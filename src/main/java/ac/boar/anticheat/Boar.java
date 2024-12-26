@@ -1,6 +1,6 @@
 package ac.boar.anticheat;
 
-import ac.boar.anticheat.player.api.BoarPlayerManager;
+import ac.boar.anticheat.player.BoarPlayerManager;
 import ac.boar.geyser.GeyserSessionJoinEvent;
 import lombok.Getter;
 
