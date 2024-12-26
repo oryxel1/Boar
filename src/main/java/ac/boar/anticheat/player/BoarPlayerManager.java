@@ -1,4 +1,6 @@
-package ac.boar.anticheat.player.api;
+package ac.boar.anticheat.player;
+
+import ac.boar.anticheat.player.api.BoarPlayer;
 
 import org.geysermc.geyser.api.connection.GeyserConnection;
 import org.geysermc.geyser.session.GeyserSession;
