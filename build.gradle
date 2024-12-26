@@ -31,10 +31,6 @@ dependencies {
     compileOnly(libs.fastutil)
 
     implementation(libs.lombok)
-
-    testImplementation(libs.lombok)
-    testImplementation(libs.gson)
-    testImplementation(libs.bedrock.connection)
 }
 
 processResources {
