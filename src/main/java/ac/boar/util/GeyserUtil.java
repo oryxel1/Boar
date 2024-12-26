@@ -23,10 +23,11 @@ public class GeyserUtil {
         final GeyserConnection connection = player.getSession();
 
         try {
-            final BedrockServerSession session = findCloudburstSession(player, connection);
-            injectCloudburstUpstream(player, session, connection);
-            injectCloudburstDownstream(player, session);
+            final BedrockServerSession session = findCloudburstSession(connection);
             player.setCloudburstSession(session);
+
+            injectCloudburstUpstream(player);
+            injectCloudburstDownstream(player);
         } catch (Exception ignored) {
             player.disconnect("Failed to inject into cloudburst session!");
         }
@@ -36,7 +37,7 @@ public class GeyserUtil {
         final GeyserConnection connection = player.getSession();
 
         try {
-            final TcpSession session = findTcpSession(player, connection);
+            final TcpSession session = findTcpSession(connection);
 
             List<SessionListener> adapters = new ArrayList<>(session.getListeners());
             session.getListeners().forEach(session::removeListener);
@@ -47,18 +48,20 @@ public class GeyserUtil {
         }
     }
 
-    private static void injectCloudburstDownstream(final BoarPlayer player, final BedrockServerSession session) {
+    private static void injectCloudburstDownstream(final BoarPlayer player) {
+        final BedrockServerSession session = player.getCloudburstSession();
         final BedrockPacketHandler handler = session.getPacketHandler();
         session.setPacketHandler(new CloudburstReceiveListener(player, handler));
     }
 
-    private static void injectCloudburstUpstream(final BoarPlayer player, final BedrockServerSession session, final GeyserConnection connection) throws Exception {
+    private static void injectCloudburstUpstream(final BoarPlayer player) throws Exception {
+        final BedrockServerSession session = player.getCloudburstSession();
         final Field upstream = GeyserSession.class.getDeclaredField("upstream");
         upstream.setAccessible(true);
-        upstream.set(connection, new CloudburstSendListener(player, session));
+        upstream.set(player.getSession(), new CloudburstSendListener(player, session));
     }
 
-    private static TcpSession findTcpSession(BoarPlayer player, GeyserConnection connection) throws Exception {
+    private static TcpSession findTcpSession(final GeyserConnection connection) throws Exception {
         final Field upstream = GeyserSession.class.getDeclaredField("downstream");
         upstream.setAccessible(true);
         final Object session = upstream.get(connection);
@@ -67,7 +70,7 @@ public class GeyserUtil {
         return (TcpSession) field.get(session);
     }
 
-    private static BedrockServerSession findCloudburstSession(final BoarPlayer player, final GeyserConnection connection) throws Exception {
+    private static BedrockServerSession findCloudburstSession(final GeyserConnection connection) throws Exception {
         final Field upstream = GeyserSession.class.getDeclaredField("upstream");
         upstream.setAccessible(true);
         final Object session = upstream.get(connection);
