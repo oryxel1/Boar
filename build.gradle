@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+}
+
+group = 'ac.boar'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    maven {
+        name = "opencollab-dev"
+        url = "https://repo.opencollab.dev/main/"
+    }
+}
+
+dependencies {
+    annotationProcessor(libs.lombok)
+
+    compileOnly(libs.bedrock.connection)
+    compileOnly(libs.protocol)
+    compileOnly(libs.spigot.api)
+    compileOnly(libs.geyser.core)
+    compileOnly(libs.fastutil)
+
+    implementation(libs.lombok)
+
+    testImplementation(libs.lombok)
+    testImplementation(libs.gson)
+    testImplementation(libs.bedrock.connection)
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}

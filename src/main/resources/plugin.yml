@@ -1,0 +1,15 @@
+name: Boar
+version: '1.0'
+main: ac.boar.plugin.BoarPlugin
+api-version: '1.21'
+depend:
+  - 'Geyser-Spigot'
+permissions:
+  boar.alert:
+    description: Allow people with this permission to see anti-cheat alert.
+    default: op
+  boar.*:
+    description: Full permission.
+    default: op
+    children:
+      boar.alert: true
