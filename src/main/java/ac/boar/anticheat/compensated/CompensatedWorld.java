@@ -8,6 +8,7 @@ import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.JavaDimension;
 import org.geysermc.geyser.level.block.Blocks;
@@ -116,6 +117,10 @@ public class CompensatedWorld {
 
     public BlockState getBlockState(int x, int y, int z) {
         return BlockState.of(getBlockAt(x, y, z));
+    }
+
+    public BlockState getBlockState(double x, double y, double z) {
+        return BlockState.of(getBlockAt(GenericMath.floor(x), GenericMath.floor(y), GenericMath.floor(z)));
     }
 
     public int getBlockAt(int x, int y, int z) {

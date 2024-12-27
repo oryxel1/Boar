@@ -1,11 +1,12 @@
 package ac.boar.anticheat.packets;
 
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 
 import ac.boar.util.MathUtil;
-import org.cloudburstmc.math.vector.Vector2f;
+
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -23,7 +24,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.getInputData().clear();
         player.getInputData().addAll(packet.getInputData());
 
-        player.movementInput = Vector2f.from(MathUtil.sign(packet.getMotion().getX()), MathUtil.sign(packet.getMotion().getY()));
+        player.movementInput = new Vec3f(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
         this.processInputData(player);
 
         player.prevX = player.x;

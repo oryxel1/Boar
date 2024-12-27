@@ -1,5 +1,6 @@
 package ac.boar.anticheat.prediction.engine.base;
 
+import ac.boar.util.MathUtil;
 import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.BoarPlayer;
@@ -18,7 +19,7 @@ public abstract class PredictionEngine {
 
     protected abstract Vec3f travel(Vec3f vec3f);
     protected abstract Vec3f applyEndOfTick(Vec3f vec3f);
-    protected abstract Vec3f jump(boolean sprinting, Vec3f vec3f);
+    protected abstract Vec3f jump(Vec3f vec3f);
     protected abstract boolean shouldJump();
 
     public final List<Vector> gatherAllPossibilities() {
@@ -40,7 +41,7 @@ public abstract class PredictionEngine {
         }
 
         for (Vector vector : vectors) {
-            vector.setVelocity(jump(player.sprinting, vector.getVelocity()));
+            vector.setVelocity(jump(vector.getVelocity()));
             vector.setJumping(true);
         }
     }
@@ -50,5 +51,10 @@ public abstract class PredictionEngine {
             final Vector vector = new Vector(entry.getValue(), VectorType.VELOCITY, entry.getKey());
             vectors.add(vector);
         }
+    }
+
+    // Other
+    protected final Vec3f updateVelocity(final float speed) {
+        return MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw);
     }
 }

@@ -240,6 +240,25 @@ public class Box implements Cloneable {
         return new Vec3f(this.maxX, this.maxY, this.maxZ);
     }
 
+    public float getAverageSideLength() {
+        float d = this.getLengthX();
+        float e = this.getLengthY();
+        float f = this.getLengthZ();
+        return (d + e + f) / 3;
+    }
+
+    public float getLengthX() {
+        return this.maxX - this.minX;
+    }
+
+    public float getLengthY() {
+        return this.maxY - this.minY;
+    }
+
+    public float getLengthZ() {
+        return this.maxZ - this.minZ;
+    }
+
     public boolean isNaN() {
         return Double.isNaN(this.minX) || Double.isNaN(this.minY) || Double.isNaN(this.minZ) || Double.isNaN(this.maxX) || Double.isNaN(this.maxY) || Double.isNaN(this.maxZ);
     }

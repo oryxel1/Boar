@@ -7,7 +7,7 @@ import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.Getter;
-import org.cloudburstmc.math.vector.Vector2f;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -48,22 +48,33 @@ public class PlayerData {
     }
 
     // Movement related, (movement input, player EOT, ...)
-    public Vector2f movementInput = Vector2f.ZERO;
+    public Vec3f movementInput = Vec3f.ZERO;
     public Vec3f claimedEOT = Vec3f.ZERO, actualVelocity = Vec3f.ZERO;
     public final Map<Long, Vec3f> queuedVelocities = new ConcurrentHashMap<>();
+
+    // Attribute related
+    public float movementSpeed = 0.1f;
 
     // Prediction related
     public EntityPose pose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = new Box(0, 0, 0, 0, 0, 0);
-
     public Vec3f eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
-
     public boolean onGround, wasGround;
+    public Vector3i supportingBlockPos = null;
+    public Vec3f movementMultiplier = Vec3f.ZERO;
 
     // Prediction related method
-    public float getEffectiveGravity(final Vec3f vec3f) {
+    public final float getEffectiveGravity(final Vec3f vec3f) {
         return vec3f.y < 0.0 && this.hasStatusEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
+    }
+
+    public float getMovementSpeed(float slipperiness) {
+        if (onGround) {
+            return (this.movementSpeed * (sprinting ? 1.3F : 1)) * (0.21600002F / (slipperiness * slipperiness * slipperiness));
+        }
+
+        return sprinting ? 0.025999999F : 0.02F;
     }
 
     // Others (methods)
@@ -75,7 +86,7 @@ public class PlayerData {
         return this.dimensions.getBoxAt(x, y, z);
     }
 
-    public void setPose(EntityPose pose) {
+    public final void setPose(EntityPose pose) {
         this.pose = pose;
         this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }

@@ -50,7 +50,7 @@ public class PredictionEngineElytra extends PredictionEngine {
     }
 
     @Override
-    protected Vec3f jump(boolean sprinting, Vec3f vec3f) {
+    protected Vec3f jump(Vec3f vec3f) {
         return vec3f;
     }
 
