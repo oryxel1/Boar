@@ -1,8 +1,11 @@
 package ac.boar.anticheat;
 
+import lombok.Getter;
+
+import ac.boar.anticheat.packets.MovementCheckRunner;
 import ac.boar.anticheat.player.BoarPlayerManager;
 import ac.boar.geyser.GeyserSessionJoinEvent;
-import lombok.Getter;
+import ac.boar.protocol.PacketEvents;
 
 @Getter
 public class Boar {
@@ -15,6 +18,8 @@ public class Boar {
     public void init() {
         this.playerManager = new BoarPlayerManager();
         new GeyserSessionJoinEvent();
+
+        PacketEvents.getApi().getCloudburst().register(new MovementCheckRunner());
     }
 
     public void terminate() {

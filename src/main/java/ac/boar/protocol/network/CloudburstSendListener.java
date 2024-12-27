@@ -35,6 +35,10 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.runtimeEntityId = startGamePacket.getRuntimeEntityId();
             player.javaEntityId = player.getSession().getPlayerEntity().getEntityId();
 
+            player.x = startGamePacket.getPlayerPosition().getX();
+            player.y = startGamePacket.getPlayerPosition().getY();
+            player.z = startGamePacket.getPlayerPosition().getZ();
+
             GeyserUtil.injectMCPL(this.player);
             // player.loadBlockMappings();
             // player.compensatedWorld.loadDimension();
