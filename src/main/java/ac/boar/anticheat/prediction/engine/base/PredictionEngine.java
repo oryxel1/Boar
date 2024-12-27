@@ -54,7 +54,7 @@ public abstract class PredictionEngine {
     }
 
     // Other
-    protected final Vec3f updateVelocity(final float speed) {
-        return MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw);
+    protected final Vec3f updateVelocity(final Vec3f vec3f, final float speed) {
+        return vec3f.add(MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw));
     }
 }

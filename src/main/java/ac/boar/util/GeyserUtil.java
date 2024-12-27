@@ -23,8 +23,7 @@ public class GeyserUtil {
         final GeyserConnection connection = player.getSession();
 
         try {
-            final BedrockServerSession session = findCloudburstSession(connection);
-            player.cloudburstSession = session;
+            player.cloudburstSession = findCloudburstSession(connection);
 
             injectCloudburstUpstream(player);
             injectCloudburstDownstream(player);

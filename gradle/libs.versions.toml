@@ -5,7 +5,6 @@ spigot-api = "1.21.4-R0.1-SNAPSHOT"
 fastutil = "8.5.13"
 core = "2.6.0-SNAPSHOT"
 lombok = "1.18.36"
-gson = "2.11.0"
 
 [libraries]
 bedrock-connection = { group = "org.cloudburstmc.protocol", name = "bedrock-connection", version.ref = "bedrock-connection" }
@@ -14,4 +13,3 @@ protocol = { group = "org.geysermc.mcprotocollib", name = "protocol", version.re
 spigot-api = { group = "org.spigotmc", name = "spigot-api", version.ref = "spigot-api" }
 geyser-core = { group = "org.geysermc.geyser", name = "core", version.ref = "core" }
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }

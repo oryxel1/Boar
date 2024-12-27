@@ -23,7 +23,7 @@ public class PredictionEngineNormal extends PredictionEngine {
     }
 
     private Vec3f applyMovementInput(Vec3f vec3f, final float slipperiness) {
-        vec3f = this.updateVelocity(player.getMovementSpeed(slipperiness));
+        vec3f = this.updateVelocity(vec3f, player.getMovementSpeed(slipperiness));
         // this.setVelocity(this.applyClimbingSpeed(this.getVelocity()));
         return vec3f;
     }
