@@ -249,8 +249,7 @@ public class Box implements Cloneable {
     }
 
     @Override
-    public Box clone() throws CloneNotSupportedException {
-        super.clone();
+    public Box clone() {
         return new Box(minX, minY, minZ, maxX, maxY, maxZ);
     }
 }

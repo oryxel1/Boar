@@ -38,22 +38,22 @@ public class Vec3f implements Cloneable {
         return Vector3d.from(this.x, this.y, this.z);
     }
 
-    public double squaredDistanceTo(Vec3f vec) {
+    public float squaredDistanceTo(Vec3f vec) {
         float d = vec.x - this.x;
         float e = vec.y - this.y;
         float f = vec.z - this.z;
         return d * d + e * e + f * f;
     }
 
-    public double distanceTo(Vec3f vec) {
+    public float distanceTo(Vec3f vec) {
         return (float) Math.sqrt(squaredDistanceTo(vec));
     }
 
-    public double horizontalLength() {
-        return (float) Math.sqrt(this.x * this.x + this.z * this.z);
+    public float horizontalLength() {
+        return (float) Math.sqrt(horizontalLengthSquared());
     }
 
-    public double horizontalLengthSquared() {
+    public float horizontalLengthSquared() {
         return this.x * this.x + this.z * this.z;
     }
 
@@ -134,8 +134,7 @@ public class Vec3f implements Cloneable {
         }
     }
 
-    public Vec3f clone() throws CloneNotSupportedException {
-        super.clone();
+    public Vec3f clone() {
         return new Vec3f(this.x, this.y, this.z);
     }
 }
