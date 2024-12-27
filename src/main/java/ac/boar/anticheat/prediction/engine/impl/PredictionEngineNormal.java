@@ -15,6 +15,11 @@ public class PredictionEngineNormal extends PredictionEngine {
     }
 
     @Override
+    protected Vec3f applyEndOfTick(Vec3f vec3f) {
+        return null;
+    }
+
+    @Override
     protected Vec3f jump(boolean sprinting, Vec3f vec3f) {
         return null;
     }

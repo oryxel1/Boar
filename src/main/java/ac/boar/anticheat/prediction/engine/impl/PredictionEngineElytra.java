@@ -45,6 +45,11 @@ public class PredictionEngineElytra extends PredictionEngine {
     }
 
     @Override
+    protected Vec3f applyEndOfTick(Vec3f vec3f) {
+        return vec3f;
+    }
+
+    @Override
     protected Vec3f jump(boolean sprinting, Vec3f vec3f) {
         return vec3f;
     }

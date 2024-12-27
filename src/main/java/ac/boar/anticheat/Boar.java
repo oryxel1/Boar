@@ -26,6 +26,7 @@ public class Boar {
     }
 
     public void terminate() {
+        PacketEvents.getApi().terminate();
         this.playerManager.clear();
     }
 }
