@@ -2,6 +2,7 @@ package ac.boar.anticheat.player.manager;
 
 import ac.boar.anticheat.player.BoarPlayer;
 
+import ac.boar.util.GeyserUtil;
 import org.geysermc.geyser.api.connection.GeyserConnection;
 import org.geysermc.geyser.session.GeyserSession;
 
@@ -14,7 +15,7 @@ public class BoarPlayerManager extends HashMap<GeyserConnection, BoarPlayer> {
         }
 
         final BoarPlayer player = new BoarPlayer((GeyserSession) connection);
-        player.init();
+        GeyserUtil.injectCloudburst(player);
         this.put(connection, player);
     }
 }

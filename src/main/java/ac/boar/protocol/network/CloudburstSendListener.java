@@ -42,8 +42,8 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.updateBoundingBox(player.x, player.y, player.z);
 
             GeyserUtil.injectMCPL(this.player);
-            // player.loadBlockMappings();
-            // player.compensatedWorld.loadDimension();
+            player.compensatedWorld.loadDimension();
+            player.loadBlockMappings();
         }
 
         super.sendPacket(event.getPacket());

@@ -1,5 +1,6 @@
 package ac.boar.anticheat;
 
+import ac.boar.anticheat.packets.world.WorldSimulationPacket;
 import lombok.Getter;
 
 import ac.boar.anticheat.packets.other.NetworkLatencyPacket;
@@ -22,7 +23,10 @@ public class Boar {
         new GeyserSessionJoinEvent();
 
         PacketEvents.getApi().getCloudburst().register(new NetworkLatencyPacket());
+        PacketEvents.getApi().getCloudburst().register(new WorldSimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new MovementCheckRunner());
+
+        PacketEvents.getApi().getMcpl().register(new WorldSimulationPacket());
     }
 
     public void terminate() {

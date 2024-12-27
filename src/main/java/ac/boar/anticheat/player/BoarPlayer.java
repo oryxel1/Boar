@@ -1,5 +1,6 @@
 package ac.boar.anticheat.player;
 
+import ac.boar.anticheat.compensated.CompensatedWorld;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -7,9 +8,15 @@ import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.util.GeyserUtil;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
+import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
+import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
 import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.mcprotocollib.network.tcp.TcpSession;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class BoarPlayer extends PlayerData {
@@ -21,8 +28,21 @@ public class BoarPlayer extends PlayerData {
     public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;
 
-    public void init() {
-        GeyserUtil.injectCloudburst(this);
+    // Lag compensation
+    public final CompensatedWorld compensatedWorld = new CompensatedWorld(this);
+
+    // Mappings
+    public final Map<BlockDefinition, Integer> bedrockToJavaBlocks = new HashMap<>();
+
+    public void loadBlockMappings() {
+        final GeyserBedrockBlock[] javaToBedrockBlocks = this.session.getBlockMappings().getJavaToBedrockBlocks();
+        for (int i = 0; i < javaToBedrockBlocks.length; i++) {
+            this.bedrockToJavaBlocks.put(javaToBedrockBlocks[i], i);
+        }
+    }
+
+    public void sendTransaction() {
+        sendTransaction(false);
     }
 
     public void sendTransaction(boolean immediate) {
@@ -47,5 +67,15 @@ public class BoarPlayer extends PlayerData {
 
     public void disconnect(String reason) {
         this.session.disconnect(ChatUtil.PREFIX + " " + reason);
+    }
+
+    // Mappings related
+    public int bedrockToJavaBlockId(final BlockDefinition definition) {
+        return this.bedrockToJavaBlocks.getOrDefault(definition, -1);
+    }
+
+    // Other
+    public MinecraftCodecHelper getCodecHelper() {
+        return (MinecraftCodecHelper) this.mcplSession.getCodecHelper();
     }
 }
