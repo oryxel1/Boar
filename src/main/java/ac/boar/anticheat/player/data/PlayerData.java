@@ -1,5 +1,6 @@
-package ac.boar.anticheat.player.api.data;
+package ac.boar.anticheat.player.data;
 
+import ac.boar.anticheat.util.LatencyUtil;
 import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -26,4 +27,8 @@ public class PlayerData {
 
     // Movement related, (movement input, player EOT, ...)
     public Vector2f movementInput = Vector2f.ZERO;
+
+    // "Transaction" related.
+    public long lastReceivedId, lastSentId, lastResponseTime = System.currentTimeMillis();
+    public final LatencyUtil latencyUtil = new LatencyUtil(this);
 }

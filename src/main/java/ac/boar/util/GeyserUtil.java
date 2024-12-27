@@ -1,6 +1,6 @@
 package ac.boar.util;
 
-import ac.boar.anticheat.player.api.BoarPlayer;
+import ac.boar.anticheat.player.BoarPlayer;
 
 import ac.boar.protocol.network.CloudburstReceiveListener;
 import ac.boar.protocol.network.CloudburstSendListener;

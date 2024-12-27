@@ -6,7 +6,7 @@ import ac.boar.protocol.listener.CloudburstPacketListener;
 import ac.boar.util.GeyserUtil;
 import lombok.NonNull;
 
-import ac.boar.anticheat.player.api.BoarPlayer;
+import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;

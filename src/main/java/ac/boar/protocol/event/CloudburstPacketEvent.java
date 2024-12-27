@@ -2,7 +2,7 @@ package ac.boar.protocol.event;
 
 import lombok.Data;
 
-import ac.boar.anticheat.player.api.BoarPlayer;
+import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 
 import java.util.ArrayList;

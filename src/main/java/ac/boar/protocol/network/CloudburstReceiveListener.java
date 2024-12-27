@@ -5,7 +5,7 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 import lombok.RequiredArgsConstructor;
 
-import ac.boar.anticheat.player.api.BoarPlayer;
+import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
 import org.cloudburstmc.protocol.common.PacketSignal;

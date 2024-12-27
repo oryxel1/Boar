@@ -2,7 +2,7 @@ package ac.boar.protocol.event;
 
 import lombok.Data;
 
-import ac.boar.anticheat.player.api.BoarPlayer;
+import ac.boar.anticheat.player.BoarPlayer;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 
 import java.util.ArrayList;

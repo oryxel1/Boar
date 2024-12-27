@@ -5,7 +5,7 @@ import ac.boar.protocol.event.MCPLPacketEvent;
 import ac.boar.protocol.listener.MCPLPacketListener;
 import lombok.RequiredArgsConstructor;
 
-import ac.boar.anticheat.player.api.BoarPlayer;
+import ac.boar.anticheat.player.BoarPlayer;
 
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.packet.Packet;
