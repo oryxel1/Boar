@@ -30,6 +30,7 @@ public class LivingTicker extends EntityTicker {
                 player.boundingBox = player.dimensions.getBoxAt(vec3f);
             }
         }
+        this.checkBlockCollision();
     }
 
     public void tickMovement() {

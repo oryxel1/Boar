@@ -13,8 +13,6 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
-import org.geysermc.geyser.item.Items;
-import org.geysermc.geyser.registry.type.ItemMapping;
 
 public class MovementCheckRunner implements CloudburstPacketListener {
     @Override

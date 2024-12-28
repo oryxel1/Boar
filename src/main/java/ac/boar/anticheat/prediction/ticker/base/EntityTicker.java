@@ -2,11 +2,13 @@ package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.GenericMath;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Fluid;
 
 @RequiredArgsConstructor
@@ -108,6 +110,21 @@ public class EntityTicker {
 
             player.fluidHeight.put(tag, e);
             return bl2;
+        }
+    }
+
+    protected void checkBlockCollision() {
+        final Vector3i vector3i = Vector3i.from(player.boundingBox.minX + 0.001D, player.boundingBox.minY + 0.001D, player.boundingBox.minZ + 0.001D);
+        final Vector3i vector31i = Vector3i.from(player.boundingBox.maxX - 0.001D, player.boundingBox.maxY - 0.001D, player.boundingBox.maxZ - 0.001D);
+
+        final Mutable mutable = new Mutable(0, 0, 0);
+        for (int i = vector3i.getX(); i <= vector31i.getX(); ++i) {
+            for (int j = vector3i.getY(); j <= vector31i.getY(); ++j) {
+                for (int k = vector3i.getZ(); k <= vector31i.getZ(); ++k) {
+                    mutable.set(i, j, k);
+                    BlockUtil.onEntityCollision(player, player.compensatedWorld.getBlockState(mutable.x, mutable.y, mutable.z), mutable);
+                }
+            }
         }
     }
 }
