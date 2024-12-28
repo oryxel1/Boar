@@ -10,6 +10,8 @@ import ac.boar.util.MathUtil;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
+import org.geysermc.geyser.item.Items;
+import org.geysermc.geyser.registry.type.ItemMapping;
 
 public class MovementCheckRunner implements CloudburstPacketListener {
     @Override
@@ -45,10 +47,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.wasSneaking = player.sneaking;
         player.wasGliding = player.gliding;
 
+        final ItemMapping ELYTRA = Items.ELYTRA.toBedrockDefinition(null, player.getSession().getItemMappings());
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
-                // TODO: Prevent player from spoofing gliding.
-                case START_GLIDING -> player.gliding = true;
+                case START_GLIDING -> player.gliding = player.getSession().getPlayerEntity().getChestplate().getDefinition().equals(ELYTRA.getBedrockDefinition());
                 case STOP_GLIDING -> player.gliding = false;
 
                 // Don't let player do backwards sprinting!
