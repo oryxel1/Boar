@@ -39,7 +39,7 @@ public class PlayerTicker extends LivingTicker {
                 lv2 = EntityPose.SWIMMING;
             }
 
-            player.pose = lv2;
+            player.setPose(lv2);
         }
     }
 
