@@ -39,6 +39,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.y = packet.getPosition().getY() - EntityDefinitions.PLAYER.offset();
         player.z = packet.getPosition().getZ();
 
+        player.bedrockRotation = packet.getRotation();
+
         player.prevYaw = player.yaw;
         player.prevPitch = player.pitch;
         player.yaw = packet.getRotation().getY();

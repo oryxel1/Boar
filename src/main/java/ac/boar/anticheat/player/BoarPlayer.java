@@ -3,6 +3,7 @@ package ac.boar.anticheat.player;
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,8 @@ public final class BoarPlayer extends PlayerData {
 
     public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;
+
+    public final TeleportUtil teleportUtil = new TeleportUtil(this);
 
     // Lag compensation
     public final CompensatedWorld compensatedWorld = new CompensatedWorld(this);

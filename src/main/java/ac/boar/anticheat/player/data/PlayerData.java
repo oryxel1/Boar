@@ -9,6 +9,7 @@ import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.Getter;
+import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -32,6 +33,7 @@ public class PlayerData {
     // Position, rotation, other.
     public float prevX, x, prevY, y, prevZ, z;
     public float prevYaw, yaw, prevPitch, pitch;
+    public Vector3f bedrockRotation = Vector3f.ZERO;
 
     // Sprinting, sneaking, swimming and other status.
     public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding, wasSwimming, swimming;

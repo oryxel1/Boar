@@ -10,6 +10,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.session.UpstreamSession;
 
 public final class CloudburstSendListener extends UpstreamSession {
@@ -36,7 +37,7 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.javaEntityId = player.getSession().getPlayerEntity().getEntityId();
 
             player.x = startGamePacket.getPlayerPosition().getX();
-            player.y = startGamePacket.getPlayerPosition().getY();
+            player.y = startGamePacket.getPlayerPosition().getY() - EntityDefinitions.PLAYER.offset();
             player.z = startGamePacket.getPlayerPosition().getZ();
 
             player.updateBoundingBox(player.x, player.y, player.z);
