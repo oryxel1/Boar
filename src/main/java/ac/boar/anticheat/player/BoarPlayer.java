@@ -1,6 +1,7 @@
 package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.CompensatedWorld;
+import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import lombok.Getter;
@@ -25,7 +26,9 @@ import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -89,6 +92,16 @@ public final class BoarPlayer extends PlayerData {
         this.attributes.forEach((_, attribute) -> attribute.tick());
         this.movementSpeed = this.attributes.get(AttributeType.Builtin.MOVEMENT_SPEED.getId()).getValue();
         this.movementSpeed *= (this.sprinting || this.hasSprintingAttribute) ? 1.3f : 1;
+
+        final List<Effect> shouldBeRemoved = new ArrayList<>();
+        for (Map.Entry<Effect, StatusEffect> entry : this.statusEffects.entrySet()) {
+            entry.getValue().tick();
+            if (entry.getValue().getDuration() <= 0) {
+                shouldBeRemoved.add(entry.getKey());
+            }
+        }
+
+        shouldBeRemoved.forEach(this.statusEffects::remove);
     }
 
     public float getVelocityMultiplier() {
