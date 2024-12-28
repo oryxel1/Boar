@@ -3,7 +3,7 @@ package ac.boar.anticheat.util;
 import ac.boar.anticheat.collision.BedrockCollision;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
-import ac.boar.anticheat.util.math.MutableBlockPos;
+import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
 import org.geysermc.geyser.level.block.BlockStateValues;
 import org.geysermc.geyser.level.block.Blocks;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlockUtil {
-    public static void onEntityCollision(final BoarPlayer player, BlockState state, MutableBlockPos pos) {
+    public static void onEntityCollision(final BoarPlayer player, BlockState state, Mutable pos) {
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
             player.movementMultiplier = new Vec3f(0.8F, 0.75F, 0.8F);
         } else if (state.is(Blocks.POWDER_SNOW)) {
@@ -31,7 +31,7 @@ public class BlockUtil {
         }
     }
 
-    public static boolean blocksMovement(BoarPlayer player, MutableBlockPos vector3i, Fluid fluid, BlockState state) {
+    public static boolean blocksMovement(BoarPlayer player, Mutable vector3i, Fluid fluid, BlockState state) {
         if (state.is(Blocks.ICE)) {
             return false;
         }
@@ -43,7 +43,7 @@ public class BlockUtil {
         return !state.is(Blocks.COBWEB) && !state.is(Blocks.BAMBOO_SAPLING) && isSolid(player, state, vector3i);
     }
 
-    public static boolean isSolid(BoarPlayer player, BlockState state, MutableBlockPos vector3i) {
+    public static boolean isSolid(BoarPlayer player, BlockState state, Mutable vector3i) {
         List<Box> boxes = getBlockBoundingBoxes(player, state, vector3i);
         if (boxes.isEmpty()) {
             return false;
@@ -57,7 +57,7 @@ public class BlockUtil {
         }
     }
 
-    public static List<Box> getBlockBoundingBoxes(BoarPlayer player, BlockState state, MutableBlockPos vector3i) {
+    public static List<Box> getBlockBoundingBoxes(BoarPlayer player, BlockState state, Mutable vector3i) {
         List<Box> boxes = BedrockCollision.getCollisionBox(player, vector3i, state);
         if (boxes != null) {
             return boxes;

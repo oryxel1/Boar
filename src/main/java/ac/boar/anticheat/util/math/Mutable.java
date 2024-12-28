@@ -6,38 +6,44 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
 @Setter
-public final class MutableBlockPos {
+public final class Mutable {
     public int x, y, z;
 
-    public MutableBlockPos(int x, int y, int z) {
+    public Mutable(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public MutableBlockPos add(int x, int y, int z) {
+    public Mutable() {
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+    }
+
+    public Mutable add(int x, int y, int z) {
         this.x += x;
         this.y += y;
         this.z += z;
         return this;
     }
 
-    public MutableBlockPos add(Vector3i vector3i) {
+    public Mutable add(Vector3i vector3i) {
         return add(vector3i.getX(), vector3i.getY(), vector3i.getZ());
     }
 
-    public MutableBlockPos set(int x, int y, int z) {
+    public Mutable set(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
         return this;
     }
 
-    public MutableBlockPos set(Vector3i vector3i) {
+    public Mutable set(Vector3i vector3i) {
         return set(vector3i.getX(), vector3i.getY(), vector3i.getZ());
     }
 
-    public MutableBlockPos set(Vector3i vector3i, Vector3i vector31) {
+    public Mutable set(Vector3i vector3i, Vector3i vector31) {
         return set(vector3i.getX() + vector31.getX(), vector3i.getY() + vector31.getY(), vector3i.getZ() + vector31.getZ());
     }
 }

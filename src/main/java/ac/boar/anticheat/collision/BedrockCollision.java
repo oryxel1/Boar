@@ -2,7 +2,7 @@ package ac.boar.anticheat.collision;
 
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
-import ac.boar.anticheat.util.math.MutableBlockPos;
+import ac.boar.anticheat.util.math.Mutable;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.property.ChestType;
@@ -76,7 +76,7 @@ public class BedrockCollision {
         }
     }
     
-    public static List<Box> getCollisionBox(final BoarPlayer player, final MutableBlockPos vector3i, final BlockState state) {
+    public static List<Box> getCollisionBox(final BoarPlayer player, final Mutable vector3i, final BlockState state) {
         if (state.is(Blocks.ENDER_CHEST)) {
             return SINGLE_CHEST_SHAPE;
         }
