@@ -91,10 +91,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.wasGliding = player.gliding;
         player.wasSwimming = player.swimming;
 
-        final ItemMapping ELYTRA = Items.ELYTRA.toBedrockDefinition(null, player.getSession().getItemMappings());
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
-                case START_GLIDING -> player.gliding = player.getSession().getPlayerEntity().getChestplate().getDefinition().equals(ELYTRA.getBedrockDefinition());
+                // TODO: Prevent player from spoofing elytra gliding.
+                case START_GLIDING -> player.gliding = true;
                 case STOP_GLIDING -> player.gliding = false;
 
                 // Don't let player do backwards sprinting!
