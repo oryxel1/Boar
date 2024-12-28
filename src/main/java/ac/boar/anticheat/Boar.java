@@ -1,5 +1,6 @@
 package ac.boar.anticheat;
 
+import ac.boar.anticheat.packets.player.AttributeSimulationPacket;
 import ac.boar.anticheat.packets.player.PlayerVelocityPacket;
 import ac.boar.anticheat.packets.world.WorldSimulationPacket;
 import lombok.Getter;
@@ -25,10 +26,12 @@ public class Boar {
 
         PacketEvents.getApi().getCloudburst().register(new NetworkLatencyPacket());
         PacketEvents.getApi().getCloudburst().register(new WorldSimulationPacket());
+        PacketEvents.getApi().getCloudburst().register(new AttributeSimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerVelocityPacket());
         PacketEvents.getApi().getCloudburst().register(new MovementCheckRunner());
 
         PacketEvents.getApi().getMcpl().register(new WorldSimulationPacket());
+        PacketEvents.getApi().getMcpl().register(new AttributeSimulationPacket());
     }
 
     public void terminate() {

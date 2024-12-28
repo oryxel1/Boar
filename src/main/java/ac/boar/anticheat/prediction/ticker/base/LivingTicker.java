@@ -48,6 +48,12 @@ public class LivingTicker extends EntityTicker {
             engine = new PredictionEngineNormal(player);
         }
 
+        if (player.wasFlying || player.flying) {
+            player.eotVelocity = player.claimedEOT;
+            player.predictedVelocity = player.actualVelocity;
+            return;
+        }
+
         // TODO: Implement unimplemented engine.
         if (engine == null) {
             return;

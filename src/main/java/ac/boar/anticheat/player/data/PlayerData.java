@@ -1,5 +1,6 @@
 package ac.boar.anticheat.player.data;
 
+import ac.boar.anticheat.data.AttributeData;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.EntityPose;
 import ac.boar.anticheat.data.StatusEffect;
@@ -9,6 +10,7 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
@@ -33,7 +35,8 @@ public class PlayerData {
 
     // Sprinting, sneaking, swimming and other status.
     public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding, wasSwimming, swimming;
-    public boolean flying;
+    public boolean wasFlying, flying;
+    public int sinceSprinting;
 
     // Information about this tick.
     public boolean lastTickWasTeleport;
@@ -54,8 +57,11 @@ public class PlayerData {
     public Vec3f claimedEOT = Vec3f.ZERO, actualVelocity = Vec3f.ZERO;
     public final Map<Long, Vec3f> queuedVelocities = new ConcurrentHashMap<>();
 
-    // Attribute related
+    // Attribute related, abilities
+    public final Map<Integer, AttributeData> attributes = new HashMap<>();
+    public final Set<Ability> abilities = new HashSet<>();
     public float movementSpeed = 0.1f;
+    public boolean hasSprintingAttribute;
 
     // Prediction related
     public EntityPose pose = EntityPose.STANDING;

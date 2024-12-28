@@ -9,6 +9,7 @@ import ac.boar.protocol.listener.CloudburstPacketListener;
 import ac.boar.util.MathUtil;
 
 import org.bukkit.Bukkit;
+import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -59,11 +60,29 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                     player.predictedVelocity.x + "," + player.predictedVelocity.y + "," + player.predictedVelocity.z);
 
             Bukkit.broadcastMessage("§7A: " + player.actualVelocity.x + "," + player.actualVelocity.y + "," + player.actualVelocity.z + ", " +
-                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", TI=" + player.closetVector.getTransactionId());
+                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", SS=" + player.sinceSprinting + ", TI=" + player.closetVector.getTransactionId());
+        }
+
+        correctInputData(player, packet);
+    }
+
+    // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90
+    // Geyser check for our vertical collision for calculation for ground, do this to prevent possible no-fall bypass.
+    private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        packet.getInputData().remove(PlayerAuthInputData.HORIZONTAL_COLLISION);
+        packet.getInputData().remove(PlayerAuthInputData.VERTICAL_COLLISION);
+
+        if (player.horizontalCollision) {
+            packet.getInputData().add(PlayerAuthInputData.HORIZONTAL_COLLISION);
+        }
+
+        if (player.verticalCollision) {
+            packet.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
         }
     }
 
-    public void processInputData(final BoarPlayer player) {
+    private void processInputData(final BoarPlayer player) {
+        player.wasFlying = player.flying;
         player.wasSprinting = player.sprinting;
         player.wasSneaking = player.sneaking;
         player.wasGliding = player.gliding;
@@ -84,7 +103,21 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
                 case START_SWIMMING -> player.swimming = true;
                 case STOP_SWIMMING -> player.swimming = false;
+
+                case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
+                case STOP_FLYING -> player.flying = false;
             }
+        }
+
+        if (player.sprinting) {
+            player.sinceSprinting = 0;
+        } else {
+            player.sinceSprinting++;
+        }
+
+        if (player.sprinting && player.movementInput.getZ() <= 0) {
+            player.sprinting = false;
+            player.sinceSprinting = 1;
         }
     }
 }

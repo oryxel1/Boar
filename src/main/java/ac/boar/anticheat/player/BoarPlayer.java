@@ -23,6 +23,7 @@ import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.network.tcp.TcpSession;
 import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,8 +86,9 @@ public final class BoarPlayer extends PlayerData {
 
     // Prediction related method
     public void tick() {
-        this.movementSpeed = 0.1F;
-        this.movementSpeed *= sprinting ? 1.3f : 1;
+        this.attributes.forEach((_, attribute) -> attribute.tick());
+        this.movementSpeed = this.attributes.get(AttributeType.Builtin.MOVEMENT_SPEED.getId()).getValue();
+        this.movementSpeed *= (this.sprinting || this.hasSprintingAttribute) ? 1.3f : 1;
     }
 
     public float getVelocityMultiplier() {
