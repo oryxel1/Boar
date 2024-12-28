@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.world;
 
+import ac.boar.anticheat.handler.BlockInteractHandler;
 import ac.boar.anticheat.player.BoarPlayer;
 
 import ac.boar.protocol.event.*;
@@ -7,6 +8,8 @@ import ac.boar.protocol.listener.*;
 
 import io.netty.buffer.*;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
+import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
@@ -85,4 +88,15 @@ public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPack
         }
     }
 
+    @Override
+    public void onPacketReceived(CloudburstPacketEvent event) {
+        final BoarPlayer player = event.getPlayer();
+        if (!(event.getPacket() instanceof InventoryTransactionPacket packet)) {
+            return;
+        }
+
+        if (packet.getTransactionType() == InventoryTransactionType.ITEM_USE && packet.getActionType() == 0) {
+            BlockInteractHandler.handleBlockClick(player, packet.getBlockPosition());
+        }
+    }
 }
