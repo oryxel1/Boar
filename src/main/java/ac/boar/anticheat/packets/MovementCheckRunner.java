@@ -51,13 +51,14 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick();
         if (player.lastTickWasTeleport) {
+            player.updateBoundingBox(player.x, player.y, player.z);
             return;
         }
 
         new PlayerTicker(player).tick();
         final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
 
-        if (player.actualVelocity.length() > 1e-5) {
+        if (player.actualVelocity.length() > 1e-5 || offset > 1e-4) {
             Bukkit.broadcastMessage((offset > 1e-4 ? "§c" : "§a") + "O:" + offset + ", T: " + player.closetVector.getType() + ", P: " +
                     player.predictedVelocity.x + "," + player.predictedVelocity.y + "," + player.predictedVelocity.z);
 

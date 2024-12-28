@@ -66,7 +66,7 @@ public class PlayerData {
     public boolean hasSprintingAttribute;
 
     // Prediction related
-    public EntityPose pose = EntityPose.STANDING;
+    public EntityPose pose = EntityPose.STANDING, lastPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = new Box(0, 0, 0, 0, 0, 0);
     public Vec3f eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
@@ -74,6 +74,8 @@ public class PlayerData {
     public boolean onGround, wasGround;
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
+
+    public float fallDistance = 0;
 
     public boolean submergedInWater, touchingWater;
     public boolean wasInPowderSnow, inPowderSnow;
@@ -110,6 +112,7 @@ public class PlayerData {
     }
 
     public final void setPose(EntityPose pose) {
+        this.lastPose = pose;
         this.pose = pose;
         this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }

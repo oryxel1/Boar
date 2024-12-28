@@ -6,7 +6,7 @@ import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
-import org.bukkit.Bukkit;
+import ac.boar.util.MathUtil;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;
@@ -20,6 +20,61 @@ import java.util.List;
 public class Collision {
     public static boolean isSpaceEmpty(final BoarPlayer player, final Box box) {
         return findCollisionsForMovement(player, box, true).isEmpty();
+    }
+
+    public static boolean isSpaceAroundPlayerEmpty(final BoarPlayer player, float offsetX, float offsetZ, float f) {
+        Box lv = player.boundingBox;
+        return isSpaceEmpty(player, new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
+    }
+
+    private static boolean canBackOffFromEdge(final BoarPlayer player) {
+        return player.onGround || player.fallDistance < 0.6F && !isSpaceAroundPlayerEmpty(player, 0, 0, 0.6F - player.fallDistance);
+    }
+
+    public static Vec3f adjustMovementForSneaking(final BoarPlayer player, final Vec3f movement) {
+        final float f = PlayerData.STEP_HEIGHT;
+        if (movement.y <= 0.0 && (player.sneaking || player.wasSneaking) && canBackOffFromEdge(player)) {
+            float d = movement.x;
+            float e = movement.z;
+            float h = MathUtil.sign(d) * 0.05F;
+            float i = MathUtil.sign(e) * 0.05F;
+
+            while (d != 0 && isSpaceAroundPlayerEmpty(player, d, 0, f)) {
+                if (Math.abs(d) <= 0.05) {
+                    d = 0;
+                    break;
+                }
+
+                d -= h;
+            }
+
+            while (e != 0.0 && isSpaceAroundPlayerEmpty(player, 0, e, f)) {
+                if (Math.abs(e) <= 0.05) {
+                    e = 0;
+                    break;
+                }
+
+                e -= i;
+            }
+
+            while (d != 0.0 && e != 0.0 && isSpaceAroundPlayerEmpty(player, d, e, f)) {
+                if (Math.abs(d) <= 0.05) {
+                    d = 0;
+                } else {
+                    d -= h;
+                }
+
+                if (Math.abs(e) <= 0.05) {
+                    e = 0;
+                } else {
+                    e -= i;
+                }
+            }
+
+            return new Vec3f(d, movement.y, e);
+        } else {
+            return movement;
+        }
     }
 
     public static Vec3f adjustMovementForCollisions(final BoarPlayer player, Vec3f movement, boolean compensated) {

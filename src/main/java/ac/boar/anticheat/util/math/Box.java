@@ -29,6 +29,10 @@ public class Box implements Cloneable {
         this.maxZ = (float) boundingBox.getMax(Axis.Z);
     }
 
+    public Vec3f toVec3f(float width) {
+        return new Vec3f(this.minX + (width / 2F), this.minY, this.maxZ - (width / 2F));
+    }
+
     public static Box of(Vec3f center, float dx, float dy, float dz) {
         return new Box(center.x - dx / 2.0F, center.y - dy / 2.0F, center.z - dz / 2.0F, center.x + dx / 2.0F, center.y + dy / 2.0F, center.z + dz / 2.0F);
     }

@@ -1,6 +1,7 @@
 package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.collision.Collision;
+import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
@@ -22,7 +23,13 @@ public class LivingTicker extends EntityTicker {
         super.tick();
         tickMovement();
 
-        player.boundingBox = player.dimensions.getBoxAt(player.x, player.y, player.z);
+        if (player.actualVelocity.lengthSquared() > 0) {
+            player.boundingBox = player.boundingBox.offset(player.predictedVelocity);
+            if (player.lastPose != player.pose) {
+                final Vec3f vec3f = player.boundingBox.toVec3f(EntityDimensions.POSE_DIMENSIONS.get(player.lastPose).width());
+                player.boundingBox = player.dimensions.getBoxAt(vec3f);
+            }
+        }
     }
 
     public void tickMovement() {
@@ -69,7 +76,7 @@ public class LivingTicker extends EntityTicker {
                 movement = movement.multiply(player.movementMultiplier);
             }
 
-            // vec3f = this.adjustMovementForSneaking(movement, type);
+            movement = Collision.adjustMovementForSneaking(player, movement);
             final Vec3f lv2 = Collision.adjustMovementForCollisions(player, movement, true);
             final double offset = lv2.distanceTo(player.actualVelocity);
             if (offset < closetOffset) {
