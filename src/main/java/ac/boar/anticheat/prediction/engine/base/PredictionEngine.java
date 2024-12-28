@@ -18,9 +18,12 @@ public abstract class PredictionEngine {
     protected final BoarPlayer player;
 
     protected abstract Vec3f travel(Vec3f vec3f);
-    protected abstract Vec3f applyEndOfTick(Vec3f vec3f);
     protected abstract Vec3f jump(Vec3f vec3f);
     protected abstract boolean shouldJump();
+
+    public Vec3f applyEndOfTick(Vec3f vec3f) {
+        return vec3f;
+    }
 
     public final List<Vector> gatherAllPossibilities() {
         List<Vector> vectors = new ArrayList<>();
@@ -33,6 +36,9 @@ public abstract class PredictionEngine {
     }
 
     protected void applyTravelToPossibilities(List<Vector> vectors) {
+        for (final Vector vector : vectors) {
+            vector.setVelocity(this.travel(vector.getVelocity()));
+        }
     }
 
     private void addJumpingToPossibilities(List<Vector> vectors) {

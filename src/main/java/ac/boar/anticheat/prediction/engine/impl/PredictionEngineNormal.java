@@ -29,7 +29,7 @@ public class PredictionEngineNormal extends PredictionEngine {
     }
 
     @Override
-    protected Vec3f applyEndOfTick(Vec3f vec3f) {
+    public Vec3f applyEndOfTick(Vec3f vec3f) {
         final Vector3i lv = player.getVelocityAffectingPos();
         float f = player.wasGround ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv)) : 1.0F;
         float d = vec3f.y;

@@ -19,7 +19,7 @@ import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 
 public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
     @Override
-    public void onPacketSend(MCPLPacketEvent event) {
+    public void onPacketSend(final MCPLPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof ClientboundLevelChunkWithLightPacket packet) {
             final int chunkSize = player.compensatedWorld.getChunkHeightY();
@@ -59,7 +59,7 @@ public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPack
     }
 
     @Override
-    public void onPacketSend(CloudburstPacketEvent event, boolean immediate) {
+    public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof UpdateBlockPacket packet) {
             final Vector3i blockPosition = packet.getBlockPosition();
@@ -89,7 +89,7 @@ public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPack
     }
 
     @Override
-    public void onPacketReceived(CloudburstPacketEvent event) {
+    public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
         if (!(event.getPacket() instanceof InventoryTransactionPacket packet)) {
             return;

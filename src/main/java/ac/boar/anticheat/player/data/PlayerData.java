@@ -3,20 +3,22 @@ package ac.boar.anticheat.player.data;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.EntityPose;
 import ac.boar.anticheat.data.StatusEffect;
+import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
+    public static final float JUMP_HEIGHT = 0.42F;
     public static final float STEP_HEIGHT = 0.6F;
     public static final float GRAVITY = 0.08F;
 
@@ -30,7 +32,7 @@ public class PlayerData {
     public float prevYaw, yaw, prevPitch, pitch;
 
     // Sprinting, sneaking, swimming and other status.
-    public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding;
+    public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding, wasSwimming, swimming;
     public boolean flying;
 
     // Information about this tick.
@@ -60,18 +62,31 @@ public class PlayerData {
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = new Box(0, 0, 0, 0, 0, 0);
     public Vec3f eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
+    public Vector closetVector;
     public boolean onGround, wasGround;
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
+    public boolean submergedInWater, touchingWater;
+    public boolean wasInPowderSnow, inPowderSnow;
+
+    public boolean horizontalCollision, verticalCollision;
+
+    public final Map<Fluid, Float> fluidHeight = new HashMap<>();
+    public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
+
     // Prediction related method
+    public boolean isInLava() {
+        return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) > 0.0;
+    }
+
     public final float getEffectiveGravity(final Vec3f vec3f) {
         return vec3f.y < 0.0 && this.hasStatusEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
     }
 
     public float getMovementSpeed(float slipperiness) {
         if (onGround) {
-            return (this.movementSpeed * (sprinting ? 1.3F : 1)) * (0.21600002F / (slipperiness * slipperiness * slipperiness));
+            return this.movementSpeed * (0.21600002F / (slipperiness * slipperiness * slipperiness));
         }
 
         return sprinting ? 0.025999999F : 0.02F;

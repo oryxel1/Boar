@@ -6,6 +6,7 @@ import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
+import org.bukkit.Bukkit;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;
@@ -17,7 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Collision {
-    private static Vec3f adjustMovementForCollisions(final BoarPlayer player, Vec3f movement, boolean compensated) {
+    public static boolean isSpaceEmpty(final BoarPlayer player, final Box box) {
+        return findCollisionsForMovement(player, box, true).isEmpty();
+    }
+
+    public static Vec3f adjustMovementForCollisions(final BoarPlayer player, Vec3f movement, boolean compensated) {
         Box box = player.boundingBox.clone();
         List<Box> collisions = /* this.getWorld().getEntityCollisions(this, lv.stretch(movement)) */ new ArrayList<>();
         Vec3f lv2 = movement.lengthSquared() == 0.0 ? movement : adjustMovementForCollisions(player, movement, box, collisions, compensated);

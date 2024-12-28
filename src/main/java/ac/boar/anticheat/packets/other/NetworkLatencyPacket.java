@@ -9,17 +9,17 @@ public class NetworkLatencyPacket implements CloudburstPacketListener {
     private static final long LATENCY_MAGNITUDE = 1000000L;
 
     @Override
-    public void onPacketReceived(CloudburstPacketEvent event) {
+    public void onPacketReceived(final CloudburstPacketEvent event) {
         if (!(event.getPacket() instanceof NetworkStackLatencyPacket packet)) {
             return;
         }
 
-        long id = packet.getTimestamp();
-        if (id >= 0 || (id / -GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP) % 10 == 0 || (-GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP / id) % 10 == 0) {
+        long id = packet.getTimestamp() / LATENCY_MAGNITUDE;
+        if (id >= 0 || id == -GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP) {
             return;
         }
 
-        boolean cancelled = event.getPlayer().latencyUtil.confirmTransaction(Math.abs(id / LATENCY_MAGNITUDE));
+        boolean cancelled = event.getPlayer().latencyUtil.confirmTransaction(Math.abs(id));
         event.setCancelled(cancelled);
     }
 }

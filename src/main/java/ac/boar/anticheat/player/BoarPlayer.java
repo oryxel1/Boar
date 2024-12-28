@@ -2,6 +2,7 @@ package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.math.Box;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,6 +14,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
 import org.geysermc.geyser.session.GeyserSession;
@@ -82,8 +84,23 @@ public final class BoarPlayer extends PlayerData {
     }
 
     // Prediction related method
+    public void tick() {
+        this.movementSpeed = 0.1F;
+        this.movementSpeed *= sprinting ? 1.3f : 1;
+    }
+
+    public float getVelocityMultiplier() {
+        final BlockState lv = this.compensatedWorld.getBlockState(Vector3i.from(this.x, this.y, this.z));
+        final float f = BlockUtil.getVelocityMultiplier(lv);
+        if (!lv.is(Blocks.WATER) && !lv.is(Blocks.BUBBLE_COLUMN)) {
+            return f == 1.0 ? BlockUtil.getVelocityMultiplier(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos())) : f;
+        } else {
+            return f;
+        }
+    }
+
     public float getJumpVelocity() {
-        return this.getJumpVelocityMultiplier() + this.getJumpBoostVelocityModifier();
+        return PlayerData.JUMP_HEIGHT * this.getJumpVelocityMultiplier() + this.getJumpBoostVelocityModifier();
     }
 
     public float getJumpBoostVelocityModifier() {
@@ -118,6 +135,15 @@ public final class BoarPlayer extends PlayerData {
             int k = GenericMath.floor(this.prevZ);
             return Vector3i.from(i, j, k);
         }
+    }
+
+    public boolean isRegionUnloaded() {
+        final Box lv = this.boundingBox.expand(1);
+        int i = GenericMath.floor(lv.minX);
+        int j = GenericMath.ceil(lv.maxX);
+        int k = GenericMath.floor(lv.minZ);
+        int l = GenericMath.ceil(lv.maxZ);
+        return !this.compensatedWorld.isRegionLoaded(i, k, j, l);
     }
 
     // Other
