@@ -10,6 +10,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import org.geysermc.mcprotocollib.network.Session;
 import org.geysermc.mcprotocollib.network.packet.Packet;
 import org.geysermc.mcprotocollib.network.event.session.*;
+import org.geysermc.mcprotocollib.protocol.packet.ingame.serverbound.level.ServerboundAcceptTeleportationPacket;
 
 import java.util.List;
 
@@ -37,6 +38,11 @@ public class MCPLSendListener extends SessionAdapter {
     @Override
     public void packetSending(PacketSendingEvent event) {
         listeners.forEach(l -> l.packetSending(event));
+
+        // We already handle this ourselves, no need for geyser to check and confirm player teleport.
+        if (event.getPacket() instanceof ServerboundAcceptTeleportationPacket) {
+            player.getSession().setUnconfirmedTeleport(null);
+        }
     }
 
     @Override
