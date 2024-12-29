@@ -25,8 +25,8 @@ public class LivingTicker extends EntityTicker {
 
         if (player.actualVelocity.lengthSquared() > 0) {
             player.boundingBox = player.boundingBox.offset(player.predictedVelocity);
-            if (player.lastPose != player.pose) {
-                final Vec3f vec3f = player.boundingBox.toVec3f(EntityDimensions.POSE_DIMENSIONS.get(player.lastPose).width());
+            if (player.prevPose != player.pose) {
+                final Vec3f vec3f = player.boundingBox.toVec3f(EntityDimensions.POSE_DIMENSIONS.get(player.prevPose).width());
                 player.boundingBox = player.dimensions.getBoxAt(vec3f);
             }
         }

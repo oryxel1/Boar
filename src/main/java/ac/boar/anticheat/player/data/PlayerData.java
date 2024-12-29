@@ -67,10 +67,10 @@ public class PlayerData {
     public boolean hasSprintingAttribute;
 
     // Prediction related
-    public EntityPose pose = EntityPose.STANDING, lastPose = EntityPose.STANDING;
+    public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = new Box(0, 0, 0, 0, 0, 0);
-    public Vec3f eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
+    public Vec3f prevEotVelocity = Vec3f.ZERO, eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
     public Vector closetVector = new Vector(Vec3f.ZERO, VectorType.NORMAL);
     public boolean onGround, wasGround;
     public Vector3i supportingBlockPos = null;
@@ -113,7 +113,7 @@ public class PlayerData {
     }
 
     public final void setPose(EntityPose pose) {
-        this.lastPose = pose;
+        this.prevPose = pose;
         this.pose = pose;
         this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }

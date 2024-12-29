@@ -46,6 +46,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
         player.claimedEOT = new Vec3f(packet.getDelta());
+        player.prevEotVelocity = player.eotVelocity.clone();
 
         player.tick();
         if (player.lastTickWasTeleport) {
@@ -80,6 +81,11 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         if (player.verticalCollision) {
             packet.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
         }
+
+        // Technically this should be eotVelocity, but since geyser check for this once instead of previous for the ground status
+        // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
+        // Also prevent "NoGround" no-fall bypass by simply send 0 0 0 delta value.
+        packet.setDelta(player.prevEotVelocity.toVector3f());
     }
 
     private void processInputData(final BoarPlayer player) {
