@@ -5,6 +5,7 @@ import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.EntityPose;
 import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.prediction.engine.data.Vector;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
@@ -70,7 +71,7 @@ public class PlayerData {
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = new Box(0, 0, 0, 0, 0, 0);
     public Vec3f eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
-    public Vector closetVector;
+    public Vector closetVector = new Vector(Vec3f.ZERO, VectorType.NORMAL);
     public boolean onGround, wasGround;
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
