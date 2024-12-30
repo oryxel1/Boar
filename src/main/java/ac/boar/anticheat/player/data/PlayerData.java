@@ -87,6 +87,13 @@ public class PlayerData {
     public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
     // Prediction related method
+    public final double getMaxOffset() {
+        // Give player more offset the further they go (https://minecraft.wiki/w/Bedrock_Edition_distance_effects#)
+        // I guess this is a bad thing to do, but how I'm I suppose to "predict" this, well possible but no.
+        final double length = Math.sqrt(x * x + y * y + z * z);
+        return 1e-4 + (4e-8 * length);
+    }
+
     public boolean isInLava() {
         return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) > 0.0;
     }

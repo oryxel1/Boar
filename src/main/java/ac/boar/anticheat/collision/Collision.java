@@ -196,7 +196,7 @@ public class Collision {
                 return 0;
             }
 
-            double oldDist = maxDist;
+            final float oldDist = maxDist;
             maxDist = bb.calculateMaxDistance(axis, box, maxDist);
 
             // Normally minecraft (java) uses 1.0E-7 when it comes to calculating collision (calculateMaxDistance)
