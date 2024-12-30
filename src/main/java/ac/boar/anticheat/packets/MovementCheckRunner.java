@@ -84,7 +84,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         // Technically this should be eotVelocity, but since geyser check for this once instead of previous for the ground status
         // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
-        // Also prevent "NoGround" no-fall bypass by simply send 0 0 0 delta value.
+        // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
         packet.setDelta(player.prevEotVelocity.toVector3f());
     }
 
