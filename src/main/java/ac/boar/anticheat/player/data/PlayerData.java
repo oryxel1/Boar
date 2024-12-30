@@ -89,7 +89,7 @@ public class PlayerData {
     // Prediction related method
     public final double getMaxOffset() {
         // Give player more offset the further they go (https://minecraft.wiki/w/Bedrock_Edition_distance_effects#)
-        // I guess this is a bad thing to do, but how I'm I suppose to "predict" this, well possible but no.
+        // I guess this is a bad thing to do, but how am I supposed to "predict" this, well possible but no.
         final double length = Math.sqrt(x * x + y * y + z * z);
         return 1e-4 + (4e-8 * length);
     }
