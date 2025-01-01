@@ -72,6 +72,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
     // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90
     // Geyser check for our vertical collision for calculation for ground, do this to prevent possible no-fall bypass.
     private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        if (player.wasFlying || player.flying) {
+            return;
+        }
+
         packet.getInputData().remove(PlayerAuthInputData.HORIZONTAL_COLLISION);
         packet.getInputData().remove(PlayerAuthInputData.VERTICAL_COLLISION);
 
