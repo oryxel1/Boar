@@ -92,7 +92,7 @@ public final class BoarPlayer extends PlayerData {
 
     // Prediction related method
     public void tick() {
-        this.attributes.forEach((_, attribute) -> attribute.tick());
+        this.attributes.forEach((i, attribute) -> attribute.tick());
         this.movementSpeed = this.attributes.get(AttributeType.Builtin.MOVEMENT_SPEED.getId()).getValue();
         this.movementSpeed *= (this.sprinting || this.hasSprintingAttribute) ? 1.3f : 1;
 
