@@ -147,11 +147,19 @@ public class CompensatedWorld {
         chunks.remove(chunkPosition);
     }
 
+    public void loadDimension(boolean synced) {
+        final JavaDimension dimension = player.getSession().getDimensionType();
+        if (!synced) {
+            this.minY = dimension.minY();
+            this.heightY = dimension.maxY();
+            return;
+        }
 
-    public void loadDimension() {
-        JavaDimension dimension = player.getSession().getDimensionType();
-        this.minY = dimension.minY();
-        this.heightY = dimension.maxY();
+        player.sendTransaction(true);
+        player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            this.minY = dimension.minY();
+            this.heightY = dimension.maxY();
+        });
     }
 
     /**

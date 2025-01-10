@@ -54,7 +54,7 @@ public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPack
         }
 
         if (event.getPacket() instanceof ClientboundRespawnPacket) {
-            event.getPostTasks().add(player.compensatedWorld::loadDimension);
+            event.getPostTasks().add(() -> player.compensatedWorld.loadDimension(true));
         }
     }
 
