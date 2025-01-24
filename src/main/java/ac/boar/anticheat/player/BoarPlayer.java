@@ -22,8 +22,7 @@ import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
 import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
-import org.geysermc.mcprotocollib.network.tcp.TcpSession;
-import org.geysermc.mcprotocollib.protocol.codec.MinecraftCodecHelper;
+import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 
@@ -37,7 +36,7 @@ public final class BoarPlayer extends PlayerData {
     @Getter
     private final GeyserSession session;
     public BedrockServerSession cloudburstSession;
-    public TcpSession mcplSession;
+    public ClientSession mcplSession;
 
     public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;
@@ -162,10 +161,5 @@ public final class BoarPlayer extends PlayerData {
         int k = GenericMath.floor(lv.minZ);
         int l = GenericMath.ceil(lv.maxZ);
         return !this.compensatedWorld.isRegionLoaded(i, k, j, l);
-    }
-
-    // Other
-    public MinecraftCodecHelper getCodecHelper() {
-        return (MinecraftCodecHelper) this.mcplSession.getCodecHelper();
     }
 }

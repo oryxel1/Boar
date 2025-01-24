@@ -13,6 +13,7 @@ import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
+import org.geysermc.mcprotocollib.protocol.codec.MinecraftTypes;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
@@ -27,7 +28,7 @@ public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPack
 
             final ByteBuf in = Unpooled.wrappedBuffer(packet.getChunkData());
             for (int sectionY = 0; sectionY < chunkSize; sectionY++) {
-                ChunkSection javaSection = player.getCodecHelper().readChunkSection(in);
+                ChunkSection javaSection = MinecraftTypes.readChunkSection(in);
                 palette[sectionY] = javaSection.getChunkData();
             }
 

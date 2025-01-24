@@ -9,8 +9,8 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
 import org.geysermc.geyser.api.connection.GeyserConnection;
 import org.geysermc.geyser.session.GeyserSession;
+import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.network.event.session.SessionListener;
-import org.geysermc.mcprotocollib.network.tcp.TcpSession;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class GeyserUtil {
         final GeyserConnection connection = player.getSession();
 
         try {
-            final TcpSession session = findTcpSession(connection);
+            final ClientSession session = findTcpSession(connection);
 
             List<SessionListener> adapters = new ArrayList<>(session.getListeners());
             session.getListeners().forEach(session::removeListener);
@@ -60,13 +60,13 @@ public class GeyserUtil {
         upstream.set(player.getSession(), new CloudburstSendListener(player, session));
     }
 
-    private static TcpSession findTcpSession(final GeyserConnection connection) throws Exception {
+    private static ClientSession findTcpSession(final GeyserConnection connection) throws Exception {
         final Field upstream = GeyserSession.class.getDeclaredField("downstream");
         upstream.setAccessible(true);
         final Object session = upstream.get(connection);
         final Field field = session.getClass().getDeclaredField("session");
         field.setAccessible(true);
-        return (TcpSession) field.get(session);
+        return (ClientSession) field.get(session);
     }
 
     private static BedrockServerSession findCloudburstSession(final GeyserConnection connection) throws Exception {
