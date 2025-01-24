@@ -22,6 +22,12 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
+        // Just to be safe.
+        if (player.mcplSession == null) {
+            player.disconnect("Failed to find MCPL session, please rejoin.");
+            return;
+        }
+
         player.tick = packet.getTick();
 
         player.getInputData().clear();

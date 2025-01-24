@@ -36,7 +36,7 @@ public class GeyserUtil {
         final GeyserConnection connection = player.getSession();
 
         try {
-            final ClientSession session = findTcpSession(connection);
+            final ClientSession session = findClientSession(connection);
 
             List<SessionListener> adapters = new ArrayList<>(session.getListeners());
             session.getListeners().forEach(session::removeListener);
@@ -44,6 +44,7 @@ public class GeyserUtil {
 
             player.mcplSession = session;
         } catch (Exception ignored) {
+            player.disconnect("Failed to inject into MCPL session!");
         }
     }
 
@@ -60,7 +61,7 @@ public class GeyserUtil {
         upstream.set(player.getSession(), new CloudburstSendListener(player, session));
     }
 
-    private static ClientSession findTcpSession(final GeyserConnection connection) throws Exception {
+    private static ClientSession findClientSession(final GeyserConnection connection) throws Exception {
         final Field upstream = GeyserSession.class.getDeclaredField("downstream");
         upstream.setAccessible(true);
         final Object session = upstream.get(connection);
