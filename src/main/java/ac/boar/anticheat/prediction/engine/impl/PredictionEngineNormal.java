@@ -36,10 +36,11 @@ public class PredictionEngineNormal extends PredictionEngine {
         final StatusEffect effect = player.statusEffects.get(Effect.LEVITATION);
         if (effect != null) {
             d += (0.05f * (effect.getAmplifier() + 1) - vec3f.y) * 0.2f;
-        } else if (player.compensatedWorld.isChunkLoaded(lv.getX(), lv.getZ())) {
+        } else if (player.compensatedWorld.isChunkLoaded((int) player.x, (int) player.z)) {
             d -= player.getEffectiveGravity(vec3f);
         } else {
-            d = player.y > player.compensatedWorld.getMinY() ? -0.1f : 0.0f;
+            // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
+            d = 0;
         }
 
         float g = f * 0.91F;
