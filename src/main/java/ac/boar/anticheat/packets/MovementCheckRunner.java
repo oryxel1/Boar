@@ -56,6 +56,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick();
         if (player.lastTickWasTeleport) {
+            player.eotVelocity = Vec3f.ZERO;
             player.updateBoundingBox(player.x, player.y, player.z);
             return;
         }
