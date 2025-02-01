@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.math.Vec3f;
@@ -70,7 +71,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                     player.predictedVelocity.x + "," + player.predictedVelocity.y + "," + player.predictedVelocity.z + ", MO=" + maxOffset);
 
             Bukkit.broadcastMessage("§7A: " + player.actualVelocity.x + "," + player.actualVelocity.y + "," + player.actualVelocity.z + ", " +
-                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", SS=" + player.sinceSprinting + ", TI=" + player.closetVector.getTransactionId());
+                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() + ", TI=" + player.closetVector.getTransactionId());
+        }
+        if (offset > maxOffset && Boar.IS_IN_DEBUGGING) {
+            player.updateBoundingBox(player.x, player.y, player.z);
         }
 
         correctInputData(player, packet);
@@ -138,5 +142,9 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             player.sprinting = false;
             player.sinceSprinting = 1;
         }
+
+        final StringBuilder builder = new StringBuilder();
+        player.getInputData().forEach(input -> builder.append(input).append(","));
+        Bukkit.broadcastMessage(builder.toString());
     }
 }

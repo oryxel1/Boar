@@ -192,20 +192,11 @@ public class Collision {
         Box box = boundingBox.clone();
 
         for (Box bb : collision) {
-            if (Math.abs(maxDist) < 1.0E-7) {
+            if (Math.abs(maxDist) < Box.EPSILON) {
                 return 0;
             }
 
-            final float oldDist = maxDist;
             maxDist = bb.calculateMaxDistance(axis, box, maxDist);
-
-            // Normally minecraft (java) uses 1.0E-7 when it comes to calculating collision (calculateMaxDistance)
-            // We however, uses 3.0E-5 since we have to account for floating point errors. This prevents collision being ignored when there is floating point errors.
-            // But, sometimes this causes the anti-cheat to wrongly calculate your movement around 1.0E-5 -> 3.0E-5 offset (floating point error)
-            // So we simply check for this and correct it back to 0. NOTE: This is only for cases that your movement is supposed to be 0.
-            if (oldDist > 0 && maxDist >= -Box.MAX_TOLERANCE_ERROR && maxDist < -Box.EPSILON || oldDist < 0 && maxDist <= Box.MAX_TOLERANCE_ERROR && maxDist > Box.EPSILON) {
-                maxDist = 0;
-            }
         }
 
         return maxDist;

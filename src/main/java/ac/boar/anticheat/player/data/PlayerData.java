@@ -69,12 +69,14 @@ public class PlayerData {
     // Prediction related
     public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
-    public Box boundingBox = new Box(0, 0, 0, 0, 0, 0);
+    public Box boundingBox = Box.EMPTY, prevBoundingBox = Box.EMPTY;
     public Vec3f prevEotVelocity = Vec3f.ZERO, eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
     public Vector closetVector = new Vector(Vec3f.ZERO, VectorType.NORMAL);
     public boolean onGround, wasGround;
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
+
+    public Vec3f fluidPushingVelocity = Vec3f.ZERO;
 
     public float fallDistance = 0;
 
@@ -112,7 +114,7 @@ public class PlayerData {
 
     // Others (methods)
     public final void updateBoundingBox(float x, float y, float z) {
-        this.boundingBox = calculateBoundingBox(x, y, z);
+        this.prevBoundingBox = this.boundingBox = calculateBoundingBox(x, y, z);
     }
 
     public final Box calculateBoundingBox(float x, float y, float z) {

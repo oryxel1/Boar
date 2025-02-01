@@ -8,6 +8,7 @@ import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineElytra;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineNormal;
+import ac.boar.anticheat.prediction.engine.impl.PredictionEngineWater;
 import ac.boar.anticheat.util.math.Vec3f;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 
@@ -24,13 +25,18 @@ public class LivingTicker extends EntityTicker {
         super.tick();
         tickMovement();
 
-        if (player.actualVelocity.lengthSquared() > 0) {
-            player.boundingBox = player.boundingBox.offset(player.predictedVelocity);
-            if (player.prevPose != player.pose) {
-                final Vec3f vec3f = player.boundingBox.toVec3f(EntityDimensions.POSE_DIMENSIONS.get(player.prevPose).width());
-                player.boundingBox = player.dimensions.getBoxAt(vec3f);
-            }
+        player.prevBoundingBox = player.boundingBox;
+
+        // Update bounding box based off our calculated movement, don't trust player position value.
+        // This patches some bypasses abuses bounding box, also this is a workaround for floating point errors breaking collision.
+        // Well since we're not predicting anything when player flying, this is going to be inaccurate as soon as we start flying.
+        // Depends on how bad is the floating point errors.
+        player.boundingBox = player.boundingBox.offset(player.predictedVelocity);
+        if (player.prevPose != player.pose) {
+            final Vec3f vec3f = player.boundingBox.toVec3f(EntityDimensions.POSE_DIMENSIONS.get(player.prevPose).width());
+            player.boundingBox = player.dimensions.getBoxAt(vec3f);
         }
+
         this.checkBlockCollision();
     }
 
@@ -50,7 +56,11 @@ public class LivingTicker extends EntityTicker {
     public void travel() {
         final PredictionEngine engine;
         if (player.touchingWater || player.isInLava()) {
-            engine = null;
+            if (player.touchingWater) {
+                engine = new PredictionEngineWater(player);
+            } else {
+                engine = null;
+            }
         } else if (player.gliding) {
             engine = new PredictionEngineElytra(player);
         } else {

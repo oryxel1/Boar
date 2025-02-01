@@ -18,6 +18,8 @@ public class Boar {
     private static final Boar instance = new Boar();
     private Boar() {}
 
+    public static final boolean IS_IN_DEBUGGING = true;
+
     private BoarPlayerManager playerManager;
 
     public void init() {

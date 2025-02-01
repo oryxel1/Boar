@@ -61,56 +61,60 @@ public class EntityTicker {
     private boolean updateMovementInFluid(final Fluid tag) {
         if (player.isRegionUnloaded()) {
             return false;
-        } else {
-            Box lv = player.boundingBox.contract(0.001F);
-            int i = GenericMath.floor(lv.minX);
-            int j = GenericMath.ceil(lv.maxX);
-            int k = GenericMath.floor(lv.minY);
-            int l = GenericMath.ceil(lv.maxY);
-            int m = GenericMath.floor(lv.minZ);
-            int n = GenericMath.ceil(lv.maxZ);
-            float e = 0;
-            boolean bl2 = false;
-            Vec3f lv2 = Vec3f.ZERO;
-            int o = 0;
-            Mutable lv3 = new Mutable();
-
-            for (int p = i; p < j; p++) {
-                for (int q = k; q < l; q++) {
-                    for (int r = m; r < n; r++) {
-                        lv3.set(p, q, r);
-                        FluidState lv4 = player.compensatedWorld.getFluidState(lv3.x, lv3.y, lv3.z);
-                        if (lv4.fluid() != tag) {
-                            continue;
-                        }
-
-                        float f = q + lv4.getHeight(player, lv3);
-                        if (f < lv.minY) {
-                            continue;
-                        }
-
-                        bl2 = true;
-                        e = Math.max(f - lv.minY, e);
-                        Vec3f lv5 = lv4.getVelocity(player, lv3, lv4);
-                        if (e < 0.4) {
-                            lv5 = lv5.multiply(e);
-                        }
-
-                        lv2 = lv2.add(lv5);
-                        o++;
-                    }
-                }
-            }
-
-            if (lv2.length() > 0.0) {
-                if (o > 0) {
-                    lv2 = lv2.multiply(1.0f / o);
-                }
-            }
-
-            player.fluidHeight.put(tag, e);
-            return bl2;
         }
+
+        final Box lv = player.prevBoundingBox.contract(0.001F);
+        int i = GenericMath.floor(lv.minX);
+        int j = GenericMath.ceil(lv.maxX);
+        int k = GenericMath.floor(lv.minY);
+        int l = GenericMath.ceil(lv.maxY);
+        int m = GenericMath.floor(lv.minZ);
+        int n = GenericMath.ceil(lv.maxZ);
+        float e = 0;
+        boolean bl2 = false;
+        Vec3f lv2 = Vec3f.ZERO;
+        int o = 0;
+        Mutable lv3 = new Mutable();
+
+        for (int p = i; p < j; p++) {
+            for (int q = k; q < l; q++) {
+                for (int r = m; r < n; r++) {
+                    lv3.set(p, q, r);
+                    FluidState lv4 = player.compensatedWorld.getFluidState(lv3.x, lv3.y, lv3.z);
+                    if (lv4.fluid() != tag) {
+                        continue;
+                    }
+
+                    float f = q + lv4.getHeight(player, lv3);
+                    if (f < lv.minY) {
+                        continue;
+                    }
+
+                    bl2 = true;
+                    e = Math.max(f - lv.minY, e);
+                    Vec3f lv5 = lv4.getVelocity(player, lv3, lv4);
+                    if (e < 0.4) {
+                        lv5 = lv5.multiply(e);
+                    }
+
+                    lv2 = lv2.add(lv5);
+                    o++;
+                }
+            }
+        }
+
+        if (lv2.length() > 0.0) {
+            if (o > 0) {
+                lv2 = lv2.multiply(1.0f / o);
+            }
+
+            player.fluidPushingVelocity = lv2.clone();
+        } else {
+            player.fluidPushingVelocity = Vec3f.ZERO;
+        }
+
+        player.fluidHeight.put(tag, e);
+        return bl2;
     }
 
     protected void checkBlockCollision() {

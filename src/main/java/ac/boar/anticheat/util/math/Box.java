@@ -4,9 +4,10 @@ import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;
 
 public class Box implements Cloneable {
+    public static final Box EMPTY = new Box(0, 0, 0, 0, 0, 0);
+
     public static final float EPSILON = 1.0E-7F;
     public static final float MAX_TOLERANCE_ERROR = 3.0E-5F;
-    public static final float TOLERANCE_DISTANCE = 5.0E-5F;
 
     public final float minX, minY, minZ;
     public final float maxX, maxY, maxZ;
@@ -55,9 +56,9 @@ public class Box implements Cloneable {
 
     public boolean isOverlapped(Axis axis, Box other) {
         return switch (axis) {
-            case X -> other.maxY - this.minY > TOLERANCE_DISTANCE && this.maxY - other.minY > TOLERANCE_DISTANCE && other.maxZ - this.minZ > TOLERANCE_DISTANCE && this.maxZ - other.minZ > TOLERANCE_DISTANCE;
-            case Y -> other.maxX - this.minX > TOLERANCE_DISTANCE && this.maxX - other.minX > TOLERANCE_DISTANCE && other.maxZ - this.minZ > TOLERANCE_DISTANCE && this.maxZ - other.minZ > TOLERANCE_DISTANCE;
-            default -> other.maxX - this.minX > TOLERANCE_DISTANCE && this.maxX - other.minX > TOLERANCE_DISTANCE && other.maxY - this.minY > TOLERANCE_DISTANCE && this.maxY - other.minY >TOLERANCE_DISTANCE;
+            case X -> other.maxY - this.minY > 0 && this.maxY - other.minY > 0 && other.maxZ - this.minZ > 0 && this.maxZ - other.minZ > 0;
+            case Y -> other.maxX - this.minX > 0 && this.maxX - other.minX > 0 && other.maxZ - this.minZ > 0 && this.maxZ - other.minZ > 0;
+            default -> other.maxX - this.minX > 0 && this.maxX - other.minX > 0 && other.maxY - this.minY > 0 && this.maxY - other.minY >0;
         };
     }
 
