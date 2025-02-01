@@ -9,6 +9,7 @@ import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineElytra;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineNormal;
 import ac.boar.anticheat.util.math.Vec3f;
+import org.cloudburstmc.protocol.bedrock.data.Ability;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -56,7 +57,8 @@ public class LivingTicker extends EntityTicker {
             engine = new PredictionEngineNormal(player);
         }
 
-        if (player.wasFlying || player.flying) {
+        // Can't just check for flying since player movement can also act weirdly when have may_fly ability.
+        if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
             player.eotVelocity = player.claimedEOT;
             player.predictedVelocity = player.actualVelocity;
             return;
