@@ -1,10 +1,12 @@
 package ac.boar.anticheat.packets;
 
 import ac.boar.anticheat.Boar;
+import ac.boar.anticheat.RewindSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
+import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
@@ -59,10 +61,17 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.claimedEOT = new Vec3f(packet.getDelta());
         player.prevEotVelocity = player.eotVelocity.clone();
 
+        if (player.teleportUtil.teleportInQueue() && RewindSetting.REWIND_INFO_DEBUG) {
+            ChatUtil.alert("Player trying to send position with tick " + player.tick + " while teleporting!");
+            return;
+        }
+
         player.tick();
         if (player.lastTickWasTeleport) {
             player.eotVelocity = Vec3f.ZERO;
             player.updateBoundingBox(player.x, player.y, player.z);
+
+            ChatUtil.alert("Teleport on tick=" + player.tick);
             return;
         }
 
@@ -143,8 +152,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             player.sinceSprinting = 1;
         }
 
-        final StringBuilder builder = new StringBuilder();
-        player.getInputData().forEach(input -> builder.append(input).append(","));
-        Bukkit.broadcastMessage(builder.toString());
+//        final StringBuilder builder = new StringBuilder();
+//        player.getInputData().forEach(input -> builder.append(input).append(","));
+//        Bukkit.broadcastMessage(builder.toString());
     }
 }
