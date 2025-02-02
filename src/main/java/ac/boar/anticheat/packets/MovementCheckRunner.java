@@ -78,6 +78,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             player.updateBoundingBox(player.x, player.y, player.z);
         }
 
+        Bukkit.broadcastMessage(player.claimedEOT.toVector3f().toString());
+
         correctInputData(player, packet);
     }
 
