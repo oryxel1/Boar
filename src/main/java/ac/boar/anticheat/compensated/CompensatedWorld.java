@@ -1,6 +1,7 @@
 package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.BoarChunk;
+import ac.boar.anticheat.util.BlockUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,9 +12,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.JavaDimension;
-import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
-import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.util.MathUtils;
@@ -90,16 +89,19 @@ public class CompensatedWorld {
     }
 
     public FluidState getFluidState(int x, int y, int z) {
-        final BlockState state = getBlockState(x, y, z);
-        boolean lava = state.is(Blocks.LAVA), water = state.is(Blocks.WATER), waterlogged = state.getValue(Properties.WATERLOGGED) != null && state.getValue(Properties.WATERLOGGED);
-        if (!lava && !water && !waterlogged) {
+        final int blockId = getBlockAt(x, y, z);
+        float waterHeight = BlockUtil.getWorldFluidHeight(Fluid.WATER, blockId);
+        float lavaHeight = BlockUtil.getWorldFluidHeight(Fluid.LAVA, blockId);
+
+        if (waterHeight <= 0 && lavaHeight <= 0) {
             return new FluidState(Fluid.EMPTY, 0);
         }
-        if (lava || water) {
-            return new FluidState(lava ? Fluid.LAVA : Fluid.WATER, Math.max(8 - state.getValue(Properties.LEVEL), 0) / 9.0F);
+
+        if (waterHeight > 0) {
+            return new FluidState(Fluid.WATER, waterHeight);
         }
 
-        return new FluidState(Fluid.WATER, 8 / 9.0F);
+        return new FluidState(Fluid.LAVA, lavaHeight);
     }
 
     public BlockState getBlockState(Vector3i vector3i) {

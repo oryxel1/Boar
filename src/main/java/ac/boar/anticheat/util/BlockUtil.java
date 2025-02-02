@@ -18,6 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlockUtil {
+    public static float getWorldFluidHeight(Fluid fluidType, int blockId) {
+        return (float) switch (fluidType) {
+            case WATER -> BlockStateValues.getWaterHeight(blockId);
+            case LAVA -> BlockStateValues.getLavaHeight(blockId);
+            case EMPTY -> -1;
+        };
+    }
+
     public static void onEntityCollision(final BoarPlayer player, BlockState state, Mutable pos) {
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
             player.movementMultiplier = new Vec3f(0.8F, 0.75F, 0.8F);

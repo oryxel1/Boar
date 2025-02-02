@@ -9,6 +9,7 @@ import ac.boar.anticheat.util.math.Vec3f;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.erosion.util.BlockPositionIterator;
 import org.geysermc.geyser.level.block.Fluid;
 
 @RequiredArgsConstructor
@@ -65,53 +66,50 @@ public class EntityTicker {
             return false;
         }
 
-        final Box lv = player.prevBoundingBox.contract(0.001F);
-        int i = GenericMath.floor(lv.minX);
-        int j = GenericMath.ceil(lv.maxX);
-        int k = GenericMath.floor(lv.minY);
-        int l = GenericMath.ceil(lv.maxY);
-        int m = GenericMath.floor(lv.minZ);
-        int n = GenericMath.ceil(lv.maxZ);
-        float e = 0;
-        boolean bl2 = false;
-        Vec3f lv2 = Vec3f.ZERO;
-        int o = 0;
-        Mutable lv3 = new Mutable();
+        boolean found = false;
+        Vec3f velocity = Vec3f.ZERO;
+        float maxFluidHeight = 0;
+        int fluidCount = 0;
 
-        for (int p = i; p < j; p++) {
-            for (int q = k; q < l; q++) {
-                for (int r = m; r < n; r++) {
-                    lv3.set(p, q, r);
-                    FluidState lv4 = player.compensatedWorld.getFluidState(lv3.x, lv3.y, lv3.z);
-                    if (lv4.fluid() != tag) {
-                        continue;
-                    }
+        final Box box = player.prevBoundingBox.contract(0.001F);
+        final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
+                GenericMath.floor(box.minX), GenericMath.floor(box.minY), GenericMath.floor(box.minZ),
+                GenericMath.floor(box.maxX), GenericMath.floor(box.maxY), GenericMath.floor(box.maxZ));
 
-                    float f = q + lv4.getHeight(player, lv3);
-                    if (f < lv.minY) {
-                        continue;
-                    }
+        final Mutable mutable = new Mutable();
+        for (iterator.reset(); iterator.hasNext(); iterator.next()) {
+            mutable.set(iterator.getX(), iterator.getY(), iterator.getZ());
+            final FluidState state = player.compensatedWorld.getFluidState(mutable.x, mutable.y, mutable.z);
 
-                    bl2 = true;
-                    e = Math.max(f - lv.minY, e);
-                    Vec3f lv5 = lv4.getVelocity(player, lv3, lv4);
-                    if (e < 0.4) {
-                        lv5 = lv5.multiply(e);
-                    }
-
-                    lv2 = lv2.add(lv5);
-                    o++;
-                }
+            if (state.fluid() != tag) {
+                continue;
             }
+
+            float height = mutable.y + state.getHeight(player, mutable);
+            if (height < box.minY) {
+                continue;
+            }
+
+            found = true;
+            maxFluidHeight = Math.max(height - box.minY, maxFluidHeight);
+
+            Vec3f lv5 = state.getVelocity(player, mutable, state);
+            if (maxFluidHeight < 0.4) {
+                lv5 = lv5.multiply(maxFluidHeight);
+            }
+            velocity = velocity.add(lv5);
+
+            fluidCount++;
         }
 
-        if (lv2.length() > 0.0 && o > 0) {
-            lv2 = lv2.multiply(1.0f / o);
+        if (velocity.length() > 0.0 && fluidCount > 0) {
+            velocity = velocity.multiply(1.0f / fluidCount);
         }
 
-        player.eotVelocity = player.eotVelocity.add(lv2.multiply(speed));
-        player.fluidHeight.put(tag, e);
-        return bl2;
+        player.eotVelocity = player.eotVelocity.add(velocity.multiply(speed));
+        player.fluidHeight.put(tag, maxFluidHeight);
+
+        return found;
     }
 
     protected void checkBlockCollision() {
