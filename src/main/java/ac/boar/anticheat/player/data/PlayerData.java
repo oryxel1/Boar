@@ -77,8 +77,6 @@ public class PlayerData {
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
-    public Vec3f fluidPushingVelocity = Vec3f.ZERO;
-
     // only for debugging
     public PredictionEngine engine;
 

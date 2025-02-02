@@ -30,7 +30,9 @@ public class EntityTicker {
     private void updateWaterState() {
         player.fluidHeight.clear();
         this.checkWaterState();
-        this.updateMovementInFluid(Fluid.LAVA);
+
+        // TODO: lava prediction.
+        this.updateMovementInFluid(0F, Fluid.LAVA);
     }
 
     private void updateSubmergedInWaterState() {
@@ -55,10 +57,10 @@ public class EntityTicker {
 //            return;
 //        }
 
-        player.touchingWater = this.updateMovementInFluid(Fluid.WATER);
+        player.touchingWater = this.updateMovementInFluid(0.014F, Fluid.WATER);
     }
 
-    private boolean updateMovementInFluid(final Fluid tag) {
+    private boolean updateMovementInFluid(final float speed, final Fluid tag) {
         if (player.isRegionUnloaded()) {
             return false;
         }
@@ -103,16 +105,11 @@ public class EntityTicker {
             }
         }
 
-        if (lv2.length() > 0.0) {
-            if (o > 0) {
-                lv2 = lv2.multiply(1.0f / o);
-            }
-
-            player.fluidPushingVelocity = lv2.clone();
-        } else {
-            player.fluidPushingVelocity = Vec3f.ZERO;
+        if (lv2.length() > 0.0 && o > 0) {
+            lv2 = lv2.multiply(1.0f / o);
         }
 
+        player.eotVelocity = player.eotVelocity.add(lv2.multiply(speed));
         player.fluidHeight.put(tag, e);
         return bl2;
     }
