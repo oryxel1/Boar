@@ -42,6 +42,7 @@ public class LivingTicker extends EntityTicker {
 
     public void tickMovement() {
         player.movementInput = player.movementInput.multiply(0.98F);
+
         if (player.movementInput.x != 0 && player.movementInput.z != 0) {
             player.movementInput = player.movementInput.multiply(0.70710677F);
         }

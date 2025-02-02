@@ -1,5 +1,6 @@
 # Boar
 
+"Server-Auth-Rewind" mode for GeyserMC project.
 ### ⚠️ WARNING: THIS ONLY FOR BEDROCK PLAYER NOT JAVA PLAYER! YOU WILL NEED TO PAIR THIS WITH ANOTHER JAVA ANTICHEAT!
 A dedicated (proof of concept) anti cheat for GeyserMC project.
 - Warning: No guarantee about performance, lag compatibility, or if I will ever finish this.
@@ -12,6 +13,7 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 ## Problems
 - Sprinting (or other status) on Bedrock is absolutely broken (can send both START and STOP 
 at the same time or send the same status 2 tick in a row)
+- Sprinting movement speed is not synced "perfectly" with Data and Attribute packet.
 - Floating point errors break collision, causing false positive, or loss precision. (Partially fixed)
 - Player falses after teleport, I can't figure out why movement act weirdly after teleport yet.
 - Step motion is different on Bedrock.
