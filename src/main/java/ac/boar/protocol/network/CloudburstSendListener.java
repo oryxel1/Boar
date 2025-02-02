@@ -1,5 +1,6 @@
 package ac.boar.protocol.network;
 
+import ac.boar.anticheat.RewindSetting;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
@@ -8,6 +9,7 @@ import lombok.NonNull;
 
 import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
+import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -32,19 +34,22 @@ public final class CloudburstSendListener extends UpstreamSession {
             return;
         }
 
-        if (packet instanceof StartGamePacket startGamePacket) {
-            player.runtimeEntityId = startGamePacket.getRuntimeEntityId();
+        if (event.getPacket() instanceof StartGamePacket start) {
+            player.runtimeEntityId = start.getRuntimeEntityId();
             player.javaEntityId = player.getSession().getPlayerEntity().getEntityId();
 
-            player.x = startGamePacket.getPlayerPosition().getX();
-            player.y = startGamePacket.getPlayerPosition().getY() - EntityDefinitions.PLAYER.offset();
-            player.z = startGamePacket.getPlayerPosition().getZ();
+            player.x = start.getPlayerPosition().getX();
+            player.y = start.getPlayerPosition().getY() - EntityDefinitions.PLAYER.offset();
+            player.z = start.getPlayerPosition().getZ();
 
             player.updateBoundingBox(player.x, player.y, player.z);
 
             GeyserUtil.injectMCPL(this.player);
             player.compensatedWorld.loadDimension(false);
             player.loadBlockMappings();
+
+            start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
+            start.setRewindHistorySize(RewindSetting.REWIND_HISTORY_SIZE_TICKS);
         }
 
         super.sendPacket(event.getPacket());
