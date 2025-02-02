@@ -101,6 +101,10 @@ public class LivingTicker extends EntityTicker {
                 afterCollision = lv2;
                 player.closetVector = vector;
             }
+
+            if (vector.getType() == VectorType.VELOCITY) {
+                player.postPredictionVelocities.put(vector.getTransactionId(), lv2);
+            }
         }
 
         player.predictedVelocity = afterCollision;

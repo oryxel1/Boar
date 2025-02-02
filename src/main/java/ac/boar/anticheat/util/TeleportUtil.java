@@ -18,6 +18,9 @@ public final class TeleportUtil {
     private final Queue<TeleportCache> teleportQueue = new ConcurrentLinkedQueue<>();
     public Vec3f lastKnowValid = Vec3f.ZERO;
 
+    // For CorrectPlayerMovePrediction rewind-mode.
+    public int rewindTick = 0;
+
     public void addTeleportToQueue(Vec3f vec3f, boolean immediate) {
         this.player.sendTransaction(immediate);
 

@@ -15,10 +15,10 @@ import ac.boar.protocol.PacketEvents;
 @Getter
 public class Boar {
     @Getter
-    private static final Boar instance = new Boar();
+    private final static Boar instance = new Boar();
     private Boar() {}
 
-    public static final boolean IS_IN_DEBUGGING = true;
+    public final static boolean IS_IN_DEBUGGING = true;
 
     private BoarPlayerManager playerManager;
 

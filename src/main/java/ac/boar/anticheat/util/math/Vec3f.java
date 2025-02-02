@@ -8,7 +8,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 
 @Getter
 public class Vec3f implements Cloneable {
-    public static final Vec3f ZERO = new Vec3f(0, 0, 0);
+    public final static Vec3f ZERO = new Vec3f(0, 0, 0);
 
     public float x, y, z;
 

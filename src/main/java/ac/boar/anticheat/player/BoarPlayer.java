@@ -1,5 +1,6 @@
 package ac.boar.anticheat.player;
 
+import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.util.BlockUtil;
@@ -42,6 +43,8 @@ public final class BoarPlayer extends PlayerData {
     public long runtimeEntityId, javaEntityId;
 
     public final TeleportUtil teleportUtil = new TeleportUtil(this);
+
+    public final CheckHolder checkHolder = new CheckHolder(this);
 
     // Lag compensation
     public final CompensatedWorld compensatedWorld = new CompensatedWorld(this);

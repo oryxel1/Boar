@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GeyserUtil {
-    public static final long MAGIC_FORM_IMAGE_HACK_TIMESTAMP = 1234567890L;
+    public final static long MAGIC_FORM_IMAGE_HACK_TIMESTAMP = 1234567890L;
 
     public static void injectCloudburst(BoarPlayer player) {
         final GeyserConnection connection = player.getSession();

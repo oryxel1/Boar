@@ -1,6 +1,8 @@
 package ac.boar.anticheat.packets;
 
 import ac.boar.anticheat.Boar;
+import ac.boar.anticheat.check.api.Check;
+import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.math.Vec3f;
@@ -14,6 +16,8 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
+
+import java.util.Map;
 
 public class MovementCheckRunner implements CloudburstPacketListener {
     @Override
@@ -65,21 +69,14 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         new PlayerTicker(player).tick();
         final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
 
-        final double maxOffset = player.getMaxOffset();
-        if (player.actualVelocity.length() > 1e-5 || offset > maxOffset) {
-            Bukkit.broadcastMessage((offset > maxOffset ? "§c" : "§a") + "O:" + offset + ", T: " + player.closetVector.getType() + ", P: " +
-                    player.predictedVelocity.x + "," + player.predictedVelocity.y + "," + player.predictedVelocity.z + ", MO=" + maxOffset);
-
-            Bukkit.broadcastMessage("§7A: " + player.actualVelocity.x + "," + player.actualVelocity.y + "," + player.actualVelocity.z + ", " +
-                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() +
-                    ", ENGINE=" + player.engine.getClass().getSimpleName());
-        }
-        if (offset > maxOffset && Boar.IS_IN_DEBUGGING) {
-            player.updateBoundingBox(player.x, player.y, player.z);
+        for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {
+            Check v = entry.getValue();
+            if (v instanceof OffsetHandlerCheck check) {
+                check.onPredictionComplete(offset);
+            }
         }
 
-        Bukkit.broadcastMessage(player.claimedEOT.toVector3f().toString());
-
+        player.postPredictionVelocities.clear();
         correctInputData(player, packet);
     }
 

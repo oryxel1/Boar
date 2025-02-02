@@ -15,42 +15,42 @@ import java.util.List;
 
 // Patch collision in bedrock that is different from java, or block with dynamic collision (ex: scaffolding)
 public class BedrockCollision {
-    private static final List<Box> EMPTY_SHAPE = List.of();
+    private final static List<Box> EMPTY_SHAPE = List.of();
     
-    private static final List<Box> BED_SHAPE = List.of(new Box(0, 0, 0, 1, 0.5625F, 1));
-    private static final List<Box> HONEY_SHAPE = List.of(new Box(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F));
-    private static final List<Box> LECTERN_SHAPE = List.of(new Box(0, 0, 0, 1, 0.9F, 1));
-    private static final List<Box> CONDUIT_SHAPE = List.of(new Box(0.25F, 0, 0.25F, 0.75f, 0.5F, 0.75f));
-    private static final List<Box> CACTUS_SHAPE = List.of(new Box(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F));
+    private final static List<Box> BED_SHAPE = List.of(new Box(0, 0, 0, 1, 0.5625F, 1));
+    private final static List<Box> HONEY_SHAPE = List.of(new Box(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F));
+    private final static List<Box> LECTERN_SHAPE = List.of(new Box(0, 0, 0, 1, 0.9F, 1));
+    private final static List<Box> CONDUIT_SHAPE = List.of(new Box(0.25F, 0, 0.25F, 0.75f, 0.5F, 0.75f));
+    private final static List<Box> CACTUS_SHAPE = List.of(new Box(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F));
 
     // Chest
-    private static final List<Box> SINGLE_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0.025F, 0.975F, 0.95F, 0.975F));
-    private static final List<Box> NORTH_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0, 0.975F, 0.95F, 0.975F));
-    private static final List<Box> SOUTH_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0.025F, 0.975F, 0.95F, 1));
-    private static final List<Box> WEST_CHEST_SHAPE = List.of(new Box(0, 0, 0.025F, 0.975F, 0.95F, 0.975F));
-    private static final List<Box> EAST_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0.025F, 1, 0.95F, 0.975F));
+    private final static List<Box> SINGLE_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0.025F, 0.975F, 0.95F, 0.975F));
+    private final static List<Box> NORTH_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0, 0.975F, 0.95F, 0.975F));
+    private final static List<Box> SOUTH_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0.025F, 0.975F, 0.95F, 1));
+    private final static List<Box> WEST_CHEST_SHAPE = List.of(new Box(0, 0, 0.025F, 0.975F, 0.95F, 0.975F));
+    private final static List<Box> EAST_CHEST_SHAPE = List.of(new Box(0.025F, 0, 0.025F, 1, 0.95F, 0.975F));
 
     // Scaffolding
-    private static final List<Box> SCAFFOLDING_NORMAL_SHAPE;
-    private static final Box SCAFFOLDING_COLLISION_SHAPE = new Box(0, 0, 0, 1, 0.125F, 1);
-    private static final Box SCAFFOLDING_OUTLINE_SHAPE = new Box(0, 0, 0, 1, 1, 1).offset(0, -1, 0);
+    private final static List<Box> SCAFFOLDING_NORMAL_SHAPE;
+    private final static Box SCAFFOLDING_COLLISION_SHAPE = new Box(0, 0, 0, 1, 0.125F, 1);
+    private final static Box SCAFFOLDING_OUTLINE_SHAPE = new Box(0, 0, 0, 1, 1, 1).offset(0, -1, 0);
 
     // Cauldron
-    private static final List<Box> CAULDRON_SHAPE;
+    private final static List<Box> CAULDRON_SHAPE;
 
     // Trapdoor
-    private static final List<Box> TRAPDOOR_EAST_SHAPE = List.of(new Box(0, 0, 0, 0.1825F, 1, 1));
-    private static final List<Box> TRAPDOOR_WEST_SHAPE = List.of(new Box(0.8175F, 0, 0, 1, 1, 1));
-    private static final List<Box> TRAPDOOR_SOUTH_SHAPE = List.of(new Box(0, 0, 0, 1, 1, 0.1825F));
-    private static final List<Box> TRAPDOOR_NORTH_SHAPE = List.of(new Box(0, 0, 0.8175F, 1, 1, 1));
-    private static final List<Box> TRAPDOOR_OPEN_BOTTOM_SHAPE = List.of(new Box(0, 0, 0, 1, 0.1825F, 1));
-    private static final List<Box> TRAPDOOR_OPEN_TOP_SHAPE = List.of(new Box(0, 0.8175F, 0, 1, 1, 1));
+    private final static List<Box> TRAPDOOR_EAST_SHAPE = List.of(new Box(0, 0, 0, 0.1825F, 1, 1));
+    private final static List<Box> TRAPDOOR_WEST_SHAPE = List.of(new Box(0.8175F, 0, 0, 1, 1, 1));
+    private final static List<Box> TRAPDOOR_SOUTH_SHAPE = List.of(new Box(0, 0, 0, 1, 1, 0.1825F));
+    private final static List<Box> TRAPDOOR_NORTH_SHAPE = List.of(new Box(0, 0, 0.8175F, 1, 1, 1));
+    private final static List<Box> TRAPDOOR_OPEN_BOTTOM_SHAPE = List.of(new Box(0, 0, 0, 1, 0.1825F, 1));
+    private final static List<Box> TRAPDOOR_OPEN_TOP_SHAPE = List.of(new Box(0, 0.8175F, 0, 1, 1, 1));
 
     // Door
-    private static final List<Box> DOOR_NORTH_SHAPE = List.of(new Box(0, 0, 0, 1, 1, 0.1825F));
-    private static final List<Box> DOOR_SOUTH_SHAPE = List.of(new Box(0, 0, 0.8175F, 1, 1, 1));
-    private static final List<Box> DOOR_EAST_SHAPE = List.of(new Box(0.8175F, 0, 0, 1, 1, 1));
-    private static final List<Box> DOOR_WEST_SHAPE = List.of(new Box(0, 0, 0, 0.1825F, 1, 1));
+    private final static List<Box> DOOR_NORTH_SHAPE = List.of(new Box(0, 0, 0, 1, 1, 0.1825F));
+    private final static List<Box> DOOR_SOUTH_SHAPE = List.of(new Box(0, 0, 0.8175F, 1, 1, 1));
+    private final static List<Box> DOOR_EAST_SHAPE = List.of(new Box(0.8175F, 0, 0, 1, 1, 1));
+    private final static List<Box> DOOR_WEST_SHAPE = List.of(new Box(0, 0, 0, 0.1825F, 1, 1));
 
     static {
         // Scaffolding

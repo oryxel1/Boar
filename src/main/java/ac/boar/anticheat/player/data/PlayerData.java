@@ -1,5 +1,6 @@
 package ac.boar.anticheat.player.data;
 
+import ac.boar.anticheat.RewindSetting;
 import ac.boar.anticheat.data.AttributeData;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.EntityPose;
@@ -23,9 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
-    public static final float JUMP_HEIGHT = 0.42F;
-    public static final float STEP_HEIGHT = 0.6F;
-    public static final float GRAVITY = 0.08F;
+    public final static float JUMP_HEIGHT = 0.42F;
+    public final static float STEP_HEIGHT = 0.6F;
+    public final static float GRAVITY = 0.08F;
 
     @Getter
     private final Set<PlayerAuthInputData> inputData = new HashSet<>();
@@ -77,6 +78,8 @@ public class PlayerData {
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
+    public final Map<Long, Vec3f> postPredictionVelocities = new HashMap<>();
+
     // only for debugging
     public PredictionEngine engine;
 
@@ -95,7 +98,7 @@ public class PlayerData {
         // Give player more offset the further they go (https://minecraft.wiki/w/Bedrock_Edition_distance_effects#)
         // I guess this is a bad thing to do, but how am I supposed to "predict" this, well possible but no.
         final double length = Math.sqrt(x * x + y * y + z * z);
-        return 1e-4 + (4e-8 * length);
+        return RewindSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD + (4e-8 * length);
     }
 
     public boolean isInLava() {
