@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class Vector {
     private long transactionId = -1;
-    private boolean sprinting, jumping;
+    private boolean jumping;
 
     private Vec3f velocity;
     private VectorType type;
