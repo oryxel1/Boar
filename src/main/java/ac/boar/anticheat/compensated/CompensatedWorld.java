@@ -78,13 +78,8 @@ public class CompensatedWorld {
     }
 
     public boolean isRegionLoaded(int minX, int minZ, int maxX, int maxZ) {
-        int m = minX >> 4;
-        int n = maxX >> 4;
-        int o = minZ >> 4;
-        int p = maxZ >> 4;
-
-        for (int q = m; q <= n; q++) {
-            for (int r = o; r <= p; r++) {
+        for (int q = minX; q <= maxX; q++) {
+            for (int r = minZ; r <= maxZ; r++) {
                 if (!this.isChunkLoaded(q, r)) {
                     return false;
                 }
@@ -92,10 +87,6 @@ public class CompensatedWorld {
         }
 
         return true;
-    }
-
-    public FluidState getFluidState(Vector3i vector3i) {
-        return getFluidState(vector3i.getX(), vector3i.getY(), vector3i.getZ());
     }
 
     public FluidState getFluidState(int x, int y, int z) {

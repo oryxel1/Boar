@@ -4,6 +4,7 @@ import ac.boar.anticheat.data.AttributeData;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.EntityPose;
 import ac.boar.anticheat.data.StatusEffect;
+import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.LatencyUtil;
@@ -77,6 +78,9 @@ public class PlayerData {
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
     public Vec3f fluidPushingVelocity = Vec3f.ZERO;
+
+    // only for debugging
+    public PredictionEngine engine;
 
     public float fallDistance = 0;
 

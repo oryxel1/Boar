@@ -68,6 +68,8 @@ public class LivingTicker extends EntityTicker {
             engine = new PredictionEngineNormal(player);
         }
 
+        player.engine = engine;
+
         // Can't just check for flying since player movement can also act weirdly when have may_fly ability.
         if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
             player.eotVelocity = player.claimedEOT;

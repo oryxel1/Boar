@@ -71,7 +71,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                     player.predictedVelocity.x + "," + player.predictedVelocity.y + "," + player.predictedVelocity.z + ", MO=" + maxOffset);
 
             Bukkit.broadcastMessage("§7A: " + player.actualVelocity.x + "," + player.actualVelocity.y + "," + player.actualVelocity.z + ", " +
-                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() + ", TI=" + player.closetVector.getTransactionId());
+                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() +
+                    ", ENGINE=" + player.engine.getClass().getSimpleName());
         }
         if (offset > maxOffset && Boar.IS_IN_DEBUGGING) {
             player.updateBoundingBox(player.x, player.y, player.z);
