@@ -109,6 +109,7 @@ public class LivingTicker extends EntityTicker {
             }
         }
 
+        player.beforeCollisionVelocity = beforeCollision;
         player.predictedVelocity = afterCollision;
         boolean bl = beforeCollision.x != afterCollision.x;
         boolean bl2 = beforeCollision.z != afterCollision.z;

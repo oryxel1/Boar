@@ -31,6 +31,10 @@ public final class TeleportUtil {
     private final Map<Long, Vec3f> savedKnowValid = new ConcurrentSkipListMap<>();
 
     public void rewind(long tick, final Vec3f beforeCollision, final Vec3f velocity) {
+        if (this.teleportInQueue()) {
+            return;
+        }
+
         final Vec3f beforeVelocity = this.savedKnowValid.getOrDefault(tick, this.lastKnowValid);
         final Vector3f position = beforeVelocity.add(velocity).toVector3f();
         Vec3f endOfTick = velocity.clone();
@@ -117,7 +121,7 @@ public final class TeleportUtil {
     }
 
     public boolean teleportInQueue() {
-        return !this.teleportQueue.isEmpty();
+        return !this.teleportQueue.isEmpty() || !this.rewindTeleportCaches.isEmpty();
     }
 
     public void setLastKnowValid(long tick, Vec3f lastKnowValid) {

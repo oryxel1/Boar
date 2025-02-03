@@ -71,7 +71,7 @@ public class PlayerData {
     public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = Box.EMPTY, prevBoundingBox = Box.EMPTY;
-    public Vec3f prevEotVelocity = Vec3f.ZERO, eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO;
+    public Vec3f prevEotVelocity = Vec3f.ZERO, eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO, beforeCollisionVelocity = Vec3f.ZERO;
     public Vector closetVector = new Vector(Vec3f.ZERO, VectorType.NORMAL);
     public boolean onGround, wasGround;
     public Vector3i supportingBlockPos = null;
