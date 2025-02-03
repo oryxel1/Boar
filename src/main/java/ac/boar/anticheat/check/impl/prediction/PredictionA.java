@@ -17,7 +17,10 @@ public class PredictionA extends OffsetHandlerCheck {
         }
 
         if (offset > player.getMaxOffset()) {
-            this.fail("o=" + offset);
+            if (player.sinceTeleport > 20) {
+                this.fail("o=" + offset);
+            }
+
             player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
         }
     }

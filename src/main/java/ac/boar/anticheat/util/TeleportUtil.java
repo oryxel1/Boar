@@ -5,6 +5,7 @@ import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
+import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public final class TeleportUtil {
             return;
         }
 
-        final Vec3f beforeVelocity = this.savedKnowValid.getOrDefault(data.tick(), this.lastKnowValid);
+        final Vec3f beforeVelocity = this.savedKnowValid.getOrDefault(data.tick(), this.lastKnowValid).add(0, Box.MAX_TOLERANCE_ERROR, 0);
         final Vector3f position = beforeVelocity.add(data.after()).toVector3f();
         Vec3f endOfTick = data.after().clone();
 
@@ -62,7 +63,10 @@ public final class TeleportUtil {
 
         long tick = data.tick();
         if (!this.savedKnowValid.containsKey(tick)) {
-            ChatUtil.alert("Can't find tick=" + tick);
+            if (RewindSetting.REWIND_INFO_DEBUG) {
+                ChatUtil.alert("Can't find tick=" + tick);
+            }
+
             tick = Math.max(0, player.tick - 1);
         }
 

@@ -40,7 +40,7 @@ public class PlayerData {
     // Sprinting, sneaking, swimming and other status.
     public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding, wasSwimming, swimming;
     public boolean wasFlying, flying;
-    public int sinceSprinting;
+    public int sinceSprinting, sinceTeleport;
 
     // Information about this tick.
     public boolean lastTickWasTeleport, lastTickWasRewind;

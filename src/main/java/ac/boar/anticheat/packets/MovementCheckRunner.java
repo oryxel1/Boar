@@ -56,6 +56,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick();
         if (player.lastTickWasTeleport) {
+            player.sinceTeleport = 0;
             // player.eotVelocity = Vec3f.ZERO;
             player.updateBoundingBox(player.x, player.y, player.z);
 
@@ -63,18 +64,20 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
+        player.sinceTeleport++;
+
         new PlayerTicker(player).tick();
         final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
 
         correctInputData(player, packet);
 
         // Player didn't accept rewind teleport properly, rewind again!
-        RewindData data = player.teleportUtil.prevRewind;
-        if (player.lastTickWasRewind && data != null && offset > player.getMaxOffset()) {
+        if (player.lastTickWasRewind && player.teleportUtil.prevRewind != null && offset > player.getMaxOffset()) {
+            final RewindData data = player.teleportUtil.prevRewind;
             long tickDistance = player.tick - data.tick();
 
             if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > RewindSetting.REWIND_HISTORY_SIZE_TICKS - 1) {
-                player.teleportUtil.rewind(new RewindData(player.tick, data.before(), data.after()));
+                player.teleportUtil.rewind(new RewindData(player.tick - 1, data.before(), data.after()));
             } else {
                 player.teleportUtil.rewind(data);
             }
