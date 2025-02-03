@@ -34,6 +34,10 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
 
     // Rewind should be handled separately since it is not teleport. We also need to catch up with the predicted tick.
     private void handleRewindTeleport(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        if (player.lastTickWasTeleport) {
+            return;
+        }
+
         final Queue<RewindTeleportCache> queue = player.teleportUtil.getRewindTeleportCaches();
         if (queue.isEmpty()) {
             return;
@@ -65,7 +69,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             }
 
             if (RewindSetting.REWIND_INFO_DEBUG) {
-                ChatUtil.alert("Required ticks to catch up: " + tickDistance);
+                // ChatUtil.alert("Required ticks to catch up: " + tickDistance);
             }
 
             if (tickDistance < 1) {
@@ -80,7 +84,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 }
 
                 player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
-                ChatUtil.alert("Actual velocity: " + player.actualVelocity.toVector3f());
+                // ChatUtil.alert("Actual velocity: " + player.actualVelocity.toVector3f());
 
                 new PlayerTicker(player).tick();
 
