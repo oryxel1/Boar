@@ -16,6 +16,7 @@ public class FinalPacketListener implements CloudburstPacketListener {
             player.savedInputMap.put(packet.getTick(), packet);
 
             player.lastTickWasTeleport = false;
+            player.lastTickWasRewind = false;
             // This packet doesn't matter, player supposed to be in the teleported position by now.
             // Cancel it don't let any position pass through unless they properly accept it.
             // Geyser also do this, but we made it stricter by checking for lastReceivedId, player can't accept it if they're still lagging.

@@ -3,6 +3,7 @@ package ac.boar.anticheat.packets;
 import ac.boar.anticheat.RewindSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
+import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
@@ -65,6 +66,23 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         new PlayerTicker(player).tick();
         final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
 
+        correctInputData(player, packet);
+
+        // Player didn't accept rewind teleport properly, rewind again!
+        RewindData data = player.teleportUtil.prevRewind;
+        if (player.lastTickWasRewind && data != null && offset > player.getMaxOffset()) {
+            long tickDistance = player.tick - data.tick();
+
+            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > RewindSetting.REWIND_HISTORY_SIZE_TICKS - 1) {
+                player.teleportUtil.rewind(new RewindData(player.tick, data.before(), data.after()));
+            } else {
+                player.teleportUtil.rewind(data);
+            }
+
+            player.postPredictionVelocities.clear();
+            return;
+        }
+
         for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {
             Check v = entry.getValue();
             if (v instanceof OffsetHandlerCheck check) {
@@ -73,7 +91,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         player.postPredictionVelocities.clear();
-        correctInputData(player, packet);
     }
 
     public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {

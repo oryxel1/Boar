@@ -1,6 +1,7 @@
 package ac.boar.anticheat.util;
 
 import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
@@ -26,40 +27,46 @@ public final class TeleportUtil {
     private final Queue<TeleportCache> teleportQueue = new ConcurrentLinkedQueue<>();
     private final Queue<RewindTeleportCache> rewindTeleportCaches = new ConcurrentLinkedQueue<>();
     public Vec3f lastKnowValid = Vec3f.ZERO;
-    public int lastRewindTick;
+    public RewindData prevRewind;
 
     private final Map<Long, Vec3f> savedKnowValid = new ConcurrentSkipListMap<>();
 
-    public void rewind(long tick, final Vec3f beforeCollision, final Vec3f velocity) {
+    public void rewind(long tick, final Vec3f before, final Vec3f after) {
+        this.rewind(new RewindData(tick, before, after));
+    }
+
+    public void rewind(final RewindData data) {
         if (this.teleportInQueue()) {
             return;
         }
 
-        final Vec3f beforeVelocity = this.savedKnowValid.getOrDefault(tick, this.lastKnowValid);
-        final Vector3f position = beforeVelocity.add(velocity).toVector3f();
-        Vec3f endOfTick = velocity.clone();
+        final Vec3f beforeVelocity = this.savedKnowValid.getOrDefault(data.tick(), this.lastKnowValid);
+        final Vector3f position = beforeVelocity.add(data.after()).toVector3f();
+        Vec3f endOfTick = data.after().clone();
+
+        if (data.before().y != data.after().y) {
+            endOfTick.y = 0;
+        }
+
+        if (data.before().x != data.after().x) {
+            endOfTick.x = 0;
+        }
+
+        if (data.before().z != data.after().z) {
+            endOfTick.z = 0;
+        }
+
         if (player.engine != null) {
             endOfTick = player.engine.applyEndOfTick(endOfTick);
         }
 
-        if (beforeCollision.y != velocity.y) {
-            endOfTick.y = 0;
-        }
-
-        if (beforeCollision.x != velocity.x) {
-            endOfTick.x = 0;
-        }
-
-        if (beforeCollision.z != velocity.z) {
-            endOfTick.z = 0;
-        }
-
+        long tick = data.tick();
         if (!this.savedKnowValid.containsKey(tick)) {
             ChatUtil.alert("Can't find tick=" + tick);
             tick = Math.max(0, player.tick - 1);
         }
 
-        final boolean onGround = beforeCollision.y != velocity.y && beforeCollision.y < 0;
+        final boolean onGround = data.before().y != data.after().y && data.before().y < 0;
 
         final CorrectPlayerMovePredictionPacket packet = new CorrectPlayerMovePredictionPacket();
         packet.setPosition(position);
@@ -73,8 +80,10 @@ public final class TeleportUtil {
 
         if (RewindSetting.REWIND_INFO_DEBUG) {
             ChatUtil.alert("Attempted to rewind player to tick=" + tick + ", current tick=" + player.tick);
-            ChatUtil.alert("Rewind info: tick=" + (tick + 1) + ", onGround=" + onGround + ", velocity=" + velocity.toVector3f().toString());
+            ChatUtil.alert("Rewind info: tick=" + (tick + 1) + ", onGround=" + onGround + ", velocity=" + data.after().toVector3f().toString());
         }
+
+        this.prevRewind = data;
     }
 
     public void addTeleportToQueue(Vec3f vec3f, boolean immediate) {

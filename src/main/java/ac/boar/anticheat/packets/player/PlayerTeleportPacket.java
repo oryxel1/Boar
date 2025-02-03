@@ -6,7 +6,6 @@ import ac.boar.anticheat.packets.MovementCheckRunner;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
-import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.plugin.BoarPlugin;
 import ac.boar.protocol.event.CloudburstPacketEvent;
@@ -49,6 +48,8 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 break;
             }
             queue.poll();
+
+            player.lastTickWasRewind = true;
 
             final long tickDistance = packet.getTick() - cache.getTick() - 1;
 
