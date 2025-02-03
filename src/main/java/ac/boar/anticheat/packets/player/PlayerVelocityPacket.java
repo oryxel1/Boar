@@ -2,7 +2,6 @@ package ac.boar.anticheat.packets.player;
 
 import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
@@ -21,8 +20,6 @@ public class PlayerVelocityPacket implements CloudburstPacketListener {
 
             player.queuedVelocities.put(player.lastSentId + 1, new VelocityData(player.lastSentId + 1, player.tick, new Vec3f(packet.getMotion())));
             event.getPostTasks().add(player::sendTransaction);
-
-            ChatUtil.alert("Velocity with tick=" + player.tick);
         }
     }
 }
