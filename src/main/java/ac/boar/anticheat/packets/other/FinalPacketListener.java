@@ -13,6 +13,8 @@ public class FinalPacketListener implements CloudburstPacketListener {
         final BoarPlayer player = event.getPlayer();
 
         if (event.getPacket() instanceof PlayerAuthInputPacket packet) {
+            player.savedInputMap.put(packet.getTick(), packet);
+
             player.lastTickWasTeleport = false;
             // This packet doesn't matter, player supposed to be in the teleported position by now.
             // Cancel it don't let any position pass through unless they properly accept it.

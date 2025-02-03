@@ -11,6 +11,7 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.PredictionType;
 import org.cloudburstmc.protocol.bedrock.packet.CorrectPlayerMovePredictionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -124,9 +125,6 @@ public final class TeleportUtil {
         this.lastKnowValid = lastKnowValid;
 
         ChatUtil.alert("Saved " + tick + " tick position!");
-        if (this.savedKnowValid.size() <= RewindSetting.REWIND_HISTORY_SIZE_TICKS) {
-            return;
-        }
 
         final Iterator<Map.Entry<Long, Vec3f>> iterator = this.savedKnowValid.entrySet().iterator();
         while (iterator.hasNext() && this.savedKnowValid.size() > RewindSetting.REWIND_HISTORY_SIZE_TICKS) {
@@ -135,5 +133,12 @@ public final class TeleportUtil {
 
             ChatUtil.alert("Removed entry: " + entry.getKey());
         }
+
+        final Iterator<Map.Entry<Long, PlayerAuthInputPacket>> iterator1 = this.player.savedInputMap.entrySet().iterator();
+        while (iterator1.hasNext() && this.player.savedInputMap.size() > RewindSetting.REWIND_HISTORY_SIZE_TICKS) {
+            iterator1.next();
+            iterator1.remove();
+        }
+
     }
 }

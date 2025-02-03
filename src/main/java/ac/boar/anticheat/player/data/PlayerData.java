@@ -13,11 +13,13 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
@@ -76,6 +78,7 @@ public class PlayerData {
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
     public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
+    public final Map<Long, PlayerAuthInputPacket> savedInputMap = new ConcurrentSkipListMap<>();
 
     // only for debugging
     public PredictionEngine engine;

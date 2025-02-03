@@ -2,6 +2,7 @@ package ac.boar.anticheat.packets.player;
 
 import ac.boar.anticheat.RewindSetting;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
+import ac.boar.anticheat.packets.MovementCheckRunner;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
@@ -63,8 +64,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 player.eotVelocity = cache.getVelocity();
             }
 
-            System.out.println(player.y);
-
             if (RewindSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Required ticks to catch up: " + tickDistance);
             }
@@ -73,7 +72,13 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 return;
             }
 
+            long currentTick = cache.getTick();
             for (int i = 0; i < tickDistance; i++) {
+                currentTick++;
+                if (player.savedInputMap.containsKey(currentTick)) {
+                    MovementCheckRunner.processInputMovePacket(player, player.savedInputMap.get(currentTick));
+                }
+
                 player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
                 ChatUtil.alert("Actual velocity: " + player.actualVelocity.toVector3f());
 
@@ -86,6 +91,8 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 player.x = player.x + player.predictedVelocity.x;
                 player.y = player.y + player.predictedVelocity.y;
                 player.z = player.z + player.predictedVelocity.z;
+
+                player.postPredictionVelocities.clear();
             }
         }
     }

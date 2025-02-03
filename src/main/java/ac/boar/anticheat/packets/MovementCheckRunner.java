@@ -1,6 +1,5 @@
 package ac.boar.anticheat.packets;
 
-import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.RewindSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
@@ -13,7 +12,6 @@ import ac.boar.protocol.listener.CloudburstPacketListener;
 
 import ac.boar.util.MathUtil;
 
-import org.bukkit.Bukkit;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -37,11 +35,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick = packet.getTick();
 
-        player.getInputData().clear();
-        player.getInputData().addAll(packet.getInputData());
-
-        player.movementInput = new Vec3f(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
-        this.processInputData(player);
+        processInputMovePacket(player, packet);
 
         player.prevX = player.x;
         player.prevY = player.y;
@@ -49,15 +43,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.x = packet.getPosition().getX();
         player.y = packet.getPosition().getY() - EntityDefinitions.PLAYER.offset();
         player.z = packet.getPosition().getZ();
-
-        System.out.println("movement: " + player.y);
-
-        player.bedrockRotation = packet.getRotation();
-
-        player.prevYaw = player.yaw;
-        player.prevPitch = player.pitch;
-        player.yaw = packet.getRotation().getY();
-        player.pitch = packet.getRotation().getX();
 
         player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
         player.claimedEOT = new Vec3f(packet.getDelta());
@@ -91,6 +76,22 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         correctInputData(player, packet);
     }
 
+    public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        player.getInputData().clear();
+        player.getInputData().addAll(packet.getInputData());
+
+        player.movementInput = new Vec3f(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
+
+        processInputData(player);
+
+        player.prevYaw = player.yaw;
+        player.prevPitch = player.pitch;
+        player.yaw = packet.getRotation().getY();
+        player.pitch = packet.getRotation().getX();
+
+        player.bedrockRotation = packet.getRotation();
+    }
+
     // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90
     // Geyser check for our vertical collision for calculation for ground, do this to prevent possible no-fall bypass.
     private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
@@ -115,7 +116,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         packet.setDelta(player.prevEotVelocity.toVector3f());
     }
 
-    private void processInputData(final BoarPlayer player) {
+    public static void processInputData(final BoarPlayer player) {
         player.wasFlying = player.flying;
         player.wasSprinting = player.sprinting;
         player.wasSneaking = player.sneaking;
