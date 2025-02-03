@@ -12,7 +12,7 @@ public class FinalPacketListener implements CloudburstPacketListener {
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
 
-        if (event.getPacket() instanceof PlayerAuthInputPacket) {
+        if (event.getPacket() instanceof PlayerAuthInputPacket packet) {
             player.lastTickWasTeleport = false;
             // This packet doesn't matter, player supposed to be in the teleported position by now.
             // Cancel it don't let any position pass through unless they properly accept it.
@@ -25,7 +25,7 @@ public class FinalPacketListener implements CloudburstPacketListener {
                 return;
             }
 
-            player.teleportUtil.lastKnowValid = new Vec3f(player.x, player.y + EntityDefinitions.PLAYER.offset(), player.z);
+            player.teleportUtil.setLastKnowValid(packet.getTick(), new Vec3f(player.x, player.y + EntityDefinitions.PLAYER.offset(), player.z));
         }
     }
 }

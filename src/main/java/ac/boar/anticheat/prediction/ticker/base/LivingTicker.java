@@ -2,6 +2,8 @@ package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.data.EntityDimensions;
+import ac.boar.anticheat.data.PredictionData;
+import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
@@ -103,7 +105,7 @@ public class LivingTicker extends EntityTicker {
             }
 
             if (vector.getType() == VectorType.VELOCITY) {
-                player.postPredictionVelocities.put(vector.getTransactionId(), lv2);
+                player.postPredictionVelocities.put(vector.getTransactionId(), new PredictionData(vector, movement, lv2));
             }
         }
 
@@ -136,9 +138,9 @@ public class LivingTicker extends EntityTicker {
         player.eotVelocity = engine.applyEndOfTick(eotVelocity);
 
         if (player.closetVector.getType() == VectorType.VELOCITY) {
-            Iterator<Map.Entry<Long, Vec3f>> iterator = player.queuedVelocities.entrySet().iterator();
+            Iterator<Map.Entry<Long, VelocityData>> iterator = player.queuedVelocities.entrySet().iterator();
 
-            Map.Entry<Long, Vec3f> entry;
+            Map.Entry<Long, VelocityData> entry;
             while (iterator.hasNext() && (entry = iterator.next()) != null) {
                 if (entry.getKey() > player.closetVector.getTransactionId()) {
                     break;

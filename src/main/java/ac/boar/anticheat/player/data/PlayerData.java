@@ -1,10 +1,7 @@
 package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.RewindSetting;
-import ac.boar.anticheat.data.AttributeData;
-import ac.boar.anticheat.data.EntityDimensions;
-import ac.boar.anticheat.data.EntityPose;
-import ac.boar.anticheat.data.StatusEffect;
+import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
@@ -60,7 +57,7 @@ public class PlayerData {
     // Movement related, (movement input, player EOT, ...)
     public Vec3f movementInput = Vec3f.ZERO;
     public Vec3f claimedEOT = Vec3f.ZERO, actualVelocity = Vec3f.ZERO;
-    public final Map<Long, Vec3f> queuedVelocities = new ConcurrentHashMap<>();
+    public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
 
     // Attribute related, abilities
     public final Map<Integer, AttributeData> attributes = new HashMap<>();
@@ -78,7 +75,7 @@ public class PlayerData {
     public Vector3i supportingBlockPos = null;
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
-    public final Map<Long, Vec3f> postPredictionVelocities = new HashMap<>();
+    public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
 
     // only for debugging
     public PredictionEngine engine;
@@ -119,7 +116,8 @@ public class PlayerData {
 
     // Others (methods)
     public final void updateBoundingBox(float x, float y, float z) {
-        this.prevBoundingBox = this.boundingBox = calculateBoundingBox(x, y, z);
+        this.prevBoundingBox = this.boundingBox;
+        this.boundingBox = calculateBoundingBox(x, y, z);
     }
 
     public final Box calculateBoundingBox(float x, float y, float z) {

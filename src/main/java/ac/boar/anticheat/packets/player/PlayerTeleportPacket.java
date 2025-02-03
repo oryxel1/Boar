@@ -1,9 +1,11 @@
 package ac.boar.anticheat.packets.player;
 
 import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.data.teleport.TeleportCache;
+import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
-import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.plugin.BoarPlugin;
 import ac.boar.protocol.event.CloudburstPacketEvent;
@@ -11,6 +13,7 @@ import ac.boar.protocol.listener.CloudburstPacketListener;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Queue;
 
@@ -24,7 +27,71 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             return;
         }
 
-        Queue<TeleportUtil.TeleportCache> queue = player.teleportUtil.getTeleportQueue();
+        handleNormalTeleport(player, packet);
+        handleRewindTeleport(player, packet);
+    }
+
+    // Rewind should be handled separately since it is not teleport. We also need to catch up with the predicted tick.
+    private void handleRewindTeleport(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        final Queue<RewindTeleportCache> queue = player.teleportUtil.getRewindTeleportCaches();
+        if (queue.isEmpty()) {
+            return;
+        }
+
+        RewindTeleportCache cache;
+        while ((cache = queue.peek()) != null) {
+            if (player.lastReceivedId < cache.getTransactionId()) {
+                break;
+            }
+            queue.poll();
+
+            final long tickDistance = packet.getTick() - cache.getTick() - 1;
+
+            player.onGround = cache.isOnGround();
+
+            if (tickDistance > 0) {
+                player.prevX = cache.getLastPosition().getX();
+                player.prevY = cache.getLastPosition().getY() - EntityDefinitions.PLAYER.offset();
+                player.prevZ = cache.getLastPosition().getZ();
+
+                player.x = cache.getPosition().getX();
+                player.y = cache.getPosition().getY() - EntityDefinitions.PLAYER.offset();
+                player.z = cache.getPosition().getZ();
+
+                player.updateBoundingBox(player.prevX, player.prevY, player.prevZ);
+                player.updateBoundingBox(player.x, player.y, player.z);
+                player.eotVelocity = cache.getVelocity();
+            }
+
+            System.out.println(player.y);
+
+            if (RewindSetting.REWIND_INFO_DEBUG) {
+                ChatUtil.alert("Required ticks to catch up: " + tickDistance);
+            }
+
+            if (tickDistance < 1) {
+                return;
+            }
+
+            for (int i = 0; i < tickDistance; i++) {
+                player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
+                ChatUtil.alert("Actual velocity: " + player.actualVelocity.toVector3f());
+
+                new PlayerTicker(player).tick();
+
+                player.prevX = player.x;
+                player.prevY = player.y;
+                player.prevZ = player.z;
+
+                player.x = player.x + player.predictedVelocity.x;
+                player.y = player.y + player.predictedVelocity.y;
+                player.z = player.z + player.predictedVelocity.z;
+            }
+        }
+    }
+
+    private void handleNormalTeleport(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        final Queue<TeleportCache> queue = player.teleportUtil.getTeleportQueue();
         if (queue.isEmpty()) {
             return;
         }
@@ -33,8 +100,8 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         // Instead of respond with an extra move packet like java, it just simply set position
         // and add HANDLE_TELEPORT to input data next tick to let us know that it accepted the teleport.
         // Which also means player will be in the position of the latest teleport they got and accept that one, not every teleport like Java.
-        TeleportUtil.TeleportCache temp;
-        TeleportUtil.TeleportCache cache = null;
+        TeleportCache temp;
+        TeleportCache cache = null;
         while ((temp = queue.peek()) != null) {
             if (player.lastReceivedId < temp.getTransactionId()) {
                 break;
@@ -50,7 +117,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         // This is not precise as java, since it being sent this tick instead of right away (also because of floating point I think?), we can't check for 0
         // I have seen it reach 2e-6 in some cases, but I haven't test enough to know.
         double distance = packet.getPosition().distanceSquared(cache.getPosition().toVector3f());
-        if ((packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT)) && distance < MAX_TOLERANCE_ERROR) {
+        if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance < MAX_TOLERANCE_ERROR) {
             BoarPlugin.LOGGER.info("Accepted teleport, d=" + distance);
             player.lastTickWasTeleport = true;
         } else {
@@ -61,6 +128,10 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             }
             // Set player back to where they're supposed to be.
             player.teleportUtil.setbackTo(cache.getPosition());
+            BoarPlugin.LOGGER.info("Received=" + packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0)
+                    + ", Required=" + cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f());
+            BoarPlugin.LOGGER.info("Is there handle teleport data: " + packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT));
+            BoarPlugin.LOGGER.info("Player rejected teleport, re-sync teleport....");
         }
     }
 

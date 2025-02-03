@@ -50,6 +50,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.y = packet.getPosition().getY() - EntityDefinitions.PLAYER.offset();
         player.z = packet.getPosition().getZ();
 
+        System.out.println("movement: " + player.y);
+
         player.bedrockRotation = packet.getRotation();
 
         player.prevYaw = player.yaw;
@@ -68,7 +70,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick();
         if (player.lastTickWasTeleport) {
-            player.eotVelocity = Vec3f.ZERO;
+            // player.eotVelocity = Vec3f.ZERO;
             player.updateBoundingBox(player.x, player.y, player.z);
 
             ChatUtil.alert("Teleport on tick=" + player.tick);
