@@ -90,15 +90,6 @@ public final class TeleportUtil {
         this.prevRewind = data;
     }
 
-    public void addTeleportToQueue(final TeleportCache cache, boolean immediate) {
-        this.player.sendTransaction(immediate);
-
-        final TeleportCache teleportCache = new TeleportCache(cache.getPosition(), this.player.lastSentId);
-        this.teleportQueue.add(teleportCache);
-
-        this.lastKnowValid = cache.getPosition().clone();
-    }
-
     public void addTeleportToQueue(RewindData data, Vec3f vec3f, boolean immediate) {
         this.player.sendTransaction(immediate);
 
