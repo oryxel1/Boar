@@ -57,18 +57,16 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             player.onGround = cache.isOnGround();
 
             player.eotVelocity = cache.getVelocity();
-            if (tickDistance > 0) {
-                player.prevX = cache.getLastPosition().getX();
-                player.prevY = cache.getLastPosition().getY() - EntityDefinitions.PLAYER.offset();
-                player.prevZ = cache.getLastPosition().getZ();
+            player.prevX = cache.getLastPosition().getX();
+            player.prevY = cache.getLastPosition().getY() - EntityDefinitions.PLAYER.offset();
+            player.prevZ = cache.getLastPosition().getZ();
 
-                player.x = cache.getPosition().getX();
-                player.y = cache.getPosition().getY() - EntityDefinitions.PLAYER.offset();
-                player.z = cache.getPosition().getZ();
+            player.x = cache.getPosition().getX();
+            player.y = cache.getPosition().getY() - EntityDefinitions.PLAYER.offset();
+            player.z = cache.getPosition().getZ();
 
-                player.updateBoundingBox(player.prevX, player.prevY, player.prevZ);
-                player.updateBoundingBox(player.x, player.y, player.z);
-            }
+            player.updateBoundingBox(player.prevX, player.prevY, player.prevZ);
+            player.updateBoundingBox(player.x, player.y, player.z);
 
             if (RewindSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Required ticks to catch up: " + tickDistance);
