@@ -13,6 +13,10 @@ public class PredictionEngineWater extends PredictionEngine {
 
     @Override
     protected Vec3f travel(Vec3f vec3f) {
+        if (player.getInputData().contains(PlayerAuthInputData.WANT_DOWN)) {
+            vec3f = vec3f.add(0, -0.04F, 0);
+        }
+
         return this.updateVelocity(vec3f, 0.02F);
     }
 
@@ -20,7 +24,7 @@ public class PredictionEngineWater extends PredictionEngine {
     public Vec3f applyEndOfTick(Vec3f lv) {
         final float y = lv.y;
 
-        float f = player.sprinting ? 0.9F : 0.8F;
+        float f = (player.sprinting || player.swimming) ? 0.9F : 0.8F;
         lv = lv.multiply(f, 0.8F, f);
         lv = this.applyFluidMovingSpeed(player.getEffectiveGravity(lv), lv);
 
