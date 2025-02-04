@@ -95,9 +95,9 @@ public class EntityTicker {
             maxFluidHeight = Math.max(height - box.minY, maxFluidHeight);
 
             Vec3f lv5 = state.getVelocity(player, mutable, state);
-            if (maxFluidHeight < 0.4) {
-                lv5 = lv5.multiply(maxFluidHeight);
-            }
+//            if (maxFluidHeight < 0.4) {
+//                lv5 = lv5.multiply(maxFluidHeight);
+//            }
             velocity = velocity.add(lv5);
 
             fluidCount++;
