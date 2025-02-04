@@ -2,6 +2,7 @@ package ac.boar.anticheat.check.impl.prediction;
 
 import ac.boar.anticheat.check.api.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
+import ac.boar.anticheat.check.impl.velocity.VelocityA;
 import ac.boar.anticheat.player.BoarPlayer;
 
 @CheckInfo(name = "Prediction", type = "A")
@@ -16,11 +17,18 @@ public class PredictionA extends OffsetHandlerCheck {
             return;
         }
 
+        if (((VelocityA)player.checkHolder.get(VelocityA.class)).check()) {
+            return;
+        }
+
         if (offset > player.getMaxOffset()) {
             if (player.sinceTeleport > 20) {
                 this.fail("o=" + offset);
             }
 
+            if (player.teleportUtil.teleportInQueue()) {
+                return;
+            }
             player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
         }
     }

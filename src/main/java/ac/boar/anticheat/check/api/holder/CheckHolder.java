@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public class CheckHolder extends HashMap<Class<?>, Check> {
     public CheckHolder(final BoarPlayer player) {
+        this.put(VelocityA.class, new VelocityA(player));
         this.put(DebugOffsetA.class, new DebugOffsetA(player));
         this.put(PredictionA.class, new PredictionA(player));
-        this.put(VelocityA.class, new VelocityA(player));
     }
 }

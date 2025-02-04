@@ -107,10 +107,6 @@ public class EntityTicker {
             velocity = velocity.multiply(1.0f / fluidCount);
         }
 
-        if (tag == Fluid.WATER) {
-            Bukkit.broadcastMessage("push: " + velocity.toVector3f());
-        }
-
         player.eotVelocity = player.eotVelocity.add(velocity.multiply(speed));
         player.fluidHeight.put(tag, maxFluidHeight);
 
