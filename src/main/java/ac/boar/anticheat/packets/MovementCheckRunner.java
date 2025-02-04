@@ -63,6 +63,11 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         player.sinceTeleport++;
+        if (player.sinceTeleport == 1 && player.teleportUtil.prevRewindTeleport != null) {
+            final RewindData data = player.teleportUtil.prevRewindTeleport;
+            player.teleportUtil.rewind(player.tick - 1, data.before(), data.after());
+            return;
+        }
 
         new PlayerTicker(player).tick();
         final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
@@ -70,12 +75,14 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         correctInputData(player, packet);
 
         // Player didn't accept rewind teleport properly, rewind again!
-        if (player.lastTickWasRewind && player.teleportUtil.prevRewind != null && offset > player.getMaxOffset()) {
+        if (player.lastTickWasRewind && player.teleportUtil.prevRewind != null && !player.teleportUtil.teleportInQueue() && offset > player.getMaxOffset()) {
             final RewindData data = player.teleportUtil.prevRewind;
             long tickDistance = player.tick - data.tick();
 
+            // We're past the point where we can rewind, and trying to rewind past this point (even if we send the latest tick id) it wouldn't act correctly.
+            // Solution? We send a normal teleport and then rewind teleport after that!
             if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > RewindSetting.REWIND_HISTORY_SIZE_TICKS - 1) {
-                player.teleportUtil.rewind(new RewindData(player.tick - 1, data.before(), data.after()));
+                player.teleportUtil.setbackTo(data, player.teleportUtil.lastKnowValid);
             } else {
                 player.teleportUtil.rewind(data);
             }

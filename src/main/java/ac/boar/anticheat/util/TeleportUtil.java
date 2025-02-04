@@ -28,7 +28,7 @@ public final class TeleportUtil {
     private final Queue<TeleportCache> teleportQueue = new ConcurrentLinkedQueue<>();
     private final Queue<RewindTeleportCache> rewindTeleportCaches = new ConcurrentLinkedQueue<>();
     public Vec3f lastKnowValid = Vec3f.ZERO;
-    public RewindData prevRewind;
+    public RewindData prevRewind, prevRewindTeleport;
 
     private final Map<Long, Vec3f> savedKnowValid = new ConcurrentSkipListMap<>();
 
@@ -90,13 +90,23 @@ public final class TeleportUtil {
         this.prevRewind = data;
     }
 
-    public void addTeleportToQueue(Vec3f vec3f, boolean immediate) {
+    public void addTeleportToQueue(final TeleportCache cache, boolean immediate) {
+        this.player.sendTransaction(immediate);
+
+        final TeleportCache teleportCache = new TeleportCache(cache.getPosition(), this.player.lastSentId);
+        this.teleportQueue.add(teleportCache);
+
+        this.lastKnowValid = cache.getPosition().clone();
+    }
+
+    public void addTeleportToQueue(RewindData data, Vec3f vec3f, boolean immediate) {
         this.player.sendTransaction(immediate);
 
         final TeleportCache teleportCache = new TeleportCache(vec3f, this.player.lastSentId);
+        teleportCache.setData(data);
         this.teleportQueue.add(teleportCache);
 
-        this.lastKnowValid = new Vec3f(vec3f.toVector3f());
+        this.lastKnowValid = vec3f.clone();
     }
 
     public void addRewindToQueue(final long tick, final Vec3f last, final Vec3f vec3f, final Vec3f eot, final boolean onGround, boolean immediate) {
@@ -111,7 +121,11 @@ public final class TeleportUtil {
         }
     }
 
-    public void setbackTo(Vec3f vec3f) {
+    public void setbackTo(final TeleportCache cache) {
+        setbackTo(cache.getData(), cache.getPosition());
+    }
+
+    public void setbackTo(final RewindData data, final Vec3f vec3f) {
         if (teleportInQueue()) {
             return;
         }
@@ -128,7 +142,7 @@ public final class TeleportUtil {
         movePlayerPacket.setOnGround(player.onGround);
         movePlayerPacket.setMode(MovePlayerPacket.Mode.TELEPORT);
         movePlayerPacket.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
-        this.addTeleportToQueue(vec3f, true);
+        this.addTeleportToQueue(data, vec3f, true);
 
         this.player.cloudburstSession.sendPacketImmediately(movePlayerPacket);
     }
