@@ -81,7 +81,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
             // We're past the point where we can rewind, and trying to rewind past this point (even if we send the latest tick id) it wouldn't act correctly.
             // Solution? We send a normal teleport and then rewind teleport after that!
-            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > RewindSetting.REWIND_HISTORY_SIZE_TICKS - 1) {
+            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > RewindSetting.TICKS_TILL_FORCE_REWIND) {
                 player.teleportUtil.setbackTo(data, player.teleportUtil.lastKnowValid);
             } else {
                 player.teleportUtil.rewind(data);
