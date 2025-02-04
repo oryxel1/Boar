@@ -18,9 +18,17 @@ public class PredictionEngineWater extends PredictionEngine {
 
     @Override
     public Vec3f applyEndOfTick(Vec3f lv) {
+        final float y = lv.y;
+
         float f = player.sprinting ? 0.9F : 0.8F;
         lv = lv.multiply(f, 0.8F, f);
-        return this.applyFluidMovingSpeed(player.getEffectiveGravity(lv), lv);
+        lv = this.applyFluidMovingSpeed(player.getEffectiveGravity(lv), lv);
+
+        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.y + player.prevY, lv.z)) {
+            lv.y = 0.3F;
+        }
+
+        return lv;
     }
 
     @Override

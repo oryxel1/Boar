@@ -72,7 +72,7 @@ public class EntityTicker {
         float maxFluidHeight = 0;
         int fluidCount = 0;
 
-        final Box box = player.prevBoundingBox.contract(0.001F);
+        final Box box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
         final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
                 GenericMath.floor(box.minX), GenericMath.floor(box.minY), GenericMath.floor(box.minZ),
                 GenericMath.floor(box.maxX), GenericMath.floor(box.maxY), GenericMath.floor(box.maxZ));

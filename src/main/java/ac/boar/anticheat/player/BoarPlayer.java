@@ -1,11 +1,14 @@
 package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.check.api.holder.CheckHolder;
+import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.CompensatedWorld;
+import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
+import ac.boar.anticheat.util.math.Mutable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +21,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.level.block.Blocks;
+import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
 import org.geysermc.geyser.session.GeyserSession;
@@ -164,5 +168,37 @@ public final class BoarPlayer extends PlayerData {
         int k = GenericMath.floor(lv.minZ);
         int l = GenericMath.ceil(lv.maxZ);
         return !this.compensatedWorld.isRegionLoaded(i, k, j, l);
+    }
+
+    public boolean containsFluid(Box box) {
+        int i = GenericMath.floor(box.minX);
+        int j = GenericMath.ceil(box.maxX);
+        int k = GenericMath.floor(box.minY);
+        int l = GenericMath.ceil(box.maxY);
+        int m = GenericMath.floor(box.minZ);
+        int n = GenericMath.ceil(box.maxZ);
+        Mutable lv = new Mutable();
+
+        for (int o = i; o < j; o++) {
+            for (int p = k; p < l; p++) {
+                for (int q = m; q < n; q++) {
+                    lv.set(o, p, q);
+                    FluidState lv2 = this.compensatedWorld.getFluidState(lv.x, lv.y, lv.z);
+                    if (lv2.fluid() != Fluid.EMPTY) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean doesNotCollide(float offsetX, float offsetY, float offsetZ) {
+        return this.doesNotCollide(this.boundingBox.offset(offsetX, offsetY, offsetZ));
+    }
+
+    private boolean doesNotCollide(Box box) {
+        return Collision.isSpaceEmpty(this, box) && !containsFluid(box);
     }
 }
