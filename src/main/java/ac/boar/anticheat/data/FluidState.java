@@ -44,7 +44,7 @@ public record FluidState(Fluid fluid, float height) {
             }
 
             if (g != 0.0F) {
-                lv6.add(lv2.getUnitVector().getX() * g, 0, lv2.getUnitVector().getZ() * g);
+                lv6 = lv6.add(lv2.getUnitVector().getX() * g, 0, lv2.getUnitVector().getZ() * g);
             }
         }
 

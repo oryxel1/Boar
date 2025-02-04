@@ -7,6 +7,7 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.erosion.util.BlockPositionIterator;
@@ -104,6 +105,10 @@ public class EntityTicker {
 
         if (velocity.length() > 0.0 && fluidCount > 0) {
             velocity = velocity.multiply(1.0f / fluidCount);
+        }
+
+        if (tag == Fluid.WATER) {
+            Bukkit.broadcastMessage("push: " + velocity.toVector3f());
         }
 
         player.eotVelocity = player.eotVelocity.add(velocity.multiply(speed));
