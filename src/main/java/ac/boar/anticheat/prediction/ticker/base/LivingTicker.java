@@ -9,6 +9,7 @@ import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineElytra;
+import ac.boar.anticheat.prediction.engine.impl.PredictionEngineLava;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineNormal;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineWater;
 import ac.boar.anticheat.util.math.Vec3f;
@@ -62,7 +63,7 @@ public class LivingTicker extends EntityTicker {
             if (player.touchingWater) {
                 engine = new PredictionEngineWater(player);
             } else {
-                engine = null;
+                engine = new PredictionEngineLava(player);
             }
         } else if (player.gliding) {
             engine = new PredictionEngineElytra(player);
@@ -76,11 +77,6 @@ public class LivingTicker extends EntityTicker {
         if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
             player.eotVelocity = player.claimedEOT;
             player.predictedVelocity = player.actualVelocity;
-            return;
-        }
-
-        // TODO: Implement unimplemented engine.
-        if (engine == null) {
             return;
         }
 

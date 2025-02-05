@@ -55,7 +55,7 @@ public class PredictionEngineWater extends PredictionEngine {
     @Override
     protected boolean shouldJump() {
         float g = player.fluidHeight.getOrDefault(Fluid.WATER, 0F);
-        boolean bl = (player.touchingWater && g > 0.0) && !(player.onGround && !(g > (player.dimensions.eyeHeight() < 0.4 ? 0.0 : 0.4)));
+        boolean bl = (player.touchingWater && g > 0.0) && !(player.onGround && !(g > player.getSwimHeight()));
         return bl && player.getInputData().contains(PlayerAuthInputData.WANT_UP);
     }
 

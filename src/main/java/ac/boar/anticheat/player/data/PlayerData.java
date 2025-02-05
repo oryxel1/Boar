@@ -109,6 +109,10 @@ public class PlayerData {
         return vec3f.y < 0.0 && this.hasStatusEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
     }
 
+    public float getSwimHeight() {
+        return this.dimensions.eyeHeight() < 0.4 ? 0.0F : 0.4F;
+    }
+
     public float getMovementSpeed(float slipperiness) {
         if (onGround) {
             return this.movementSpeed * (0.21600002F / (slipperiness * slipperiness * slipperiness));
