@@ -138,7 +138,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public Vector3i getVelocityAffectingPos() {
-        return this.getPosWithYOffset(0.500001F);
+        return this.getPosWithYOffset(0.1F);
     }
 
     public Vector3i getPosWithYOffset(final float offset) {
