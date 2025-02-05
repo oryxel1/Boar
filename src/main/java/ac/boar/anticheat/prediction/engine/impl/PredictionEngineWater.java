@@ -1,8 +1,11 @@
 package ac.boar.anticheat.prediction.engine.impl;
 
+import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.util.MathUtil;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Fluid;
 
@@ -15,6 +18,15 @@ public class PredictionEngineWater extends PredictionEngine {
     protected Vec3f travel(Vec3f vec3f) {
         if (player.getInputData().contains(PlayerAuthInputData.WANT_DOWN)) {
             vec3f = vec3f.add(0, -0.04F, 0);
+        }
+
+        if (player.swimming) {
+            float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;
+            float e = d < -0.2 ? 0.085F : 0.06F;
+            final FluidState state = player.compensatedWorld.getFluidState(GenericMath.floor(player.prevX), GenericMath.floor(player.prevY + 1.0 - 0.1), GenericMath.floor(player.prevZ));
+            if (d <= 0.0 || player.getInputData().contains(PlayerAuthInputData.WANT_UP) || state.fluid() != Fluid.EMPTY) {
+                vec3f = vec3f.add(0, (d - vec3f.y) * e, 0);
+            }
         }
 
         return this.updateVelocity(vec3f, 0.02F);
