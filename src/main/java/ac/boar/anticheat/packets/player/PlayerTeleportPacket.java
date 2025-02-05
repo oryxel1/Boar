@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.plugin.BoarPlugin;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.util.GeyserUtil;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -80,7 +81,10 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             for (int i = 0; i < tickDistance; i++) {
                 currentTick++;
                 if (player.savedInputMap.containsKey(currentTick)) {
-                    MovementCheckRunner.processInputMovePacket(player, player.savedInputMap.get(currentTick));
+                    final PlayerAuthInputPacket old = player.savedInputMap.get(currentTick);
+
+                    GeyserUtil.syncInputData(player, true, old);
+                    MovementCheckRunner.processInputMovePacket(player, old);
                 }
 
                 player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);

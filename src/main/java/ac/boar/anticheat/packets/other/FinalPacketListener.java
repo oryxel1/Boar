@@ -4,6 +4,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.util.GeyserUtil;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 
@@ -25,6 +26,8 @@ public class FinalPacketListener implements CloudburstPacketListener {
             }
 
             if (event.isCancelled()) {
+                // We cancelled this, but we still need to let geyser know so we can sync sprinting etc....
+                GeyserUtil.syncInputData(player, true, packet);
                 return;
             }
 
