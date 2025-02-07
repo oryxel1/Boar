@@ -138,10 +138,14 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public Vector3i getVelocityAffectingPos() {
-        return this.getPosWithYOffset(0.1F);
+        return this.getPosWithYOffset(true, 0.1F);
     }
 
-    public Vector3i getPosWithYOffset(final float offset) {
+    public Vector3i getPosWithYOffset(final boolean old, final float offset) {
+        float x = old ? this.prevX : this.x;
+        float y = old ? this.prevY : this.y;
+        float z = old ? this.prevZ : this.z;
+
         if (this.supportingBlockPos != null) {
             if (!(offset > 1.0E-5F)) {
                 return this.supportingBlockPos;
@@ -150,13 +154,13 @@ public final class BoarPlayer extends PlayerData {
                 final BlockState lv2 = this.compensatedWorld.getBlockState(this.supportingBlockPos);
                 return offset > 0.5 || !cache.is(BlockTag.FENCES, lv2.block())
                         && !cache.is(BlockTag.WALLS, lv2.block()) && !cache.is(BlockTag.FENCE_GATES, lv2.block())
-                        ? Vector3i.from(this.supportingBlockPos.getX(), GenericMath.floor(this.prevY - offset), this.supportingBlockPos.getZ())
+                        ? Vector3i.from(this.supportingBlockPos.getX(), GenericMath.floor(y - offset), this.supportingBlockPos.getZ())
                         : this.supportingBlockPos;
             }
         } else {
-            int i = GenericMath.floor(this.prevX);
-            int j = GenericMath.floor(this.prevY - offset);
-            int k = GenericMath.floor(this.prevZ);
+            int i = GenericMath.floor(x);
+            int j = GenericMath.floor(y - offset);
+            int k = GenericMath.floor(z);
             return Vector3i.from(i, j, k);
         }
     }

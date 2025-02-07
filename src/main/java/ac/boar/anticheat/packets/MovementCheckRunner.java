@@ -72,6 +72,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         new PlayerTicker(player).tick();
         final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
 
+        if (player.canControlEOT()) {
+            player.eotVelocity = player.claimedEOT;
+        }
+
         correctInputData(player, packet);
 
         // Player didn't accept rewind teleport properly, rewind again!

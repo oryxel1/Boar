@@ -101,6 +101,10 @@ public class PlayerData {
         return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD + (4e-8 * length);
     }
 
+    public final boolean canControlEOT() {
+        return false;
+    }
+
     public boolean isInLava() {
         return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) > 0.0;
     }

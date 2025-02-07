@@ -100,6 +100,10 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 player.y = player.y + player.predictedVelocity.y;
                 player.z = player.z + player.predictedVelocity.z;
 
+                if (player.canControlEOT()) {
+                    player.eotVelocity = player.claimedEOT;
+                }
+
                 player.postPredictionVelocities.clear();
             }
         }
