@@ -1,6 +1,8 @@
 package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.BoarChunk;
+import ac.boar.anticheat.compensated.cache.BoarEntity;
+import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.util.BlockUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.geyser.entity.EntityDefinition;
 import org.geysermc.geyser.level.JavaDimension;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.Block;
@@ -18,11 +21,45 @@ import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.chunk.DataPalette;
 
+import java.util.HashMap;
+import java.util.Map;
+
 // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/session/cache/ChunkCache.java
 @RequiredArgsConstructor
-public class CompensatedWorld {
+public final class CompensatedWorld {
     private final BoarPlayer player;
     private final Long2ObjectMap<BoarChunk> chunks = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<BoarEntity> entities = new Long2ObjectOpenHashMap<>();
+    private final Map<Long, Long> uniqueIdToRuntimeId = new HashMap<>();
+
+    // Entity related
+
+    public BoarEntity addToCache(final long runtimeId, final long uniqueId) {
+        final EntityDefinition<?> definition = player.getSession().getEntityCache().getEntityByGeyserId(runtimeId).getDefinition();
+        if (definition == null) {
+            return null;
+        }
+
+        final EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
+
+        player.sendTransaction();
+        final BoarEntity cache = new BoarEntity(definition.entityType(), definition, dimensions, player.lastSentId, runtimeId);
+        this.entities.put(runtimeId, cache);
+        this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
+
+        return cache;
+    }
+
+    public void removeEntity(final long uniqueId) {
+        final long key = this.uniqueIdToRuntimeId.get(uniqueId);
+        this.entities.remove(key);
+    }
+
+    public BoarEntity getEntity(long id) {
+        return this.entities.get(id);
+    }
+
+    // Chunk/World related
 
     @Getter
     private int minY;
@@ -36,7 +73,7 @@ public class CompensatedWorld {
 
     public boolean isChunkLoaded(int chunkX, int chunkZ) {
         final BoarChunk chunk = this.getChunk(chunkX >> 4, chunkZ >> 4);
-        return chunk != null && chunk.id() <= player.lastReceivedId;
+        return chunk != null && chunk.transactionId() <= player.lastReceivedId;
     }
 
     private BoarChunk getChunk(int chunkX, int chunkZ) {

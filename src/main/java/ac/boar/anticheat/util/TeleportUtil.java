@@ -1,6 +1,6 @@
 package ac.boar.anticheat.util;
 
-import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -63,7 +63,7 @@ public final class TeleportUtil {
 
         long tick = data.tick();
         if (!this.savedKnowValid.containsKey(tick)) {
-            if (RewindSetting.REWIND_INFO_DEBUG) {
+            if (GlobalSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Can't find tick=" + tick);
             }
 
@@ -82,7 +82,7 @@ public final class TeleportUtil {
         this.addRewindToQueue(tick + 1, beforeVelocity, new Vec3f(position), endOfTick, onGround, true);
         this.player.cloudburstSession.sendPacketImmediately(packet);
 
-        if (RewindSetting.REWIND_INFO_DEBUG) {
+        if (GlobalSetting.REWIND_INFO_DEBUG) {
             ChatUtil.alert("Attempted to rewind player to tick=" + tick + ", current tick=" + player.tick);
             ChatUtil.alert("Rewind info: tick=" + (tick + 1) + ", onGround=" + onGround + ", velocity=" + data.after().toVector3f().toString());
         }
@@ -106,7 +106,7 @@ public final class TeleportUtil {
         final RewindTeleportCache teleportCache = new RewindTeleportCache(tick, last, vec3f, eot, onGround, this.player.lastSentId);
         this.rewindTeleportCaches.add(teleportCache);
 
-        if (RewindSetting.REWIND_INFO_DEBUG) {
+        if (GlobalSetting.REWIND_INFO_DEBUG) {
             final long id = player.lastSentId;
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> ChatUtil.alert("Player accepted rewind with transaction id=" + id));
         }
@@ -149,7 +149,7 @@ public final class TeleportUtil {
         // ChatUtil.alert("Saved " + tick + " tick position!");
 
         final Iterator<Map.Entry<Long, Vec3f>> iterator = this.savedKnowValid.entrySet().iterator();
-        while (iterator.hasNext() && this.savedKnowValid.size() > RewindSetting.REWIND_HISTORY_SIZE_TICKS) {
+        while (iterator.hasNext() && this.savedKnowValid.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
             Map.Entry<Long, Vec3f> entry = iterator.next();
             iterator.remove();
 
@@ -157,7 +157,7 @@ public final class TeleportUtil {
         }
 
         final Iterator<Map.Entry<Long, PlayerAuthInputPacket>> iterator1 = this.player.savedInputMap.entrySet().iterator();
-        while (iterator1.hasNext() && this.player.savedInputMap.size() > RewindSetting.REWIND_HISTORY_SIZE_TICKS) {
+        while (iterator1.hasNext() && this.player.savedInputMap.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
             iterator1.next();
             iterator1.remove();
         }

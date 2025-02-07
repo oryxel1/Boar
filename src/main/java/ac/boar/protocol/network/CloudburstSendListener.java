@@ -1,6 +1,6 @@
 package ac.boar.protocol.network;
 
-import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
@@ -12,7 +12,6 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
-import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.session.UpstreamSession;
 
 public final class CloudburstSendListener extends UpstreamSession {
@@ -43,7 +42,7 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.loadBlockMappings();
 
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
-            start.setRewindHistorySize(RewindSetting.REWIND_HISTORY_SIZE_TICKS);
+            start.setRewindHistorySize(GlobalSetting.REWIND_HISTORY_SIZE_TICKS);
         }
 
         super.sendPacket(event.getPacket());

@@ -18,7 +18,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.chunk.*;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundRespawnPacket;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.*;
 
-public class WorldSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
+public class ChunkSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
     @Override
     public void onPacketSend(final MCPLPacketEvent event) {
         final BoarPlayer player = event.getPlayer();

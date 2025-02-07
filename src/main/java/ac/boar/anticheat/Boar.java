@@ -27,7 +27,8 @@ public class Boar {
         new GeyserSessionJoinEvent();
 
         PacketEvents.getApi().getCloudburst().register(new NetworkLatencyPacket());
-        PacketEvents.getApi().getCloudburst().register(new WorldSimulationPacket());
+        PacketEvents.getApi().getCloudburst().register(new ChunkSimulationPacket());
+        PacketEvents.getApi().getCloudburst().register(new EntitySimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new AttributeSimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerEffectPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerTeleportPacket());
@@ -35,7 +36,7 @@ public class Boar {
         PacketEvents.getApi().getCloudburst().register(new MovementCheckRunner());
         PacketEvents.getApi().getCloudburst().register(new FinalPacketListener());
 
-        PacketEvents.getApi().getMcpl().register(new WorldSimulationPacket());
+        PacketEvents.getApi().getMcpl().register(new ChunkSimulationPacket());
         PacketEvents.getApi().getMcpl().register(new AttributeSimulationPacket());
     }
 

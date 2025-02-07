@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.player;
 
-import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.packets.MovementCheckRunner;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -69,7 +69,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             player.updateBoundingBox(player.prevX, player.prevY, player.prevZ);
             player.updateBoundingBox(player.x, player.y, player.z);
 
-            if (RewindSetting.REWIND_INFO_DEBUG) {
+            if (GlobalSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Required ticks to catch up: " + tickDistance);
             }
 

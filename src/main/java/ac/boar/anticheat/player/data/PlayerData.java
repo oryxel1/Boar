@@ -1,6 +1,6 @@
 package ac.boar.anticheat.player.data;
 
-import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
@@ -98,7 +98,7 @@ public class PlayerData {
         // Give player more offset the further they go (https://minecraft.wiki/w/Bedrock_Edition_distance_effects#)
         // I guess this is a bad thing to do, but how am I supposed to "predict" this, well possible but no.
         final double length = Math.sqrt(x * x + y * y + z * z);
-        return RewindSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD + (4e-8 * length);
+        return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD + (4e-8 * length);
     }
 
     public boolean isInLava() {

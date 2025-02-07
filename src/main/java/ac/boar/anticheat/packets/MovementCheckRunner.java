@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets;
 
-import ac.boar.anticheat.RewindSetting;
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.data.teleport.RewindData;
@@ -49,7 +49,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.claimedEOT = new Vec3f(packet.getDelta());
         player.prevEotVelocity = player.eotVelocity.clone();
 
-        if (player.teleportUtil.teleportInQueue() && RewindSetting.REWIND_INFO_DEBUG) {
+        if (player.teleportUtil.teleportInQueue() && GlobalSetting.REWIND_INFO_DEBUG) {
             ChatUtil.alert("Player trying to send position with tick " + player.tick + " while teleporting!");
             return;
         }
@@ -82,7 +82,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             // We're past the point where we can rewind, and trying to rewind past this point (even if we send the latest tick id) it wouldn't act correctly.
             // Or player accept the position but not velocity, or complicated.....
             // Solution? We send a normal teleport and then rewind teleport after that!
-            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > RewindSetting.TICKS_TILL_FORCE_REWIND) {
+            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > GlobalSetting.TICKS_TILL_FORCE_REWIND) {
                 player.teleportUtil.setbackTo(data, player.teleportUtil.lastKnowValid);
             } else {
                 player.teleportUtil.rewind(data);

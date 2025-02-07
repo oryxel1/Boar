@@ -1,7 +1,7 @@
 package ac.boar.anticheat;
 
 // https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/AntiCheatServer.properties
-public class RewindSetting {
+public class GlobalSetting {
     public static boolean REWIND_INFO_DEBUG = true;
     public static int REWIND_HISTORY_SIZE_TICKS = 40;
     public static int TICKS_TILL_FORCE_REWIND = 15;
