@@ -7,6 +7,8 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.packet.*;
+import org.geysermc.geyser.entity.EntityDefinitions;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.Set;
 
@@ -24,6 +26,18 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
             entity.setPosition(packet.getPosition());
             entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3f(packet.getPosition())));
         }
+
+        if (event.getPacket() instanceof AddPlayerPacket packet) {
+            final BoarEntity entity = player.compensatedWorld.addToCache(packet.getRuntimeEntityId(), packet.getUniqueEntityId());
+            if (entity == null) {
+                return;
+            }
+
+            entity.setServerPosition(packet.getPosition());
+            entity.setPosition(packet.getPosition());
+            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3f(packet.getPosition())));
+        }
+
 
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
             player.compensatedWorld.removeEntity(packet.getUniqueEntityId());
@@ -64,10 +78,29 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             this.queuePositionUpdate(event, entity, packet.getPosition());
         }
+
+        if (event.getPacket() instanceof MovePlayerPacket packet) {
+            if (packet.getRuntimeEntityId() == player.runtimeEntityId) {
+                return;
+            }
+
+            final BoarEntity entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+            if (entity == null) {
+                return;
+            }
+
+            this.queuePositionUpdate(event, entity, packet.getPosition());
+        }
     }
 
-    private void queuePositionUpdate(final CloudburstPacketEvent event, final BoarEntity entity, final Vector3f position) {
+    private void queuePositionUpdate(final CloudburstPacketEvent event, final BoarEntity entity, final Vector3f raw) {
         final BoarPlayer player = event.getPlayer();
+        final Vector3f position = raw.sub(0, entity.getType() == EntityType.PLAYER ? EntityDefinitions.PLAYER.offset() : 0, 0);
+
+        if (position.distance(entity.getServerPosition()) < 1.0E-7) {
+            return;
+        }
+
         entity.setServerPosition(position);
 
         // We need 2 transaction to check, if player receive the first transaction they could already have received the packet

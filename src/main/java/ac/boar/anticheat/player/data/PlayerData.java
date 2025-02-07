@@ -35,7 +35,7 @@ public class PlayerData {
     // Position, rotation, other.
     public float prevX, x, prevY, y, prevZ, z;
     public float prevYaw, yaw, prevPitch, pitch;
-    public Vector3f bedrockRotation = Vector3f.ZERO;
+    public Vector3f bedrockRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
 
     // Sprinting, sneaking, swimming and other status.
     public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding, wasSwimming, swimming;

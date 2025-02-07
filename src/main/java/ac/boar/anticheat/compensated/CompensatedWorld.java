@@ -51,7 +51,11 @@ public final class CompensatedWorld {
     }
 
     public void removeEntity(final long uniqueId) {
-        final long key = this.uniqueIdToRuntimeId.get(uniqueId);
+        final long key = this.uniqueIdToRuntimeId.getOrDefault(uniqueId, -1L);
+        if (key == -1L) {
+            return;
+        }
+
         this.entities.remove(key);
     }
 

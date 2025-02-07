@@ -116,6 +116,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.pitch = packet.getRotation().getX();
 
         player.bedrockRotation = packet.getRotation();
+        player.cameraOrientation = packet.getCameraOrientation();
     }
 
     // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90

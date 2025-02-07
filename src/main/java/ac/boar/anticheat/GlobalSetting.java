@@ -6,6 +6,4 @@ public class GlobalSetting {
     public static int REWIND_HISTORY_SIZE_TICKS = 40;
     public static int TICKS_TILL_FORCE_REWIND = 15;
     public static double PLAYER_POSITION_ACCEPTANCE_THRESHOLD = 1.0E-4;
-
-    public static double PLAYER_MOVEMENT_ACTION_DIRECTION_THRESHOLD = 1;
 }
