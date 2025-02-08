@@ -9,6 +9,7 @@ import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.Getter;
+import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
@@ -29,7 +30,8 @@ public class PlayerData {
     public final static float GRAVITY = 0.08F;
 
     @Getter
-    private final Set<PlayerAuthInputData> inputData = new HashSet<>();
+    @Setter
+    private Set<PlayerAuthInputData> inputData = new HashSet<>();
 
     public long tick;
 

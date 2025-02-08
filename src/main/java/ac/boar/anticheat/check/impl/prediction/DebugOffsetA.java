@@ -21,7 +21,7 @@ public class DebugOffsetA extends OffsetHandlerCheck {
                     player.predictedVelocity.x + "," + player.predictedVelocity.y + "," + player.predictedVelocity.z + ", MO=" + maxOffset);
 
             Bukkit.broadcastMessage("§7A: " + player.actualVelocity.x + "," + player.actualVelocity.y + "," + player.actualVelocity.z + ", " +
-                    "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() +
+                    "SPRINTING=" + player.sprinting + ", SPRINTING_BOOST=" + player.hasSprintingAttribute + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() +
                     ", ENGINE=" + player.engine.getClass().getSimpleName() + ", sinceTeleport=" + player.sinceTeleport);
 
             Bukkit.broadcastMessage("A EOT: " + player.eotVelocity.toVector3f().toString());

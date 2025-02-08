@@ -8,13 +8,14 @@ import ac.boar.protocol.listener.CloudburstPacketListener;
 import ac.boar.protocol.listener.MCPLPacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
+import org.cloudburstmc.protocol.bedrock.packet.SetEntityDataPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateAbilitiesPacket;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.Attribute;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
 
-public class AttributeSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
+public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
@@ -38,6 +39,17 @@ public class AttributeSimulationPacket implements CloudburstPacketListener, MCPL
                 player.flying = player.abilities.contains(Ability.FLYING) || player.abilities.contains(Ability.MAY_FLY) && player.flying;
             });
         }
+
+        if (event.getPacket() instanceof SetEntityDataPacket packet) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                return;
+            }
+
+            player.sendTransaction(true);
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+                System.out.println(packet);
+            });
+        }
     }
 
     @Override
@@ -50,8 +62,10 @@ public class AttributeSimulationPacket implements CloudburstPacketListener, MCPL
         for (final Attribute attribute : attributesPacket.getAttributes()) {
             final AttributeData data = player.attributes.get(attribute.getType().getId());
 
-            player.sendTransaction();
+            player.sendTransaction(true);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+                System.out.println(event.getPacket().toString());
+
                 data.getModifiers().clear();
                 data.setBaseValue((float) attribute.getValue());
                 player.hasSprintingAttribute = false;

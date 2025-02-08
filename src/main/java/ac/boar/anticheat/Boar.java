@@ -30,7 +30,7 @@ public class Boar {
         PacketEvents.getApi().getCloudburst().register(new NetworkLatencyPacket());
         PacketEvents.getApi().getCloudburst().register(new ChunkSimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new EntitySimulationPacket());
-        PacketEvents.getApi().getCloudburst().register(new AttributeSimulationPacket());
+        PacketEvents.getApi().getCloudburst().register(new DataSimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerEffectPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerTeleportPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerVelocityPacket());
@@ -39,7 +39,7 @@ public class Boar {
         PacketEvents.getApi().getCloudburst().register(new FinalPacketListener());
 
         PacketEvents.getApi().getMcpl().register(new ChunkSimulationPacket());
-        PacketEvents.getApi().getMcpl().register(new AttributeSimulationPacket());
+        PacketEvents.getApi().getMcpl().register(new DataSimulationPacket());
         PacketEvents.getApi().getMcpl().register(new PacketCheckRunner());
     }
 

@@ -36,6 +36,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick = packet.getTick();
 
+        System.out.println(packet);
         processInputMovePacket(player, packet);
 
         player.prevX = player.x;
@@ -107,8 +108,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
     }
 
     public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        player.getInputData().clear();
-        player.getInputData().addAll(packet.getInputData());
+        player.setInputData(packet.getInputData());
 
         player.movementInput = new Vec3f(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
 
@@ -161,8 +161,14 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                 case STOP_GLIDING -> player.gliding = false;
 
                 // Don't let player do backwards sprinting!
-                case START_SPRINTING -> player.sprinting = player.movementInput.getZ() > 0;
-                case STOP_SPRINTING -> player.sprinting = false;
+                case START_SPRINTING -> {
+                    System.out.println("start sprinting");
+                    player.sprinting = player.movementInput.getZ() > 0;
+                }
+                case STOP_SPRINTING -> {
+                    System.out.println("stop sprinting");
+                    player.sprinting = false;
+                }
 
                 case START_SNEAKING -> player.sneaking = true;
                 case STOP_SNEAKING -> player.sneaking = false;
