@@ -9,10 +9,13 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityDataPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateAbilitiesPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateAttributesPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
+
+import java.util.EnumSet;
 
 public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
     @Override
@@ -44,9 +47,19 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                 return;
             }
 
+            final EnumSet<EntityFlag> flags = packet.getMetadata().getFlags();
+            if (flags == null) {
+                return;
+            }
+
+            // Work-around because this act weirdly asf wtf, is this geyser fault or mine?
+            flags.remove(EntityFlag.SPRINTING);
+
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
                 System.out.println(packet);
+
+                player.setSprinting(false);
             });
         }
 
@@ -67,6 +80,9 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                     attribute.setBaseValue(data.getDefaultValue());
                     attribute.setValue(data.getValue());
 
+                    // Geyser don't translate attribute modifier but calculate the value and send the value to us
+                    // This is useless since there is no modifiers but still be here
+                    // if Geyser decide to change this in the future.
                     for (AttributeModifierData lv5 : data.getModifiers()) {
                         attribute.addTemporaryModifier(lv5);
                     }
