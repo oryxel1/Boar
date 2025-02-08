@@ -9,6 +9,8 @@ import ac.boar.anticheat.util.math.Vec3f;
 
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
+import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.geyser.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,5 +72,18 @@ public abstract class PredictionEngine {
     // Other
     protected final Vec3f updateVelocity(final Vec3f vec3f, final float speed) {
         return vec3f.add(MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw));
+    }
+
+    protected final Vec3f applyClimbingSpeed(final Vec3f motion) {
+        if (player.isClimbing(true)) {
+            float g = Math.max(motion.y, -0.2F);
+            if (g < 0.0 && !player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.SCAFFOLDING) && player.sneaking) {
+                g = 0;
+            }
+
+            return new Vec3f(motion.x, g, motion.z);
+        }
+
+        return motion;
     }
 }

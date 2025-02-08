@@ -15,6 +15,7 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
@@ -79,6 +80,8 @@ public class PlayerData {
 
     public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
     public final Map<Long, PlayerAuthInputPacket> savedInputMap = new ConcurrentSkipListMap<>();
+
+    public Optional<Vector3i> climbingPos;
 
     // only for debugging
     public PredictionEngine engine;

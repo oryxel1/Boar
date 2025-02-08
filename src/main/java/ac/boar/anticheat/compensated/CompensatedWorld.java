@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.entity.EntityDefinition;
+import org.geysermc.geyser.entity.type.Entity;
 import org.geysermc.geyser.level.JavaDimension;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.Block;
@@ -35,11 +36,12 @@ public final class CompensatedWorld {
     // Entity related
 
     public BoarEntity addToCache(final long runtimeId, final long uniqueId) {
-        final EntityDefinition<?> definition = player.getSession().getEntityCache().getEntityByGeyserId(runtimeId).getDefinition();
-        if (definition == null) {
+        final Entity entity = player.getSession().getEntityCache().getEntityByGeyserId(runtimeId);
+        if (entity == null || entity.getDefinition() == null || runtimeId == player.runtimeEntityId) {
             return null;
         }
 
+        final EntityDefinition<?> definition = entity.getDefinition();
         final EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
 
         player.sendTransaction();

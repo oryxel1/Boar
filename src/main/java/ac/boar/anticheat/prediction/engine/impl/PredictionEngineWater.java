@@ -44,6 +44,13 @@ public class PredictionEngineWater extends PredictionEngine {
             lv.y = 0.3F;
         }
 
+        if ((player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING)) &&
+                (player.isClimbing(false) /* ||
+                        player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.POWDER_SNOW) &&
+                                PowderSnowBlock.canWalkOnPowderSnow(this) */)) {
+            lv = new Vec3f(lv.x, 0.2F, lv.z);
+        }
+
         return lv;
     }
 

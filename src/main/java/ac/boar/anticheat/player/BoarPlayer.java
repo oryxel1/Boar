@@ -31,10 +31,7 @@ import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 public final class BoarPlayer extends PlayerData {
@@ -120,6 +117,19 @@ public final class BoarPlayer extends PlayerData {
             return f == 1.0 ? BlockUtil.getVelocityMultiplier(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos())) : f;
         } else {
             return f;
+        }
+    }
+
+    public boolean isClimbing(boolean old) {
+        final TagCache cache = this.getSession().getTagCache();
+
+        Vector3i lv = Vector3i.from(old ? this.prevX : this.x, old ? this.prevY : this.y, old ? this.prevZ : this.z);
+        BlockState lv2 = this.compensatedWorld.getBlockState(lv);
+        if (cache.is(BlockTag.CLIMBABLE, lv2.block())) {
+            this.climbingPos = Optional.of(lv);
+            return true;
+        } else {
+            return false;
         }
     }
 
