@@ -57,7 +57,7 @@ public class DirectionA extends PacketCheck {
             return;
         }
 
-        fail();
-        event.setCancelled(true);
+//        fail();
+//        event.setCancelled(true);
     }
 }
