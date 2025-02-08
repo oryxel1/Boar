@@ -14,9 +14,11 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
+import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Fluid;
-import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
@@ -25,6 +27,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
+    private static final AttributeModifierData SPRINTING_SPEED_BOOST = new AttributeModifierData("minecraft:sprinting", "sprinting",
+            0.3F, AttributeOperation.MULTIPLY_TOTAL, 0, false);
+
     public final static float JUMP_HEIGHT = 0.42F;
     public final static float STEP_HEIGHT = 0.6F;
     public final static float GRAVITY = 0.08F;
@@ -65,10 +70,9 @@ public class PlayerData {
     public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
 
     // Attribute related, abilities
-    public final Map<Integer, AttributeData> attributes = new HashMap<>();
+    public final Map<String, PlayerAttributeData> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();
     public float movementSpeed = 0.1f;
-    public boolean hasSprintingAttribute;
 
     // Prediction related
     public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
@@ -108,6 +112,20 @@ public class PlayerData {
 
     public final boolean canControlEOT() {
         return false;
+    }
+
+    public final void setSprinting(boolean sprinting) {
+        this.sprinting = sprinting;
+        final PlayerAttributeData lv = this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier());
+        if (lv == null) {
+            // wtf?
+            return;
+        }
+
+        lv.removeModifier(SPRINTING_SPEED_BOOST.getId());
+        if (sprinting) {
+            lv.addTemporaryModifier(SPRINTING_SPEED_BOOST);
+        }
     }
 
     public boolean isInLava() {

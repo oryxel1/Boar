@@ -20,6 +20,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
+import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
@@ -29,7 +30,6 @@ import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
 
 import java.util.*;
 
@@ -95,9 +95,7 @@ public final class BoarPlayer extends PlayerData {
 
     // Prediction related method
     public void tick() {
-        this.attributes.forEach((i, attribute) -> attribute.tick());
-        this.movementSpeed = this.attributes.get(AttributeType.Builtin.MOVEMENT_SPEED.getId()).getValue();
-        this.movementSpeed *= (this.sprinting || this.hasSprintingAttribute) ? 1.3f : 1;
+        this.movementSpeed = this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).getValue();
 
         final List<Effect> shouldBeRemoved = new ArrayList<>();
         for (Map.Entry<Effect, StatusEffect> entry : this.statusEffects.entrySet()) {

@@ -1,19 +1,18 @@
 package ac.boar.anticheat.packets.player;
 
-import ac.boar.anticheat.data.AttributeData;
+import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.event.MCPLPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 import ac.boar.protocol.listener.MCPLPacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
+import org.cloudburstmc.protocol.bedrock.data.AttributeData;
+import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityDataPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateAbilitiesPacket;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.Attribute;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeModifier;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.attribute.AttributeType;
-import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.entity.ClientboundUpdateAttributesPacket;
+import org.cloudburstmc.protocol.bedrock.packet.UpdateAttributesPacket;
+import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 
 public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
     @Override
@@ -29,7 +28,7 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                 player.abilities.clear();
                 for (AbilityLayer layer : packet.getAbilityLayers()) {
                     if (layer.getLayerType() == AbilityLayer.Type.BASE) {
-                        player.attributes.get(AttributeType.Builtin.MOVEMENT_SPEED.getId()).setBaseValue(layer.getWalkSpeed());
+                        player.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).setBaseValue(layer.getWalkSpeed());
                     }
 
                     player.abilities.addAll(layer.getAbilityValues());
@@ -45,36 +44,31 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                 return;
             }
 
-            player.sendTransaction(true);
+            player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
                 System.out.println(packet);
             });
         }
-    }
 
-    @Override
-    public void onPacketSend(final MCPLPacketEvent event) {
-        final BoarPlayer player = event.getPlayer();
-        if (!(event.getPacket() instanceof ClientboundUpdateAttributesPacket attributesPacket) || attributesPacket.getEntityId() != player.javaEntityId) {
-            return;
-        }
+        if (event.getPacket() instanceof UpdateAttributesPacket packet) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                return;
+            }
 
-        for (final Attribute attribute : attributesPacket.getAttributes()) {
-            final AttributeData data = player.attributes.get(attribute.getType().getId());
-
-            player.sendTransaction(true);
+            player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
-                System.out.println(event.getPacket().toString());
+                for (final AttributeData data : packet.getAttributes()) {
+                    final PlayerAttributeData attribute = player.attributes.get(data.getName());
+                    if (attribute == null) {
+                        return;
+                    }
 
-                data.getModifiers().clear();
-                data.setBaseValue((float) attribute.getValue());
-                player.hasSprintingAttribute = false;
-                for (final AttributeModifier modifier : attribute.getModifiers()) {
-                    final String id = modifier.toString().split(",")[0].replace("AttributeModifier(id=", "");
-                    if (id.equals("minecraft:sprinting")) {
-                        player.hasSprintingAttribute = true;
-                    } else {
-                        data.getModifiers().put(id, new ac.boar.anticheat.data.AttributeModifier(id, modifier.getAmount(), modifier.getOperation()));
+                    attribute.clearModifiers();
+                    attribute.setBaseValue(data.getDefaultValue());
+                    attribute.setValue(data.getValue());
+
+                    for (AttributeModifierData lv5 : data.getModifiers()) {
+                        attribute.addTemporaryModifier(lv5);
                     }
                 }
             });

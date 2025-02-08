@@ -164,12 +164,13 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                 case START_SPRINTING -> {
                     System.out.println("start sprinting");
                     player.sprinting = player.movementInput.getZ() > 0;
+                    player.setSprinting(player.sprinting);
                 }
                 case STOP_SPRINTING -> {
                     System.out.println("stop sprinting");
                     player.sprinting = false;
+                    player.setSprinting(false);
                 }
-
                 case START_SNEAKING -> player.sneaking = true;
                 case STOP_SNEAKING -> player.sneaking = false;
 
