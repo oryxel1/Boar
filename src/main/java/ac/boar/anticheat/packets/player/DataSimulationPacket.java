@@ -51,12 +51,6 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
             if (flags == null) {
                 return;
             }
-
-            // Work-around because this act weirdly asf wtf, is this geyser fault or mine?
-            flags.remove(EntityFlag.SPRINTING);
-
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.setSprinting(false));
         }
 
         if (event.getPacket() instanceof UpdateAttributesPacket packet) {
