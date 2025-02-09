@@ -90,10 +90,11 @@ public final class TeleportUtil {
         this.prevRewind = data;
     }
 
-    public void addTeleportToQueue(RewindData data, Vec3f vec3f, boolean immediate) {
+    public void addTeleportToQueue(RewindData data, Vec3f vec3f, boolean respawn, boolean immediate) {
         this.player.sendTransaction(immediate);
 
         final TeleportCache teleportCache = new TeleportCache(vec3f, this.player.lastSentId);
+        teleportCache.setRespawnTeleport(respawn);
         teleportCache.setData(data);
         this.teleportQueue.add(teleportCache);
 
@@ -133,7 +134,7 @@ public final class TeleportUtil {
         movePlayerPacket.setOnGround(player.onGround);
         movePlayerPacket.setMode(MovePlayerPacket.Mode.TELEPORT);
         movePlayerPacket.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
-        this.addTeleportToQueue(data, vec3f, true);
+        this.addTeleportToQueue(data, vec3f,false, true);
 
         this.player.cloudburstSession.sendPacketImmediately(movePlayerPacket);
     }

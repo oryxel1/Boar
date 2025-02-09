@@ -25,7 +25,7 @@ public class DebugOffsetA extends OffsetHandlerCheck {
                     ", ENGINE=" + player.engine.getClass().getSimpleName() + ", sinceTeleport=" + player.sinceTeleport);
 
             Bukkit.broadcastMessage("A EOT: " + player.eotVelocity.toVector3f().toString());
-            Bukkit.broadcastMessage("EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset  + "," + player.claimedEOT.toVector3f().toString());
+            Bukkit.broadcastMessage("EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset + "," + player.claimedEOT.toVector3f().toString());
         }
 
 //        Bukkit.broadcastMessage(player.claimedEOT.toVector3f().toString());

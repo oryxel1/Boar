@@ -12,4 +12,6 @@ public class TeleportCache {
     private final Vec3f position;
     private final long transactionId;
     private RewindData data;
+
+    private boolean respawnTeleport;
 }

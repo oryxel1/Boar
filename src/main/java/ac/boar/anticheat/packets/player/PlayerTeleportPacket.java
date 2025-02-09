@@ -121,16 +121,25 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         // Which also means player will be in the position of the latest teleport they got and accept that one, not every teleport like Java.
         TeleportCache temp;
         TeleportCache cache = null;
+        boolean isThereRespawnTeleport = false;
         while ((temp = queue.peek()) != null) {
             if (player.lastReceivedId < temp.getTransactionId()) {
                 break;
             }
 
             cache = queue.poll();
+
+            if (cache.isRespawnTeleport()) {
+                isThereRespawnTeleport = true;
+            }
         }
 
         if (cache == null) {
             return;
+        }
+
+        if (isThereRespawnTeleport) {
+            player.tick = packet.getTick() - 1;
         }
 
         // This is not precise as java, since it being sent this tick instead of right away (also because of floating point I think?), we can't check for 0
@@ -171,6 +180,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         }
 
         player.queuedVelocities.clear();
-        player.teleportUtil.addTeleportToQueue(null, new Vec3f(packet.getPosition()), immediate);
+        player.teleportUtil.addTeleportToQueue(null, new Vec3f(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
     }
 }

@@ -34,7 +34,14 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
-        player.tick = packet.getTick();
+        if (player.tick == Long.MIN_VALUE) {
+            player.tick = Math.max(0, packet.getTick()) - 1;
+        }
+        player.tick++;
+        if (packet.getTick() != player.tick || packet.getTick() < 0) {
+            player.disconnect("Invalid tick id=" + packet.getTick());
+            return;
+        }
 
         processInputMovePacket(player, packet);
 

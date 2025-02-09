@@ -38,7 +38,7 @@ public class PlayerData {
     @Setter
     private Set<PlayerAuthInputData> inputData = new HashSet<>();
 
-    public long tick;
+    public long tick = Long.MIN_VALUE;
 
     // Position, rotation, other.
     public float prevX, x, prevY, y, prevZ, z;
