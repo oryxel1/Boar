@@ -49,17 +49,10 @@ public abstract class PredictionEngine {
             return;
         }
 
-        final List<Vector> vectors1 = new ArrayList<>();
         for (Vector vector : vectors) {
-            vectors1.add(vector);
-
-            final Vector vector1 = new Vector(jump(vector.getVelocity()), vector.getType(), vector.getTransactionId());
-            vector1.setJumping(true);
-            vectors1.add(vector1);
+            vector.setJumping(true);
+            vector.setVelocity(jump(vector.getVelocity()));
         }
-
-        vectors.clear();
-        vectors.addAll(vectors1);
     }
 
     private void addVelocityToPossibilities(final List<Vector> vectors) {
