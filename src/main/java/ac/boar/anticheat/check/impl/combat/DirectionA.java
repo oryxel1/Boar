@@ -21,7 +21,6 @@ public class DirectionA extends PacketCheck {
     public void onPacketReceived(final CloudburstPacketEvent event) {
         // I doubt that minecraft still use this packet....
         if (event.getPacket() instanceof InteractPacket packet && packet.getAction() == InteractPacket.Action.DAMAGE) {
-            System.out.println("cancelled!");
             event.setCancelled(true);
         }
 
@@ -39,7 +38,6 @@ public class DirectionA extends PacketCheck {
         final boolean tooFarOrInvalid = entity == null || entity.getTransactionId() > player.lastReceivedId ||
                 entity.getServerPosition().distance(player.x, player.y, player.z) > 6.0 || entity.getPosition().distance(player.x, player.y, player.z) > 6.0;
         if (tooFarOrInvalid) {
-            System.out.println("tooFarOrInvalid");
             event.setCancelled(true);
             return;
         }

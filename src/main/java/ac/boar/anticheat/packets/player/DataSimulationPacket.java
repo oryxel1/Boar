@@ -56,11 +56,7 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
             flags.remove(EntityFlag.SPRINTING);
 
             player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
-                System.out.println(packet);
-
-                player.setSprinting(false);
-            });
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.setSprinting(false));
         }
 
         if (event.getPacket() instanceof UpdateAttributesPacket packet) {

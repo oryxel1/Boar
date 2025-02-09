@@ -36,7 +36,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick = packet.getTick();
 
-        System.out.println(packet);
         processInputMovePacket(player, packet);
 
         player.prevX = player.x;
@@ -162,12 +161,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
                 // Don't let player do backwards sprinting!
                 case START_SPRINTING -> {
-                    System.out.println("start sprinting");
                     player.sprinting = player.movementInput.getZ() > 0;
                     player.setSprinting(player.sprinting);
                 }
                 case STOP_SPRINTING -> {
-                    System.out.println("stop sprinting");
                     player.sprinting = false;
                     player.setSprinting(false);
                 }
