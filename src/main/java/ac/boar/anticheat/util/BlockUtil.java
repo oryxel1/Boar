@@ -27,15 +27,32 @@ public class BlockUtil {
     }
 
     public static void onEntityCollision(final BoarPlayer player, BlockState state, Mutable pos) {
+        Vec3f movementMultiplier = Vec3f.ZERO;
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
-            player.movementMultiplier = new Vec3f(0.8F, 0.75F, 0.8F);
+            movementMultiplier = new Vec3f(0.8F, 0.75F, 0.8F);
         } else if (state.is(Blocks.POWDER_SNOW)) {
-            player.movementMultiplier = new Vec3f(0.9F, 1.5F, 0.9F);
+            movementMultiplier = new Vec3f(0.9F, 1.5F, 0.9F);
         } else if (state.is(Blocks.COBWEB)) {
-            player.movementMultiplier = new Vec3f(0.25F, 0.05F, 0.25F);
+            movementMultiplier = new Vec3f(0.25F, 0.05F, 0.25F);
             if (player.hasStatusEffect(Effect.WEAVING)) {
-                player.movementMultiplier = new Vec3f(0.5F, 0.25F, 0.5F);
+                movementMultiplier = new Vec3f(0.5F, 0.25F, 0.5F);
             }
+        }
+
+        if (movementMultiplier.equals(Vec3f.ZERO)) {
+            return;
+        }
+
+        final float THRESHOLD = 0.00000011920929F;
+        final boolean xLargerThanThreshold = Math.abs(player.movementMultiplier.x) >= THRESHOLD;
+        final boolean yLargerThanThreshold = Math.abs(player.movementMultiplier.y) >= THRESHOLD;
+        final boolean zLargerThanThreshold = Math.abs(player.movementMultiplier.z) >= THRESHOLD;
+        if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
+            player.movementMultiplier.x = Math.min(player.movementMultiplier.x, movementMultiplier.x);
+            player.movementMultiplier.y = Math.min(player.movementMultiplier.y, movementMultiplier.y);
+            player.movementMultiplier.z = Math.min(player.movementMultiplier.z, movementMultiplier.z);
+        } else {
+            player.movementMultiplier = movementMultiplier;
         }
     }
 

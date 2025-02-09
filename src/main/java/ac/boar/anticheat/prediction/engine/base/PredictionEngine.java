@@ -32,8 +32,8 @@ public abstract class PredictionEngine {
         List<Vector> vectors = new ArrayList<>();
         vectors.add(new Vector(player.eotVelocity, VectorType.NORMAL));
         addVelocityToPossibilities(vectors);
-        addJumpingToPossibilities(vectors);
 
+        applyJumpingToPossibilities(vectors);
         applyTravelToPossibilities(vectors);
         return vectors;
     }
@@ -44,7 +44,7 @@ public abstract class PredictionEngine {
         }
     }
 
-    private void addJumpingToPossibilities(List<Vector> vectors) {
+    private void applyJumpingToPossibilities(List<Vector> vectors) {
         if (!shouldJump()) {
             return;
         }
