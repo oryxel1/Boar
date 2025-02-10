@@ -27,8 +27,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
-    private static final AttributeModifierData SPRINTING_SPEED_BOOST = new AttributeModifierData("minecraft:sprinting", "sprinting",
-            0.3F, AttributeOperation.MULTIPLY_TOTAL, 0, false);
+    private static final AttributeModifierData SPRINTING_SPEED_BOOST = new AttributeModifierData("D208FC00-42AA-4AAD-9276-D5446530DE43",
+            "Sprinting speed boost",
+            0.3F, AttributeOperation.MULTIPLY_TOTAL, 2, false);
 
     public final static float JUMP_HEIGHT = 0.42F;
     public final static float STEP_HEIGHT = 0.6F;
