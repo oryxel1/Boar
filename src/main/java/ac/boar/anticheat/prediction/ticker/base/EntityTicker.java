@@ -7,11 +7,11 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.Bukkit;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.erosion.util.BlockPositionIterator;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.type.BlockState;
 
 @RequiredArgsConstructor
 public class EntityTicker {
@@ -113,7 +113,13 @@ public class EntityTicker {
         return found;
     }
 
-    protected void checkBlockCollision() {
+    protected void tickBlockCollision() {
+        if (player.onGround) {
+            final Vector3i lv = player.getPosWithYOffset(false, 0.2F);
+            final BlockState lv2 = player.compensatedWorld.getBlockState(lv);
+            BlockUtil.onSteppedOn(player, lv2, lv);
+        }
+
         final Vector3i vector3i = Vector3i.from(player.boundingBox.minX + 0.001D, player.boundingBox.minY + 0.001D, player.boundingBox.minZ + 0.001D);
         final Vector3i vector31i = Vector3i.from(player.boundingBox.maxX - 0.001D, player.boundingBox.maxY - 0.001D, player.boundingBox.maxZ - 0.001D);
 

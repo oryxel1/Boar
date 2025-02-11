@@ -5,6 +5,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.BlockStateValues;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
@@ -26,6 +27,17 @@ public class BlockUtil {
         };
     }
 
+    public static void onSteppedOn(final BoarPlayer player, final BlockState state, final Vector3i vector3i) {
+        if (state.is(Blocks.HONEY_BLOCK)) {
+            // Yes lol.
+            float d = Math.abs(player.eotVelocity.y);
+            if (d < 0.1 && !player.sneaking) {
+                float e = 0.4F + d * 0.2F;
+                player.eotVelocity = player.eotVelocity.multiply(e, 1, e);
+            }
+        }
+    }
+
     public static void onEntityCollision(final BoarPlayer player, BlockState state, Mutable pos) {
         Vec3f movementMultiplier = Vec3f.ZERO;
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
@@ -43,10 +55,9 @@ public class BlockUtil {
             return;
         }
 
-        final float THRESHOLD = 0.00000011920929F;
-        final boolean xLargerThanThreshold = Math.abs(player.movementMultiplier.x) >= THRESHOLD;
-        final boolean yLargerThanThreshold = Math.abs(player.movementMultiplier.y) >= THRESHOLD;
-        final boolean zLargerThanThreshold = Math.abs(player.movementMultiplier.z) >= THRESHOLD;
+        final boolean xLargerThanThreshold = Math.abs(player.movementMultiplier.x) >= 1.0E-7;
+        final boolean yLargerThanThreshold = Math.abs(player.movementMultiplier.y) >= 1.0E-7;
+        final boolean zLargerThanThreshold = Math.abs(player.movementMultiplier.z) >= 1.0E-7;
         if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
             player.movementMultiplier.x = Math.min(player.movementMultiplier.x, movementMultiplier.x);
             player.movementMultiplier.y = Math.min(player.movementMultiplier.y, movementMultiplier.y);
@@ -102,10 +113,6 @@ public class BlockUtil {
     }
 
     public static float getVelocityMultiplier(BlockState state) {
-//        if (state.is(Blocks.SOUL_SAND) || state.is(Blocks.HONEY_BLOCK)) {
-//            return 0.4F;
-//        }
-
         return 1F;
     }
 
@@ -120,7 +127,7 @@ public class BlockUtil {
     public static float getBlockSlipperiness(BlockState state) {
         if (state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.FROSTED_ICE)) {
             return 0.98F;
-        } else if (state.is(Blocks.SLIME_BLOCK)) {
+        } else if (state.is(Blocks.SLIME_BLOCK) || state.is(Blocks.HONEY_BLOCK)) {
             return 0.8F;
         } else if (state.is(Blocks.BLUE_ICE)) {
             return 0.989F;
