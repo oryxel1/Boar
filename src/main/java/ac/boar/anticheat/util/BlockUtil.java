@@ -102,9 +102,9 @@ public class BlockUtil {
     }
 
     public static float getVelocityMultiplier(BlockState state) {
-        if (state.is(Blocks.SOUL_SAND) || state.is(Blocks.HONEY_BLOCK)) {
-            return 0.4F;
-        }
+//        if (state.is(Blocks.SOUL_SAND) || state.is(Blocks.HONEY_BLOCK)) {
+//            return 0.4F;
+//        }
 
         return 1F;
     }

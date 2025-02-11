@@ -17,7 +17,5 @@ public final class TimerA extends PacketCheck {
         if (!(event.getPacket() instanceof PlayerAuthInputPacket)) {
             return;
         }
-
-        player.sendTransaction(true);
     }
 }
