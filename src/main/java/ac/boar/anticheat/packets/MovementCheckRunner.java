@@ -16,6 +16,7 @@ import ac.boar.util.MathUtil;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.cloudburstmc.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Map;
@@ -24,6 +25,16 @@ public class MovementCheckRunner implements CloudburstPacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
+
+        if (event.getPacket() instanceof SetLocalPlayerAsInitializedPacket packet) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId || player.hasSpawnedIn) {
+                return;
+            }
+
+            player.hasSpawnedIn = true;
+            player.sinceSpawnIn = 0;
+        }
+
         if (!(event.getPacket() instanceof PlayerAuthInputPacket packet)) {
             return;
         }
@@ -70,9 +81,19 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         player.sinceTeleport++;
+        player.sinceSpawnIn++;
         if (player.sinceTeleport == 1 && player.teleportUtil.prevRewindTeleport != null) {
             final RewindData data = player.teleportUtil.prevRewindTeleport;
             player.teleportUtil.rewind(player.tick - 1, data.before(), data.after());
+            return;
+        }
+
+        if (!player.hasSpawnedIn) {
+            final double offset = player.actualVelocity.distanceTo(Vec3f.ZERO);
+            if (offset > 1.0E-7) {
+                player.teleportUtil.setbackTo(null, player.teleportUtil.lastKnowValid);
+            }
+            player.postPredictionVelocities.clear();
             return;
         }
 

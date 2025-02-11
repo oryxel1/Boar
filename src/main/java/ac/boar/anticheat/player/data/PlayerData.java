@@ -40,6 +40,8 @@ public class PlayerData {
     private Set<PlayerAuthInputData> inputData = new HashSet<>();
 
     public long tick = Long.MIN_VALUE;
+    public boolean hasSpawnedIn = false;
+    public long sinceSpawnIn;
 
     // Position, rotation, other.
     public float prevX, x, prevY, y, prevZ, z;

@@ -17,7 +17,7 @@ public class VelocityA extends Check {
     }
 
     public boolean check() {
-        if (player.closetVector.getType() == VectorType.VELOCITY) {
+        if (player.closetVector.getType() == VectorType.VELOCITY || player.sinceSpawnIn < 5) {
             return false;
         }
 
