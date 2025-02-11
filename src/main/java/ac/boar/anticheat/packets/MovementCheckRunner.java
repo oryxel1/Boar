@@ -150,13 +150,13 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.cameraOrientation = packet.getCameraOrientation();
     }
 
-    // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90
-    // Geyser check for our vertical collision for calculation for ground, do this to prevent possible no-fall bypass.
     private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         if (player.wasFlying || player.flying) {
             return;
         }
 
+        // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90
+        // Geyser check for our vertical collision for calculation for ground, do this to prevent possible no-fall bypass.
         packet.getInputData().remove(PlayerAuthInputData.HORIZONTAL_COLLISION);
         packet.getInputData().remove(PlayerAuthInputData.VERTICAL_COLLISION);
 
@@ -172,6 +172,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
         // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
         packet.setDelta(player.prevEotVelocity.toVector3f());
+
+        if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
+            packet.getInputData().remove(player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
+        }
     }
 
     public static void processInputData(final BoarPlayer player) {
