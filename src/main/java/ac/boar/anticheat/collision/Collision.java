@@ -156,23 +156,6 @@ public class Collision {
         return collision;
     }
 
-    public static Optional<Vector3i> findSupportingBlockPos(final PlayerData player, Box box) {
-        Vector3i lv = null;
-        double d = Double.MAX_VALUE;
-        final CuboidBlockIterator lv2 = CuboidBlockIterator.iterator(box);
-
-        while (lv2.step()) {
-            final Vector3i lv3 = Vector3i.from(lv2.getX(), lv2.getY(), lv2.getZ());
-            double e = lv3.distanceSquared(player.x, player.y, player.z);
-            if (e < d || e == d && (lv == null || lv.compareTo(lv3) < 0)) {
-                lv = lv3.clone();
-                d = e;
-            }
-        }
-
-        return Optional.ofNullable(lv);
-    }
-
     private static void addCollisionBoxesToList(final BoarPlayer player, final Mutable pos, final Box boundingBox, final List<Box> list, boolean compensated) {
         GeyserSession session = player.getSession();
         BlockState state;

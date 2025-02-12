@@ -133,28 +133,6 @@ public class PlayerData {
         }
     }
 
-    public void updateSupportingBlockPos(boolean onGround, Vec3f movement) {
-        if (onGround) {
-            Box lv = this.boundingBox;
-            Box lv2 = new Box(lv.minX, lv.minY - 1.0E-6F, lv.minZ, lv.maxX, lv.minY, lv.maxZ);
-            Optional<Vector3i> optional = Collision.findSupportingBlockPos(this, lv2);
-            if (optional.isPresent() || this.forceUpdateSupportingBlockPos) {
-                this.supportingBlockPos = optional;
-            } else if (movement != null) {
-                Box lv3 = lv2.offset(-movement.x, 0, -movement.z);
-                optional = Collision.findSupportingBlockPos(this, lv3);
-                this.supportingBlockPos = optional;
-            }
-
-            this.forceUpdateSupportingBlockPos = optional.isEmpty();
-        } else {
-            this.forceUpdateSupportingBlockPos = false;
-            if (this.supportingBlockPos.isPresent()) {
-                this.supportingBlockPos = Optional.empty();
-            }
-        }
-    }
-
     public boolean isInLava() {
         return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) > 0.0;
     }
