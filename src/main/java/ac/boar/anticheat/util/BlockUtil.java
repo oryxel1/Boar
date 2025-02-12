@@ -11,6 +11,8 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.BoundingBox;
+import org.geysermc.geyser.session.cache.TagCache;
+import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.translator.collision.BlockCollision;
 import org.geysermc.geyser.util.BlockUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
@@ -25,6 +27,22 @@ public class BlockUtil {
             case LAVA -> BlockStateValues.getLavaHeight(blockId);
             case EMPTY -> -1;
         };
+    }
+
+    public static void onEntityLand(final boolean living, final BoarPlayer player, final Vec3f lv, final BlockState state) {
+        final TagCache cache = player.getSession().getTagCache();
+
+        if (cache.is(BlockTag.BEDS, state.block()) && lv.y < 0.0 && !player.sneaking) {
+            final float d = living ? 1.0F : 0.8F;
+            lv.y = -lv.y * 0.75F * d;
+            if (lv.y > 0.75) {
+                lv.y = 0.75F;
+            }
+
+            return;
+        }
+
+        lv.y = 0;
     }
 
     public static void onSteppedOn(final BoarPlayer player, final BlockState state, final Vector3i vector3i) {

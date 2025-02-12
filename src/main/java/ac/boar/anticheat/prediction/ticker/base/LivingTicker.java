@@ -12,8 +12,11 @@ import ac.boar.anticheat.prediction.engine.impl.PredictionEngineElytra;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineLava;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineNormal;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineWater;
+import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Vec3f;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
+import org.geysermc.geyser.level.block.type.BlockState;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -115,7 +118,7 @@ public class LivingTicker extends EntityTicker {
         player.wasGround = player.onGround;
         player.onGround = player.verticalCollision && beforeCollision.y < 0;
 
-        Vec3f eotVelocity = afterCollision.clone();
+        Vec3f eotVelocity = beforeCollision.clone();
         if (isThereMovementMultiplier) {
             player.movementMultiplier = eotVelocity = Vec3f.ZERO;
         }
@@ -124,10 +127,10 @@ public class LivingTicker extends EntityTicker {
             eotVelocity = new Vec3f(bl ? 0 : eotVelocity.x, eotVelocity.y, bl2 ? 0 : eotVelocity.z);
         }
 
-//        Block lv7 = lv5.getBlock();
         if (player.verticalCollision) {
-            eotVelocity.y = 0;
-            // lv7.onEntityLand(this.getWorld(), this);
+            final Vector3i lv = player.getPosWithYOffset(false, 0.2F);
+            final BlockState lv2 = player.compensatedWorld.getBlockState(lv);
+            BlockUtil.onEntityLand(true, player, eotVelocity, lv2);
         }
 
         float f = player.getVelocityMultiplier();
