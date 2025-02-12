@@ -174,7 +174,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         packet.setDelta(player.prevEotVelocity.toVector3f());
 
         if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
-            packet.getInputData().remove(player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
+            packet.getInputData().remove(!player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
         }
     }
 
