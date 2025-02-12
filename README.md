@@ -4,6 +4,9 @@ Boar is an extra plugin for [GeyserMC](https://github.com/GeyserMC/Geyser) proje
 achieve something similar to [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) on bedrock (but stricter).
 This project is still in development, and is more like a PoC than an anti-cheat.
 
+- Boar prediction engine also built to (or at-least try to) be compatible with other project (PocketMine, NukkitX) and
+can be port back and forth, but I'm not going to do that here, only for GeyserMC as an **PoC**.
+
 ### ⚠️ WARNING: THIS ONLY FOR BEDROCK PLAYER NOT JAVA PLAYER! YOU WILL NEED TO PAIR THIS WITH ANOTHER JAVA ANTICHEAT!
 A dedicated (proof of concept) anti cheat for GeyserMC project.
 - Warning: No guarantee about performance, lag compatibility, or if I will ever finish this.
@@ -11,15 +14,16 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 ## Features
 - A packet managing system for GeyserMC
 - An uncompleted prediction engine that only works on normal/elytra movement.
-- 1:1 recreation of player world server-sided that accounted for lag.
+- 1:1 recreation of player world server-sided that accounted for lag (no placing/breaking support yet).
+- A smooth rewind setback system that is the same as server-auth-with-rewind
 
 ## Problems
-- Sprinting (or other status) on Bedrock is absolutely broken (can send both START and STOP 
-at the same time or send the same status 2 tick in a row)
+- A lot of movement differences is not implemented.
+- Accuracy in edge cases is about 1.0E-3 instead of 1.0E-6 (Elytra, Collision, ...)
 - Sprinting movement speed is not synced "perfectly" with Data and Attribute packet.
-- Floating point errors break collision, causing false positive, or loss precision. (Partially fixed)
-- Player falses after teleport, I can't figure out why movement act weirdly after teleport yet.
-- Step motion is different on Bedrock.
+- ~~Floating point errors break collision, causing false positive, or loss precision. (Partially fixed)~~
+- ~~Player falses after teleport, I can't figure out why movement act weirdly after teleport yet. (Partially fixed)~~
+- Step motion is different on Bedrock, and collision in general.
 - A lot of stuff is still unimplemented.
 
 ### Differences from other Geyser anti-cheat.
