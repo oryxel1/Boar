@@ -88,7 +88,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
-        if (!player.hasSpawnedIn) {
+        if (!player.hasSpawnedIn || player.sinceSpawnIn < 2) {
             final double offset = player.actualVelocity.distanceTo(Vec3f.ZERO);
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(null, player.teleportUtil.lastKnowValid);

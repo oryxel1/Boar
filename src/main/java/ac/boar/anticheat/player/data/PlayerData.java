@@ -1,6 +1,7 @@
 package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.GlobalSetting;
+import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
@@ -84,13 +85,14 @@ public class PlayerData {
     public Vec3f prevEotVelocity = Vec3f.ZERO, eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO, beforeCollisionVelocity = Vec3f.ZERO;
     public Vector closetVector = new Vector(Vec3f.ZERO, VectorType.NORMAL);
     public boolean onGround, wasGround;
-    public Vector3i supportingBlockPos = null;
+    public Optional<Vector3i> supportingBlockPos = Optional.empty();
+    public boolean forceUpdateSupportingBlockPos;
     public Vec3f movementMultiplier = Vec3f.ZERO;
 
     public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
     public final Map<Long, PlayerAuthInputPacket> savedInputMap = new ConcurrentSkipListMap<>();
 
-    public Optional<Vector3i> climbingPos;
+    public Optional<Vector3i> climbingPos = Optional.empty();
 
     // only for debugging
     public PredictionEngine engine;
@@ -128,6 +130,28 @@ public class PlayerData {
         lv.removeModifier(SPRINTING_SPEED_BOOST.getId());
         if (sprinting) {
             lv.addTemporaryModifier(SPRINTING_SPEED_BOOST);
+        }
+    }
+
+    public void updateSupportingBlockPos(boolean onGround, Vec3f movement) {
+        if (onGround) {
+            Box lv = this.boundingBox;
+            Box lv2 = new Box(lv.minX, lv.minY - 1.0E-6F, lv.minZ, lv.maxX, lv.minY, lv.maxZ);
+            Optional<Vector3i> optional = Collision.findSupportingBlockPos(this, lv2);
+            if (optional.isPresent() || this.forceUpdateSupportingBlockPos) {
+                this.supportingBlockPos = optional;
+            } else if (movement != null) {
+                Box lv3 = lv2.offset(-movement.x, 0, -movement.z);
+                optional = Collision.findSupportingBlockPos(this, lv3);
+                this.supportingBlockPos = optional;
+            }
+
+            this.forceUpdateSupportingBlockPos = optional.isEmpty();
+        } else {
+            this.forceUpdateSupportingBlockPos = false;
+            if (this.supportingBlockPos.isPresent()) {
+                this.supportingBlockPos = Optional.empty();
+            }
         }
     }
 

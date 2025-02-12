@@ -142,7 +142,7 @@ public class BlockUtil {
         return 1F;
     }
 
-    public static float getBlockSlipperiness(BlockState state) {
+    public static float getBlockSlipperiness(final BlockState state) {
         if (state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.FROSTED_ICE)) {
             return 0.98F;
         } else if (state.is(Blocks.SLIME_BLOCK) || state.is(Blocks.HONEY_BLOCK)) {

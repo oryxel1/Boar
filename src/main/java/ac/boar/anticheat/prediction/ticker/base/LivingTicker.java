@@ -113,10 +113,12 @@ public class LivingTicker extends EntityTicker {
         boolean bl = beforeCollision.x != afterCollision.x;
         boolean bl2 = beforeCollision.z != afterCollision.z;
         player.horizontalCollision = bl || bl2;
-
-        player.verticalCollision = beforeCollision.y != afterCollision.y;
-        player.wasGround = player.onGround;
-        player.onGround = player.verticalCollision && beforeCollision.y < 0;
+        if (Math.abs(beforeCollision.y) > 0.0) {
+            player.verticalCollision = beforeCollision.y != afterCollision.y;
+            player.wasGround = player.onGround;
+            player.onGround = player.verticalCollision && beforeCollision.y < 0;
+            player.updateSupportingBlockPos(player.onGround, beforeCollision);
+        }
 
         Vec3f eotVelocity = beforeCollision.clone();
         if (isThereMovementMultiplier) {

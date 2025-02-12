@@ -154,16 +154,16 @@ public final class BoarPlayer extends PlayerData {
         float y = old ? this.prevY : this.y;
         float z = old ? this.prevZ : this.z;
 
-        if (this.supportingBlockPos != null) {
+        if (this.supportingBlockPos.isPresent()) {
             if (!(offset > 1.0E-5F)) {
-                return this.supportingBlockPos;
+                return this.supportingBlockPos.get();
             } else {
+                final Vector3i vector3i = this.supportingBlockPos.get();
                 final TagCache cache = this.session.getTagCache();
-                final BlockState lv2 = this.compensatedWorld.getBlockState(this.supportingBlockPos);
+                final BlockState lv2 = this.compensatedWorld.getBlockState(vector3i);
                 return offset > 0.5 || !cache.is(BlockTag.FENCES, lv2.block())
                         && !cache.is(BlockTag.WALLS, lv2.block()) && !cache.is(BlockTag.FENCE_GATES, lv2.block())
-                        ? Vector3i.from(this.supportingBlockPos.getX(), GenericMath.floor(y - offset), this.supportingBlockPos.getZ())
-                        : this.supportingBlockPos;
+                        ? Vector3i.from(vector3i.getX(), GenericMath.floor(y - offset), vector3i.getZ()) : vector3i;
             }
         } else {
             int i = GenericMath.floor(x);

@@ -8,7 +8,6 @@ import ac.boar.anticheat.util.math.Vec3f;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
-import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 public class PredictionEngineNormal extends PredictionEngine {
