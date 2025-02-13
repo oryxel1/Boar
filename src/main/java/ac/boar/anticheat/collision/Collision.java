@@ -160,15 +160,15 @@ public class Collision {
         GeyserSession session = player.getSession();
         BlockState state;
         if (compensated) {
-            state = player.compensatedWorld.getBlockState(pos.x, pos.y, pos.z);
+            state = player.compensatedWorld.getBlockState(pos);
         } else {
-            state = session.getGeyser().getWorldManager().blockAt(session, pos.x, pos.y, pos.z);
+            state = session.getGeyser().getWorldManager().blockAt(session, pos.getX(), pos.getY(), pos.getZ());
         }
 
         final List<Box> boxes = BedrockCollision.getCollisionBox(player, pos, state);
         if (boxes != null) {
             for (Box box : boxes) {
-                box = box.offset(pos.x, pos.y, pos.z);
+                box = box.offset(pos.getX(), pos.getY(), pos.getZ());
                 if (box.intersects(boundingBox)) {
                     list.add(box);
                 }
@@ -182,7 +182,7 @@ public class Collision {
         }
 
         for (final BoundingBox geyserBB : collision.getBoundingBoxes()) {
-            final Box box = new Box(geyserBB).offset(pos.x, pos.y, pos.z);
+            final Box box = new Box(geyserBB).offset(pos.getX(), pos.getY(), pos.getZ());
 
             if (box.intersects(boundingBox)) {
                 list.add(box);

@@ -4,6 +4,7 @@ import ac.boar.anticheat.compensated.cache.BoarChunk;
 import ac.boar.anticheat.compensated.cache.BoarEntity;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.math.Mutable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -131,6 +132,10 @@ public final class CompensatedWorld {
         return true;
     }
 
+    public FluidState getFluidState(final Mutable mutable) {
+        return this.getFluidState(mutable.getX(), mutable.getY(), mutable.getZ());
+    }
+
     public FluidState getFluidState(int x, int y, int z) {
         final int blockId = getBlockAt(x, y, z);
         float waterHeight = BlockUtil.getWorldFluidHeight(Fluid.WATER, blockId);
@@ -145,6 +150,10 @@ public final class CompensatedWorld {
         }
 
         return new FluidState(Fluid.LAVA, lavaHeight);
+    }
+
+    public BlockState getBlockState(final Mutable mutable) {
+        return this.getBlockState(mutable.getX(), mutable.getY(), mutable.getZ());
     }
 
     public BlockState getBlockState(Vector3i vector3i) {

@@ -8,7 +8,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 @Getter
 @Setter
 public final class Mutable {
-    public int x, y, z;
+    private int x, y, z;
 
     public Mutable(int x, int y, int z) {
         this.x = x;

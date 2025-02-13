@@ -46,7 +46,7 @@ public class EntityTicker {
 
         final float eyePosition = player.y + player.dimensions.eyeHeight();
         final Mutable mutable = new Mutable(player.x, eyePosition, player.z);
-        final FluidState lv4 = player.compensatedWorld.getFluidState(mutable.x, mutable.y, mutable.z);
+        final FluidState lv4 = player.compensatedWorld.getFluidState(mutable);
         float e = mutable.getY() + lv4.getHeight(player, mutable);
         if (e > eyePosition) {
             player.submergedFluidTag.add(lv4.fluid());
@@ -80,13 +80,13 @@ public class EntityTicker {
         final Mutable mutable = new Mutable();
         for (iterator.reset(); iterator.hasNext(); iterator.next()) {
             mutable.set(iterator.getX(), iterator.getY(), iterator.getZ());
-            final FluidState state = player.compensatedWorld.getFluidState(mutable.x, mutable.y, mutable.z);
+            final FluidState state = player.compensatedWorld.getFluidState(mutable);
 
             if (state.fluid() != tag) {
                 continue;
             }
 
-            float height = mutable.y + state.getHeight(player, mutable);
+            float height = mutable.getY() + state.getHeight(player, mutable);
             if (height < box.minY) {
                 continue;
             }
@@ -120,17 +120,15 @@ public class EntityTicker {
             BlockUtil.onSteppedOn(player, lv2, lv);
         }
 
-        final Vector3i vector3i = Vector3i.from(player.boundingBox.minX + 0.001D, player.boundingBox.minY + 0.001D, player.boundingBox.minZ + 0.001D);
-        final Vector3i vector31i = Vector3i.from(player.boundingBox.maxX - 0.001D, player.boundingBox.maxY - 0.001D, player.boundingBox.maxZ - 0.001D);
+        final Box box = player.boundingBox;
+        final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
+                GenericMath.floor(box.minX + 0.001), GenericMath.floor(box.minY + 0.001), GenericMath.floor(box.minZ + 0.001),
+                GenericMath.floor(box.maxX - 0.001), GenericMath.floor(box.maxY - 0.001), GenericMath.floor(box.maxZ - 0.001));
 
-        final Mutable mutable = new Mutable(0, 0, 0);
-        for (int i = vector3i.getX(); i <= vector31i.getX(); ++i) {
-            for (int j = vector3i.getY(); j <= vector31i.getY(); ++j) {
-                for (int k = vector3i.getZ(); k <= vector31i.getZ(); ++k) {
-                    mutable.set(i, j, k);
-                    BlockUtil.onEntityCollision(player, player.compensatedWorld.getBlockState(mutable.x, mutable.y, mutable.z), mutable);
-                }
-            }
+        final Mutable mutable = new Mutable();
+        for (iterator.reset(); iterator.hasNext(); iterator.next()) {
+            mutable.set(iterator.getX(), iterator.getY(), iterator.getZ());
+            BlockUtil.onEntityCollision(player, player.compensatedWorld.getBlockState(mutable), mutable);
         }
     }
 }

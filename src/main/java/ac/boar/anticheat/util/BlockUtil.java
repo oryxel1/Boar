@@ -9,6 +9,8 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.BlockStateValues;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.property.Properties;
+import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.BoundingBox;
 import org.geysermc.geyser.session.cache.TagCache;
@@ -57,6 +59,25 @@ public class BlockUtil {
     }
 
     public static void onEntityCollision(final BoarPlayer player, BlockState state, Mutable pos) {
+        if (state.is(Blocks.BUBBLE_COLUMN)) {
+            boolean drag = state.getValue(Properties.DRAG);
+
+            final Vec3f lv = player.eotVelocity;
+            if (player.compensatedWorld.getBlockAt(pos.getX(), pos.getY() + 1, pos.getZ()) == Block.JAVA_AIR_ID) {
+                if (drag) {
+                    lv.y = Math.max(-0.9F, lv.y - 0.03F);
+                } else {
+                    lv.y = Math.min(1.8F, lv.y + 0.1F);
+                }
+            } else {
+                if (drag) {
+                    lv.y = Math.max(-0.3F, lv.y - 0.03F);
+                } else {
+                    lv.y = Math.min(0.7F, lv.y + 0.06F);
+                }
+            }
+        }
+
         Vec3f movementMultiplier = Vec3f.ZERO;
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
             movementMultiplier = new Vec3f(0.8F, 0.75F, 0.8F);

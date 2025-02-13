@@ -13,7 +13,7 @@ public record FluidState(Fluid fluid, float height) {
     }
 
     private boolean isFluidAboveEqual(BoarPlayer player, Mutable pos) {
-        return fluid == player.compensatedWorld.getFluidState(pos.x, pos.y + 1, pos.z).fluid();
+        return fluid == player.compensatedWorld.getFluidState(pos.getX(), pos.getY() + 1, pos.getZ()).fluid();
     }
 
     private boolean isEmptyOrThis(FluidState state) {
@@ -22,10 +22,10 @@ public record FluidState(Fluid fluid, float height) {
 
     public Vec3f getVelocity(final BoarPlayer player, final Mutable vector3i, final FluidState state) {
         Vec3f lv6 = new Vec3f(0, 0, 0);
-        final Mutable mutable = new Mutable(0, 0, 0);
+        final Mutable mutable = new Mutable();
         for (final Direction lv2 : Direction.HORIZONTAL) {
-            mutable.set(vector3i.x, vector3i.y, vector3i.z).add(lv2.getUnitVector());
-            FluidState lv3 = player.compensatedWorld.getFluidState(mutable.x, mutable.y, mutable.z);
+            mutable.set(vector3i.getX(), vector3i.getY(), vector3i.getZ()).add(lv2.getUnitVector());
+            FluidState lv3 = player.compensatedWorld.getFluidState(mutable);
             if (!this.isEmptyOrThis(lv3)) {
                 continue;
             }
@@ -33,8 +33,8 @@ public record FluidState(Fluid fluid, float height) {
             float f = lv3.height();
             float g = 0.0F;
             if (f == 0.0F) {
-                if (!BlockUtil.blocksMovement(player, mutable, fluid, player.compensatedWorld.getBlockState(mutable.x, mutable.y, mutable.z))) {
-                    FluidState lv5 = player.compensatedWorld.getFluidState(mutable.x, mutable.y - 1, mutable.z);
+                if (!BlockUtil.blocksMovement(player, mutable, fluid, player.compensatedWorld.getBlockState(mutable))) {
+                    FluidState lv5 = player.compensatedWorld.getFluidState(mutable.getX(), mutable.getY() - 1, mutable.getZ());
                     if (this.isEmptyOrThis(lv5) && lv5.height() > 0.0F) {
                         g = state.height() - (f - 0.8888889F);
                     }

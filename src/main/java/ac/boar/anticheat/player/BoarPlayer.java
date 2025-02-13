@@ -195,7 +195,7 @@ public final class BoarPlayer extends PlayerData {
             for (int p = k; p < l; p++) {
                 for (int q = m; q < n; q++) {
                     lv.set(o, p, q);
-                    FluidState lv2 = this.compensatedWorld.getFluidState(lv.x, lv.y, lv.z);
+                    FluidState lv2 = this.compensatedWorld.getFluidState(lv);
                     if (lv2.fluid() != Fluid.EMPTY) {
                         return true;
                     }
