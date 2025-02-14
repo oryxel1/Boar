@@ -3,6 +3,7 @@ package ac.boar.util;
 import ac.boar.anticheat.util.math.Vec3f;
 
 import org.cloudburstmc.math.TrigMath;
+import org.cloudburstmc.math.vector.Vector3i;
 
 public class MathUtil {
     public static float sign(final float value) {
@@ -15,6 +16,11 @@ public class MathUtil {
 
     public static float square(float v) {
         return v * v;
+    }
+
+    public static boolean isValid(final Vector3i vector3i) {
+        return Float.isFinite(vector3i.getX()) && Float.isFinite(vector3i.getY()) &&
+                Float.isFinite(vector3i.getZ());
     }
 
     public static Vec3f getRotationVector(float pitch, float yaw) {

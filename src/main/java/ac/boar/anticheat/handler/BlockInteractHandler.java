@@ -6,7 +6,7 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
 
-public class BlockInteractHandler {
+public final class BlockInteractHandler {
     public static void handleBlockClick(final BoarPlayer player, final Vector3i vector3i) {
         final BlockState state = player.compensatedWorld.getBlockState(vector3i);
         if (!state.is(Blocks.BARREL) && state.getValue(Properties.OPEN) != null) {

@@ -1,0 +1,147 @@
+package ac.boar.anticheat.handler;
+
+import ac.boar.anticheat.data.BreakingData;
+import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.util.MathUtil;
+import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.ItemUseTransaction;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.level.block.type.Block;
+import org.geysermc.geyser.level.block.type.BlockState;
+import org.geysermc.geyser.level.physics.Direction;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// TODO: support for multiple blocks.
+@RequiredArgsConstructor
+public final class BreakingBlockValidator {
+    private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK, PlayerActionType.CONTINUE_BREAK);
+
+    private final BoarPlayer player;
+
+    private final List<BreakingData> cachedBlockBreak = new ArrayList<>();
+
+    public void handle(final PlayerAuthInputPacket packet) {
+        final boolean isPerformingBlockAction = packet.getInputData().contains(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
+
+        if (isPerformingBlockAction) {
+            handleBlockAction(packet);
+        }
+
+        final boolean isPerformingInteraction = packet.getInputData().contains(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
+        final ItemUseTransaction transaction = packet.getItemUseTransaction();
+        if (transaction != null && transaction.getActionType() == 2 && isPerformingInteraction) {
+            final Vector3i position = transaction.getBlockPosition();
+            final int face = transaction.getBlockFace();
+            if (position == null || !MathUtil.isValid(position) || face < 0 || face >= Direction.VALUES.length) {
+                packet.setItemUseTransaction(null);
+                return;
+            }
+
+            final BreakingData data = findCacheUsingPosition(position);
+            if (data == null) {
+                packet.setItemUseTransaction(null);
+            } else {
+                if (data.getBreakingProcess() >= 1) {
+                    player.compensatedWorld.updateBlock(data.getPosition(), Block.JAVA_AIR_ID);
+                } else {
+                    packet.setItemUseTransaction(null);
+                    this.resyncBlock(position);
+
+                    final PlayerBlockActionData abort = new PlayerBlockActionData();
+                    abort.setAction(PlayerActionType.ABORT_BREAK);
+                    abort.setFace(0);
+                    abort.setBlockPosition(position);
+
+                    packet.getPlayerActions().add(abort);
+                    packet.getInputData().add(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
+                }
+
+                this.cachedBlockBreak.remove(data);
+            }
+        }
+
+        if (packet.getItemUseTransaction() == null && isPerformingInteraction) {
+            packet.getInputData().remove(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
+        }
+    }
+
+    private void handleBlockAction(final PlayerAuthInputPacket packet) {
+        final List<PlayerBlockActionData> valid = new ArrayList<>();
+
+        for (final PlayerBlockActionData action : packet.getPlayerActions()) {
+            if ((action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition()) && action.getAction()
+                    != PlayerActionType.START_BREAK)
+                    || (action.getFace() < 0 || action.getFace() >= Direction.VALUES.length) && action.getAction()
+                    != PlayerActionType.ABORT_BREAK||
+                    !allowedActions.contains(action.getAction())) {
+                continue;
+            }
+
+            final BreakingData data = findCacheUsingPosition(action.getBlockPosition());
+
+            if (data != null) {
+                final double distance = data.getPosition().distance(player.x, player.y, player.z);
+                if (distance > 12) {
+                    this.resyncBlock(data.getPosition());
+                    continue;
+                }
+            }
+
+            if (action.getAction() == PlayerActionType.START_BREAK) {
+                if (data != null) {
+                    this.cachedBlockBreak.remove(data);
+                }
+                this.cachedBlockBreak.add(new BreakingData(action.getAction(), action.getBlockPosition(), action.getFace()));
+
+                valid.add(action);
+            }
+
+            if (action.getAction() == PlayerActionType.CONTINUE_BREAK) {
+                if (data != null) {
+                    tickBreaking(data);
+                    data.setFace(action.getFace());
+                    data.setState(PlayerActionType.CONTINUE_BREAK);
+                    valid.add(action);
+                } else {
+                    this.resyncBlock(action.getBlockPosition());
+                }
+            }
+        }
+
+        packet.getPlayerActions().clear();
+        packet.getPlayerActions().addAll(valid);
+
+        if (packet.getPlayerActions().isEmpty()) {
+            packet.getInputData().remove(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
+        }
+    }
+
+    private void tickBreaking(final BreakingData data) {
+        // TODO: implement this
+        // also before implement this I will have to implement inventory compensation lol.
+        data.setBreakingProcess(1);
+    }
+
+    // TODO: resync item.
+    private void resyncBlock(final Vector3i vector3i) {
+        final BlockState state = player.getSession().getGeyser().getWorldManager().blockAt(player.getSession(), vector3i);
+        state.block().updateBlock(player.getSession(), state, vector3i);
+    }
+
+    private BreakingData findCacheUsingPosition(final Vector3i vector3i) {
+        for (final BreakingData data : this.cachedBlockBreak) {
+            if (vector3i.getX() == data.getPosition().getX() &&
+                vector3i.getY() == data.getPosition().getY() && vector3i.getZ() == data.getPosition().getZ()) {
+                return data;
+            }
+        }
+
+        return null;
+    }
+}

@@ -54,6 +54,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
+        player.breakingValidator.handle(packet);
+
         processInputMovePacket(player, packet);
 
         player.prevX = player.x;

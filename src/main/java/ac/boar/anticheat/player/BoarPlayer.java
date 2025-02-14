@@ -5,6 +5,7 @@ import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.StatusEffect;
+import ac.boar.anticheat.handler.BreakingBlockValidator;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
@@ -49,6 +50,9 @@ public final class BoarPlayer extends PlayerData {
 
     // Lag compensation
     public final CompensatedWorld compensatedWorld = new CompensatedWorld(this);
+
+    // Validation
+    public final BreakingBlockValidator breakingValidator = new BreakingBlockValidator(this);
 
     // Mappings
     public final Map<BlockDefinition, Integer> bedrockToJavaBlocks = new HashMap<>();
