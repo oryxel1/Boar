@@ -34,7 +34,7 @@ public final class BreakingBlockValidator {
             // Geyser refused to translate these actions, rather they fail Geyser validation check,
             // or we're the one cancelling auth input packet causing this.
             // Whatever the case is, we need to resync player world.
-            for (final PlayerBlockActionData action : player.breakingValidator.getValid()) {
+            for (final PlayerBlockActionData action : this.valid) {
                 if (action.getAction() == PlayerActionType.CONTINUE_BREAK) {
                     continue;
                 }
