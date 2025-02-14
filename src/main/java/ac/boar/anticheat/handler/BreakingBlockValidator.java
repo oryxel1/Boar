@@ -3,6 +3,7 @@ package ac.boar.anticheat.handler;
 import ac.boar.anticheat.data.BreakingData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.util.MathUtil;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
@@ -17,7 +18,6 @@ import org.geysermc.geyser.level.physics.Direction;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: support for multiple blocks.
 @RequiredArgsConstructor
 public final class BreakingBlockValidator {
     private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK, PlayerActionType.CONTINUE_BREAK);
@@ -26,7 +26,25 @@ public final class BreakingBlockValidator {
 
     private final List<BreakingData> cachedBlockBreak = new ArrayList<>();
 
+    @Getter
+    private final List<PlayerBlockActionData> valid = new ArrayList<>();
+
     public void handle(final PlayerAuthInputPacket packet) {
+        if (!this.valid.isEmpty()) {
+            // Geyser refused to translate these actions, rather they fail Geyser validation check,
+            // or we're the one cancelling auth input packet causing this.
+            // Whatever the case is, we need to resync player world.
+            for (final PlayerBlockActionData action : player.breakingValidator.getValid()) {
+                if (action.getAction() == PlayerActionType.CONTINUE_BREAK) {
+                    continue;
+                }
+
+                this.resyncBlock(action.getBlockPosition());
+            }
+
+            this.valid.clear();
+        }
+
         final boolean isPerformingBlockAction = packet.getInputData().contains(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
 
         if (isPerformingBlockAction) {
@@ -39,7 +57,16 @@ public final class BreakingBlockValidator {
             final Vector3i position = transaction.getBlockPosition();
             final int face = transaction.getBlockFace();
             if (position == null || !MathUtil.isValid(position) || face < 0 || face >= Direction.VALUES.length) {
+                packet.getInputData().remove(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
                 packet.setItemUseTransaction(null);
+                return;
+            }
+
+            final double distance = position.distance(player.x, player.y, player.z);
+            if (distance > 12) {
+                this.resyncBlock(position);
+                packet.setItemUseTransaction(null);
+                packet.getInputData().remove(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
                 return;
             }
 
@@ -49,30 +76,30 @@ public final class BreakingBlockValidator {
             } else {
                 if (data.getBreakingProcess() >= 1) {
                     player.compensatedWorld.updateBlock(data.getPosition(), Block.JAVA_AIR_ID);
+
+                    // We have to manually save this so we can handle it later on lol.
+                    final PlayerBlockActionData action = new PlayerBlockActionData();
+                    action.setAction(PlayerActionType.STOP_BREAK);
+                    action.setBlockPosition(position);
+                    action.setFace(face);
+                    this.valid.add(action);
                 } else {
                     packet.setItemUseTransaction(null);
                     this.resyncBlock(position);
-
-                    final PlayerBlockActionData abort = new PlayerBlockActionData();
-                    abort.setAction(PlayerActionType.ABORT_BREAK);
-                    abort.setFace(0);
-                    abort.setBlockPosition(position);
-
-                    packet.getPlayerActions().add(abort);
-                    packet.getInputData().add(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
                 }
 
                 this.cachedBlockBreak.remove(data);
             }
         }
 
+        // So geyser won't attempt to process null transaction use.
         if (packet.getItemUseTransaction() == null && isPerformingInteraction) {
             packet.getInputData().remove(PlayerAuthInputData.PERFORM_ITEM_INTERACTION);
         }
     }
 
     private void handleBlockAction(final PlayerAuthInputPacket packet) {
-        final List<PlayerBlockActionData> valid = new ArrayList<>();
+        this.valid.clear();
 
         for (final PlayerBlockActionData action : packet.getPlayerActions()) {
             if ((action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition()) && action.getAction()
@@ -99,23 +126,21 @@ public final class BreakingBlockValidator {
                 }
                 this.cachedBlockBreak.add(new BreakingData(action.getAction(), action.getBlockPosition(), action.getFace()));
 
-                valid.add(action);
+                this.valid.add(action);
             }
 
-            if (action.getAction() == PlayerActionType.CONTINUE_BREAK) {
-                if (data != null) {
-                    tickBreaking(data);
-                    data.setFace(action.getFace());
-                    data.setState(PlayerActionType.CONTINUE_BREAK);
-                    valid.add(action);
-                } else {
-                    this.resyncBlock(action.getBlockPosition());
-                }
+            // In case of data == null, we can just ignore it, since we're going to cancel
+            // digging when player send stop digging anyway.
+            if (action.getAction() == PlayerActionType.CONTINUE_BREAK && data != null) {
+                tickBreaking(data);
+                data.setFace(action.getFace());
+                data.setState(PlayerActionType.CONTINUE_BREAK);
+                this.valid.add(action);
             }
         }
 
         packet.getPlayerActions().clear();
-        packet.getPlayerActions().addAll(valid);
+        packet.getPlayerActions().addAll(this.valid);
 
         if (packet.getPlayerActions().isEmpty()) {
             packet.getInputData().remove(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
@@ -136,8 +161,7 @@ public final class BreakingBlockValidator {
 
     private BreakingData findCacheUsingPosition(final Vector3i vector3i) {
         for (final BreakingData data : this.cachedBlockBreak) {
-            if (vector3i.getX() == data.getPosition().getX() &&
-                vector3i.getY() == data.getPosition().getY() && vector3i.getZ() == data.getPosition().getZ()) {
+            if (MathUtil.compare(vector3i, data.getPosition())) {
                 return data;
             }
         }

@@ -18,6 +18,10 @@ public class MathUtil {
         return v * v;
     }
 
+    public static boolean compare(final Vector3i vector3i, final Vector3i vector3i1) {
+        return vector3i != null && vector3i1 != null && vector3i.getX() == vector3i1.getX() && vector3i.getY() == vector3i1.getY() && vector3i.getZ() == vector3i1.getZ();
+    }
+
     public static boolean isValid(final Vector3i vector3i) {
         return Float.isFinite(vector3i.getX()) && Float.isFinite(vector3i.getY()) &&
                 Float.isFinite(vector3i.getZ());

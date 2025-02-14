@@ -14,7 +14,7 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 ## Features
 - A packet managing system for GeyserMC
 - An uncompleted prediction engine that only works on normal/elytra movement.
-- 1:1 recreation of player world server-sided that accounted for lag (no placing/breaking support yet).
+- 1:1 recreation of player world server-sided that accounted for lag (no placing support yet).
 - A smooth rewind setback system that is the same as server-auth-with-rewind
 
 ## Problems
