@@ -82,8 +82,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 currentTick++;
                 if (player.savedInputMap.containsKey(currentTick)) {
                     final PlayerAuthInputPacket old = player.savedInputMap.get(currentTick);
-
-                    GeyserUtil.syncInputData(player, true, old);
                     MovementCheckRunner.processInputMovePacket(player, old);
                 }
 

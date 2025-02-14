@@ -26,8 +26,6 @@ public class FinalPacketListener implements CloudburstPacketListener {
             }
 
             if (event.isCancelled()) {
-                // We cancelled this, but we still need to let geyser know so we can sync sprinting etc....
-                GeyserUtil.syncInputData(player, true, packet);
                 return;
             }
 
