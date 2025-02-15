@@ -1,4 +1,4 @@
-package ac.boar.anticheat.handler;
+package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.data.BreakingData;
 import ac.boar.anticheat.player.BoarPlayer;

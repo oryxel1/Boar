@@ -5,11 +5,12 @@ import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.StatusEffect;
-import ac.boar.anticheat.handler.BreakingBlockValidator;
+import ac.boar.anticheat.validator.BreakingBlockValidator;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
+import ac.boar.anticheat.validator.ItemTransactionValidator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -53,6 +54,7 @@ public final class BoarPlayer extends PlayerData {
 
     // Validation
     public final BreakingBlockValidator breakingValidator = new BreakingBlockValidator(this);
+    public final ItemTransactionValidator transactionValidator = new ItemTransactionValidator(this);
 
     // Mappings
     public final Map<BlockDefinition, Integer> bedrockToJavaBlocks = new HashMap<>();

@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.world;
 
-import ac.boar.anticheat.handler.BlockInteractHandler;
+import ac.boar.anticheat.validator.ItemTransactionValidator;
 import ac.boar.anticheat.player.BoarPlayer;
 
 import ac.boar.protocol.event.*;
@@ -86,18 +86,6 @@ public class ChunkSimulationPacket implements CloudburstPacketListener, MCPLPack
 
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.compensatedWorld.updateBlock(blockPosition, javaId));
-        }
-    }
-
-    @Override
-    public void onPacketReceived(final CloudburstPacketEvent event) {
-        final BoarPlayer player = event.getPlayer();
-        if (!(event.getPacket() instanceof InventoryTransactionPacket packet)) {
-            return;
-        }
-
-        if (packet.getTransactionType() == InventoryTransactionType.ITEM_USE && packet.getActionType() == 0) {
-            BlockInteractHandler.handleBlockClick(player, packet.getBlockPosition());
         }
     }
 }
