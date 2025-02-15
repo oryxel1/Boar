@@ -6,6 +6,7 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3f;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.geysermc.geyser.level.block.BlockStateValues;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
@@ -23,6 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlockUtil {
+    public static boolean determineCanBreak(final BoarPlayer player, final BlockState state) {
+        if (state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR) || state.is(Blocks.LAVA) || state.is(Blocks.WATER)) {
+            return false;
+        }
+
+        float destroyTime = state.block().destroyTime();
+        return destroyTime != -1 || player.gameType == GameType.CREATIVE;
+    }
+
     public static float getWorldFluidHeight(Fluid fluidType, int blockId) {
         return (float) switch (fluidType) {
             case WATER -> BlockStateValues.getWaterHeight(blockId);

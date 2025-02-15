@@ -43,6 +43,9 @@ public final class CloudburstSendListener extends UpstreamSession {
 
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
             start.setRewindHistorySize(GlobalSetting.REWIND_HISTORY_SIZE_TICKS);
+
+            player.sendTransaction();
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.gameType = start.getPlayerGameType());
         }
 
         super.sendPacket(event.getPacket());

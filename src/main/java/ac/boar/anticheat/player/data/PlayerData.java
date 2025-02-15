@@ -1,7 +1,6 @@
 package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.GlobalSetting;
-import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
@@ -14,6 +13,7 @@ import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
+import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
@@ -43,6 +43,8 @@ public class PlayerData {
     public long tick = Long.MIN_VALUE;
     public boolean hasSpawnedIn = false;
     public long sinceSpawnIn;
+
+    public GameType gameType = GameType.DEFAULT;
 
     // Position, rotation, other.
     public float prevX, x, prevY, y, prevZ, z;

@@ -8,9 +8,11 @@ import ac.boar.protocol.listener.MCPLPacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
+import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityDataPacket;
+import org.cloudburstmc.protocol.bedrock.packet.SetPlayerGameTypePacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateAbilitiesPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateAttributesPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
@@ -21,6 +23,12 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
+
+        if (event.getPacket() instanceof SetPlayerGameTypePacket packet) {
+            player.sendTransaction();
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.gameType = GameType.from(packet.getGamemode()));
+        }
+
         if (event.getPacket() instanceof UpdateAbilitiesPacket packet) {
             if (packet.getUniqueEntityId() != player.runtimeEntityId) {
                 return;
