@@ -11,6 +11,7 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.ItemUseTransaction;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
@@ -70,9 +71,14 @@ public final class BreakingBlockValidator {
                 return;
             }
 
+            final BlockState state = player.compensatedWorld.getBlockState(position);
+            boolean canBreak = state.block().destroyTime() != -1 && !state.is(Blocks.AIR) && !state.is(Blocks.CAVE_AIR) && !state.is(Blocks.VOID_AIR)
+                    && !state.is(Blocks.LAVA) && !state.is(Blocks.WATER);
+
             final BreakingData data = findCacheUsingPosition(position);
-            if (data == null) {
+            if (data == null || !canBreak) {
                 packet.setItemUseTransaction(null);
+                this.resyncBlock(position);
             } else {
                 if (data.getBreakingProcess() >= 1) {
                     player.compensatedWorld.updateBlock(data.getPosition(), Block.JAVA_AIR_ID);
