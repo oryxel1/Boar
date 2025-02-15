@@ -30,6 +30,11 @@ public class VelocityA extends Check {
             }
             iterator.remove();
 
+            // Player movement tends to act weirdly post-teleport, or at-least I haven't figured out why yet lol.
+            if (player.sinceTeleport < 8) {
+                continue;
+            }
+
             final PredictionData data = player.postPredictionVelocities.get(entry.getKey());
             if (data == null) {
                 continue;

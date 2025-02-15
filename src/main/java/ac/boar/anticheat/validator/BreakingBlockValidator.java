@@ -15,6 +15,7 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
+import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransactionTranslator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,10 +157,8 @@ public final class BreakingBlockValidator {
         data.setBreakingProcess(1);
     }
 
-    // TODO: resync item.
     private void resyncBlock(final Vector3i vector3i) {
-        final BlockState state = player.getSession().getGeyser().getWorldManager().blockAt(player.getSession(), vector3i);
-        state.block().updateBlock(player.getSession(), state, vector3i);
+        BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), vector3i);
     }
 
     private BreakingData findCacheUsingPosition(final Vector3i vector3i) {
