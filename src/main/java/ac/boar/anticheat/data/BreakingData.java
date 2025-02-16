@@ -2,9 +2,11 @@ package ac.boar.anticheat.data;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 
+@ToString
 @Getter
 @Setter
 public class BreakingData {

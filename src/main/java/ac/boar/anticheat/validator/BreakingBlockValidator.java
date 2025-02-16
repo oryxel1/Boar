@@ -22,7 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public final class BreakingBlockValidator {
-    private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK, PlayerActionType.CONTINUE_BREAK);
+    private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK, PlayerActionType.CONTINUE_BREAK, PlayerActionType.ABORT_BREAK);
 
     private final BoarPlayer player;
 
@@ -109,8 +109,8 @@ public final class BreakingBlockValidator {
             if ((action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition()) && action.getAction()
                     != PlayerActionType.START_BREAK)
                     || (action.getFace() < 0 || action.getFace() >= Direction.VALUES.length) && action.getAction()
-                    != PlayerActionType.ABORT_BREAK||
-                    !allowedActions.contains(action.getAction())) {
+                    != PlayerActionType.ABORT_BREAK
+                    || !allowedActions.contains(action.getAction())) {
                 continue;
             }
 
@@ -139,6 +139,11 @@ public final class BreakingBlockValidator {
                 tickBreaking(data);
                 data.setFace(action.getFace());
                 data.setState(PlayerActionType.CONTINUE_BREAK);
+                this.valid.add(action);
+            }
+
+            if (action.getAction() == PlayerActionType.ABORT_BREAK & data != null) {
+                this.cachedBlockBreak.remove(data);
                 this.valid.add(action);
             }
         }
