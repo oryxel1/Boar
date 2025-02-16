@@ -18,6 +18,7 @@ public class PlayerVelocityPacket implements CloudburstPacketListener {
                 return;
             }
 
+            player.sendTransaction();
             player.queuedVelocities.put(player.lastSentId + 1, new VelocityData(player.lastSentId + 1, player.tick, new Vec3f(packet.getMotion())));
             event.getPostTasks().add(player::sendTransaction);
         }

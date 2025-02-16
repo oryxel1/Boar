@@ -29,9 +29,5 @@ public class DebugOffsetA extends OffsetHandlerCheck {
         }
 
 //        Bukkit.broadcastMessage(player.claimedEOT.toVector3f().toString());
-
-        if (offset > maxOffset && Boar.IS_IN_DEBUGGING) {
-            player.updateBoundingBox(player.x, player.y, player.z);
-        }
     }
 }

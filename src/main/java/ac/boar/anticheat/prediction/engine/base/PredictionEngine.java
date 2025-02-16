@@ -57,6 +57,10 @@ public abstract class PredictionEngine {
 
     private void addVelocityToPossibilities(final List<Vector> vectors) {
         for (final Map.Entry<Long, VelocityData> entry : player.queuedVelocities.entrySet()) {
+            if (entry.getKey() - 1 > player.lastReceivedId) {
+                continue;
+            }
+
             final Vector vector = new Vector(entry.getValue().velocity(), VectorType.VELOCITY, entry.getKey());
             vectors.add(vector);
         }
