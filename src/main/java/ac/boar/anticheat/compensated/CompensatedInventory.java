@@ -5,6 +5,10 @@ import ac.boar.anticheat.player.BoarPlayer;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
+import org.geysermc.geyser.inventory.GeyserItemStack;
+import org.geysermc.geyser.translator.item.ItemTranslator;
+import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
 @RequiredArgsConstructor
 public class CompensatedInventory {
@@ -18,6 +22,22 @@ public class CompensatedInventory {
     public ContainerCache hudContainer = new ContainerCache((byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
 
     public ContainerCache openContainer = null;
+
+    public ItemStack translate(ItemData data) {
+        return ItemTranslator.translateToJava(player.getSession(), data);
+    }
+
+    public ItemData getHeldItemData() {
+        if (this.heldItemSlot >= inventoryContainer.getContents().size()) {
+            return ItemData.AIR;
+        }
+
+        return inventoryContainer.getContents().get(heldItemSlot);
+    }
+
+    public GeyserItemStack getHeldItem() {
+        return GeyserItemStack.from(translate(getHeldItemData()));
+    }
 
     public ContainerCache getContainer(byte id) {
         if (id == inventoryContainer.getId()) {

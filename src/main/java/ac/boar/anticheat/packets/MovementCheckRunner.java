@@ -3,6 +3,7 @@ package ac.boar.anticheat.packets;
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
+import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
@@ -18,6 +19,7 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.cloudburstmc.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
+import org.geysermc.geyser.item.Items;
 
 import java.util.Map;
 
@@ -189,8 +191,19 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
-                // TODO: Prevent player from spoofing elytra gliding.
-                case START_GLIDING -> player.gliding = true;
+                case START_GLIDING -> {
+                    final ContainerCache cache = player.compensatedInventory.armorContainer;
+                    if (cache.getContents().size() < 2) {
+                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
+                        return;
+                    }
+
+                    // Prevent player from spoofing elytra gliding.
+                    player.gliding = player.compensatedInventory.translate(cache.getContents().get(1)).getId() == Items.ELYTRA.javaId();
+                    if (!player.gliding) {
+                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
+                    }
+                }
                 case STOP_GLIDING -> player.gliding = false;
 
                 // Don't let player do backwards sprinting!
