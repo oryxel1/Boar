@@ -5,15 +5,22 @@ import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
+import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
-public class InventoryPacket implements CloudburstPacketListener {
+public class InventorySimulationPacket implements CloudburstPacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
         final CompensatedInventory inventory = player.compensatedInventory;
 
         if (event.getPacket() instanceof InventoryTransactionPacket packet) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                return;
+            }
+
             player.transactionValidator.handle(packet);
         }
 
@@ -28,6 +35,19 @@ public class InventoryPacket implements CloudburstPacketListener {
 
             inventory.openContainer = null;
         }
+
+        if (event.getPacket() instanceof MobEquipmentPacket packet) {
+            final int newSlot = packet.getHotbarSlot();
+            if (player.runtimeEntityId != packet.getRuntimeEntityId()) {
+                return;
+            }
+
+            if (newSlot < 0 || newSlot > 8 || packet.getContainerId() != ContainerId.INVENTORY || inventory.heldItemSlot == newSlot) {
+                return;
+            }
+
+            inventory.heldItemSlot = newSlot;
+        }
     }
 
     @Override
@@ -35,9 +55,44 @@ public class InventoryPacket implements CloudburstPacketListener {
         final BoarPlayer player = event.getPlayer();
         final CompensatedInventory inventory = player.compensatedInventory;
 
+        if (event.getPacket() instanceof InventorySlotPacket packet) {
+            player.sendTransaction(immediate);
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+                final ContainerCache container = inventory.getContainer((byte) packet.getContainerId());
+                if (container == null) {
+                    return;
+                }
+
+                if (packet.getSlot() < 0 || packet.getSlot() >= container.getContents().size()) {
+                    return;
+                }
+
+                container.getContents().set(packet.getSlot(), packet.getItem());
+            });
+        }
+
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> inventory.openContainer = new ContainerCache(packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
+        }
+
+        if (event.getPacket() instanceof UpdateEquipPacket packet) {
+            player.sendTransaction(immediate);
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> { try {
+                inventory.openContainer = new ContainerCache((byte) packet.getWindowId(),
+                        ContainerType.from(packet.getWindowType()), Vector3i.ZERO, packet.getUniqueEntityId());
+            } catch (Exception ignored) {}});
+        }
+
+        if (event.getPacket() instanceof UpdateTradePacket packet) {
+            if (packet.getPlayerUniqueEntityId() != player.runtimeEntityId) {
+                return;
+            }
+
+            player.sendTransaction(immediate);
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> { try {
+                inventory.openContainer = new ContainerCache((byte) packet.getContainerId(), packet.getContainerType(), Vector3i.ZERO, packet.getTraderUniqueEntityId());
+            } catch (Exception ignored) {}});
         }
 
         if (event.getPacket() instanceof InventoryContentPacket packet) {

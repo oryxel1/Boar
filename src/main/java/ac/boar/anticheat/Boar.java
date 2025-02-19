@@ -34,7 +34,7 @@ public class Boar {
         PacketEvents.getApi().getCloudburst().register(new PlayerEffectPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerTeleportPacket());
         PacketEvents.getApi().getCloudburst().register(new PlayerVelocityPacket());
-        PacketEvents.getApi().getCloudburst().register(new InventoryPacket());
+        PacketEvents.getApi().getCloudburst().register(new InventorySimulationPacket());
         PacketEvents.getApi().getCloudburst().register(new MovementCheckRunner());
         PacketEvents.getApi().getCloudburst().register(new PacketCheckRunner());
         PacketEvents.getApi().getCloudburst().register(new FinalPacketListener());
