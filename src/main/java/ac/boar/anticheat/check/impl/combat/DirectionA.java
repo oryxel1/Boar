@@ -2,7 +2,7 @@ package ac.boar.anticheat.check.impl.combat;
 
 import ac.boar.anticheat.check.api.CheckInfo;
 import ac.boar.anticheat.check.api.impl.PacketCheck;
-import ac.boar.anticheat.compensated.cache.BoarEntity;
+import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3f;
@@ -33,7 +33,7 @@ public class DirectionA extends PacketCheck {
             return;
         }
 
-        final BoarEntity entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+        final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
         // Some simple validation.
         final boolean tooFarOrInvalid = entity == null || entity.getTransactionId() > player.lastReceivedId ||
                 entity.getServerPosition().distance(player.x, player.y, player.z) > 6.0 || entity.getPosition().distance(player.x, player.y, player.z) > 6.0;

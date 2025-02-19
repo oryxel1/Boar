@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.world;
 
-import ac.boar.anticheat.compensated.cache.BoarEntity;
+import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3f;
 import ac.boar.protocol.event.CloudburstPacketEvent;
@@ -17,7 +17,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof AddEntityPacket packet) {
-            final BoarEntity entity = player.compensatedWorld.addToCache(packet.getRuntimeEntityId(), packet.getUniqueEntityId());
+            final EntityCache entity = player.compensatedWorld.addToCache(packet.getRuntimeEntityId(), packet.getUniqueEntityId());
             if (entity == null) {
                 return;
             }
@@ -28,7 +28,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         }
 
         if (event.getPacket() instanceof AddPlayerPacket packet) {
-            final BoarEntity entity = player.compensatedWorld.addToCache(packet.getRuntimeEntityId(), packet.getUniqueEntityId());
+            final EntityCache entity = player.compensatedWorld.addToCache(packet.getRuntimeEntityId(), packet.getUniqueEntityId());
             if (entity == null) {
                 return;
             }
@@ -44,7 +44,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         }
 
         if (event.getPacket() instanceof MoveEntityDeltaPacket packet) {
-            final BoarEntity entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+            final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
             if (entity == null) {
                 return;
             }
@@ -71,7 +71,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         }
 
         if (event.getPacket() instanceof MoveEntityAbsolutePacket packet) {
-            final BoarEntity entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+            final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
             if (entity == null) {
                 return;
             }
@@ -84,7 +84,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            final BoarEntity entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+            final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
             if (entity == null) {
                 return;
             }
@@ -93,7 +93,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         }
     }
 
-    private void queuePositionUpdate(final CloudburstPacketEvent event, final BoarEntity entity, final Vector3f raw) {
+    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw) {
         final BoarPlayer player = event.getPlayer();
         final Vector3f position = raw.sub(0, entity.getType() == EntityType.PLAYER ? EntityDefinitions.PLAYER.offset() : 0, 0);
 

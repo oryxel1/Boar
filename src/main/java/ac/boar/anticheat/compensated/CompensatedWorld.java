@@ -1,7 +1,7 @@
 package ac.boar.anticheat.compensated;
 
-import ac.boar.anticheat.compensated.cache.BoarChunk;
-import ac.boar.anticheat.compensated.cache.BoarEntity;
+import ac.boar.anticheat.compensated.cache.ChunkCache;
+import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
@@ -30,13 +30,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public final class CompensatedWorld {
     private final BoarPlayer player;
-    private final Long2ObjectMap<BoarChunk> chunks = new Long2ObjectOpenHashMap<>();
-    private final Long2ObjectMap<BoarEntity> entities = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<ChunkCache> chunks = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<EntityCache> entities = new Long2ObjectOpenHashMap<>();
     private final Map<Long, Long> uniqueIdToRuntimeId = new HashMap<>();
 
     // Entity related
 
-    public BoarEntity addToCache(final long runtimeId, final long uniqueId) {
+    public EntityCache addToCache(final long runtimeId, final long uniqueId) {
         final Entity entity = player.getSession().getEntityCache().getEntityByGeyserId(runtimeId);
         if (entity == null || entity.getDefinition() == null || runtimeId == player.runtimeEntityId) {
             return null;
@@ -46,7 +46,7 @@ public final class CompensatedWorld {
         final EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
 
         player.sendTransaction();
-        final BoarEntity cache = new BoarEntity(definition.entityType(), definition, dimensions, player.lastSentId, runtimeId);
+        final EntityCache cache = new EntityCache(definition.entityType(), definition, dimensions, player.lastSentId, runtimeId);
         this.entities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
 
@@ -62,7 +62,7 @@ public final class CompensatedWorld {
         this.entities.remove(key);
     }
 
-    public BoarEntity getEntity(long id) {
+    public EntityCache getEntity(long id) {
         return this.entities.get(id);
     }
 
@@ -74,16 +74,16 @@ public final class CompensatedWorld {
 
     public void addToCache(int x, int z, DataPalette[] chunks, long id) {
         long chunkPosition = MathUtils.chunkPositionToLong(x, z);
-        BoarChunk geyserChunk = new BoarChunk(chunks, id);
+        ChunkCache geyserChunk = new ChunkCache(chunks, id);
         this.chunks.put(chunkPosition, geyserChunk);
     }
 
     public boolean isChunkLoaded(int chunkX, int chunkZ) {
-        final BoarChunk chunk = this.getChunk(chunkX >> 4, chunkZ >> 4);
+        final ChunkCache chunk = this.getChunk(chunkX >> 4, chunkZ >> 4);
         return chunk != null && chunk.transactionId() <= player.lastReceivedId;
     }
 
-    private BoarChunk getChunk(int chunkX, int chunkZ) {
+    private ChunkCache getChunk(int chunkX, int chunkZ) {
         long chunkPosition = MathUtils.chunkPositionToLong(chunkX, chunkZ);
         return chunks.getOrDefault(chunkPosition, null);
     }
@@ -93,7 +93,7 @@ public final class CompensatedWorld {
     }
 
     public void updateBlock(int x, int y, int z, int block) {
-        final BoarChunk chunk = this.getChunk(x >> 4, z >> 4);
+        final ChunkCache chunk = this.getChunk(x >> 4, z >> 4);
         if (chunk == null) {
             return;
         }
@@ -169,7 +169,7 @@ public final class CompensatedWorld {
     }
 
     public int getBlockAt(int x, int y, int z) {
-        BoarChunk column = this.getChunk(x >> 4, z >> 4);
+        ChunkCache column = this.getChunk(x >> 4, z >> 4);
         if (column == null) {
             return Block.JAVA_AIR_ID;
         }

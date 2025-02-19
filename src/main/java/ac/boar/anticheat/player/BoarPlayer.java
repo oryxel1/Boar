@@ -2,6 +2,7 @@ package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.collision.Collision;
+import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.StatusEffect;
@@ -51,6 +52,7 @@ public final class BoarPlayer extends PlayerData {
 
     // Lag compensation
     public final CompensatedWorld compensatedWorld = new CompensatedWorld(this);
+    public final CompensatedInventory compensatedInventory = new CompensatedInventory(this);
 
     // Validation
     public final BreakingBlockValidator breakingValidator = new BreakingBlockValidator(this);

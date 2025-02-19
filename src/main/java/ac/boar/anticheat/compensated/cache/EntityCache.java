@@ -12,7 +12,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 @RequiredArgsConstructor
 @Getter
 @Setter
-public class BoarEntity {
+public class EntityCache {
     private final EntityType type;
     private final EntityDefinition<?> definition;
     private final EntityDimensions dimensions;
