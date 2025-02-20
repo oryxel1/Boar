@@ -17,11 +17,21 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
         final CompensatedInventory inventory = player.compensatedInventory;
 
         if (event.getPacket() instanceof InventoryTransactionPacket packet) {
-            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+            player.transactionValidator.handle(packet);
+        }
+
+        if (event.getPacket() instanceof ItemStackRequestPacket packet) {
+            player.transactionValidator.handle(packet);
+        }
+
+        if (event.getPacket() instanceof InteractPacket packet) {
+            if (player.runtimeEntityId != packet.getRuntimeEntityId()) {
                 return;
             }
 
-            player.transactionValidator.handle(packet);
+            if (packet.getAction() == InteractPacket.Action.OPEN_INVENTORY) {
+                player.compensatedInventory.openContainer = player.compensatedInventory.inventoryContainer;
+            }
         }
 
         if (event.getPacket() instanceof ContainerClosePacket packet) {
