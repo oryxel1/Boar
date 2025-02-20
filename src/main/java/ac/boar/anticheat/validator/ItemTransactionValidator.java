@@ -18,25 +18,25 @@ import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
 public final class ItemTransactionValidator {
     private final BoarPlayer player;
 
-    public void handle(final InventoryTransactionPacket packet) {
+    public boolean handle(final InventoryTransactionPacket packet) {
         System.out.println(packet);
 
         final CompensatedInventory inventory = player.compensatedInventory;
         switch (packet.getTransactionType()) {
             case NORMAL -> {
                 if (packet.getActions().size() != 2) {
-                    break;
+                    return false;
                 }
                 // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/BedrockInventoryTransactionTranslator.java#L123
                 final InventoryActionData world = packet.getActions().get(0), container = packet.getActions().get(1);
 
                 if (world.getSource().getType() != InventorySource.Type.WORLD_INTERACTION || world.getSource().getFlag() != InventorySource.Flag.DROP_ITEM) {
-                    break;
+                    return false;
                 }
 
                 final int slot = container.getSlot();
                 if (slot < 0 || slot > 8) {
-                    break;
+                    return false;
                 }
 
                 final ItemData slotData = inventory.inventoryContainer.getItemFromSlot(slot);
@@ -45,7 +45,7 @@ public final class ItemTransactionValidator {
 
                 // Invalid drop, item or whatever
                 if (dropCounts < 1 || dropCounts > slotData.getCount() || !this.validate(slotData, claimedData)) {
-                    break;
+                    return false;
                 }
 
                 // Since Geyser proceed to drop everything anyway, as long as you send anything larger than 1.
@@ -68,6 +68,8 @@ public final class ItemTransactionValidator {
                 }
             }
         }
+
+        return true;
     }
 
     public void handle(final ItemStackRequestPacket packet) {

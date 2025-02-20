@@ -17,7 +17,7 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
         final CompensatedInventory inventory = player.compensatedInventory;
 
         if (event.getPacket() instanceof InventoryTransactionPacket packet) {
-            player.transactionValidator.handle(packet);
+            event.setCancelled(!player.transactionValidator.handle(packet));
         }
 
         if (event.getPacket() instanceof ItemStackRequestPacket packet) {
