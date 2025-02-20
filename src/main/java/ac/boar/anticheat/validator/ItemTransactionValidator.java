@@ -1,6 +1,7 @@
 package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
+import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.util.StringUtil;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +72,29 @@ public final class ItemTransactionValidator {
                     inventory.inventoryContainer.getContents().set(slot, builder.build());
                 }
             }
+
+            case ITEM_USE_ON_ENTITY -> {
+                final int slot = packet.getHotbarSlot();
+                if (slot < 0 || slot > 8) {
+                    return false;
+                }
+
+                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot);
+                final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
+                if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
+                    return false;
+                }
+
+                final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+                if (entity == null || entity.getTransactionId() > player.lastReceivedId) {
+                    return false;
+                }
+
+                final boolean tooFar = entity.getServerPosition().distance(player.x, player.y, player.z) > 6.0 || entity.getPosition().distance(player.x, player.y, player.z) > 6.0;
+                if (tooFar) {
+                    return false;
+                }
+            }
         }
 
         return true;
@@ -98,7 +122,7 @@ public final class ItemTransactionValidator {
     }
 
     private boolean validate(final ItemData predicted, final ItemData claimed) {
-        if (claimed == null || claimed.isNull() || !claimed.isValid()) {
+        if (claimed == null) {
             return false;
         }
 
