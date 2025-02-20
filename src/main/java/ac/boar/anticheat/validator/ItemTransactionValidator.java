@@ -8,11 +8,15 @@ import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryActionData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySource;
 import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 public final class ItemTransactionValidator {
@@ -78,6 +82,18 @@ public final class ItemTransactionValidator {
             return;
         }
 
+        final List<ItemStackRequest> clone = new ArrayList<>(packet.getRequests());
+        packet.getRequests().clear();
+        for (final ItemStackRequest request : clone) {
+            if (request.getActions().length == 0) {
+                packet.getRequests().add(request);
+                continue;
+            }
+
+
+
+            packet.getRequests().add(request);
+        }
         System.out.println(packet);
     }
 
@@ -92,7 +108,7 @@ public final class ItemTransactionValidator {
             return true;
         }
 
-        if (!StringUtil.sanitizePrefix(ID1.getIdentifier()).equalsIgnoreCase(StringUtil.sanitizePrefix(SID2.getIdentifier()))) {
+        if (!StringUtil.sanitizePrefix(SID1.getIdentifier()).equalsIgnoreCase(StringUtil.sanitizePrefix(SID2.getIdentifier()))) {
             return false;
         }
 
