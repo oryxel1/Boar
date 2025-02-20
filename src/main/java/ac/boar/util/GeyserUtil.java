@@ -58,7 +58,7 @@ public class GeyserUtil {
         final BedrockServerSession session = player.cloudburstSession;
         final Field upstream = GeyserSession.class.getDeclaredField("upstream");
         upstream.setAccessible(true);
-        upstream.set(player.getSession(), new CloudburstSendListener(player, session));
+        upstream.set(player.getSession(), player.geyserUpstream = new CloudburstSendListener(player, session));
     }
 
     private static ClientSession findClientSession(final GeyserConnection connection) throws Exception {

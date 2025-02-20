@@ -1,12 +1,12 @@
 package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.compensated.cache.container.PlayerContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
-import org.geysermc.geyser.inventory.GeyserItemStack;
 import org.geysermc.geyser.translator.item.ItemTranslator;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
@@ -16,7 +16,7 @@ public class CompensatedInventory {
 
     public int heldItemSlot;
 
-    public ContainerCache inventoryContainer = new ContainerCache((byte) ContainerId.INVENTORY, ContainerType.INVENTORY, null, -1L);
+    public PlayerContainerCache inventoryContainer = new PlayerContainerCache(this);
     public ContainerCache offhandContainer = new ContainerCache((byte) ContainerId.OFFHAND, ContainerType.INVENTORY, null, -1L);
     public ContainerCache armorContainer = new ContainerCache((byte) ContainerId.ARMOR, ContainerType.INVENTORY, null, -1L);
     public ContainerCache hudContainer = new ContainerCache((byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
@@ -27,16 +27,8 @@ public class CompensatedInventory {
         return ItemTranslator.translateToJava(player.getSession(), data);
     }
 
-    public ItemData getHeldItemData() {
-        if (this.heldItemSlot >= inventoryContainer.getContents().size()) {
-            return ItemData.AIR;
-        }
-
-        return inventoryContainer.getContents().get(heldItemSlot);
-    }
-
-    public GeyserItemStack getHeldItem() {
-        return GeyserItemStack.from(translate(getHeldItemData()));
+    public ItemData translate(ItemStack stack) {
+        return ItemTranslator.translateToBedrock(player.getSession(), stack);
     }
 
     public ContainerCache getContainer(byte id) {

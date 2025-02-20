@@ -2,7 +2,15 @@ package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.util.StringUtil;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
+import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryActionData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySource;
+import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
 
@@ -12,6 +20,54 @@ public final class ItemTransactionValidator {
 
     public void handle(final InventoryTransactionPacket packet) {
         System.out.println(packet);
+
+        final CompensatedInventory inventory = player.compensatedInventory;
+        switch (packet.getTransactionType()) {
+            case NORMAL -> {
+                if (packet.getActions().size() != 2) {
+                    break;
+                }
+                // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/BedrockInventoryTransactionTranslator.java#L123
+                final InventoryActionData world = packet.getActions().get(0), container = packet.getActions().get(1);
+
+                if (world.getSource().getType() != InventorySource.Type.WORLD_INTERACTION || world.getSource().getFlag() != InventorySource.Flag.DROP_ITEM) {
+                    break;
+                }
+
+                final int slot = container.getSlot();
+                if (slot < 0 || slot > 8) {
+                    break;
+                }
+
+                final ItemData slotData = inventory.inventoryContainer.getItemFromSlot(slot);
+                final ItemData claimedData = world.getToItem();
+                final int dropCounts = claimedData.getCount();
+
+                // Invalid drop, item or whatever
+                if (dropCounts < 1 || dropCounts > slotData.getCount() || !this.validate(slotData, claimedData)) {
+                    break;
+                }
+
+                // Since Geyser proceed to drop everything anyway, as long as you send anything larger than 1.
+                // Also, it is possible to drop more than 1 but not all? I don't know.
+                if (dropCounts > 1 && dropCounts < slotData.getCount()) {
+                    final InventorySlotPacket slotPacket = new InventorySlotPacket();
+                    slotPacket.setItem(ItemData.AIR);
+                    slotPacket.setContainerId(ContainerId.INVENTORY);
+                    slotPacket.setSlot(slot);
+                    player.geyserUpstream.sendPacket(slotPacket);
+                }
+
+                if (dropCounts == slotData.getCount()) {
+                    inventory.inventoryContainer.getContents().set(slot, ItemData.AIR);
+                } else {
+                    ItemData.Builder builder = slotData.toBuilder();
+                    builder.count(Math.max(0, slotData.getCount() - dropCounts));
+
+                    inventory.inventoryContainer.getContents().set(slot, builder.build());
+                }
+            }
+        }
     }
 
     public void handle(final ItemStackRequestPacket packet) {
@@ -21,5 +77,23 @@ public final class ItemTransactionValidator {
         }
 
         System.out.println(packet);
+    }
+
+    private boolean validate(final ItemData predicted, final ItemData claimed) {
+        if (claimed == null || claimed.isNull() || !claimed.isValid()) {
+            return false;
+        }
+
+        final ItemDefinition ID1 = predicted.getDefinition();
+        final ItemDefinition ID2 = claimed.getDefinition();
+        if (!(ID1 instanceof SimpleItemDefinition SID1) || !(ID2 instanceof SimpleItemDefinition SID2)) {
+            return true;
+        }
+
+        if (!StringUtil.sanitizePrefix(ID1.getIdentifier()).equalsIgnoreCase(StringUtil.sanitizePrefix(SID2.getIdentifier()))) {
+            return false;
+        }
+
+        return ID1.getRuntimeId() == ID2.getRuntimeId();
     }
 }
