@@ -6,12 +6,18 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.ItemTransactionValidator;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 public class BedrockClickProcessor {
+    private static final List<ContainerType> CANT_HANDLE = List.of(ContainerType.GRINDSTONE,
+            ContainerType.ANVIL, ContainerType.WORKBENCH, ContainerType.ENCHANTMENT);
+
     private final BoarPlayer player;
 
     public boolean processAction(final ItemStackRequestAction action) {
@@ -34,8 +40,16 @@ public class BedrockClickProcessor {
                 final int sourceSlot = source.getSlot();
                 final int destinationSlot = destination.getSlot();
 
+                // This seems to be handled client-sided, like crafting result.
+                final boolean cantDoValidation = CANT_HANDLE.contains(sourceContainer.getType()) || CANT_HANDLE.contains(destinationContainer.getType());
+                if (cantDoValidation) {
+                    sourceContainer.setOutOfSync(true);
+                    destinationContainer.setOutOfSync(true);
+                    System.out.println("OUT OF SYNC!");
+                }
+
                 if (sourceSlot < 0 || destinationSlot < 0 || sourceSlot >= sourceContainer.getContents().size() || destinationSlot > 100) {
-                    return false;
+                    return cantDoValidation;
                 }
 
                 // TODO: properly implement container size, I will just cap it at 100 for now.
@@ -55,14 +69,17 @@ public class BedrockClickProcessor {
                     System.out.println("INVALID DESTINATION!");
                     System.out.println(sourceData);
                     System.out.println(destinationSlot);
-                    return false;
+                    return cantDoValidation;
                 }
 
                 final int count = transferAction.getCount();
                 // Source data is air, or count is invalid.
                 if (sourceData.isNull() || count <= 0 || count > sourceData.getCount()) {
                     System.out.println("INVALID COUNT!"); // for debugging in case I fucked up.
-                    return false;
+                    System.out.println("First condition: " + sourceData.isNull());
+                    System.out.println("Count: " + count);
+                    System.out.println("Source Data: " + sourceData);
+                    return cantDoValidation;
                 }
 
                 // Now simply move, lol.
@@ -163,7 +180,7 @@ public class BedrockClickProcessor {
                 builder.count(data.getCount() - counts);
 
                 final ItemData newData = builder.build();
-                if (newData.getCount() >= 0) {
+                if (newData.getCount() <= 0) {
                     cache.getContents().set(slot, ItemData.AIR);
                 } else {
                     cache.getContents().set(slot, builder.build());

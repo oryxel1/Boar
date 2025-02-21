@@ -19,5 +19,8 @@ public class ContainerCache {
     private final long uniqueEntityId;
 
     @Setter
+    private boolean outOfSync;
+
+    @Setter
     private List<ItemData> contents = new ObjectArrayList<>();
 }

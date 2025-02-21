@@ -118,6 +118,7 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
                     return;
                 }
 
+                container.setOutOfSync(false);
                 container.setContents(packet.getContents());
             });
         }
