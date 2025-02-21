@@ -28,6 +28,7 @@ public class BedrockClickProcessor {
 
         if (player.gameType == GameType.CREATIVE) {
             // Uhhh.
+            return true;
         }
 
         switch (type) {
