@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.DropAction;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestActionType;
-import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.TransferItemStackRequestAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.*;
 
 @RequiredArgsConstructor
 public class BedrockClickProcessor {
@@ -26,8 +23,6 @@ public class BedrockClickProcessor {
         switch (type) {
             case TAKE, PLACE -> {
                 final TransferItemStackRequestAction transferAction = (TransferItemStackRequestAction) action;
-                System.out.println(transferAction);
-
                 // TODO: bundle lol.
 
                 final ItemStackRequestSlotData source = transferAction.getSource();
@@ -57,6 +52,7 @@ public class BedrockClickProcessor {
                 // This is not the same item too, so not possible...
                 if (!destinationData.isNull() && !ItemTransactionValidator.validate(sourceData, destinationData)) {
                     // for debugging in case I fucked up.
+                    System.out.println("INVALID DESTINATION!");
                     System.out.println(sourceData);
                     System.out.println(destinationSlot);
                     return false;
@@ -65,7 +61,7 @@ public class BedrockClickProcessor {
                 final int count = transferAction.getCount();
                 // Source data is air, or count is invalid.
                 if (sourceData.isNull() || count <= 0 || count > sourceData.getCount()) {
-                    System.out.println("invalid count!"); // for debugging in case I fucked up.
+                    System.out.println("INVALID COUNT!"); // for debugging in case I fucked up.
                     return false;
                 }
 
@@ -80,6 +76,43 @@ public class BedrockClickProcessor {
                 } else {
                     this.add(destinationContainer, destinationSlot, destinationData, count);
                 }
+            }
+
+            case SWAP -> {
+                final SwapAction swapAction = (SwapAction) action;
+
+                final ItemStackRequestSlotData source = swapAction.getSource();
+                final ItemStackRequestSlotData destination = swapAction.getDestination();
+
+                final ContainerCache sourceContainer = this.findContainer(source.getContainer());
+                final ContainerCache destinationContainer = this.findContainer(destination.getContainer());
+
+                final int sourceSlot = source.getSlot();
+                final int destinationSlot = destination.getSlot();
+
+                if (sourceSlot < 0 || destinationSlot < 0 || sourceSlot >= sourceContainer.getContents().size() || destinationSlot > 100) {
+                    return false;
+                }
+
+                // TODO: properly implement container size, I will just cap it at 100 for now.
+                if (destinationSlot >= destinationContainer.getContents().size()) {
+                    while (destinationContainer.getContents().size() <= destinationSlot) {
+                        destinationContainer.getContents().add(ItemData.AIR);
+                    }
+                }
+
+                final ItemData sourceData = sourceContainer.getContents().get(sourceSlot);
+                final ItemData destinationData = destinationContainer.getContents().get(destinationSlot);
+
+                // Source/Destination slot is empty! Player is supposed to send TAKE/PLACE instead of SWAP!
+                if (sourceData.isNull() || destinationData.isNull()) {
+                    System.out.println("INVALID SWAP!"); // for debugging in case I fucked up.
+                    return false;
+                }
+
+                // Now simply swap :D
+                sourceContainer.getContents().set(sourceSlot, destinationData);
+                destinationContainer.getContents().set(destinationSlot, sourceData);
             }
 
             case DROP -> {
