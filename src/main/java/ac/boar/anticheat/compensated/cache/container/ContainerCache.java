@@ -18,6 +18,8 @@ public class ContainerCache {
     private final long uniqueEntityId;
 
     private final int containerSize, offset;
+
+    @Getter
     private final ItemData[] contents;
 
     public ContainerCache(byte id, ContainerType type, Vector3i blockPosition, long uniqueEntityId) {

@@ -173,7 +173,7 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
                 }
 
                 for (int i = 0; i < packet.getContents().size(); i++) {
-                    container.set(i, packet.getContents().get(i));
+                    container.getContents()[i] = packet.getContents().get(i);
                 }
             });
         }
