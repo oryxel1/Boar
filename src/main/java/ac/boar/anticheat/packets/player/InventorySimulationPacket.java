@@ -10,6 +10,8 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
+import java.util.Objects;
+
 public class InventorySimulationPacket implements CloudburstPacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
@@ -83,7 +85,10 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
 
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
             player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> inventory.openContainer = new ContainerCache(packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+                final ContainerCache container = inventory.getContainer(packet.getId());
+                inventory.openContainer = Objects.requireNonNullElseGet(container, () -> new ContainerCache(packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
+            });
         }
 
         if (event.getPacket() instanceof UpdateEquipPacket packet) {

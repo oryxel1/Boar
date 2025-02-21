@@ -40,7 +40,7 @@ public class CompensatedInventory {
             return armorContainer;
         } else if (id == hudContainer.getId()) {
             return hudContainer;
-        } else if (id == openContainer.getId()) {
+        } else if (openContainer != null && id == openContainer.getId()) {
             return openContainer;
         }
 

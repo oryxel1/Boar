@@ -3,6 +3,7 @@ package ac.boar.anticheat.validator;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.validator.click.BedrockClickProcessor;
 import ac.boar.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
@@ -10,6 +11,7 @@ import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryActionData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySource;
 import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
@@ -24,7 +26,7 @@ public final class ItemTransactionValidator {
     private final BoarPlayer player;
 
     public boolean handle(final InventoryTransactionPacket packet) {
-        System.out.println(packet);
+//        System.out.println(packet);
 
         final CompensatedInventory inventory = player.compensatedInventory;
         switch (packet.getTransactionType()) {
@@ -114,11 +116,20 @@ public final class ItemTransactionValidator {
                 continue;
             }
 
+            final BedrockClickProcessor processor = new BedrockClickProcessor(player);
 
+            for (final ItemStackRequestAction action : request.getActions()) {
+                switch (action.getType()) {
+                    case CRAFT_RECIPE, CRAFT_RECIPE_AUTO, CRAFT_CREATIVE -> {
+                        // TODO: implement this.
+                    }
+                    default -> processor.processAction(action);
+                }
+            }
 
             packet.getRequests().add(request);
         }
-        System.out.println(packet);
+//        System.out.println(packet);
     }
 
     private boolean validate(final ItemData predicted, final ItemData claimed) {
