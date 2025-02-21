@@ -110,6 +110,7 @@ public final class ItemTransactionValidator {
 
         final List<ItemStackRequest> clone = new ArrayList<>(packet.getRequests());
         packet.getRequests().clear();
+
         for (final ItemStackRequest request : clone) {
             if (request.getActions().length == 0) {
                 packet.getRequests().add(request);
@@ -123,7 +124,12 @@ public final class ItemTransactionValidator {
                     case CRAFT_RECIPE, CRAFT_RECIPE_AUTO, CRAFT_CREATIVE -> {
                         // TODO: implement this.
                     }
-                    default -> processor.processAction(action);
+                    default -> {
+                        // Don't even bother.
+                        if (!processor.processAction(action)) {
+                            return;
+                        }
+                    }
                 }
             }
 
@@ -132,7 +138,12 @@ public final class ItemTransactionValidator {
 //        System.out.println(packet);
     }
 
-    private boolean validate(final ItemData predicted, final ItemData claimed) {
+    public static boolean validate(final ItemData predicted, final ItemData claimed) {
+        if (predicted == null) {
+            // Our fault?
+            return true;
+        }
+
         if (claimed == null) {
             return false;
         }
