@@ -1,25 +1,44 @@
 package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.compensated.cache.container.PlayerContainerCache;
+import ac.boar.anticheat.compensated.cache.container.impl.PlayerContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.PotionMixData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.RecipeData;
 import org.geysermc.geyser.translator.item.ItemTranslator;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class CompensatedInventory {
     private final BoarPlayer player;
 
+    @Getter
+    @Setter
+    private Map<Integer, RecipeData> craftingData = new HashMap<>();
+    @Getter
+    @Setter
+    private Map<Integer, ItemData> creativeData = new HashMap<>();
+    @Getter
+    @Setter
+    private List<PotionMixData> potionMixData = new ObjectArrayList<>();
+
     public int heldItemSlot;
 
-    public PlayerContainerCache inventoryContainer = new PlayerContainerCache(this);
-    public ContainerCache offhandContainer = new ContainerCache((byte) ContainerId.OFFHAND, ContainerType.INVENTORY, null, -1L);
-    public ContainerCache armorContainer = new ContainerCache((byte) ContainerId.ARMOR, ContainerType.INVENTORY, null, -1L);
-    public ContainerCache hudContainer = new ContainerCache((byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
+    public final PlayerContainerCache inventoryContainer = new PlayerContainerCache(this);
+    public final ContainerCache offhandContainer = new ContainerCache((byte) ContainerId.OFFHAND, ContainerType.INVENTORY, null, -1L);
+    public final ContainerCache armorContainer = new ContainerCache((byte) ContainerId.ARMOR, ContainerType.INVENTORY, null, -1L);
+    public final ContainerCache hudContainer = new ContainerCache((byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
 
     public ContainerCache openContainer = null;
 

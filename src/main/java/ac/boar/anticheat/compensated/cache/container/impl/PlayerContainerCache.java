@@ -1,6 +1,7 @@
-package ac.boar.anticheat.compensated.cache.container;
+package ac.boar.anticheat.compensated.cache.container.impl;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
+import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
@@ -24,11 +25,10 @@ public class PlayerContainerCache extends ContainerCache {
     }
 
     public ItemData getItemFromSlot(final int slot) {
-        return ItemData.AIR;
-//        if (slot < 0 || slot > 8 || slot >= this.getContents().size()) {
-//            return ItemData.AIR;
-//        }
-//
-//        return this.getContents().get(slot);
+        if (slot < 0 || slot > 8 || slot >= this.getContainerSize()) {
+            return ItemData.AIR;
+        }
+
+        return this.get(slot);
     }
 }
