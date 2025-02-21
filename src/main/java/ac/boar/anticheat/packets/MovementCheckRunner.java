@@ -192,17 +192,17 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
                 case START_GLIDING -> {
-                    final ContainerCache cache = player.compensatedInventory.armorContainer;
-                    if (cache.getContents().size() < 2) {
-                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
-                        return;
-                    }
-
-                    // Prevent player from spoofing elytra gliding.
-                    player.gliding = player.compensatedInventory.translate(cache.getContents().get(1)).getId() == Items.ELYTRA.javaId();
-                    if (!player.gliding) {
-                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
-                    }
+//                    final ContainerCache cache = player.compensatedInventory.armorContainer;
+//                    if (cache.getContents().size() < 2) {
+//                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
+//                        return;
+//                    }
+//
+//                    // Prevent player from spoofing elytra gliding.
+//                    player.gliding = player.compensatedInventory.translate(cache.getContents().get(1)).getId() == Items.ELYTRA.javaId();
+//                    if (!player.gliding) {
+//                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
+//                    }
                 }
                 case STOP_GLIDING -> player.gliding = false;
 

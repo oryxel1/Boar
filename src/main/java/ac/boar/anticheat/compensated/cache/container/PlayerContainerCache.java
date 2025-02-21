@@ -24,10 +24,11 @@ public class PlayerContainerCache extends ContainerCache {
     }
 
     public ItemData getItemFromSlot(final int slot) {
-        if (slot < 0 || slot > 8 || slot >= this.getContents().size()) {
-            return ItemData.AIR;
-        }
-
-        return this.getContents().get(slot);
+        return ItemData.AIR;
+//        if (slot < 0 || slot > 8 || slot >= this.getContents().size()) {
+//            return ItemData.AIR;
+//        }
+//
+//        return this.getContents().get(slot);
     }
 }
