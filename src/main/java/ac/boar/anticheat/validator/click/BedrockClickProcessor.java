@@ -5,6 +5,7 @@ import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.ItemTransactionValidator;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class BedrockClickProcessor {
-    private static final List<ContainerType> CANT_HANDLE = List.of(ContainerType.WORKBENCH);
+    private static final List<ContainerType> CANT_HANDLE = List.of(ContainerType.WORKBENCH, ContainerType.BREWING_STAND);
 
     private final BoarPlayer player;
 
@@ -24,6 +25,10 @@ public class BedrockClickProcessor {
 
         final ItemStackRequestActionType type = action.getType();
         final ContainerCache cache = inventory.openContainer;
+
+        if (player.gameType == GameType.CREATIVE) {
+            // Uhhh.
+        }
 
         switch (type) {
             case TAKE, PLACE -> {
