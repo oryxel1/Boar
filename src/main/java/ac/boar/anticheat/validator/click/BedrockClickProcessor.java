@@ -15,8 +15,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class BedrockClickProcessor {
-    private static final List<ContainerType> CANT_HANDLE = List.of(ContainerType.GRINDSTONE,
-            ContainerType.ANVIL, ContainerType.WORKBENCH, ContainerType.ENCHANTMENT);
+    private static final List<ContainerType> CANT_HANDLE = List.of(ContainerType.WORKBENCH);
 
     private final BoarPlayer player;
 
