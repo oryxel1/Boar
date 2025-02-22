@@ -3,6 +3,7 @@ package ac.boar.anticheat.packets.player;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.container.impl.TradeContainerCache;
+import ac.boar.anticheat.data.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
@@ -10,6 +11,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.*;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
@@ -118,28 +120,12 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
             });
         }
 
-        if (event.getPacket() instanceof InventorySlotPacket packet) {
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
-                final ContainerCache container = inventory.getContainer((byte) packet.getContainerId());
-                if (container == null) {
-                    return;
-                }
-
-                if (packet.getSlot() < 0 || packet.getSlot() >= container.getContainerSize()) {
-                    return;
-                }
-
-                container.set(packet.getSlot(), packet.getItem());
-            });
-        }
-
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
             System.out.println(packet);
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
                 final ContainerCache container = inventory.getContainer(packet.getId());
-                inventory.openContainer = Objects.requireNonNullElseGet(container, () -> new ContainerCache(packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
+                inventory.openContainer = Objects.requireNonNullElseGet(container, () -> new ContainerCache(inventory, packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
             });
         }
 //
@@ -159,21 +145,80 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
 
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> { try {
-                inventory.openContainer = new TradeContainerCache(packet.getOffers(),
+                inventory.openContainer = new TradeContainerCache(inventory, packet.getOffers(),
                         (byte) packet.getContainerId(), packet.getContainerType(), Vector3i.ZERO, packet.getTraderUniqueEntityId());
             } catch (Exception ignored) {}});
+        }
+
+        if (event.getPacket() instanceof InventorySlotPacket packet) {
+            player.sendTransaction(immediate);
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+                // Bundle should be handled separately.
+                if (packet.getContainerId() == 125) {
+                    final ItemCache cache;
+                    try {
+                        cache = inventory.getBundleCache().get(Objects.requireNonNull(packet.getStorageItem().getTag()).getInt("bundle_id"));
+                    } catch (Exception ignored) {
+                        return;
+                    }
+
+                    if (cache == null) {
+                        return;
+                    }
+
+                    cache.getBundle().getContents()[packet.getSlot()] = ItemCache.build(inventory, packet.getItem());
+                    return;
+                }
+
+                final ContainerCache container = inventory.getContainer((byte) packet.getContainerId());
+                if (container == null) {
+                    return;
+                }
+
+                if (packet.getSlot() < 0 || packet.getSlot() >= container.getContainerSize()) {
+                    return;
+                }
+
+                container.set(packet.getSlot(), packet.getItem());
+            });
         }
 
         if (event.getPacket() instanceof InventoryContentPacket packet) {
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+                // Bundle should be handled separately.
+                if (packet.getContainerId() == 125) {
+                    final ItemCache cache;
+                    try {
+                        cache = inventory.getBundleCache().get(Objects.requireNonNull(packet.getStorageItem().getTag()).getInt("bundle_id"));
+                    } catch (Exception ignored) {
+                        return;
+                    }
+
+                    if (cache == null) {
+                        return;
+                    }
+
+                    for (int i = 0; i < packet.getContents().size(); i++) {
+                        // Just in case? Because it seems to be possible to change the size, I will add support for it later.
+                        if (i >= 64) {
+                            break;
+                        }
+
+                        cache.getBundle().getContents()[i] = ItemCache.build(inventory, packet.getContents().get(i));
+                    }
+
+                    // System.out.println("Update bundle: " + packet);
+                    return;
+                }
+
                 final ContainerCache container = inventory.getContainer((byte) packet.getContainerId());
                 if (container == null) {
                     return;
                 }
 
                 for (int i = 0; i < packet.getContents().size(); i++) {
-                    container.getContents()[i] = packet.getContents().get(i);
+                    container.set(i, packet.getContents().get(i), false);
                 }
             });
         }

@@ -2,6 +2,7 @@ package ac.boar.anticheat.validator.click;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.ItemTransactionValidator;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.List;
 public class ItemRequestProcessor {
     private final BoarPlayer player;
 
-    private final List<ItemData> queuedItems = new ArrayList<>();
+    private final List<ItemCache> queuedItems = new ArrayList<>();
 
     public boolean processAll(final ItemStackRequest request) {
         for (final ItemStackRequestAction action : request.getActions()) {
@@ -62,7 +63,7 @@ public class ItemRequestProcessor {
 
                 // Creative item yay! Also, we have to grab the item definition we stored instead of
                 // the one player send to prevent they send some weird shit item to try anything funny.
-                this.queuedItems.add(item);
+                this.queuedItems.add(ItemCache.build(inventory, item));
             }
 
             case CRAFT_RECIPE -> {
@@ -75,8 +76,9 @@ public class ItemRequestProcessor {
                     }
 
                     final List<ItemData> ingredients = List.of(
-                            cache.get(32), cache.get(33), cache.get(34), cache.get(35), cache.get(36), cache.get(37), cache.get(38),
-                            cache.get(39), cache.get(40));
+                            cache.get(32).getData(), cache.get(33).getData(), cache.get(34).getData(), cache.get(35).getData(),
+                            cache.get(36).getData(), cache.get(37).getData(), cache.get(38).getData(),
+                            cache.get(39).getData(), cache.get(40).getData());
 
                     List<ItemData> results = null;
 
@@ -125,7 +127,9 @@ public class ItemRequestProcessor {
 
                     System.out.println("Valid crafting yay!");
                     if (results != null) {
-                        this.queuedItems.addAll(results);
+                        for (final ItemData data : results) {
+                            this.queuedItems.add(ItemCache.build(inventory, data));
+                        }
                     }
                 }
             }
@@ -139,12 +143,13 @@ public class ItemRequestProcessor {
 
                 for (final ItemData item : craftResult.getResultItems()) {
                     boolean valid = false;
-                    for (final ItemData predicted : this.queuedItems) {
+                    for (final ItemCache predicted : this.queuedItems) {
                         if (item.isNull()) {
                             continue;
                         }
 
-                        if (ItemTransactionValidator.validate(item, predicted) && (item.getCount() == predicted.getCount() || player.gameType == GameType.CREATIVE)) {
+                        if (ItemTransactionValidator.validate(item, predicted.getData()) && (item.getCount() == predicted.count() ||
+                                player.gameType == GameType.CREATIVE)) {
                             valid = true;
                         }
                     }
@@ -160,6 +165,11 @@ public class ItemRequestProcessor {
             case TAKE, PLACE -> {
                 final TransferItemStackRequestAction transferAction = (TransferItemStackRequestAction) action;
                 // TODO: bundle lol.
+
+                final BundleClickProcessor.BundleResponse response = BundleClickProcessor.processBundleClick(inventory, transferAction);
+                if (response.bundle()) {
+                    return response.valid();
+                }
 
                 final ItemStackRequestSlotData source = transferAction.getSource();
                 final ItemStackRequestSlotData destination = transferAction.getDestination();
@@ -177,12 +187,12 @@ public class ItemRequestProcessor {
                     return false;
                 }
 
-                final ItemData sourceData = create ? this.queuedItems.getFirst() : sourceContainer.get(sourceSlot);
-                final ItemData destinationData = destinationContainer.get(destinationSlot);
+                final ItemCache sourceData = create ? this.queuedItems.getFirst() : sourceContainer.get(sourceSlot);
+                final ItemCache destinationData = destinationContainer.get(destinationSlot);
 
                 // Player try to move this item to an already occupied destination, and is sending TAKE/PLACE instead of SWAP.
                 // This is not the same item too, so not possible...
-                if (!destinationData.isNull() && !ItemTransactionValidator.validate(sourceData, destinationData)) {
+                if (!destinationData.getData().isNull() && !ItemTransactionValidator.validate(sourceData.getData(), destinationData.getData())) {
                     // for debugging in case I fucked up.
                     System.out.println("INVALID DESTINATION!");
                     System.out.println(sourceData);
@@ -193,9 +203,9 @@ public class ItemRequestProcessor {
                 int count = transferAction.getCount();
                 // Source data is air, or count is invalid.
                 // Exempt this if player is grabbing from creative menu....
-                if (!(create && player.gameType == GameType.CREATIVE) && (sourceData.isNull() || count <= 0 || count > sourceData.getCount())) {
+                if (!(create && player.gameType == GameType.CREATIVE) && (sourceData.getData().isNull() || count <= 0 || count > sourceData.count())) {
                     System.out.println("INVALID COUNT!"); // for debugging in case I fucked up.
-                    System.out.println("First condition: " + sourceData.isNull());
+                    System.out.println("First condition: " + sourceData.getData().isNull());
                     System.out.println("Count: " + count);
                     System.out.println("Source Data: " + sourceData);
                     return false;
@@ -208,13 +218,13 @@ public class ItemRequestProcessor {
                     this.remove(sourceContainer, sourceSlot, sourceData, count);
                 }
 
-                if (destinationData.isNull()) {
-                    final ItemData.Builder builder = sourceData.toBuilder();
-                    builder.count(count);
+                if (destinationData.getData().isNull()) {
+                    final ItemCache cache1 = sourceData.clone();
+                    cache1.count(count);
 
-                    destinationContainer.set(destinationSlot, builder.build());
+                    destinationContainer.set(destinationSlot, cache1);
                 } else {
-                    this.add(destinationContainer, destinationSlot, destinationData, count);
+                    this.add(destinationData, count);
                 }
             }
 
@@ -234,11 +244,11 @@ public class ItemRequestProcessor {
                     return false;
                 }
 
-                final ItemData sourceData = sourceContainer.get(sourceSlot);
-                final ItemData destinationData = destinationContainer.get(destinationSlot);
+                final ItemCache sourceData = sourceContainer.get(sourceSlot);
+                final ItemCache destinationData = destinationContainer.get(destinationSlot);
 
                 // Source/Destination slot is empty! Player is supposed to send TAKE/PLACE instead of SWAP!
-                if (sourceData.isNull() || destinationData.isNull()) {
+                if (sourceData.getData().isNull() || destinationData.getData().isNull()) {
                     System.out.println("INVALID SWAP!"); // for debugging in case I fucked up.
                     return false;
                 }
@@ -259,17 +269,15 @@ public class ItemRequestProcessor {
 
                 // Player is clicking outside the window to drop.
                 if (source.getContainer() == ContainerSlotType.CURSOR) {
-                    final ItemData cursor = inventory.hudContainer.get(0);
-                    if (!cursor.isValid() || slot != 0) { // Slot 0 is cursor slot.
+                    final ItemCache cursor = inventory.hudContainer.get(0);
+                    if (!cursor.getData().isValid() || slot != 0) { // Slot 0 is cursor slot.
                         return false;
                     }
 
                     this.remove(inventory.hudContainer, 0, cursor, dropAction.getCount());
-                    System.out.println("drop cursor!");
                 } else { // Dropping by pressing Q?
-                    final ItemData data = cache.get(slot);
+                    final ItemCache data = cache.get(slot);
                     this.remove(cache, slot, data, dropAction.getCount());
-                    System.out.println("drop count!");
                 }
             }
 
@@ -283,9 +291,9 @@ public class ItemRequestProcessor {
                     return false;
                 }
 
-                final ItemData itemData = sourceContainer.get(slot);
+                final ItemCache itemData = sourceContainer.get(slot);
 
-                if (destroyAction.getCount() > itemData.getCount()) {
+                if (destroyAction.getCount() > itemData.count()) {
                     return false;
                 }
 
@@ -303,9 +311,9 @@ public class ItemRequestProcessor {
                     return false;
                 }
 
-                final ItemData itemData = sourceContainer.get(slot);
+                final ItemCache itemData = sourceContainer.get(slot);
 
-                if (consumeAction.getCount() > itemData.getCount()) {
+                if (consumeAction.getCount() > itemData.count()) {
                     return false;
                 }
 
@@ -316,33 +324,29 @@ public class ItemRequestProcessor {
         return true;
     }
 
-    public void add(final ContainerCache cache, final int slot, final ItemData data, final int counts) {
-        final ItemData.Builder builder = data.toBuilder();
-        builder.count(data.getCount() + counts);
-        cache.set(slot, builder.build());
+    public void add(final ItemCache data, final int counts) {
+        data.count(data.count() + counts);
     }
 
-    private void remove(final ContainerCache cache, final int slot, final ItemData data, final int counts) {
-        if (counts >= data.getCount()) {
+    private void remove(final ContainerCache cache, final int slot, final ItemCache data, final int counts) {
+        if (counts >= data.count()) {
             cache.set(slot, ItemData.AIR);
         } else {
-            if (data.getCount() > 0) {
-                final ItemData.Builder builder = data.toBuilder();
-                builder.count(data.getCount() - counts);
-
-                final ItemData newData = builder.build();
-                if (newData.getCount() <= 0) {
-                    cache.set(slot, ItemData.AIR);
+            if (data.count() > 0) {
+                if ((data.count() - counts) <= 0) {
+                    cache.set(slot, ItemCache.AIR);
                 } else {
-                    cache.set(slot, builder.build());
+                    data.count(data.count() - counts);
                 }
             }
         }
     }
 
     private ContainerCache findContainer(final ContainerSlotType type) {
-        final CompensatedInventory inventory = player.compensatedInventory;
+        return findContainer(player.compensatedInventory, type);
+    }
 
+    public static ContainerCache findContainer(final CompensatedInventory inventory, final ContainerSlotType type) {
         ContainerCache cache;
         switch (type) {
             case CURSOR -> cache = inventory.hudContainer;

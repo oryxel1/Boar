@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
-    private static final AttributeModifierData SPRINTING_SPEED_BOOST = new AttributeModifierData("D208FC00-42AA-4AAD-9276-D5446530DE43",
+    private final static AttributeModifierData SPRINTING_SPEED_BOOST = new AttributeModifierData("D208FC00-42AA-4AAD-9276-D5446530DE43",
             "Sprinting speed boost",
             0.3F, AttributeOperation.MULTIPLY_TOTAL, 2, false);
 

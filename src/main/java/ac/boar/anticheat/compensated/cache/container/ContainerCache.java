@@ -1,5 +1,7 @@
 package ac.boar.anticheat.compensated.cache.container;
 
+import ac.boar.anticheat.compensated.CompensatedInventory;
+import ac.boar.anticheat.data.ItemCache;
 import lombok.Getter;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -8,6 +10,8 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import java.util.Arrays;
 
 public class ContainerCache {
+    protected final CompensatedInventory inventory;
+
     @Getter
     private final byte id;
     @Getter
@@ -19,10 +23,10 @@ public class ContainerCache {
 
     private final int containerSize, offset;
 
-    @Getter
-    private final ItemData[] contents;
+    private final ItemCache[] contents;
 
-    public ContainerCache(byte id, ContainerType type, Vector3i blockPosition, long uniqueEntityId) {
+    public ContainerCache(CompensatedInventory inventory, byte id, ContainerType type, Vector3i blockPosition, long uniqueEntityId) {
+        this.inventory = inventory;
         this.id = id;
         this.type = type;
         this.blockPosition = blockPosition;
@@ -57,8 +61,8 @@ public class ContainerCache {
         };
 
         if (this.containerSize > 0) {
-            this.contents = new ItemData[this.containerSize];
-            Arrays.fill(this.contents, ItemData.AIR);
+            this.contents = new ItemCache[this.containerSize];
+            Arrays.fill(this.contents, ItemCache.AIR);
         } else {
             this.contents = null;
         }
@@ -68,11 +72,23 @@ public class ContainerCache {
         return this.containerSize + this.offset;
     }
 
-    public ItemData get(final int slot) {
+    public ItemCache get(final int slot) {
         return this.contents[slot - this.offset];
     }
 
-    public void set(final int slot, final ItemData data) {
-        this.contents[slot - this.offset] = data;
+    public void set(final int slot, final ItemData raw) {
+        this.set(slot, raw, true);
+    }
+
+    public void set(final int slot, final ItemCache raw) {
+        this.set(slot, raw, true);
+    }
+
+    public void set(final int slot, final ItemData raw, final boolean offset) {
+        this.set(slot, ItemCache.build(this.inventory, raw), offset);
+    }
+
+    public void set(final int slot, final ItemCache cache, final boolean offset) {
+        this.contents[(offset ? slot - this.offset : slot)] = cache;
     }
 }

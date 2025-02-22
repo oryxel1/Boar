@@ -2,6 +2,7 @@ package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.container.impl.PlayerContainerCache;
+import ac.boar.anticheat.data.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class CompensatedInventory {
+    @Getter
     private final BoarPlayer player;
 
     @Getter
@@ -36,11 +38,14 @@ public class CompensatedInventory {
     public int heldItemSlot;
 
     public final PlayerContainerCache inventoryContainer = new PlayerContainerCache(this);
-    public final ContainerCache offhandContainer = new ContainerCache((byte) ContainerId.OFFHAND, ContainerType.INVENTORY, null, -1L);
-    public final ContainerCache armorContainer = new ContainerCache((byte) ContainerId.ARMOR, ContainerType.INVENTORY, null, -1L);
-    public final ContainerCache hudContainer = new ContainerCache((byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
+    public final ContainerCache offhandContainer = new ContainerCache(this, (byte) ContainerId.OFFHAND, ContainerType.INVENTORY, null, -1L);
+    public final ContainerCache armorContainer = new ContainerCache(this, (byte) ContainerId.ARMOR, ContainerType.INVENTORY, null, -1L);
+    public final ContainerCache hudContainer = new ContainerCache(this, (byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
 
     public ContainerCache openContainer = null;
+
+    @Getter
+    private final Map<Integer, ItemCache> bundleCache = new HashMap<>();
 
     public ItemStack translate(ItemData data) {
         return ItemTranslator.translateToJava(player.getSession(), data);

@@ -45,7 +45,7 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                final ItemData slotData = inventory.inventoryContainer.getItemFromSlot(slot);
+                final ItemData slotData = inventory.inventoryContainer.getItemFromSlot(slot).getData();
                 final ItemData claimedData = world.getToItem();
                 final int dropCounts = claimedData.getCount();
 
@@ -80,7 +80,7 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot);
+                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot).getData();
                 final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
                 if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
                     return false;

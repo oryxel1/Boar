@@ -2,31 +2,28 @@ package ac.boar.anticheat.compensated.cache.container.impl;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.ItemCache;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.geysermc.geyser.inventory.GeyserItemStack;
 
 public class PlayerContainerCache extends ContainerCache {
-    private final CompensatedInventory inventory;
-
     public PlayerContainerCache(final CompensatedInventory inventory) {
-        super((byte) ContainerId.INVENTORY, ContainerType.INVENTORY, null, -1L);
-
-        this.inventory = inventory;
+        super(inventory, (byte) ContainerId.INVENTORY, ContainerType.INVENTORY, null, -1L);
     }
 
     public ItemData getHeldItemData() {
-        return this.getItemFromSlot(this.inventory.heldItemSlot);
+        return this.getItemFromSlot(this.inventory.heldItemSlot).getData();
     }
 
     public GeyserItemStack getHeldItem() {
         return GeyserItemStack.from(this.inventory.translate(getHeldItemData()));
     }
 
-    public ItemData getItemFromSlot(final int slot) {
+    public ItemCache getItemFromSlot(final int slot) {
         if (slot < 0 || slot > 8 || slot >= this.getContainerSize()) {
-            return ItemData.AIR;
+            return ItemCache.AIR;
         }
 
         return this.get(slot);
