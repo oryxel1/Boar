@@ -17,7 +17,7 @@ public class PredictionA extends OffsetHandlerCheck {
             return;
         }
 
-        if (((VelocityA)player.checkHolder.get(VelocityA.class)).check()) {
+        if (((VelocityA)player.checkHolder.get(VelocityA.class)).check(offset)) {
             return;
         }
 

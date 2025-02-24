@@ -4,6 +4,7 @@ import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
@@ -82,10 +83,16 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.sinceTeleport++;
         player.sinceSpawnIn++;
 
+        if (player.sinceTeleport == 1 && player.teleportUtil.prevRewindTeleport != null) {
+            final RewindData data = player.teleportUtil.prevRewindTeleport;
+            player.teleportUtil.rewind(player.tick - 1, data.before(), data.after());
+            return;
+        }
+
         if (!player.hasSpawnedIn || player.sinceSpawnIn < 2) {
             final double offset = player.position.distanceTo(player.prevPosition);
             if (offset > 1.0E-7) {
-                player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
+                player.teleportUtil.setbackTo(null, player.teleportUtil.lastKnowValid);
             }
             player.postPredictionVelocities.clear();
             return;
@@ -107,6 +114,22 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         correctInputData(player, packet);
+
+        // There is 100% a problem with how my rewind system works that it fucked up if I tried to send it like BDS does, so I have to send it this way.
+        // TODO: figure this out.
+        if (player.lastTickWasRewind && player.teleportUtil.prevRewind != null && !player.teleportUtil.teleportInQueue() && offset > player.getMaxOffset()) {
+            final RewindData data = player.teleportUtil.prevRewind;
+            long tickDistance = player.tick - data.tick();
+
+            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > GlobalSetting.TICKS_TILL_FORCE_REWIND) {
+                player.teleportUtil.setbackTo(data, player.teleportUtil.lastKnowValid);
+            } else {
+                player.teleportUtil.rewind(data);
+            }
+
+            player.postPredictionVelocities.clear();
+            return;
+        }
 
         for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {
             Check v = entry.getValue();

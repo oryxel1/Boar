@@ -5,6 +5,7 @@ import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
+import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public final class TeleportUtil {
     private final Queue<TeleportCache> teleportQueue = new ConcurrentLinkedQueue<>();
     private final Queue<RewindTeleportCache> rewindTeleportCaches = new ConcurrentLinkedQueue<>();
     public Vec3 lastKnowValid = Vec3.ZERO;
+    public RewindData prevRewind, prevRewindTeleport;
 
     private final Map<Long, Vec3> savedKnowValid = new ConcurrentSkipListMap<>();
 
@@ -39,7 +41,7 @@ public final class TeleportUtil {
             return;
         }
 
-        final Vec3 beforeVelocity = this.savedKnowValid.getOrDefault(data.tick(), this.lastKnowValid);
+        final Vec3 beforeVelocity = this.savedKnowValid.getOrDefault(data.tick(), this.lastKnowValid).add(0, Box.MAX_TOLERANCE_ERROR, 0);
         final Vector3f position = beforeVelocity.add(data.after()).toVector3f();
         Vec3 endOfTick = data.after().clone();
 
@@ -73,33 +75,36 @@ public final class TeleportUtil {
         final CorrectPlayerMovePredictionPacket packet = new CorrectPlayerMovePredictionPacket();
         packet.setPosition(position);
         packet.setOnGround(onGround);
-        packet.setTick(tick);
+        packet.setTick(tick + 1);
         packet.setDelta(endOfTick.toVector3f());
         packet.setPredictionType(PredictionType.PLAYER);
 
-        this.addRewindToQueue(tick, beforeVelocity, new Vec3(position), endOfTick, onGround, true);
+        this.addRewindToQueue(tick + 1, beforeVelocity, new Vec3(position), endOfTick, onGround, true);
         this.player.cloudburstSession.sendPacketImmediately(packet);
 
         if (GlobalSetting.REWIND_INFO_DEBUG) {
             ChatUtil.alert("Attempted to rewind player to tick=" + tick + ", current tick=" + player.tick);
-            ChatUtil.alert("Rewind info: tick=" + (tick) + ", onGround=" + onGround + ", velocity=" + data.after().toVector3f().toString());
+            ChatUtil.alert("Rewind info: tick=" + (tick + 1) + ", onGround=" + onGround + ", velocity=" + data.after().toVector3f().toString());
         }
+
+        this.prevRewind = data;
     }
 
-    public void addTeleportToQueue(Vec3 vec3, boolean respawn, boolean immediate) {
+    public void addTeleportToQueue(RewindData data, Vec3 Vec3, boolean respawn, boolean immediate) {
         this.player.sendTransaction(immediate);
 
-        final TeleportCache teleportCache = new TeleportCache(vec3, this.player.lastSentId);
+        final TeleportCache teleportCache = new TeleportCache(Vec3, this.player.lastSentId);
         teleportCache.setRespawnTeleport(respawn);
+        teleportCache.setData(data);
         this.teleportQueue.add(teleportCache);
 
-        this.lastKnowValid = vec3.clone();
+        this.lastKnowValid = Vec3.clone();
     }
 
-    public void addRewindToQueue(final long tick, final Vec3 last, final Vec3 vec3, final Vec3 eot, final boolean onGround, boolean immediate) {
+    public void addRewindToQueue(final long tick, final Vec3 last, final Vec3 Vec3, final Vec3 eot, final boolean onGround, boolean immediate) {
         this.player.sendTransaction(immediate);
 
-        final RewindTeleportCache teleportCache = new RewindTeleportCache(tick, last, vec3, eot, onGround, this.player.lastSentId);
+        final RewindTeleportCache teleportCache = new RewindTeleportCache(tick, last, Vec3, eot, onGround, this.player.lastSentId);
         this.rewindTeleportCaches.add(teleportCache);
 
         if (GlobalSetting.REWIND_INFO_DEBUG) {
@@ -109,10 +114,10 @@ public final class TeleportUtil {
     }
 
     public void setbackTo(final TeleportCache cache) {
-        setbackTo(cache.getPosition());
+        setbackTo(cache.getData(), cache.getPosition());
     }
 
-    public void setbackTo(final Vec3 vec3) {
+    public void setbackTo(final RewindData data, final Vec3 Vec3) {
         if (teleportInQueue()) {
             return;
         }
@@ -124,12 +129,12 @@ public final class TeleportUtil {
 
         final MovePlayerPacket movePlayerPacket = new MovePlayerPacket();
         movePlayerPacket.setRuntimeEntityId(player.runtimeEntityId);
-        movePlayerPacket.setPosition(Vector3f.from(vec3.x, vec3.y, vec3.z));
+        movePlayerPacket.setPosition(Vector3f.from(Vec3.x, Vec3.y, Vec3.z));
         movePlayerPacket.setRotation(player.bedrockRotation);
         movePlayerPacket.setOnGround(player.onGround);
         movePlayerPacket.setMode(MovePlayerPacket.Mode.TELEPORT);
         movePlayerPacket.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
-        this.addTeleportToQueue(vec3,false, true);
+        this.addTeleportToQueue(data, Vec3,false, true);
 
         this.player.cloudburstSession.sendPacketImmediately(movePlayerPacket);
     }

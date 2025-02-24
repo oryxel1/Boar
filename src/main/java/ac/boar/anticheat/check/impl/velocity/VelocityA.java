@@ -16,8 +16,21 @@ public class VelocityA extends Check {
         super(player);
     }
 
-    public boolean check() {
-        if (player.closetVector.getType() == VectorType.VELOCITY || player.sinceSpawnIn < 5) {
+    public boolean check(final double offset) {
+        if (player.sinceSpawnIn < 5) {
+            return false;
+        }
+
+        if (player.closetVector.getType() == VectorType.VELOCITY) {
+            if (offset > player.getMaxOffset()) {
+                if (player.sinceTeleport > 5) {
+                    this.fail("o=" + offset);
+                }
+
+                player.teleportUtil.rewind(player.velocityData == null ? player.tick - 1 : player.velocityData.tick(), player.predictedData.before(), player.predictedData.after());
+                return true;
+            }
+
             return false;
         }
 

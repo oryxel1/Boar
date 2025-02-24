@@ -11,6 +11,7 @@ import lombok.Setter;
 public class TeleportCache {
     private final Vec3 position;
     private final long transactionId;
+    private RewindData data;
 
     private boolean respawnTeleport;
 }

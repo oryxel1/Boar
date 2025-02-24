@@ -87,7 +87,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 }
 
                 player.postPredictionVelocities.clear();
-                player.teleportUtil.setLastKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
             }
         }
     }
@@ -162,6 +161,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         }
 
         player.queuedVelocities.clear();
-        player.teleportUtil.addTeleportToQueue(new Vec3(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
+        player.teleportUtil.addTeleportToQueue(null, new Vec3(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
     }
 }

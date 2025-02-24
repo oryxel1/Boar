@@ -89,6 +89,7 @@ public class PlayerData {
             velocity = entry.getValue();
         }
 
+        this.velocityData = velocity;
         return velocity;
     }
 
@@ -106,6 +107,7 @@ public class PlayerData {
     public Vec3 prevEotVelocity = Vec3.ZERO, eotVelocity = Vec3.ZERO;
     public PredictionData predictedData = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO);
     public Vector closetVector = new Vector(Vec3.ZERO, VectorType.NORMAL);
+    public VelocityData velocityData;
     public boolean onGround, wasGround;
     public Optional<Vector3i> supportingBlockPos = Optional.empty();
     public boolean forceUpdateSupportingBlockPos;
