@@ -29,7 +29,7 @@ public class PredictionA extends OffsetHandlerCheck {
             if (player.teleportUtil.teleportInQueue()) {
                 return;
             }
-            player.teleportUtil.rewind(player.tick - 1, player.predictedData.before(), player.predictedData.after());
+            player.teleportUtil.rewind(player.tick);
         }
     }
 }

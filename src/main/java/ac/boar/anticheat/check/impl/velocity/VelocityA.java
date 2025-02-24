@@ -4,6 +4,7 @@ import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.CheckInfo;
 import ac.boar.anticheat.data.PredictionData;
 import ac.boar.anticheat.data.VelocityData;
+import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 
@@ -27,7 +28,8 @@ public class VelocityA extends Check {
                     this.fail("o=" + offset);
                 }
 
-                player.teleportUtil.rewind(player.velocityData == null ? player.tick - 1 : player.velocityData.tick(), player.predictedData.before(), player.predictedData.after());
+                final long tick = player.velocityData == null ? player.tick : player.velocityData.tick();
+                player.teleportUtil.rewind(tick, player.predictedData);
                 return true;
             }
 
@@ -58,7 +60,7 @@ public class VelocityA extends Check {
             }
 
             if (player.queuedVelocities.isEmpty()) {
-                player.teleportUtil.rewind(entry.getValue().tick(), data.before(), data.after());
+                player.teleportUtil.rewind(entry.getValue().tick(), data);
             }
 
             return true;

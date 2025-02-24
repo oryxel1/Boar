@@ -13,6 +13,7 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.PotionMixData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.RecipeData;
+import org.geysermc.geyser.item.Items;
 import org.geysermc.geyser.translator.item.ItemTranslator;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
@@ -48,7 +49,11 @@ public class CompensatedInventory {
     private final Map<Integer, ItemCache> bundleCache = new HashMap<>();
 
     public ItemStack translate(ItemData data) {
-        return ItemTranslator.translateToJava(player.getSession(), data);
+        ItemStack stack = ItemTranslator.translateToJava(player.getSession(), data);
+        if (stack == null) {
+            stack = new ItemStack(Items.AIR_ID);
+        }
+        return stack;
     }
 
     public ItemData translate(ItemStack stack) {

@@ -83,16 +83,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.sinceTeleport++;
         player.sinceSpawnIn++;
 
-        if (player.sinceTeleport == 1 && player.teleportUtil.prevRewindTeleport != null) {
-            final RewindData data = player.teleportUtil.prevRewindTeleport;
-            player.teleportUtil.rewind(player.tick - 1, data.before(), data.after());
-            return;
-        }
-
         if (!player.hasSpawnedIn || player.sinceSpawnIn < 2) {
             final double offset = player.position.distanceTo(player.prevPosition);
             if (offset > 1.0E-7) {
-                player.teleportUtil.setbackTo(null, player.teleportUtil.lastKnowValid);
+                player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
             }
             player.postPredictionVelocities.clear();
             return;
@@ -105,8 +99,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         // For example player want to move by 0.1 block in the Z coord, but due to floating point error, when player add this
         // velocity to their position to move, floating point errors fuck this up and make player move just slightly further or less than
         // what player suppose to be. So we also do the same thing to accounted for this!
-        // Also, this is extremely accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
-        // Also this around 1.0E-8 when squared? but when sqrt up it became 0 lol.
+        // Also, this is more accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
         final double offset = player.predictedPosition.distanceTo(player.position);
 
         if (player.canControlEOT()) {
@@ -114,22 +107,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         correctInputData(player, packet);
-
-        // There is 100% a problem with how my rewind system works that it fucked up if I tried to send it like BDS does, so I have to send it this way.
-        // TODO: figure this out.
-        if (player.lastTickWasRewind && player.teleportUtil.prevRewind != null && !player.teleportUtil.teleportInQueue() && offset > player.getMaxOffset()) {
-            final RewindData data = player.teleportUtil.prevRewind;
-            long tickDistance = player.tick - data.tick();
-
-            if (!player.teleportUtil.getSavedKnowValid().containsKey(data.tick()) || tickDistance > GlobalSetting.TICKS_TILL_FORCE_REWIND) {
-                player.teleportUtil.setbackTo(data, player.teleportUtil.lastKnowValid);
-            } else {
-                player.teleportUtil.rewind(data);
-            }
-
-            player.postPredictionVelocities.clear();
-            return;
-        }
 
         for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {
             Check v = entry.getValue();
@@ -200,7 +177,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                     // Prevent player from spoofing elytra gliding.
                     player.gliding = player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId();
                     if (!player.gliding) {
-                        player.teleportUtil.rewind(player.tick - 1, player.predictedData.before(), player.predictedData.after());
+                        player.teleportUtil.rewind(player.tick - 1);
                     }
                 }
                 case STOP_GLIDING -> player.gliding = false;

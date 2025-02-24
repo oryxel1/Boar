@@ -8,9 +8,10 @@ public class RewindTeleportCache extends TeleportCache {
     private final long tick;
     private final Vec3 lastPosition;
     private final Vec3 velocity;
+    private final RewindData data;
     private final boolean onGround;
 
-    public RewindTeleportCache(long tick, Vec3 lastPosition, Vec3 position, Vec3 velocity, boolean onGround, long transactionId) {
+    public RewindTeleportCache(long tick, RewindData data, Vec3 lastPosition, Vec3 position, Vec3 velocity, boolean onGround, long transactionId) {
         super(position, transactionId);
 
         this.lastPosition = lastPosition;
@@ -19,5 +20,7 @@ public class RewindTeleportCache extends TeleportCache {
         this.velocity = velocity;
 
         this.onGround = onGround;
+
+        this.data = data;
     }
 }

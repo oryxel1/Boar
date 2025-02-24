@@ -57,7 +57,11 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             player.onGround = cache.isOnGround();
 
             player.eotVelocity = cache.getVelocity();
+            player.prevPosition = cache.getLastPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0);
             player.position = cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0);
+            player.predictedData = cache.getData().data();
+
+            player.teleportUtil.setLastKnowValid(cache.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
 
             player.updateBoundingBox(player.position);
 
@@ -88,6 +92,8 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
 
                 player.postPredictionVelocities.clear();
             }
+
+            player.teleportUtil.setLastKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
         }
     }
 
@@ -161,6 +167,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         }
 
         player.queuedVelocities.clear();
-        player.teleportUtil.addTeleportToQueue(null, new Vec3(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
+        player.teleportUtil.addTeleportToQueue(new Vec3(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
     }
 }
