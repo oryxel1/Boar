@@ -75,6 +75,23 @@ public class PlayerData {
     public Vec3f claimedEOT = Vec3f.ZERO, actualVelocity = Vec3f.ZERO;
     public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
 
+    public VelocityData getSupposedVelocity() {
+        final Iterator<Map.Entry<Long, VelocityData>> iterator = this.queuedVelocities.entrySet().iterator();
+
+        VelocityData velocity = null;
+        Map.Entry<Long, VelocityData> entry;
+        while (iterator.hasNext() && (entry = iterator.next()) != null) {
+            if (this.lastReceivedId < entry.getKey()) {
+                break;
+            }
+            iterator.remove();
+
+            velocity = entry.getValue();
+        }
+
+        return velocity;
+    }
+
     // Attribute related, abilities
     public final Map<String, PlayerAttributeData> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();

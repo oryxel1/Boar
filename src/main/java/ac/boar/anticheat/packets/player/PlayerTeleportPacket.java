@@ -103,6 +103,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 }
 
                 player.postPredictionVelocities.clear();
+                player.teleportUtil.setLastKnowValid(currentTick, new Vec3f(player.x, player.y + EntityDefinitions.PLAYER.offset(), player.z));
             }
         }
     }
@@ -146,7 +147,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance < MAX_TOLERANCE_ERROR) {
             BoarPlugin.LOGGER.info("Accepted teleport, d=" + distance);
             player.lastTickWasTeleport = true;
-            player.teleportUtil.prevRewindTeleport = cache.getData();
         } else {
             // This is not the latest teleport, just ignore this one, we only force player to accept the latest one.
             // We don't want to teleport player to old teleport position when they're supposed to teleport to the latest tone.
@@ -178,6 +178,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         }
 
         player.queuedVelocities.clear();
-        player.teleportUtil.addTeleportToQueue(null, new Vec3f(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
+        player.teleportUtil.addTeleportToQueue(new Vec3f(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
     }
 }

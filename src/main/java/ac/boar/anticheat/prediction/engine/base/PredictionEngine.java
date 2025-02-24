@@ -30,7 +30,13 @@ public abstract class PredictionEngine {
 
     public final List<Vector> gatherAllPossibilities() {
         List<Vector> vectors = new ArrayList<>();
-        vectors.add(new Vector(player.eotVelocity, VectorType.NORMAL));
+        final VelocityData supposedVelocity = player.getSupposedVelocity();
+        if (supposedVelocity == null) {
+            vectors.add(new Vector(player.eotVelocity, VectorType.NORMAL));
+        } else {
+            vectors.add(new Vector(supposedVelocity.velocity(), VectorType.VELOCITY, supposedVelocity.transactionId()));
+        }
+
         addVelocityToPossibilities(vectors);
 
         applyJumpingToPossibilities(vectors);
