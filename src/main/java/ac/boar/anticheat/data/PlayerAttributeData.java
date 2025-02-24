@@ -22,18 +22,23 @@ public class PlayerAttributeData {
         this.baseValue = baseValue;
     }
 
-    public void onUpdate() {
+    public void update() {
         this.dirty = true;
+        this.getValue();
     }
 
     public void clearModifiers() {
+        if (!this.modifiers.isEmpty()) {
+            this.update();
+        }
+
         this.modifiers.clear();
     }
 
     public void removeModifier(final String id) {
         final AttributeModifierData lv = this.modifiers.remove(id);
         if (lv != null) {
-            this.onUpdate();
+            this.update();
         }
     }
 
@@ -44,7 +49,7 @@ public class PlayerAttributeData {
     private void addModifier(AttributeModifierData modifier) {
         final AttributeModifierData lv = this.modifiers.putIfAbsent(modifier.getId(), modifier);
         if (lv == null) {
-            this.onUpdate();
+            this.update();
         }
     }
 

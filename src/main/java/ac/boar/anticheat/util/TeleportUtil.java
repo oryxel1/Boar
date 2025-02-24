@@ -147,14 +147,10 @@ public final class TeleportUtil {
         this.savedKnowValid.put(tick, lastKnowValid);
         this.lastKnowValid = lastKnowValid;
 
-        // ChatUtil.alert("Saved " + tick + " tick position!");
-
         final Iterator<Map.Entry<Long, Vec3f>> iterator = this.savedKnowValid.entrySet().iterator();
         while (iterator.hasNext() && this.savedKnowValid.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
-            Map.Entry<Long, Vec3f> entry = iterator.next();
+            iterator.next();
             iterator.remove();
-
-            // ChatUtil.alert("Removed entry: " + entry.getKey());
         }
 
         final Iterator<Map.Entry<Long, PlayerAuthInputPacket>> iterator1 = this.player.savedInputMap.entrySet().iterator();
