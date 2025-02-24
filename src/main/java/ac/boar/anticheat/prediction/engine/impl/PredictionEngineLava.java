@@ -2,7 +2,7 @@ package ac.boar.anticheat.prediction.engine.impl;
 
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Fluid;
 
@@ -12,12 +12,12 @@ public class PredictionEngineLava extends PredictionEngine {
     }
 
     @Override
-    protected Vec3f travel(Vec3f vec3f) {
-        return this.updateVelocity(vec3f, 0.02F);
+    protected Vec3 travel(Vec3 vec3) {
+        return this.updateVelocity(vec3, 0.02F);
     }
 
     @Override
-    public Vec3f applyEndOfTick(Vec3f lv) {
+    public Vec3 applyEndOfTick(Vec3 lv) {
         final float y = lv.y;
 
         float gravity = player.getEffectiveGravity(lv);
@@ -32,7 +32,7 @@ public class PredictionEngineLava extends PredictionEngine {
             lv = lv.add(0, -gravity / 4.0F, 0);
         }
 
-        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.y + player.prevY, lv.z)) {
+        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
             lv.y = 0.3F;
         }
 
@@ -40,15 +40,15 @@ public class PredictionEngineLava extends PredictionEngine {
                 (player.isClimbing(false) /* ||
                         player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.POWDER_SNOW) &&
                                 PowderSnowBlock.canWalkOnPowderSnow(this) */)) {
-            lv = new Vec3f(lv.x, 0.2F, lv.z);
+            lv = new Vec3(lv.x, 0.2F, lv.z);
         }
 
         return lv;
     }
 
     @Override
-    protected Vec3f jump(Vec3f vec3f) {
-        return vec3f.add(0, 0.04F, 0);
+    protected Vec3 jump(Vec3 vec3) {
+        return vec3.add(0, 0.04F, 0);
     }
 
     @Override
@@ -59,9 +59,9 @@ public class PredictionEngineLava extends PredictionEngine {
         return !bl && !canJumpOnGround && player.getInputData().contains(PlayerAuthInputData.WANT_UP);
     }
 
-    private Vec3f applyFluidMovingSpeed(float gravity, Vec3f motion) {
+    private Vec3 applyFluidMovingSpeed(float gravity, Vec3 motion) {
         if (gravity != 0.0 && !player.swimming) {
-            return new Vec3f(motion.x, motion.y - (gravity / 16.0F), motion.z);
+            return new Vec3(motion.x, motion.y - (gravity / 16.0F), motion.z);
         }
 
         return motion;

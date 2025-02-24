@@ -62,6 +62,6 @@ public class PlayerTicker extends LivingTicker {
     }
 
     private boolean canChangeIntoPose(final EntityPose pose) {
-        return Collision.isSpaceEmpty(player, EntityDimensions.POSE_DIMENSIONS.get(pose).getBoxAt(player.x, player.y, player.z).contract(1.0E-7F));
+        return Collision.isSpaceEmpty(player, EntityDimensions.POSE_DIMENSIONS.get(pose).getBoxAt(player.position).contract(1.0E-7F));
     }
 }

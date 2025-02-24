@@ -119,7 +119,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getVelocityMultiplier() {
-        final BlockState lv = this.compensatedWorld.getBlockState(Vector3i.from(this.x, this.y, this.z));
+        final BlockState lv = this.compensatedWorld.getBlockState(this.position.toVector3i());
         final float f = BlockUtil.getVelocityMultiplier(lv);
         if (!lv.is(Blocks.WATER) && !lv.is(Blocks.BUBBLE_COLUMN)) {
             return f == 1.0 ? BlockUtil.getVelocityMultiplier(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos())) : f;
@@ -131,7 +131,8 @@ public final class BoarPlayer extends PlayerData {
     public boolean isClimbing(boolean old) {
         final TagCache cache = this.getSession().getTagCache();
 
-        Vector3i lv = Vector3i.from(old ? this.prevX : this.x, old ? this.prevY : this.y, old ? this.prevZ : this.z);
+        Vector3i lv = Vector3i.from(old ? this.prevPosition.x : this.position.x, old ? this.prevPosition.y : this.position.y,
+                old ? this.prevPosition.z : this.position.z);
         BlockState lv2 = this.compensatedWorld.getBlockState(lv);
         if (cache.is(BlockTag.CLIMBABLE, lv2.block())) {
             this.climbingPos = Optional.of(lv);
@@ -150,7 +151,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getJumpVelocityMultiplier() {
-        float f = BlockUtil.getJumpVelocityMultiplier(this.compensatedWorld.getBlockState(this.prevX, this.prevY, this.prevZ));
+        float f = BlockUtil.getJumpVelocityMultiplier(this.compensatedWorld.getBlockState(this.prevPosition.toVector3i()));
         float g = BlockUtil.getJumpVelocityMultiplier(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos()));
         return (double)f == 1.0 ? g : f;
     }
@@ -160,9 +161,9 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public Vector3i getPosWithYOffset(final boolean old, final float offset) {
-        float x = old ? this.prevX : this.x;
-        float y = old ? this.prevY : this.y;
-        float z = old ? this.prevZ : this.z;
+        float x = old ? this.prevPosition.x : this.position.x;
+        float y = old ? this.prevPosition.y : this.position.y;
+        float z = old ? this.prevPosition.z : this.position.z;
 
         if (this.supportingBlockPos.isPresent()) {
             if (!(offset > 1.0E-5F)) {

@@ -3,7 +3,7 @@ package ac.boar.anticheat.data;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.physics.Direction;
 
@@ -20,8 +20,8 @@ public record FluidState(Fluid fluid, float height) {
         return state.fluid == Fluid.EMPTY || state.fluid.equals(this.fluid);
     }
 
-    public Vec3f getVelocity(final BoarPlayer player, final Mutable vector3i, final FluidState state) {
-        Vec3f lv6 = new Vec3f(0, 0, 0);
+    public Vec3 getVelocity(final BoarPlayer player, final Mutable vector3i, final FluidState state) {
+        Vec3 lv6 = Vec3.ZERO;
         final Mutable mutable = new Mutable();
         for (final Direction lv2 : Direction.HORIZONTAL) {
             mutable.set(vector3i.getX(), vector3i.getY(), vector3i.getZ()).add(lv2.getUnitVector());

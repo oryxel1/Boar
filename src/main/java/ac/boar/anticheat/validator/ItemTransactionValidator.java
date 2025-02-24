@@ -91,7 +91,7 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                final boolean tooFar = entity.getServerPosition().distance(player.x, player.y, player.z) > 6.0 || entity.getPosition().distance(player.x, player.y, player.z) > 6.0;
+                final boolean tooFar = entity.getServerPosition().distance(player.position.toVector3f()) > 6.0 || entity.getPosition().distance(player.position.toVector3f()) > 6.0;
                 if (tooFar) {
                     return false;
                 }

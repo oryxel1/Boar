@@ -5,7 +5,7 @@ import ac.boar.util.MathUtil;
 import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
@@ -20,12 +20,12 @@ import java.util.Map;
 public abstract class PredictionEngine {
     protected final BoarPlayer player;
 
-    protected abstract Vec3f travel(Vec3f vec3f);
-    protected abstract Vec3f jump(Vec3f vec3f);
+    protected abstract Vec3 travel(Vec3 vec3);
+    protected abstract Vec3 jump(Vec3 vec3);
     protected abstract boolean shouldJump();
 
-    public Vec3f applyEndOfTick(Vec3f vec3f) {
-        return vec3f;
+    public Vec3 applyEndOfTick(Vec3 vec3) {
+        return vec3;
     }
 
     public final List<Vector> gatherAllPossibilities() {
@@ -73,18 +73,18 @@ public abstract class PredictionEngine {
     }
 
     // Other
-    protected final Vec3f updateVelocity(final Vec3f vec3f, final float speed) {
-        return vec3f.add(MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw));
+    protected final Vec3 updateVelocity(final Vec3 vec3, final float speed) {
+        return vec3.add(MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw));
     }
 
-    protected final Vec3f applyClimbingSpeed(final Vec3f motion) {
+    protected final Vec3 applyClimbingSpeed(final Vec3 motion) {
         if (player.isClimbing(true)) {
             float g = Math.max(motion.y, -0.2F);
-            if (g < 0.0 && !player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.SCAFFOLDING) && player.sneaking) {
+            if (g < 0.0 && !player.compensatedWorld.getBlockState(player.position.toVector3i()).is(Blocks.SCAFFOLDING) && player.sneaking) {
                 g = 0;
             }
 
-            return new Vec3f(motion.x, g, motion.z);
+            return new Vec3(motion.x, g, motion.z);
         }
 
         return motion;

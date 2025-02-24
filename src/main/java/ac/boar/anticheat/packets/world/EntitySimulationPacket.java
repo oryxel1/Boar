@@ -2,7 +2,7 @@ package ac.boar.anticheat.packets.world;
 
 import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -24,7 +24,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             entity.setServerPosition(packet.getPosition());
             entity.setPosition(packet.getPosition());
-            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3f(packet.getPosition())));
+            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3(packet.getPosition())));
         }
 
         if (event.getPacket() instanceof AddPlayerPacket packet) {
@@ -35,7 +35,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             entity.setServerPosition(packet.getPosition());
             entity.setPosition(packet.getPosition());
-            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3f(packet.getPosition())));
+            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3(packet.getPosition())));
         }
 
 

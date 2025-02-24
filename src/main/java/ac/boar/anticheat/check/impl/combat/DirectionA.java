@@ -5,7 +5,7 @@ import ac.boar.anticheat.check.api.impl.PacketCheck;
 import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
@@ -36,16 +36,16 @@ public class DirectionA extends PacketCheck {
         final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
         // Some simple validation.
         final boolean tooFarOrInvalid = entity == null || entity.getTransactionId() > player.lastReceivedId ||
-                entity.getServerPosition().distance(player.x, player.y, player.z) > 6.0 || entity.getPosition().distance(player.x, player.y, player.z) > 6.0;
+                entity.getServerPosition().distance(player.position.toVector3f()) > 6.0 || entity.getPosition().distance(player.position.toVector3f()) > 6.0;
         if (tooFarOrInvalid) {
             event.setCancelled(true);
             return;
         }
 
         // TODO: prevent spoofing cameraOrientation
-        final Vec3f viewVector = new Vec3f(player.cameraOrientation);
-        final Vec3f playerEye = new Vec3f(player.x, player.y + player.dimensions.eyeHeight(), player.z);
-        final Vec3f endPos = playerEye.add(viewVector.multiply(12)).add(viewVector.multiply(12));
+        final Vec3 viewVector = new Vec3(player.cameraOrientation);
+        final Vec3 playerEye = player.position.add(0, player.dimensions.eyeHeight(), 0);
+        final Vec3 endPos = playerEye.add(viewVector.multiply(12)).add(viewVector.multiply(12));
 
         final Box box = entity.getBoundingBox().expand(1);
         final Box prevBox = entity.getPrevBoundingBox();

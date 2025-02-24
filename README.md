@@ -13,13 +13,12 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 
 ## Features
 - A packet managing system for GeyserMC
-- An uncompleted prediction engine that only works on normal/elytra movement.
+- An uncompleted prediction engine that only works on normal/elytra movement (with around 1.0E-8 accuracy).
 - 1:1 recreation of player world server-sided that accounted for lag (no placing support yet).
 - A smooth rewind setback system that is the same as server-auth-with-rewind
 
 ## Problems
 - A lot of movement differences is not implemented.
-- Accuracy in edge cases is about 1.0E-3 instead of 1.0E-6 (Elytra, Collision, ...)
 - Sprinting movement speed is not synced "perfectly" with Data and Attribute packet.
 - ~~Floating point errors break collision, causing false positive, or loss precision. (Partially fixed)~~
 - ~~Player falses after teleport, I can't figure out why movement act weirdly after teleport yet. (Partially fixed)~~

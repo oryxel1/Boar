@@ -1,6 +1,6 @@
 package ac.boar.anticheat.data.teleport;
 
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TeleportCache {
-    private final Vec3f position;
+    private final Vec3 position;
     private final long transactionId;
 
     private boolean respawnTeleport;

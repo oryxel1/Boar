@@ -2,7 +2,7 @@ package ac.boar.anticheat.packets.player;
 
 import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityMotionPacket;
@@ -19,7 +19,7 @@ public class PlayerVelocityPacket implements CloudburstPacketListener {
             }
 
             player.sendTransaction();
-            player.queuedVelocities.put(player.lastSentId + 1, new VelocityData(player.lastSentId + 1, player.tick, new Vec3f(packet.getMotion())));
+            player.queuedVelocities.put(player.lastSentId + 1, new VelocityData(player.lastSentId + 1, player.tick, new Vec3(packet.getMotion())));
             event.getPostTasks().add(player::sendTransaction);
         }
     }

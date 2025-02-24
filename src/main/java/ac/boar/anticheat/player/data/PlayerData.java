@@ -7,7 +7,7 @@ import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3f;
@@ -47,7 +47,7 @@ public class PlayerData {
     public GameType gameType = GameType.DEFAULT;
 
     // Position, rotation, other.
-    public float prevX, x, prevY, y, prevZ, z;
+    public Vec3 position = Vec3.ZERO, prevPosition = Vec3.ZERO;
     public float prevYaw, yaw, prevPitch, pitch;
     public Vector3f bedrockRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
 
@@ -71,8 +71,8 @@ public class PlayerData {
     }
 
     // Movement related, (movement input, player EOT, ...)
-    public Vec3f movementInput = Vec3f.ZERO;
-    public Vec3f claimedEOT = Vec3f.ZERO, actualVelocity = Vec3f.ZERO;
+    public Vec3 movementInput = Vec3.ZERO;
+    public Vec3 claimedEOT = Vec3.ZERO;
     public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
 
     public VelocityData getSupposedVelocity() {
@@ -98,15 +98,18 @@ public class PlayerData {
     public float movementSpeed = 0.1f;
 
     // Prediction related
+    public Vec3 predictedPosition = Vec3.ZERO;
+
     public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
-    public Box boundingBox = Box.EMPTY, prevBoundingBox = Box.EMPTY;
-    public Vec3f prevEotVelocity = Vec3f.ZERO, eotVelocity = Vec3f.ZERO, predictedVelocity = Vec3f.ZERO, beforeCollisionVelocity = Vec3f.ZERO;
-    public Vector closetVector = new Vector(Vec3f.ZERO, VectorType.NORMAL);
+    public Box boundingBox = Box.EMPTY;
+    public Vec3 prevEotVelocity = Vec3.ZERO, eotVelocity = Vec3.ZERO;
+    public PredictionData predictedData = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO);
+    public Vector closetVector = new Vector(Vec3.ZERO, VectorType.NORMAL);
     public boolean onGround, wasGround;
     public Optional<Vector3i> supportingBlockPos = Optional.empty();
     public boolean forceUpdateSupportingBlockPos;
-    public Vec3f movementMultiplier = Vec3f.ZERO;
+    public Vec3 movementMultiplier = Vec3.ZERO;
 
     public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
     public final Map<Long, PlayerAuthInputPacket> savedInputMap = new ConcurrentSkipListMap<>();
@@ -128,10 +131,7 @@ public class PlayerData {
 
     // Prediction related method
     public final double getMaxOffset() {
-        // Give player more offset the further they go (https://minecraft.wiki/w/Bedrock_Edition_distance_effects#)
-        // I guess this is a bad thing to do, but how am I supposed to "predict" this, well possible but no.
-        final double length = Math.sqrt(x * x + y * y + z * z);
-        return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD + (4e-8 * length);
+        return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD;
     }
 
     public final boolean canControlEOT() {
@@ -156,8 +156,8 @@ public class PlayerData {
         return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) > 0.0;
     }
 
-    public final float getEffectiveGravity(final Vec3f vec3f) {
-        return vec3f.y < 0.0 && this.hasStatusEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
+    public final float getEffectiveGravity(final Vec3 vec3) {
+        return vec3.y < 0.0 && this.hasStatusEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
     }
 
     public float getSwimHeight() {
@@ -173,9 +173,8 @@ public class PlayerData {
     }
 
     // Others (methods)
-    public final void updateBoundingBox(float x, float y, float z) {
-        this.prevBoundingBox = this.boundingBox;
-        this.boundingBox = calculateBoundingBox(x, y, z);
+    public final void updateBoundingBox(Vec3 vec3) {
+        this.boundingBox = calculateBoundingBox(vec3.x, vec3.y, vec3.z);
     }
 
     public final Box calculateBoundingBox(float x, float y, float z) {

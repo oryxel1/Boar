@@ -64,7 +64,7 @@ public final class BreakingBlockValidator {
                 return;
             }
 
-            final double distance = position.distance(player.x, player.y, player.z);
+            final double distance = position.distance(player.position.toVector3i());
             if (distance > 12) {
                 this.resyncBlock(position);
                 packet.setItemUseTransaction(null);
@@ -117,7 +117,7 @@ public final class BreakingBlockValidator {
             final BreakingData data = findCacheUsingPosition(action.getBlockPosition());
 
             if (data != null) {
-                final double distance = data.getPosition().distance(player.x, player.y, player.z);
+                final double distance = data.getPosition().distance(player.position.toVector3i());
                 if (distance > 12) {
                     this.resyncBlock(data.getPosition());
                     continue;

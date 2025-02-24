@@ -34,7 +34,7 @@ public class ChunkSimulationPacket implements CloudburstPacketListener, MCPLPack
 
             // Send a transaction if player is inside (or near) that chunk.
             int chunkX = packet.getX() << 4, chunkZ = packet.getZ() << 4;
-            boolean check = Math.abs(player.x - chunkX) <= 16 || Math.abs(player.z - chunkZ) <= 16;
+            boolean check = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
             if (check) {
                 event.getPostTasks().add(player::sendTransaction);
             }
@@ -45,7 +45,7 @@ public class ChunkSimulationPacket implements CloudburstPacketListener, MCPLPack
         if (event.getPacket() instanceof ClientboundForgetLevelChunkPacket packet) {
             // Send a transaction if player is inside (or near) that chunk.
             int chunkX = packet.getX() << 4, chunkZ = packet.getZ() << 4;
-            boolean check = Math.abs(player.x - chunkX) <= 16 || Math.abs(player.z - chunkZ) <= 16;
+            boolean check = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
             if (check) {
                 event.getPostTasks().add(player::sendTransaction);
             }

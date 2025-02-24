@@ -1,10 +1,9 @@
 package ac.boar.anticheat.packets.other;
 
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
-import ac.boar.util.GeyserUtil;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 
@@ -29,7 +28,7 @@ public class FinalPacketListener implements CloudburstPacketListener {
                 return;
             }
 
-            player.teleportUtil.setLastKnowValid(packet.getTick(), new Vec3f(player.x, player.y + EntityDefinitions.PLAYER.offset(), player.z));
+            player.teleportUtil.setLastKnowValid(packet.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
         }
     }
 }

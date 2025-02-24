@@ -35,7 +35,7 @@ public class VelocityA extends Check {
                 continue;
             }
 
-            double distance = data.afterCollision().distanceTo(player.predictedVelocity);
+            double distance = data.after().distanceTo(player.predictedData.after());
             if (distance < 0.0001) {
                 continue;
             }
@@ -45,7 +45,7 @@ public class VelocityA extends Check {
             }
 
             if (player.queuedVelocities.isEmpty()) {
-                player.teleportUtil.rewind(entry.getValue().tick(), data.beforeCollision(), data.afterCollision());
+                player.teleportUtil.rewind(entry.getValue().tick(), data.before(), data.after());
             }
 
             return true;

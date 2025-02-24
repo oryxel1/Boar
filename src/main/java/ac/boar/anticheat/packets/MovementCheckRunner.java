@@ -4,11 +4,10 @@ import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
 
@@ -60,15 +59,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         processInputMovePacket(player, packet);
 
-        player.prevX = player.x;
-        player.prevY = player.y;
-        player.prevZ = player.z;
-        player.x = packet.getPosition().getX();
-        player.y = packet.getPosition().getY() - EntityDefinitions.PLAYER.offset();
-        player.z = packet.getPosition().getZ();
+        player.prevPosition = player.position.clone();
+        player.position = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
 
-        player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
-        player.claimedEOT = new Vec3f(packet.getDelta());
+        player.claimedEOT = new Vec3(packet.getDelta());
         player.prevEotVelocity = player.eotVelocity.clone();
 
         if (player.teleportUtil.teleportInQueue() && GlobalSetting.REWIND_INFO_DEBUG) {
@@ -79,8 +73,9 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.tick();
         if (player.lastTickWasTeleport) {
             player.sinceTeleport = 0;
-            player.eotVelocity = Vec3f.ZERO;
-            player.updateBoundingBox(player.x, player.y, player.z);
+            player.eotVelocity = Vec3.ZERO;
+            player.predictedPosition = player.position;
+            player.updateBoundingBox(player.position);
             return;
         }
 
@@ -88,7 +83,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.sinceSpawnIn++;
 
         if (!player.hasSpawnedIn || player.sinceSpawnIn < 2) {
-            final double offset = player.actualVelocity.distanceTo(Vec3f.ZERO);
+            final double offset = player.position.distanceTo(player.prevPosition);
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
             }
@@ -97,7 +92,15 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         new PlayerTicker(player).tick();
-        final double offset = player.predictedVelocity.distanceTo(player.actualVelocity);
+
+        // Instead of comparing velocity calculate by (pos - prevPos) that player sends to our predicted velocity
+        // We compare predicted position to player claimed position, this is because player velocity will never be accurate.
+        // For example player want to move by 0.1 block in the Z coord, but due to floating point error, when player add this
+        // velocity to their position to move, floating point errors fuck this up and make player move just slightly further or less than
+        // what player suppose to be. So we also do the same thing to accounted for this!
+        // Also, this is extremely accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
+        // Also this around 1.0E-8 when squared? but when sqrt up it became 0 lol.
+        final double offset = player.predictedPosition.distanceTo(player.position);
 
         if (player.canControlEOT()) {
             player.eotVelocity = player.claimedEOT;
@@ -118,7 +121,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
     public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         player.setInputData(packet.getInputData());
 
-        player.movementInput = new Vec3f(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
+        player.movementInput = new Vec3(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
 
         processInputData(player);
 
@@ -174,7 +177,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                     // Prevent player from spoofing elytra gliding.
                     player.gliding = player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId();
                     if (!player.gliding) {
-                        player.teleportUtil.rewind(player.tick - 1, player.beforeCollisionVelocity, player.predictedVelocity);
+                        player.teleportUtil.rewind(player.tick - 1, player.predictedData.before(), player.predictedData.after());
                     }
                 }
                 case STOP_GLIDING -> player.gliding = false;

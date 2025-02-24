@@ -7,11 +7,10 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.plugin.BoarPlugin;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
-import ac.boar.util.GeyserUtil;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -58,16 +57,9 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             player.onGround = cache.isOnGround();
 
             player.eotVelocity = cache.getVelocity();
-            player.prevX = cache.getLastPosition().getX();
-            player.prevY = cache.getLastPosition().getY() - EntityDefinitions.PLAYER.offset();
-            player.prevZ = cache.getLastPosition().getZ();
+            player.position = cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0);
 
-            player.x = cache.getPosition().getX();
-            player.y = cache.getPosition().getY() - EntityDefinitions.PLAYER.offset();
-            player.z = cache.getPosition().getZ();
-
-            player.updateBoundingBox(player.prevX, player.prevY, player.prevZ);
-            player.updateBoundingBox(player.x, player.y, player.z);
+            player.updateBoundingBox(player.position);
 
             if (GlobalSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Required ticks to catch up: " + tickDistance);
@@ -85,25 +77,17 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                     MovementCheckRunner.processInputMovePacket(player, old);
                 }
 
-                player.actualVelocity = new Vec3f(player.x - player.prevX, player.y - player.prevY, player.z - player.prevZ);
-                // ChatUtil.alert("Actual velocity: " + player.actualVelocity.toVector3f());
-
                 new PlayerTicker(player).tick();
 
-                player.prevX = player.x;
-                player.prevY = player.y;
-                player.prevZ = player.z;
-
-                player.x = player.x + player.predictedVelocity.x;
-                player.y = player.y + player.predictedVelocity.y;
-                player.z = player.z + player.predictedVelocity.z;
+                player.prevPosition = player.position.clone();
+                player.position = player.position.add(player.predictedData.after());
 
                 if (player.canControlEOT()) {
                     player.eotVelocity = player.claimedEOT;
                 }
 
                 player.postPredictionVelocities.clear();
-                player.teleportUtil.setLastKnowValid(currentTick, new Vec3f(player.x, player.y + EntityDefinitions.PLAYER.offset(), player.z));
+                player.teleportUtil.setLastKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
             }
         }
     }
@@ -178,6 +162,6 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         }
 
         player.queuedVelocities.clear();
-        player.teleportUtil.addTeleportToQueue(new Vec3f(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
+        player.teleportUtil.addTeleportToQueue(new Vec3(packet.getPosition()), packet.getMode() == MovePlayerPacket.Mode.RESPAWN, immediate);
     }
 }

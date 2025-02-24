@@ -5,6 +5,7 @@ import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
+import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -130,6 +131,10 @@ public final class CompensatedWorld {
         }
 
         return true;
+    }
+
+    public FluidState getFluidState(final Vector3i vec3) {
+        return this.getFluidState(vec3.getX(), vec3.getY(), vec3.getZ());
     }
 
     public FluidState getFluidState(final Mutable mutable) {

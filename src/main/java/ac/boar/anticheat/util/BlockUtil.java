@@ -4,7 +4,7 @@ import ac.boar.anticheat.collision.BedrockCollision;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.geysermc.geyser.level.block.BlockStateValues;
@@ -41,7 +41,7 @@ public class BlockUtil {
         };
     }
 
-    public static void onEntityLand(final boolean living, final BoarPlayer player, final Vec3f lv, final BlockState state) {
+    public static void onEntityLand(final boolean living, final BoarPlayer player, final Vec3 lv, final BlockState state) {
         final TagCache cache = player.getSession().getTagCache();
 
         if (cache.is(BlockTag.BEDS, state.block()) && lv.y < 0.0 && !player.sneaking) {
@@ -72,7 +72,7 @@ public class BlockUtil {
         if (state.is(Blocks.BUBBLE_COLUMN)) {
             boolean drag = state.getValue(Properties.DRAG);
 
-            final Vec3f lv = player.eotVelocity;
+            final Vec3 lv = player.eotVelocity;
             if (player.compensatedWorld.getBlockAt(pos.getX(), pos.getY() + 1, pos.getZ()) == Block.JAVA_AIR_ID) {
                 if (drag) {
                     lv.y = Math.max(-0.9F, lv.y - 0.03F);
@@ -88,19 +88,19 @@ public class BlockUtil {
             }
         }
 
-        Vec3f movementMultiplier = Vec3f.ZERO;
+        Vec3 movementMultiplier = Vec3.ZERO;
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
-            movementMultiplier = new Vec3f(0.8F, 0.75F, 0.8F);
+            movementMultiplier = new Vec3(0.8F, 0.75F, 0.8F);
         } else if (state.is(Blocks.POWDER_SNOW)) {
-            movementMultiplier = new Vec3f(0.9F, 1.5F, 0.9F);
+            movementMultiplier = new Vec3(0.9F, 1.5F, 0.9F);
         } else if (state.is(Blocks.COBWEB)) {
-            movementMultiplier = new Vec3f(0.25F, 0.05F, 0.25F);
+            movementMultiplier = new Vec3(0.25F, 0.05F, 0.25F);
             if (player.hasStatusEffect(Effect.WEAVING)) {
-                movementMultiplier = new Vec3f(0.5F, 0.25F, 0.5F);
+                movementMultiplier = new Vec3(0.5F, 0.25F, 0.5F);
             }
         }
 
-        if (movementMultiplier.equals(Vec3f.ZERO)) {
+        if (movementMultiplier.equals(Vec3.ZERO)) {
             return;
         }
 

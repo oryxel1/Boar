@@ -30,11 +30,11 @@ public class Box implements Cloneable {
         this.maxZ = (float) boundingBox.getMax(Axis.Z);
     }
 
-    public Vec3f toVec3f(float width) {
-        return new Vec3f(this.minX + (width / 2F), this.minY, this.maxZ - (width / 2F));
+    public Vec3 toVec3f(float width) {
+        return new Vec3(this.minX + (width / 2F), this.minY, this.maxZ - (width / 2F));
     }
 
-    public static Box of(Vec3f center, float dx, float dy, float dz) {
+    public static Box of(Vec3 center, float dx, float dy, float dz) {
         return new Box(center.x - dx / 2.0F, center.y - dy / 2.0F, center.z - dz / 2.0F, center.x + dx / 2.0F, center.y + dy / 2.0F, center.z + dz / 2.0F);
     }
 
@@ -135,7 +135,7 @@ public class Box implements Cloneable {
         return new Box(d, e, f, g, h, i);
     }
 
-    public Box stretch(Vec3f scale) {
+    public Box stretch(Vec3 scale) {
         return this.stretch(scale.x, scale.y, scale.z);
     }
 
@@ -205,7 +205,7 @@ public class Box implements Cloneable {
         return new Box(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
     }
 
-    public Box offset(Vec3f vec) {
+    public Box offset(Vec3 vec) {
         return this.offset(vec.x, vec.y, vec.z);
     }
 
@@ -217,11 +217,11 @@ public class Box implements Cloneable {
         return this.minX < maxX && this.maxX > minX && this.minY < maxY && this.maxY > minY && this.minZ < maxZ && this.maxZ > minZ;
     }
 
-    public boolean intersects(Vec3f pos1, Vec3f pos2) {
+    public boolean intersects(Vec3 pos1, Vec3 pos2) {
         return this.intersects(Math.min(pos1.x, pos2.x), Math.min(pos1.y, pos2.y), Math.min(pos1.z, pos2.z), Math.max(pos1.x, pos2.x), Math.max(pos1.y, pos2.y), Math.max(pos1.z, pos2.z));
     }
 
-    public boolean contains(Vec3f pos) {
+    public boolean contains(Vec3 pos) {
         return this.contains(pos.x, pos.y, pos.z);
     }
 
@@ -237,12 +237,12 @@ public class Box implements Cloneable {
         return this.expand(-value);
     }
 
-    public Vec3f getMinPos() {
-        return new Vec3f(this.minX, this.minY, this.minZ);
+    public Vec3 getMinPos() {
+        return new Vec3(this.minX, this.minY, this.minZ);
     }
 
-    public Vec3f getMaxPos() {
-        return new Vec3f(this.maxX, this.maxY, this.maxZ);
+    public Vec3 getMaxPos() {
+        return new Vec3(this.maxX, this.maxY, this.maxZ);
     }
 
     public float getAverageSideLength() {

@@ -5,9 +5,8 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.util.MathUtil;
-import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;
@@ -17,7 +16,6 @@ import org.geysermc.geyser.util.BlockUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class Collision {
     public static boolean isSpaceEmpty(final BoarPlayer player, final Box box) {
@@ -33,7 +31,7 @@ public class Collision {
         return player.onGround || player.fallDistance < 0.6F && !isSpaceAroundPlayerEmpty(player, 0, 0, 0.6F - player.fallDistance);
     }
 
-    public static Vec3f adjustMovementForSneaking(final BoarPlayer player, final Vec3f movement) {
+    public static Vec3 adjustMovementForSneaking(final BoarPlayer player, final Vec3 movement) {
         final float f = PlayerData.STEP_HEIGHT;
         if (movement.y <= 0.0 && (player.sneaking || player.wasSneaking) && canBackOffFromEdge(player)) {
             float d = movement.x;
@@ -73,43 +71,43 @@ public class Collision {
                 }
             }
 
-            return new Vec3f(d, movement.y, e);
+            return new Vec3(d, movement.y, e);
         } else {
             return movement;
         }
     }
 
-    public static Vec3f adjustMovementForCollisions(final BoarPlayer player, Vec3f movement, boolean compensated) {
+    public static Vec3 adjustMovementForCollisions(final BoarPlayer player, Vec3 movement, boolean compensated) {
         Box box = player.boundingBox.clone();
         List<Box> collisions = /* this.getWorld().getEntityCollisions(this, lv.stretch(movement)) */ new ArrayList<>();
-        Vec3f lv2 = movement.lengthSquared() == 0.0 ? movement : adjustMovementForCollisions(player, movement, box, collisions, compensated);
+        Vec3 lv2 = movement.lengthSquared() == 0.0 ? movement : adjustMovementForCollisions(player, movement, box, collisions, compensated);
         boolean collisionX = movement.x != lv2.x, collisionZ = movement.z != lv2.z;
         boolean verticalCollision = movement.y != lv2.y;
         boolean onGround = verticalCollision && movement.y < 0.0;
         if ((onGround || player.onGround) && (collisionX || collisionZ)) {
-            Vec3f vec32 = adjustMovementForCollisions(player, new Vec3f(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions, compensated);
-            Vec3f vec33 = adjustMovementForCollisions(player, new Vec3f(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions, compensated);
+            Vec3 vec32 = adjustMovementForCollisions(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions, compensated);
+            Vec3 vec33 = adjustMovementForCollisions(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions, compensated);
             if (vec33.y < PlayerData.STEP_HEIGHT) {
-                Vec3f vec34 = adjustMovementForCollisions(player, new Vec3f(movement.x, 0, movement.z), box.offset(vec33), collisions, compensated).add(vec33);
+                Vec3 vec34 = adjustMovementForCollisions(player, new Vec3(movement.x, 0, movement.z), box.offset(vec33), collisions, compensated).add(vec33);
                 if (vec34.horizontalLengthSquared() > vec32.horizontalLengthSquared()) {
                     vec32 = vec34;
                 }
             }
 
             if (vec32.horizontalLengthSquared() > lv2.horizontalLengthSquared()) {
-                lv2 = vec32.add(adjustMovementForCollisions(player, new Vec3f(0, -vec32.y, 0), box.offset(vec32), collisions, compensated));
+                lv2 = vec32.add(adjustMovementForCollisions(player, new Vec3(0, -vec32.y, 0), box.offset(vec32), collisions, compensated));
             }
         }
 
         return lv2;
     }
 
-    private static Vec3f adjustMovementForCollisions(final BoarPlayer player, final Vec3f movement, final Box box, final List<Box> collisions, boolean compensated) {
+    private static Vec3 adjustMovementForCollisions(final BoarPlayer player, final Vec3 movement, final Box box, final List<Box> collisions, boolean compensated) {
         collisions.addAll(findCollisionsForMovement(player, box.stretch(movement), compensated));
         return adjustMovementForCollisions(movement, box, collisions);
     }
 
-    private static Vec3f adjustMovementForCollisions(final Vec3f movement, Box box, final List<Box> collisions) {
+    private static Vec3 adjustMovementForCollisions(final Vec3 movement, Box box, final List<Box> collisions) {
         if (collisions.isEmpty()) {
             return movement;
         } else {
@@ -134,7 +132,7 @@ public class Collision {
                 z = calculateMaxOffset(Axis.Z, box, collisions, z);
             }
 
-            return new Vec3f(x, y, z);
+            return new Vec3(x, y, z);
         }
     }
 

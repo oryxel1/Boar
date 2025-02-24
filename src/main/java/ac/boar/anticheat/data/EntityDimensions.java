@@ -1,7 +1,7 @@
 package ac.boar.anticheat.data;
 
 import ac.boar.anticheat.util.math.Box;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ public record EntityDimensions(float width, float height, float eyeHeight, boole
 		return height * 0.85F;
 	}
 
-	public Box getBoxAt(Vec3f pos) {
+	public Box getBoxAt(Vec3 pos) {
 		return this.getBoxAt(pos.x, pos.y, pos.z);
 	}
 

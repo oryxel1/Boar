@@ -13,7 +13,7 @@ import ac.boar.anticheat.prediction.engine.impl.PredictionEngineLava;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineNormal;
 import ac.boar.anticheat.prediction.engine.impl.PredictionEngineWater;
 import ac.boar.anticheat.util.BlockUtil;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.geysermc.geyser.level.block.type.BlockState;
@@ -31,17 +31,11 @@ public class LivingTicker extends EntityTicker {
         super.tick();
         tickMovement();
 
-        player.prevBoundingBox = player.boundingBox;
-
         // Update bounding box based off our calculated movement, don't trust player position value.
         // This patches some bypasses abuses bounding box, also this is a workaround for floating point errors breaking collision.
         // Well since we're not predicting anything when player flying, this is going to be inaccurate as soon as we start flying.
         // Depends on how bad is the floating point errors.
-        player.boundingBox = player.boundingBox.offset(player.predictedVelocity);
-        if (player.prevPose != player.pose) {
-            final Vec3f vec3f = player.boundingBox.toVec3f(EntityDimensions.POSE_DIMENSIONS.get(player.prevPose).width());
-            player.boundingBox = player.dimensions.getBoxAt(vec3f);
-        }
+        player.updateBoundingBox(player.predictedPosition);
 
         this.tickBlockCollision();
     }
@@ -80,23 +74,23 @@ public class LivingTicker extends EntityTicker {
         if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
             player.prevEotVelocity = player.eotVelocity;
             player.eotVelocity = player.claimedEOT;
-            player.predictedVelocity = player.actualVelocity;
+            player.predictedPosition = player.position;
             return;
         }
 
         final boolean isThereMovementMultiplier = player.movementMultiplier.lengthSquared() > 1.0E-7;
 
         double closetOffset = Double.MAX_VALUE;
-        Vec3f beforeCollision = Vec3f.ZERO, afterCollision = Vec3f.ZERO;
+        Vec3 beforeCollision = Vec3.ZERO, afterCollision = Vec3.ZERO;
         for (final Vector vector : engine.gatherAllPossibilities()) {
-            Vec3f movement = vector.getVelocity();
+            Vec3 movement = vector.getVelocity();
             if (isThereMovementMultiplier) {
                 movement = movement.multiply(player.movementMultiplier);
             }
 
             movement = Collision.adjustMovementForSneaking(player, movement);
-            final Vec3f lv2 = Collision.adjustMovementForCollisions(player, movement, true);
-            final double offset = lv2.distanceTo(player.actualVelocity);
+            final Vec3 lv2 = Collision.adjustMovementForCollisions(player, movement, true);
+            final double offset = player.prevPosition.add(lv2).distanceTo(player.position);
             if (offset < closetOffset) {
                 closetOffset = offset;
                 beforeCollision = movement;
@@ -109,8 +103,7 @@ public class LivingTicker extends EntityTicker {
             }
         }
 
-        player.beforeCollisionVelocity = beforeCollision;
-        player.predictedVelocity = afterCollision;
+        player.predictedData = new PredictionData(player.closetVector, beforeCollision, afterCollision);
         boolean bl = beforeCollision.x != afterCollision.x;
         boolean bl2 = beforeCollision.z != afterCollision.z;
         player.horizontalCollision = bl || bl2;
@@ -119,13 +112,13 @@ public class LivingTicker extends EntityTicker {
         player.wasGround = player.onGround;
         player.onGround = player.verticalCollision && beforeCollision.y < 0;
 
-        Vec3f eotVelocity = beforeCollision.clone();
+        Vec3 eotVelocity = beforeCollision.clone();
         if (isThereMovementMultiplier) {
-            player.movementMultiplier = eotVelocity = Vec3f.ZERO;
+            player.movementMultiplier = eotVelocity = Vec3.ZERO;
         }
 
         if (player.horizontalCollision) {
-            eotVelocity = new Vec3f(bl ? 0 : eotVelocity.x, eotVelocity.y, bl2 ? 0 : eotVelocity.z);
+            eotVelocity = new Vec3(bl ? 0 : eotVelocity.x, eotVelocity.y, bl2 ? 0 : eotVelocity.z);
         }
 
         if (player.verticalCollision) {
@@ -150,5 +143,7 @@ public class LivingTicker extends EntityTicker {
                 }
             }
         }
+
+        player.predictedPosition = player.prevPosition.add(afterCollision);
     }
 }

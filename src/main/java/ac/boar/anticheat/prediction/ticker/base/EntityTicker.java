@@ -5,7 +5,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
-import ac.boar.anticheat.util.math.Vec3f;
+import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -44,8 +44,8 @@ public class EntityTicker {
 //            return;
 //        }
 
-        final float eyePosition = player.y + player.dimensions.eyeHeight();
-        final Mutable mutable = new Mutable(player.x, eyePosition, player.z);
+        final float eyePosition = player.position.y + player.dimensions.eyeHeight();
+        final Mutable mutable = new Mutable(player.position.x, eyePosition, player.position.z);
         final FluidState lv4 = player.compensatedWorld.getFluidState(mutable);
         float e = mutable.getY() + lv4.getHeight(player, mutable);
         if (e > eyePosition) {
@@ -68,7 +68,7 @@ public class EntityTicker {
         }
 
         boolean found = false;
-        Vec3f velocity = Vec3f.ZERO;
+        Vec3 velocity = Vec3.ZERO;
         float maxFluidHeight = 0;
         int fluidCount = 0;
 
@@ -94,7 +94,7 @@ public class EntityTicker {
             found = true;
             maxFluidHeight = Math.max(height - box.minY, maxFluidHeight);
 
-            Vec3f lv5 = state.getVelocity(player, mutable, state);
+            Vec3 lv5 = state.getVelocity(player, mutable, state);
 //            if (maxFluidHeight < 0.4) {
 //                lv5 = lv5.multiply(maxFluidHeight);
 //            }
@@ -122,7 +122,9 @@ public class EntityTicker {
 
         final Box box = player.boundingBox;
         final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
-                GenericMath.floor(box.minX + 0.001), GenericMath.floor(box.minY + 0.001), GenericMath.floor(box.minZ + 0.001),
+                Math.min(GenericMath.floor(box.minX + 0.001), GenericMath.floor(box.minX - 0.001)),
+                Math.min(GenericMath.floor(box.minY + 0.001), GenericMath.floor(box.minY - 0.001)),
+                Math.min(GenericMath.floor(box.minZ + 0.001), GenericMath.floor(box.minZ - 0.001)),
                 GenericMath.floor(box.maxX - 0.001), GenericMath.floor(box.maxY - 0.001), GenericMath.floor(box.maxZ - 0.001));
 
         final Mutable mutable = new Mutable();
