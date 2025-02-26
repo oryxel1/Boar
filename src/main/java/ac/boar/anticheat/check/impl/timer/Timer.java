@@ -6,9 +6,9 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
-@CheckInfo(name = "Timer", type = "A")
-public final class TimerA extends PacketCheck {
-    public TimerA(final BoarPlayer player) {
+@CheckInfo(name = "Timer", type = "*")
+public final class Timer extends PacketCheck {
+    public Timer(final BoarPlayer player) {
         super(player);
     }
 

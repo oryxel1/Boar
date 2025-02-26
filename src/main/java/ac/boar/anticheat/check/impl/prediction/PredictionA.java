@@ -2,7 +2,7 @@ package ac.boar.anticheat.check.impl.prediction;
 
 import ac.boar.anticheat.check.api.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
-import ac.boar.anticheat.check.impl.velocity.VelocityA;
+import ac.boar.anticheat.check.impl.velocity.Velocity;
 import ac.boar.anticheat.player.BoarPlayer;
 
 @CheckInfo(name = "Prediction", type = "A")
@@ -17,7 +17,7 @@ public class PredictionA extends OffsetHandlerCheck {
             return;
         }
 
-        if (((VelocityA)player.checkHolder.get(VelocityA.class)).check(offset)) {
+        if (((Velocity)player.checkHolder.get(Velocity.class)).check(offset)) {
             return;
         }
 

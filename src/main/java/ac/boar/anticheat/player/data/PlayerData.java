@@ -85,7 +85,6 @@ public class PlayerData {
                 break;
             }
             iterator.remove();
-
             velocity = entry.getValue();
         }
 

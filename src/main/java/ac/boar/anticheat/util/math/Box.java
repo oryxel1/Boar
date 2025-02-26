@@ -7,7 +7,6 @@ public class Box implements Cloneable {
     public final static Box EMPTY = new Box(0, 0, 0, 0, 0, 0);
 
     public final static float EPSILON = 1.0E-7F;
-    public final static float MAX_TOLERANCE_ERROR = 3.0E-5F;
 
     public final float minX, minY, minZ;
     public final float maxX, maxY, maxZ;
@@ -70,13 +69,13 @@ public class Box implements Cloneable {
         if (maxDist > 0) {
             float d1 = chooseMin(axis) - other.chooseMax(axis);
 
-            if (d1 >= -MAX_TOLERANCE_ERROR) {
+            if (d1 >= -1.0E-3) {
                 maxDist = Math.min(maxDist, d1);
             }
         } else {
             float d0 = chooseMax(axis) - other.chooseMin(axis);
 
-            if (d0 <= MAX_TOLERANCE_ERROR) {
+            if (d0 <= 1.0E-3) {
                 maxDist = Math.max(maxDist, d0);
             }
         }
