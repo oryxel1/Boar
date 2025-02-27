@@ -19,8 +19,6 @@ public class Boar {
     private final static Boar instance = new Boar();
     private Boar() {}
 
-    public final static boolean IS_IN_DEBUGGING = true;
-
     private BoarPlayerManager playerManager;
 
     public void init() {

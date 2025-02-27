@@ -108,6 +108,11 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                 check.onPredictionComplete(offset);
             }
         }
+
+        // Have to do this due to loss precision, especially elytra!
+        if (offset < player.getMaxOffset()) {
+            player.velocity = player.unvalidatedTickEnd.clone();
+        }
     }
 
     private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {

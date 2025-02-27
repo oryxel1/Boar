@@ -97,7 +97,7 @@ public class PlayerData {
     public final Set<Ability> abilities = new HashSet<>();
 
     // Prediction related
-    public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
+    public EntityPose pose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = Box.EMPTY;
 
@@ -177,7 +177,6 @@ public class PlayerData {
     }
 
     public final void setPose(EntityPose pose) {
-        this.prevPose = pose;
         this.pose = pose;
         this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }

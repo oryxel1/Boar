@@ -7,10 +7,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
-import ac.boar.anticheat.prediction.engine.impl.PredictionEngineElytra;
-import ac.boar.anticheat.prediction.engine.impl.PredictionEngineLava;
-import ac.boar.anticheat.prediction.engine.impl.PredictionEngineNormal;
-import ac.boar.anticheat.prediction.engine.impl.PredictionEngineWater;
+import ac.boar.anticheat.prediction.engine.impl.*;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -44,7 +41,7 @@ public class LivingTicker extends EntityTicker {
 
     public void travel() {
         if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
-            player.velocity = player.unvalidatedTickEnd;
+            player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
             return;
         }
@@ -57,7 +54,7 @@ public class LivingTicker extends EntityTicker {
                 engine = new PredictionEngineLava(player);
             }
         } else if (player.gliding) {
-            engine = new PredictionEngineElytra(player);
+            engine = new PredictionEngineGliding(player);
         } else {
             engine = new PredictionEngineNormal(player);
         }
@@ -97,7 +94,8 @@ public class LivingTicker extends EntityTicker {
         player.groundCollision = player.verticalCollision && velocity.y < 0;
 
         if (isThereStuckSpeed) {
-            player.stuckSpeedMultiplier = player.velocity = Vec3.ZERO;
+            player.stuckSpeedMultiplier = Vec3.ZERO;
+            player.velocity = Vec3.ZERO.clone();
         }
 
         if (player.horizontalCollision) {
