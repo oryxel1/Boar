@@ -14,7 +14,7 @@ public class PredictionEngineElytra extends PredictionEngine {
 
     @Override
     protected Vec3 travel(Vec3 vec3) {
-        if (player.onGround) {
+        if (player.groundCollision) {
             player.gliding = false;
         }
 

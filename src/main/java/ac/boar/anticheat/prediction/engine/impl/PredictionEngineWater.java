@@ -5,7 +5,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.util.MathUtil;
-import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Fluid;
 
@@ -33,18 +32,16 @@ public class PredictionEngineWater extends PredictionEngine {
     }
 
     @Override
-    public Vec3 applyEndOfTick(Vec3 lv) {
-        final float y = lv.y;
+    public void finalizeMovement() {
+        final float y = player.velocity.y;
 
         float f = (player.sprinting || player.swimming) ? 0.9F : 0.8F;
-        lv = lv.multiply(f, 0.8F, f);
-        lv = this.applyFluidMovingSpeed(player.getEffectiveGravity(lv), lv);
+        player.velocity = player.velocity.multiply(f, 0.8F, f);
+        player.velocity = this.applyFluidMovingSpeed(player.getEffectiveGravity(), player.velocity);
 
 //        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
 //            lv.y = 0.3F;
 //        }
-
-        return lv;
     }
 
     @Override
@@ -55,7 +52,7 @@ public class PredictionEngineWater extends PredictionEngine {
     @Override
     protected boolean shouldJump() {
         float g = player.fluidHeight.getOrDefault(Fluid.WATER, 0F);
-        boolean bl = (player.touchingWater && g > 0.0) && !(player.onGround && !(g > player.getSwimHeight()));
+        boolean bl = (player.touchingWater && g > 0.0) && !(player.groundCollision && !(g > player.getSwimHeight()));
         return bl && player.getInputData().contains(PlayerAuthInputData.WANT_UP);
     }
 

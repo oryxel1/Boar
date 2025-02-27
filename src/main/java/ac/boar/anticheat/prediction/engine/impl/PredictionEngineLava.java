@@ -17,26 +17,24 @@ public class PredictionEngineLava extends PredictionEngine {
     }
 
     @Override
-    public Vec3 applyEndOfTick(Vec3 lv) {
-        final float y = lv.y;
+    public void finalizeMovement() {
+        final float y = player.velocity.y;
 
-        float gravity = player.getEffectiveGravity(lv);
+        float gravity = player.getEffectiveGravity();
         if (player.fluidHeight.getOrDefault(Fluid.LAVA, 0F) <= player.getSwimHeight()) {
-            lv = lv.multiply(0.5F, 0.8F, 0.5F);
-            lv = this.applyFluidMovingSpeed(gravity, lv);
+            player.velocity = player.velocity.multiply(0.5F, 0.8F, 0.5F);
+            player.velocity = this.applyFluidMovingSpeed(gravity, player.velocity);
         } else {
-            lv = lv.multiply(0.5F);
+            player.velocity = player.velocity.multiply(0.5F);
         }
 
         if (gravity != 0.0) {
-            lv = lv.add(0, -gravity / 4.0F, 0);
+            player.velocity = player.velocity.add(0, -gravity / 4.0F, 0);
         }
 
 //        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
 //            lv.y = 0.3F;
 //        }
-
-        return lv;
     }
 
     @Override
@@ -47,8 +45,8 @@ public class PredictionEngineLava extends PredictionEngine {
     @Override
     protected boolean shouldJump() {
         float g = player.fluidHeight.getOrDefault(Fluid.LAVA, 0F);
-        boolean bl = (player.touchingWater && g > 0.0) && !(player.onGround && !(g > player.getSwimHeight()));
-        boolean canJumpOnGround = !player.isInLava() || player.onGround && !(g > player.getSwimHeight());
+        boolean bl = (player.touchingWater && g > 0.0) && !(player.groundCollision && !(g > player.getSwimHeight()));
+        boolean canJumpOnGround = !player.isInLava() || player.groundCollision && !(g > player.getSwimHeight());
         return !bl && !canJumpOnGround && player.getInputData().contains(PlayerAuthInputData.WANT_UP);
     }
 

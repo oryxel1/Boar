@@ -104,14 +104,14 @@ public final class BoarPlayer extends PlayerData {
     // Prediction related method
     public void tick() {
         final List<Effect> shouldBeRemoved = new ArrayList<>();
-        for (Map.Entry<Effect, StatusEffect> entry : this.statusEffects.entrySet()) {
+        for (Map.Entry<Effect, StatusEffect> entry : this.activeEffects.entrySet()) {
             entry.getValue().tick();
             if (entry.getValue().getDuration() <= 0) {
                 shouldBeRemoved.add(entry.getKey());
             }
         }
 
-        shouldBeRemoved.forEach(this.statusEffects::remove);
+        shouldBeRemoved.forEach(this.activeEffects::remove);
     }
 
     public boolean isClimbing() {
@@ -127,16 +127,16 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getJumpBoostPower() {
-        return this.hasStatusEffect(Effect.JUMP_BOOST) ? 0.1F * (this.statusEffects.get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
+        return this.hasEffect(Effect.JUMP_BOOST) ? 0.1F * (this.activeEffects.get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
     }
 
     public float getBlockJumpFactor() {
         float f = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.position.toVector3i()));
-        float g = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos()));
+        float g = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()));
         return (double)f == 1.0 ? g : f;
     }
 
-    public Vector3i getVelocityAffectingPos() {
+    public Vector3i getBlockPosBelowThatAffectsMyMovement() {
         return this.getOnPos(0.1F);
     }
 

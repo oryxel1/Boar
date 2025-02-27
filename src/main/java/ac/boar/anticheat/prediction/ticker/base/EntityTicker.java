@@ -107,14 +107,14 @@ public class EntityTicker {
             velocity = velocity.multiply(1.0f / fluidCount);
         }
 
-        player.eotVelocity = player.eotVelocity.add(velocity.multiply(speed));
+        player.velocity = player.velocity.add(velocity.multiply(speed));
         player.fluidHeight.put(tag, maxFluidHeight);
 
         return found;
     }
 
     protected void tickBlockCollision() {
-        if (player.onGround) {
+        if (player.groundCollision) {
             final Vector3i lv = player.getOnPos(0.2F);
             final BlockState lv2 = player.compensatedWorld.getBlockState(lv);
             BlockUtil.onSteppedOn(player, lv2, lv);

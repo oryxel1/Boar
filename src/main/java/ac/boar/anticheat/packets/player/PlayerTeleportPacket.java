@@ -54,15 +54,14 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
 
             final long tickDistance = packet.getTick() - cache.getTick() - 1;
 
-            player.onGround = cache.isOnGround();
+            player.groundCollision = cache.isOnGround();
 
-            player.eotVelocity = cache.getVelocity();
+            player.velocity = cache.getVelocity();
             player.setPos(cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
-            player.predictedData = cache.getData().data();
 
             player.unvalidatedPosition = player.position.clone();
 
-            player.teleportUtil.setLastKnowValid(cache.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
+            player.teleportUtil.cacheKnowValid(cache.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
 
             if (GlobalSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Required ticks to catch up: " + tickDistance);
@@ -75,14 +74,15 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             long currentTick = cache.getTick();
             for (int i = 0; i < tickDistance; i++) {
                 currentTick++;
-                if (player.savedInputMap.containsKey(currentTick)) {
-                    final PlayerAuthInputPacket old = player.savedInputMap.get(currentTick);
+                if (player.teleportUtil.getAuthInputHistory().containsKey(currentTick)) {
+                    final PlayerAuthInputPacket old = player.teleportUtil.getAuthInputHistory().get(currentTick);
                     MovementCheckRunner.processInputMovePacket(player, old);
                 }
 
                 new PlayerTicker(player).tick();
 
-                player.teleportUtil.setLastKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
+                player.teleportUtil.cacheKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
+                player.prevUnvalidatedPosition = player.position.clone();
             }
 
             player.unvalidatedPosition = player.position.clone();

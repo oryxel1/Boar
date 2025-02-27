@@ -23,7 +23,7 @@ public class Velocity extends Check {
                 }
 
                 final long tick = player.velocityData == null ? player.tick : player.velocityData.tick();
-                player.teleportUtil.rewind(tick, player.predictedData);
+                player.teleportUtil.rewind(tick, player.predictionResult);
                 return true;
             }
 

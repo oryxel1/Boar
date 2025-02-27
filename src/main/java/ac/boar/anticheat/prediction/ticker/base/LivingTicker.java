@@ -32,10 +32,10 @@ public class LivingTicker extends EntityTicker {
     }
 
     public void tickMovement() {
-        player.movementInput = player.movementInput.multiply(0.98F);
+        player.input = player.input.multiply(0.98F);
 
-        if (player.movementInput.x != 0 && player.movementInput.z != 0) {
-            player.movementInput = player.movementInput.multiply(0.70710677F);
+        if (player.input.x != 0 && player.input.z != 0) {
+            player.input = player.input.multiply(0.70710677F);
         }
 
         this.travel();
@@ -43,6 +43,12 @@ public class LivingTicker extends EntityTicker {
     }
 
     public void travel() {
+        if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
+            player.velocity = player.unvalidatedTickEnd;
+            player.setPos(player.unvalidatedPosition);
+            return;
+        }
+
         final PredictionEngine engine;
         if (player.touchingWater || player.isInLava()) {
             if (player.touchingWater) {
@@ -56,25 +62,14 @@ public class LivingTicker extends EntityTicker {
             engine = new PredictionEngineNormal(player);
         }
 
-        player.engine = engine;
-
-        // Can't just check for flying since player movement can also act weirdly when have may_fly ability.
-        if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
-            player.prevEotVelocity = player.eotVelocity;
-            player.eotVelocity = player.claimedEOT;
-
-            player.setPos(player.unvalidatedPosition);
-            return;
-        }
-
-        final boolean isThereMovementMultiplier = player.movementMultiplier.lengthSquared() > 1.0E-7;
+        final boolean isThereStuckSpeed = player.stuckSpeedMultiplier.lengthSquared() > 1.0E-7;
 
         double closetOffset = Double.MAX_VALUE;
-        Vec3 beforeCollision = Vec3.ZERO, afterCollision = Vec3.ZERO;
+        Vec3 velocity = Vec3.ZERO, collided = Vec3.ZERO;
         for (final Vector vector : engine.gatherAllPossibilities()) {
             Vec3 movement = vector.getVelocity();
-            if (isThereMovementMultiplier) {
-                movement = movement.multiply(player.movementMultiplier);
+            if (isThereStuckSpeed) {
+                movement = movement.multiply(player.stuckSpeedMultiplier);
             }
 
             movement = Collision.maybeBackOffFromEdge(player, movement);
@@ -82,44 +77,41 @@ public class LivingTicker extends EntityTicker {
             final double offset = player.position.add(lv2).distanceTo(player.position);
             if (offset < closetOffset) {
                 closetOffset = offset;
-                beforeCollision = movement;
-                afterCollision = lv2;
+                velocity = movement;
+                collided = lv2;
                 player.closetVector = vector;
-            }
-
-            if (vector.getType() == VectorType.VELOCITY) {
-                player.postPredictionVelocities.put(vector.getTransactionId(), new PredictionData(vector, movement, lv2));
             }
         }
 
-        // Well we're going to use player sent last position instead of our own since if we use ours then it will lose precision.
-        player.setPos(player.prevUnvalidatedPosition.add(afterCollision));
+        player.velocity = velocity.clone();
 
-        player.predictedData = new PredictionData(player.closetVector, beforeCollision, afterCollision);
-        boolean bl = beforeCollision.x != afterCollision.x;
-        boolean bl2 = beforeCollision.z != afterCollision.z;
+        // Well we're going to use player sent last position instead of our own since if we use ours then it will lose precision.
+        player.setPos(player.prevUnvalidatedPosition.add(collided));
+
+        boolean bl = velocity.x != collided.x;
+        boolean bl2 = velocity.z != collided.z;
         player.horizontalCollision = bl || bl2;
 
-        player.verticalCollision = beforeCollision.y != afterCollision.y;
-        player.wasGround = player.onGround;
-        player.onGround = player.verticalCollision && beforeCollision.y < 0;
+        player.verticalCollision = velocity.y != collided.y;
+        player.wasGroundCollision = player.groundCollision;
+        player.groundCollision = player.verticalCollision && velocity.y < 0;
 
-        Vec3 eotVelocity = beforeCollision.clone();
-        if (isThereMovementMultiplier) {
-            player.movementMultiplier = eotVelocity = Vec3.ZERO;
+        if (isThereStuckSpeed) {
+            player.stuckSpeedMultiplier = player.velocity = Vec3.ZERO;
         }
 
         if (player.horizontalCollision) {
-            eotVelocity = new Vec3(bl ? 0 : eotVelocity.x, eotVelocity.y, bl2 ? 0 : eotVelocity.z);
+            player.velocity = new Vec3(bl ? 0 : player.velocity.x, player.velocity.y, bl2 ? 0 : player.velocity.z);
         }
 
         if (player.verticalCollision) {
             final Vector3i lv = player.getOnPos(0.2F);
             final BlockState lv2 = player.compensatedWorld.getBlockState(lv);
-            BlockUtil.onEntityLand(true, player, eotVelocity, lv2);
+            BlockUtil.onEntityLand(true, player, lv2);
         }
 
-        player.eotVelocity = engine.applyEndOfTick(eotVelocity);
+        engine.finalizeMovement();
+        player.predictionResult = new PredictionData(player.closetVector, velocity, collided, player.velocity.clone());
 
         if (player.closetVector.getType() == VectorType.VELOCITY) {
             Iterator<Map.Entry<Long, VelocityData>> iterator = player.queuedVelocities.entrySet().iterator();

@@ -17,8 +17,8 @@ public class PredictionEngineNormal extends PredictionEngine {
 
     @Override
     protected Vec3 travel(Vec3 vec3) {
-        final Vector3i lv = player.getVelocityAffectingPos();
-        float f = player.onGround ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv)) : 1.0F;
+        final Vector3i lv = player.getBlockPosBelowThatAffectsMyMovement();
+        float f = player.groundCollision ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv)) : 1.0F;
         return this.applyMovementInput(vec3, f);
     }
 
@@ -29,24 +29,21 @@ public class PredictionEngineNormal extends PredictionEngine {
     }
 
     @Override
-    public Vec3 applyEndOfTick(Vec3 lv) {
-        final Vector3i lv2 = player.getVelocityAffectingPos();
-        float f = player.wasGround ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv2)) : 1.0F;
-        float d = lv.y;
-        final StatusEffect effect = player.statusEffects.get(Effect.LEVITATION);
+    public void finalizeMovement() {
+        final Vector3i lv2 = player.getBlockPosBelowThatAffectsMyMovement();
+        float f = player.wasGroundCollision ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv2)) : 1.0F;
+        final StatusEffect effect = player.activeEffects.get(Effect.LEVITATION);
         if (effect != null) {
-            d += (0.05f * (effect.getAmplifier() + 1) - lv.y) * 0.2f;
+            player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
         } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
-            d -= player.getEffectiveGravity(lv);
+            player.velocity.y -= player.getEffectiveGravity();
         } else {
             // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
-            d = 0;
+            player.velocity.y = 0;
         }
 
         final float g = f * 0.91F;
-        lv = new Vec3(lv.x * g, d * 0.98F, lv.z * g);
-
-        return lv;
+        player.velocity = player.velocity.multiply(g, 0.98F, g);
     }
 
     @Override
@@ -55,7 +52,7 @@ public class PredictionEngineNormal extends PredictionEngine {
         if (!(f <= 1.0E-5F)) {
             vec3 = new Vec3(vec3.x, Math.max(f, vec3.y), vec3.z);
             if (player.sprinting) {
-                float g = player.yaw * (float) (TrigMath.PI / 180.0);
+                float g = player.yaw * (float) (TrigMath.PI / 180.0F);
                 vec3 = vec3.add(-TrigMath.sin(g) * 0.2f, 0, TrigMath.cos(g) * 0.2f);
             }
         }
@@ -65,6 +62,6 @@ public class PredictionEngineNormal extends PredictionEngine {
 
     @Override
     protected boolean shouldJump() {
-        return player.getInputData().contains(PlayerAuthInputData.START_JUMPING) && player.onGround;
+        return player.getInputData().contains(PlayerAuthInputData.START_JUMPING) && player.groundCollision;
     }
 }

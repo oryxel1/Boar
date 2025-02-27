@@ -62,8 +62,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.prevUnvalidatedPosition = player.unvalidatedPosition;
         player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
 
-        player.claimedEOT = new Vec3(packet.getDelta());
-        player.prevEotVelocity = player.eotVelocity.clone();
+        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
+        player.prevVelocity = player.velocity.clone();
 
         if (player.teleportUtil.teleportInQueue() && GlobalSetting.REWIND_INFO_DEBUG) {
             ChatUtil.alert("Player trying to send position with tick " + player.tick + " while teleporting!");
@@ -75,7 +75,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             player.setPos(player.unvalidatedPosition);
 
             player.sinceTeleport = 0;
-            player.eotVelocity = Vec3.ZERO;
+            player.velocity = Vec3.ZERO;
             return;
         }
 
@@ -87,7 +87,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
             }
-            player.postPredictionVelocities.clear();
             return;
         }
 
@@ -101,10 +100,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         // Also, this is more accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
         final double offset = player.position.distanceTo(player.unvalidatedPosition);
 
-        if (player.canControlEOT()) {
-            player.eotVelocity = player.claimedEOT;
-        }
-
         correctInputData(player, packet);
 
         for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {
@@ -113,24 +108,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
                 check.onPredictionComplete(offset);
             }
         }
-
-        player.postPredictionVelocities.clear();
-    }
-
-    public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        player.setInputData(packet.getInputData());
-
-        player.movementInput = new Vec3(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
-
-        processInputData(player);
-
-        player.prevYaw = player.yaw;
-        player.prevPitch = player.pitch;
-        player.yaw = packet.getRotation().getY();
-        player.pitch = packet.getRotation().getX();
-
-        player.bedrockRotation = packet.getRotation();
-        player.cameraOrientation = packet.getCameraOrientation();
     }
 
     private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
@@ -154,11 +131,27 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         // Technically this should be eotVelocity, but since geyser check for this once instead of previous for the ground status
         // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
         // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
-        packet.setDelta(player.prevEotVelocity.toVector3f());
+        packet.setDelta(player.prevVelocity.toVector3f());
 
         if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
             packet.getInputData().remove(!player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
         }
+    }
+
+    public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        player.setInputData(packet.getInputData());
+
+        player.input = new Vec3(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
+
+        processInputData(player);
+
+        player.prevYaw = player.yaw;
+        player.prevPitch = player.pitch;
+        player.yaw = packet.getRotation().getY();
+        player.pitch = packet.getRotation().getX();
+
+        player.bedrockRotation = packet.getRotation();
+        player.cameraOrientation = packet.getCameraOrientation();
     }
 
     public static void processInputData(final BoarPlayer player) {
@@ -183,7 +176,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
                 // Don't let player do backwards sprinting!
                 case START_SPRINTING -> {
-                    player.sprinting = player.movementInput.getZ() > 0;
+                    player.sprinting = player.input.getZ() > 0;
                     player.setSprinting(player.sprinting);
                 }
                 case STOP_SPRINTING -> {
@@ -207,7 +200,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             player.sinceSprinting++;
         }
 
-        if (player.sprinting && player.movementInput.getZ() <= 0) {
+        if (player.sprinting && player.input.getZ() <= 0) {
             player.sprinting = false;
             player.sinceSprinting = 1;
         }

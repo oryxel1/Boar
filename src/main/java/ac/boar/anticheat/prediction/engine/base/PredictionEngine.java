@@ -9,7 +9,6 @@ import ac.boar.anticheat.util.math.Vec3;
 
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
-import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Blocks;
 
 import java.util.ArrayList;
@@ -24,15 +23,14 @@ public abstract class PredictionEngine {
     protected abstract Vec3 jump(Vec3 vec3);
     protected abstract boolean shouldJump();
 
-    public Vec3 applyEndOfTick(Vec3 vec3) {
-        return vec3;
+    public void finalizeMovement() {
     }
 
     public final List<Vector> gatherAllPossibilities() {
         List<Vector> vectors = new ArrayList<>();
         final VelocityData supposedVelocity = player.getSupposedVelocity();
         if (supposedVelocity == null) {
-            vectors.add(new Vector(player.eotVelocity, VectorType.NORMAL));
+            vectors.add(new Vector(player.velocity, VectorType.NORMAL));
         } else {
             vectors.add(new Vector(supposedVelocity.velocity(), VectorType.VELOCITY, supposedVelocity.transactionId()));
         }
@@ -74,7 +72,7 @@ public abstract class PredictionEngine {
 
     // Other
     protected final Vec3 updateVelocity(final Vec3 vec3, final float speed) {
-        return vec3.add(MathUtil.movementInputToVelocity(player.movementInput, speed, player.yaw));
+        return vec3.add(MathUtil.movementInputToVelocity(player.input, speed, player.yaw));
     }
 
     protected final Vec3 applyClimbingSpeed(final Vec3 motion) {

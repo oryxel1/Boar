@@ -41,29 +41,29 @@ public class BlockUtil {
         };
     }
 
-    public static void onEntityLand(final boolean living, final BoarPlayer player, final Vec3 lv, final BlockState state) {
+    public static void onEntityLand(final boolean living, final BoarPlayer player, final BlockState state) {
         final TagCache cache = player.getSession().getTagCache();
 
-        if (cache.is(BlockTag.BEDS, state.block()) && lv.y < 0.0 && !player.sneaking) {
+        if (cache.is(BlockTag.BEDS, state.block()) && player.velocity.y < 0.0 && !player.sneaking) {
             final float d = living ? 1.0F : 0.8F;
-            lv.y = -lv.y * 0.75F * d;
-            if (lv.y > 0.75) {
-                lv.y = 0.75F;
+            player.velocity.y = -player.velocity.y * 0.75F * d;
+            if (player.velocity.y > 0.75) {
+                player.velocity.y = 0.75F;
             }
 
             return;
         }
 
-        lv.y = 0;
+        player.velocity.y = 0;
     }
 
     public static void onSteppedOn(final BoarPlayer player, final BlockState state, final Vector3i vector3i) {
         if (state.is(Blocks.HONEY_BLOCK)) {
             // Yes lol.
-            float d = Math.abs(player.eotVelocity.y);
+            float d = Math.abs(player.velocity.y);
             if (d < 0.1 && !player.sneaking) {
                 float e = 0.4F + d * 0.2F;
-                player.eotVelocity = player.eotVelocity.multiply(e, 1, e);
+                player.velocity = player.velocity.multiply(e, 1, e);
             }
         }
     }
@@ -72,7 +72,7 @@ public class BlockUtil {
         if (state.is(Blocks.BUBBLE_COLUMN)) {
             boolean drag = state.getValue(Properties.DRAG);
 
-            final Vec3 lv = player.eotVelocity;
+            final Vec3 lv = player.velocity;
             if (player.compensatedWorld.getBlockAt(pos.getX(), pos.getY() + 1, pos.getZ()) == Block.JAVA_AIR_ID) {
                 if (drag) {
                     lv.y = Math.max(-0.9F, lv.y - 0.03F);
@@ -95,7 +95,7 @@ public class BlockUtil {
             movementMultiplier = new Vec3(0.9F, 1.5F, 0.9F);
         } else if (state.is(Blocks.COBWEB)) {
             movementMultiplier = new Vec3(0.25F, 0.05F, 0.25F);
-            if (player.hasStatusEffect(Effect.WEAVING)) {
+            if (player.hasEffect(Effect.WEAVING)) {
                 movementMultiplier = new Vec3(0.5F, 0.25F, 0.5F);
             }
         }
@@ -104,15 +104,15 @@ public class BlockUtil {
             return;
         }
 
-        final boolean xLargerThanThreshold = Math.abs(player.movementMultiplier.x) >= 1.0E-7;
-        final boolean yLargerThanThreshold = Math.abs(player.movementMultiplier.y) >= 1.0E-7;
-        final boolean zLargerThanThreshold = Math.abs(player.movementMultiplier.z) >= 1.0E-7;
+        final boolean xLargerThanThreshold = Math.abs(player.stuckSpeedMultiplier.x) >= 1.0E-7;
+        final boolean yLargerThanThreshold = Math.abs(player.stuckSpeedMultiplier.y) >= 1.0E-7;
+        final boolean zLargerThanThreshold = Math.abs(player.stuckSpeedMultiplier.z) >= 1.0E-7;
         if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
-            player.movementMultiplier.x = Math.min(player.movementMultiplier.x, movementMultiplier.x);
-            player.movementMultiplier.y = Math.min(player.movementMultiplier.y, movementMultiplier.y);
-            player.movementMultiplier.z = Math.min(player.movementMultiplier.z, movementMultiplier.z);
+            player.stuckSpeedMultiplier.x = Math.min(player.stuckSpeedMultiplier.x, movementMultiplier.x);
+            player.stuckSpeedMultiplier.y = Math.min(player.stuckSpeedMultiplier.y, movementMultiplier.y);
+            player.stuckSpeedMultiplier.z = Math.min(player.stuckSpeedMultiplier.z, movementMultiplier.z);
         } else {
-            player.movementMultiplier = movementMultiplier;
+            player.stuckSpeedMultiplier = movementMultiplier;
         }
     }
 

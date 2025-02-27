@@ -28,7 +28,7 @@ public class Collision {
     }
 
     private static boolean canBackOffFromEdge(final BoarPlayer player) {
-        return player.onGround || player.fallDistance < 0.6F && !canFallAtLeast(player, 0, 0, 0.6F - player.fallDistance);
+        return player.groundCollision || player.fallDistance < 0.6F && !canFallAtLeast(player, 0, 0, 0.6F - player.fallDistance);
     }
 
     public static Vec3 maybeBackOffFromEdge(final BoarPlayer player, final Vec3 movement) {
@@ -84,7 +84,7 @@ public class Collision {
         boolean collisionX = movement.x != lv2.x, collisionZ = movement.z != lv2.z;
         boolean verticalCollision = movement.y != lv2.y;
         boolean onGround = verticalCollision && movement.y < 0.0;
-        if ((onGround || player.onGround) && (collisionX || collisionZ)) {
+        if ((onGround || player.groundCollision) && (collisionX || collisionZ)) {
             Vec3 vec32 = collideBoundingBox(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions, compensated);
             Vec3 vec33 = collideBoundingBox(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions, compensated);
             if (vec33.y < PlayerData.STEP_HEIGHT) {

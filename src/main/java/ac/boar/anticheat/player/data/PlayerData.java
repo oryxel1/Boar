@@ -2,7 +2,6 @@ package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.*;
-import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.LatencyUtil;
@@ -65,15 +64,15 @@ public class PlayerData {
     public final LatencyUtil latencyUtil = new LatencyUtil(this);
 
     // Effect status related
-    public final Map<Effect, StatusEffect> statusEffects = new ConcurrentHashMap<>();
+    public final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();
 
-    public boolean hasStatusEffect(final Effect effect) {
-        return this.statusEffects.containsKey(effect);
+    public boolean hasEffect(final Effect effect) {
+        return this.activeEffects.containsKey(effect);
     }
 
     // Movement related, (movement input, player EOT, ...)
-    public Vec3 movementInput = Vec3.ZERO;
-    public Vec3 claimedEOT = Vec3.ZERO;
+    public Vec3 input = Vec3.ZERO;
+    public Vec3 unvalidatedTickEnd = Vec3.ZERO;
     public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
 
     public VelocityData getSupposedVelocity() {
@@ -101,18 +100,14 @@ public class PlayerData {
     public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = Box.EMPTY;
-    public Vec3 prevEotVelocity = Vec3.ZERO, eotVelocity = Vec3.ZERO;
-    public PredictionData predictedData = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO);
+
+    public Vec3 prevVelocity = Vec3.ZERO, velocity = Vec3.ZERO;
+
+    public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector closetVector = new Vector(Vec3.ZERO, VectorType.NORMAL);
     public VelocityData velocityData;
-    public boolean onGround, wasGround;
-    public Vec3 movementMultiplier = Vec3.ZERO;
-
-    public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
-    public final Map<Long, PlayerAuthInputPacket> savedInputMap = new ConcurrentSkipListMap<>();
-
-    // only for debugging
-    public PredictionEngine engine;
+    public boolean groundCollision, wasGroundCollision;
+    public Vec3 stuckSpeedMultiplier = Vec3.ZERO;
 
     public float fallDistance = 0;
 
@@ -127,10 +122,6 @@ public class PlayerData {
     // Prediction related method
     public final double getMaxOffset() {
         return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD;
-    }
-
-    public final boolean canControlEOT() {
-        return false;
     }
 
     public final void setSprinting(boolean sprinting) {
@@ -152,7 +143,11 @@ public class PlayerData {
     }
 
     public final float getEffectiveGravity(final Vec3 vec3) {
-        return vec3.y < 0.0 && this.hasStatusEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
+        return vec3.y < 0.0 && this.hasEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
+    }
+
+    public final float getEffectiveGravity() {
+        return this.getEffectiveGravity(this.velocity);
     }
 
     public float getSwimHeight() {
@@ -164,7 +159,7 @@ public class PlayerData {
     }
 
     public float getMovementSpeed(float slipperiness) {
-        if (onGround) {
+        if (groundCollision) {
             return this.getMovementSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
         }
 
