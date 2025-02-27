@@ -4,7 +4,6 @@ import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.data.teleport.RewindData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
@@ -60,8 +59,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         processInputMovePacket(player, packet);
 
-        player.prevPosition = player.position.clone();
-        player.position = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.prevUnvalidatedPosition = player.unvalidatedPosition;
+        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
 
         player.claimedEOT = new Vec3(packet.getDelta());
         player.prevEotVelocity = player.eotVelocity.clone();
@@ -73,10 +72,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.tick();
         if (player.lastTickWasTeleport) {
+            player.setPos(player.unvalidatedPosition);
+
             player.sinceTeleport = 0;
             player.eotVelocity = Vec3.ZERO;
-            player.predictedPosition = player.position;
-            player.updateBoundingBox(player.position);
             return;
         }
 
@@ -84,7 +83,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.sinceSpawnIn++;
 
         if (!player.hasSpawnedIn || player.sinceSpawnIn < 2) {
-            final double offset = player.position.distanceTo(player.prevPosition);
+            final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
             }
@@ -100,7 +99,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         // velocity to their position to move, floating point errors fuck this up and make player move just slightly further or less than
         // what player suppose to be. So we also do the same thing to accounted for this!
         // Also, this is more accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
-        final double offset = player.predictedPosition.distanceTo(player.position);
+        final double offset = player.position.distanceTo(player.unvalidatedPosition);
 
         if (player.canControlEOT()) {
             player.eotVelocity = player.claimedEOT;

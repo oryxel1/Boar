@@ -11,7 +11,6 @@ import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector3f;
-import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -47,7 +46,9 @@ public class PlayerData {
     public GameType gameType = GameType.DEFAULT;
 
     // Position, rotation, other.
-    public Vec3 position = Vec3.ZERO, prevPosition = Vec3.ZERO;
+    public Vec3 unvalidatedPosition = Vec3.ZERO, prevUnvalidatedPosition = Vec3.ZERO;
+
+    public Vec3 position = Vec3.ZERO;
     public float prevYaw, yaw, prevPitch, pitch;
     public Vector3f bedrockRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
 
@@ -95,11 +96,8 @@ public class PlayerData {
     // Attribute related, abilities
     public final Map<String, PlayerAttributeData> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();
-    public float movementSpeed = 0.1f;
 
     // Prediction related
-    public Vec3 predictedPosition = Vec3.ZERO;
-
     public EntityPose pose = EntityPose.STANDING, prevPose = EntityPose.STANDING;
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
     public Box boundingBox = Box.EMPTY;
@@ -108,14 +106,10 @@ public class PlayerData {
     public Vector closetVector = new Vector(Vec3.ZERO, VectorType.NORMAL);
     public VelocityData velocityData;
     public boolean onGround, wasGround;
-    public Optional<Vector3i> supportingBlockPos = Optional.empty();
-    public boolean forceUpdateSupportingBlockPos;
     public Vec3 movementMultiplier = Vec3.ZERO;
 
     public final Map<Long, PredictionData> postPredictionVelocities = new HashMap<>();
     public final Map<Long, PlayerAuthInputPacket> savedInputMap = new ConcurrentSkipListMap<>();
-
-    public Optional<Vector3i> climbingPos = Optional.empty();
 
     // only for debugging
     public PredictionEngine engine;
@@ -165,21 +159,26 @@ public class PlayerData {
         return this.dimensions.eyeHeight() < 0.4 ? 0.0F : 0.4F;
     }
 
+    public float getMovementSpeed() {
+        return this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).getValue();
+    }
+
     public float getMovementSpeed(float slipperiness) {
         if (onGround) {
-            return this.movementSpeed * (0.21600002F / (slipperiness * slipperiness * slipperiness));
+            return this.getMovementSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
         }
 
         return sprinting ? 0.025999999F : 0.02F;
     }
 
     // Others (methods)
-    public final void updateBoundingBox(Vec3 vec3) {
-        this.boundingBox = calculateBoundingBox(vec3.x, vec3.y, vec3.z);
+    public final void setPos(Vec3 vec3) {
+        this.position = vec3;
+        this.setBoundingBox(vec3);
     }
 
-    public final Box calculateBoundingBox(float x, float y, float z) {
-        return this.dimensions.getBoxAt(x, y, z);
+    public final void setBoundingBox(Vec3 vec3) {
+        this.boundingBox = this.dimensions.getBoxAt(vec3.x, vec3.y, vec3.z);
     }
 
     public final void setPose(EntityPose pose) {

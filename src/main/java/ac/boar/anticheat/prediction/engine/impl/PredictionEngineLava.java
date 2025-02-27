@@ -32,16 +32,9 @@ public class PredictionEngineLava extends PredictionEngine {
             lv = lv.add(0, -gravity / 4.0F, 0);
         }
 
-        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
-            lv.y = 0.3F;
-        }
-
-        if ((player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING)) &&
-                (player.isClimbing(false) /* ||
-                        player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.POWDER_SNOW) &&
-                                PowderSnowBlock.canWalkOnPowderSnow(this) */)) {
-            lv = new Vec3(lv.x, 0.2F, lv.z);
-        }
+//        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
+//            lv.y = 0.3F;
+//        }
 
         return lv;
     }

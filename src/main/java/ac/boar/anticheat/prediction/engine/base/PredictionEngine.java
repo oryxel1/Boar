@@ -78,7 +78,7 @@ public abstract class PredictionEngine {
     }
 
     protected final Vec3 applyClimbingSpeed(final Vec3 motion) {
-        if (player.isClimbing(true)) {
+        if (player.isClimbing()) {
             float g = Math.max(motion.y, -0.2F);
             if (g < 0.0 && !player.compensatedWorld.getBlockState(player.position.toVector3i()).is(Blocks.SCAFFOLDING) && player.sneaking) {
                 g = 0;

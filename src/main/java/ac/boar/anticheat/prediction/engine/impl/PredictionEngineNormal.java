@@ -46,20 +46,12 @@ public class PredictionEngineNormal extends PredictionEngine {
         final float g = f * 0.91F;
         lv = new Vec3(lv.x * g, d * 0.98F, lv.z * g);
 
-        // This got applied before instead of after like on Java Edition - or at-least seems to be the case.
-        if ((player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING)) &&
-                (player.isClimbing(false) /* ||
-                        player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.POWDER_SNOW) &&
-                                PowderSnowBlock.canWalkOnPowderSnow(this) */)) {
-            lv = new Vec3(lv.x, 0.2F, lv.z);
-        }
-
         return lv;
     }
 
     @Override
     protected Vec3 jump(Vec3 vec3) {
-        float f = player.getJumpVelocity();
+        float f = player.getJumpPower();
         if (!(f <= 1.0E-5F)) {
             vec3 = new Vec3(vec3.x, Math.max(f, vec3.y), vec3.z);
             if (player.sprinting) {

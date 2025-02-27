@@ -161,11 +161,7 @@ public class BlockUtil {
         return boxes1;
     }
 
-    public static float getVelocityMultiplier(BlockState state) {
-        return 1F;
-    }
-
-    public static float getJumpVelocityMultiplier(BlockState state) {
+    public static float getBlockJumpFactor(BlockState state) {
         if (state.is(Blocks.HONEY_BLOCK)) {
             return 0.6F;
         }

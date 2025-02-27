@@ -23,7 +23,7 @@ public class PredictionEngineWater extends PredictionEngine {
         if (player.swimming) {
             float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;
             float e = d < -0.2 ? 0.085F : 0.06F;
-            final FluidState state = player.compensatedWorld.getFluidState(player.prevPosition.add(0, 1.0F - 0.1F, 0).toVector3i());
+            final FluidState state = player.compensatedWorld.getFluidState(player.position.add(0, 1.0F - 0.1F, 0).toVector3i());
             if (d <= 0.0 || player.getInputData().contains(PlayerAuthInputData.WANT_UP) || state.fluid() != Fluid.EMPTY) {
                 vec3 = vec3.add(0, (d - vec3.y) * e, 0);
             }
@@ -40,16 +40,9 @@ public class PredictionEngineWater extends PredictionEngine {
         lv = lv.multiply(f, 0.8F, f);
         lv = this.applyFluidMovingSpeed(player.getEffectiveGravity(lv), lv);
 
-        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
-            lv.y = 0.3F;
-        }
-
-        if ((player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING)) &&
-                (player.isClimbing(false) /* ||
-                        player.compensatedWorld.getBlockState(Vector3i.from(player.x, player.y, player.z)).is(Blocks.POWDER_SNOW) &&
-                                PowderSnowBlock.canWalkOnPowderSnow(this) */)) {
-            lv = new Vec3(lv.x, 0.2F, lv.z);
-        }
+//        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
+//            lv.y = 0.3F;
+//        }
 
         return lv;
     }

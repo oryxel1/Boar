@@ -24,8 +24,6 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
-import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
-import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
@@ -105,8 +103,6 @@ public final class BoarPlayer extends PlayerData {
 
     // Prediction related method
     public void tick() {
-        this.movementSpeed = this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).getValue();
-
         final List<Effect> shouldBeRemoved = new ArrayList<>();
         for (Map.Entry<Effect, StatusEffect> entry : this.statusEffects.entrySet()) {
             entry.getValue().tick();
@@ -118,70 +114,52 @@ public final class BoarPlayer extends PlayerData {
         shouldBeRemoved.forEach(this.statusEffects::remove);
     }
 
-    public float getVelocityMultiplier() {
-        final BlockState lv = this.compensatedWorld.getBlockState(this.position.toVector3i());
-        final float f = BlockUtil.getVelocityMultiplier(lv);
-        if (!lv.is(Blocks.WATER) && !lv.is(Blocks.BUBBLE_COLUMN)) {
-            return f == 1.0 ? BlockUtil.getVelocityMultiplier(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos())) : f;
-        } else {
-            return f;
-        }
-    }
-
-    public boolean isClimbing(boolean old) {
+    public boolean isClimbing() {
         final TagCache cache = this.getSession().getTagCache();
 
-        Vector3i lv = Vector3i.from(old ? this.prevPosition.x : this.position.x, old ? this.prevPosition.y : this.position.y,
-                old ? this.prevPosition.z : this.position.z);
+        Vector3i lv = this.position.toVector3i();
         BlockState lv2 = this.compensatedWorld.getBlockState(lv);
-        if (cache.is(BlockTag.CLIMBABLE, lv2.block())) {
-            this.climbingPos = Optional.of(lv);
-            return true;
-        } else {
-            return false;
-        }
+        return cache.is(BlockTag.CLIMBABLE, lv2.block());
     }
 
-    public float getJumpVelocity() {
-        return PlayerData.JUMP_HEIGHT * this.getJumpVelocityMultiplier() + this.getJumpBoostVelocityModifier();
+    public float getJumpPower() {
+        return PlayerData.JUMP_HEIGHT * this.getBlockJumpFactor() + this.getJumpBoostPower();
     }
 
-    public float getJumpBoostVelocityModifier() {
+    public float getJumpBoostPower() {
         return this.hasStatusEffect(Effect.JUMP_BOOST) ? 0.1F * (this.statusEffects.get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
     }
 
-    public float getJumpVelocityMultiplier() {
-        float f = BlockUtil.getJumpVelocityMultiplier(this.compensatedWorld.getBlockState(this.prevPosition.toVector3i()));
-        float g = BlockUtil.getJumpVelocityMultiplier(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos()));
+    public float getBlockJumpFactor() {
+        float f = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.position.toVector3i()));
+        float g = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.getVelocityAffectingPos()));
         return (double)f == 1.0 ? g : f;
     }
 
     public Vector3i getVelocityAffectingPos() {
-        return this.getPosWithYOffset(true, 0.1F);
+        return this.getOnPos(0.1F);
     }
 
-    public Vector3i getPosWithYOffset(final boolean old, final float offset) {
-        float x = old ? this.prevPosition.x : this.position.x;
-        float y = old ? this.prevPosition.y : this.position.y;
-        float z = old ? this.prevPosition.z : this.position.z;
+    public Vector3i getOnPos(final float offset) {
+//        if (this.supportingBlockPos.isPresent()) {
+//            if (!(offset > 1.0E-5F)) {
+//                return this.supportingBlockPos.get();
+//            } else {
+//                final Vector3i vector3i = this.supportingBlockPos.get();
+//                final TagCache cache = this.session.getTagCache();
+//                final BlockState lv2 = this.compensatedWorld.getBlockState(vector3i);
+//                return offset > 0.5 || !cache.is(BlockTag.FENCES, lv2.block())
+//                        && !cache.is(BlockTag.WALLS, lv2.block()) && !cache.is(BlockTag.FENCE_GATES, lv2.block())
+//                        ? Vector3i.from(vector3i.getX(), GenericMath.floor(y - offset), vector3i.getZ()) : vector3i;
+//            }
+//        } else {
+//            int i = GenericMath.floor(x);
+//            int j = GenericMath.floor(y - offset);
+//            int k = GenericMath.floor(z);
+//            return Vector3i.from(i, j, k);
+//        }
 
-        if (this.supportingBlockPos.isPresent()) {
-            if (!(offset > 1.0E-5F)) {
-                return this.supportingBlockPos.get();
-            } else {
-                final Vector3i vector3i = this.supportingBlockPos.get();
-                final TagCache cache = this.session.getTagCache();
-                final BlockState lv2 = this.compensatedWorld.getBlockState(vector3i);
-                return offset > 0.5 || !cache.is(BlockTag.FENCES, lv2.block())
-                        && !cache.is(BlockTag.WALLS, lv2.block()) && !cache.is(BlockTag.FENCE_GATES, lv2.block())
-                        ? Vector3i.from(vector3i.getX(), GenericMath.floor(y - offset), vector3i.getZ()) : vector3i;
-            }
-        } else {
-            int i = GenericMath.floor(x);
-            int j = GenericMath.floor(y - offset);
-            int k = GenericMath.floor(z);
-            return Vector3i.from(i, j, k);
-        }
+        return this.position.subtract(0, offset, 0).toVector3i();
     }
 
     public boolean isRegionUnloaded() {
@@ -222,6 +200,6 @@ public final class BoarPlayer extends PlayerData {
     }
 
     private boolean doesNotCollide(Box box) {
-        return Collision.isSpaceEmpty(this, box) && !containsFluid(box);
+        return Collision.canFallAtLeast(this, box) && !containsFluid(box);
     }
 }

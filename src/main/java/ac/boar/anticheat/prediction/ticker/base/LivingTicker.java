@@ -1,7 +1,6 @@
 package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.collision.Collision;
-import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.PredictionData;
 import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -30,14 +29,6 @@ public class LivingTicker extends EntityTicker {
     public void tick() {
         super.tick();
         tickMovement();
-
-        // Update bounding box based off our calculated movement, don't trust player position value.
-        // This patches some bypasses abuses bounding box, also this is a workaround for floating point errors breaking collision.
-        // Well since we're not predicting anything when player flying, this is going to be inaccurate as soon as we start flying.
-        // Depends on how bad is the floating point errors.
-        player.updateBoundingBox(player.predictedPosition);
-
-        this.tickBlockCollision();
     }
 
     public void tickMovement() {
@@ -48,10 +39,7 @@ public class LivingTicker extends EntityTicker {
         }
 
         this.travel();
-//        if (!this.getWorld().isClient() || this.isLogicalSideForUpdatingMovement()) {
-//            this.tickBlockCollision();
-//        }
-
+        this.tickBlockCollision();
     }
 
     public void travel() {
@@ -74,7 +62,8 @@ public class LivingTicker extends EntityTicker {
         if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
             player.prevEotVelocity = player.eotVelocity;
             player.eotVelocity = player.claimedEOT;
-            player.predictedPosition = player.position;
+
+            player.setPos(player.unvalidatedPosition);
             return;
         }
 
@@ -88,9 +77,9 @@ public class LivingTicker extends EntityTicker {
                 movement = movement.multiply(player.movementMultiplier);
             }
 
-            movement = Collision.adjustMovementForSneaking(player, movement);
-            final Vec3 lv2 = Collision.adjustMovementForCollisions(player, movement, true);
-            final double offset = player.prevPosition.add(lv2).distanceTo(player.position);
+            movement = Collision.maybeBackOffFromEdge(player, movement);
+            final Vec3 lv2 = Collision.collide(player, movement, true);
+            final double offset = player.position.add(lv2).distanceTo(player.position);
             if (offset < closetOffset) {
                 closetOffset = offset;
                 beforeCollision = movement;
@@ -102,6 +91,9 @@ public class LivingTicker extends EntityTicker {
                 player.postPredictionVelocities.put(vector.getTransactionId(), new PredictionData(vector, movement, lv2));
             }
         }
+
+        // Well we're going to use player sent last position instead of our own since if we use ours then it will lose precision.
+        player.setPos(player.prevUnvalidatedPosition.add(afterCollision));
 
         player.predictedData = new PredictionData(player.closetVector, beforeCollision, afterCollision);
         boolean bl = beforeCollision.x != afterCollision.x;
@@ -122,13 +114,11 @@ public class LivingTicker extends EntityTicker {
         }
 
         if (player.verticalCollision) {
-            final Vector3i lv = player.getPosWithYOffset(false, 0.2F);
+            final Vector3i lv = player.getOnPos(0.2F);
             final BlockState lv2 = player.compensatedWorld.getBlockState(lv);
             BlockUtil.onEntityLand(true, player, eotVelocity, lv2);
         }
 
-        float f = player.getVelocityMultiplier();
-        eotVelocity = eotVelocity.multiply(f, 1, f);
         player.eotVelocity = engine.applyEndOfTick(eotVelocity);
 
         if (player.closetVector.getType() == VectorType.VELOCITY) {
@@ -143,7 +133,5 @@ public class LivingTicker extends EntityTicker {
                 }
             }
         }
-
-        player.predictedPosition = player.prevPosition.add(afterCollision);
     }
 }

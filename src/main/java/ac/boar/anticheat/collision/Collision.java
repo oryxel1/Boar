@@ -18,20 +18,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Collision {
-    public static boolean isSpaceEmpty(final BoarPlayer player, final Box box) {
+    public static boolean canFallAtLeast(final BoarPlayer player, final Box box) {
         return findCollisionsForMovement(player, box, true).isEmpty();
     }
 
-    public static boolean isSpaceAroundPlayerEmpty(final BoarPlayer player, float offsetX, float offsetZ, float f) {
+    public static boolean canFallAtLeast(final BoarPlayer player, float offsetX, float offsetZ, float f) {
         Box lv = player.boundingBox;
-        return isSpaceEmpty(player, new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
+        return canFallAtLeast(player, new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
     }
 
     private static boolean canBackOffFromEdge(final BoarPlayer player) {
-        return player.onGround || player.fallDistance < 0.6F && !isSpaceAroundPlayerEmpty(player, 0, 0, 0.6F - player.fallDistance);
+        return player.onGround || player.fallDistance < 0.6F && !canFallAtLeast(player, 0, 0, 0.6F - player.fallDistance);
     }
 
-    public static Vec3 adjustMovementForSneaking(final BoarPlayer player, final Vec3 movement) {
+    public static Vec3 maybeBackOffFromEdge(final BoarPlayer player, final Vec3 movement) {
         final float f = PlayerData.STEP_HEIGHT;
         if (movement.y <= 0.0 && (player.sneaking || player.wasSneaking) && canBackOffFromEdge(player)) {
             float d = movement.x;
@@ -39,7 +39,7 @@ public class Collision {
             float h = MathUtil.sign(d) * 0.05F;
             float i = MathUtil.sign(e) * 0.05F;
 
-            while (d != 0 && isSpaceAroundPlayerEmpty(player, d, 0, f)) {
+            while (d != 0 && canFallAtLeast(player, d, 0, f)) {
                 if (Math.abs(d) <= 0.05) {
                     d = 0;
                     break;
@@ -48,7 +48,7 @@ public class Collision {
                 d -= h;
             }
 
-            while (e != 0.0 && isSpaceAroundPlayerEmpty(player, 0, e, f)) {
+            while (e != 0.0 && canFallAtLeast(player, 0, e, f)) {
                 if (Math.abs(e) <= 0.05) {
                     e = 0;
                     break;
@@ -57,7 +57,7 @@ public class Collision {
                 e -= i;
             }
 
-            while (d != 0.0 && e != 0.0 && isSpaceAroundPlayerEmpty(player, d, e, f)) {
+            while (d != 0.0 && e != 0.0 && canFallAtLeast(player, d, e, f)) {
                 if (Math.abs(d) <= 0.05) {
                     d = 0;
                 } else {
@@ -77,40 +77,38 @@ public class Collision {
         }
     }
 
-    public static Vec3 adjustMovementForCollisions(final BoarPlayer player, Vec3 movement, boolean compensated) {
+    public static Vec3 collide(final BoarPlayer player, Vec3 movement, boolean compensated) {
         Box box = player.boundingBox.clone();
         List<Box> collisions = /* this.getWorld().getEntityCollisions(this, lv.stretch(movement)) */ new ArrayList<>();
-        Vec3 lv2 = movement.lengthSquared() == 0.0 ? movement : adjustMovementForCollisions(player, movement, box, collisions, compensated);
+        Vec3 lv2 = movement.lengthSquared() == 0.0 ? movement : collideBoundingBox(player, movement, box, collisions, compensated);
         boolean collisionX = movement.x != lv2.x, collisionZ = movement.z != lv2.z;
         boolean verticalCollision = movement.y != lv2.y;
         boolean onGround = verticalCollision && movement.y < 0.0;
         if ((onGround || player.onGround) && (collisionX || collisionZ)) {
-            Vec3 vec32 = adjustMovementForCollisions(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions, compensated);
-            Vec3 vec33 = adjustMovementForCollisions(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions, compensated);
+            Vec3 vec32 = collideBoundingBox(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions, compensated);
+            Vec3 vec33 = collideBoundingBox(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions, compensated);
             if (vec33.y < PlayerData.STEP_HEIGHT) {
-                Vec3 vec34 = adjustMovementForCollisions(player, new Vec3(movement.x, 0, movement.z), box.offset(vec33), collisions, compensated).add(vec33);
+                Vec3 vec34 = collideBoundingBox(player, new Vec3(movement.x, 0, movement.z), box.offset(vec33), collisions, compensated).add(vec33);
                 if (vec34.horizontalLengthSquared() > vec32.horizontalLengthSquared()) {
                     vec32 = vec34;
                 }
             }
 
             if (vec32.horizontalLengthSquared() > lv2.horizontalLengthSquared()) {
-                lv2 = vec32.add(adjustMovementForCollisions(player, new Vec3(0, -vec32.y, 0), box.offset(vec32), collisions, compensated));
+                lv2 = vec32.add(collideBoundingBox(player, new Vec3(0, -vec32.y, 0), box.offset(vec32), collisions, compensated));
             }
         }
 
         return lv2;
     }
 
-    private static Vec3 adjustMovementForCollisions(final BoarPlayer player, final Vec3 movement, final Box box, final List<Box> collisions, boolean compensated) {
+    private static Vec3 collideBoundingBox(final BoarPlayer player, final Vec3 movement, final Box box, final List<Box> collisions, boolean compensated) {
         collisions.addAll(findCollisionsForMovement(player, box.stretch(movement), compensated));
-        return adjustMovementForCollisions(movement, box, collisions);
+        return collideWithShapes(movement, box, collisions);
     }
 
-    private static Vec3 adjustMovementForCollisions(final Vec3 movement, Box box, final List<Box> collisions) {
-        if (collisions.isEmpty()) {
-            return movement;
-        } else {
+    private static Vec3 collideWithShapes(final Vec3 movement, Box box, final List<Box> collisions) {
+        if (!collisions.isEmpty()) {
             float x = movement.x;
             float y = movement.y;
             float z = movement.z;
@@ -134,6 +132,8 @@ public class Collision {
 
             return new Vec3(x, y, z);
         }
+
+        return movement;
     }
 
     private static List<Box> findCollisionsForMovement(final BoarPlayer player, final Box box, boolean compensated) {

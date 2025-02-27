@@ -34,7 +34,7 @@ public class EntityTicker {
         this.checkWaterState();
 
         // TODO: lava prediction.
-        this.updateMovementInFluid(0F, Fluid.LAVA);
+        this.updateFluidHeightAndDoFluidPushing(0F, Fluid.LAVA);
     }
 
     private void updateSubmergedInWaterState() {
@@ -59,10 +59,10 @@ public class EntityTicker {
 //            return;
 //        }
 
-        player.touchingWater = this.updateMovementInFluid(0.014F, Fluid.WATER);
+        player.touchingWater = this.updateFluidHeightAndDoFluidPushing(0.014F, Fluid.WATER);
     }
 
-    private boolean updateMovementInFluid(final float speed, final Fluid tag) {
+    private boolean updateFluidHeightAndDoFluidPushing(final float speed, final Fluid tag) {
         if (player.isRegionUnloaded()) {
             return false;
         }
@@ -115,7 +115,7 @@ public class EntityTicker {
 
     protected void tickBlockCollision() {
         if (player.onGround) {
-            final Vector3i lv = player.getPosWithYOffset(false, 0.2F);
+            final Vector3i lv = player.getOnPos(0.2F);
             final BlockState lv2 = player.compensatedWorld.getBlockState(lv);
             BlockUtil.onSteppedOn(player, lv2, lv);
         }

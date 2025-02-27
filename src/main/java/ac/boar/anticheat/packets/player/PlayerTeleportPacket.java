@@ -57,13 +57,12 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             player.onGround = cache.isOnGround();
 
             player.eotVelocity = cache.getVelocity();
-            player.prevPosition = cache.getLastPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0);
-            player.position = cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0);
+            player.setPos(cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
             player.predictedData = cache.getData().data();
 
-            player.teleportUtil.setLastKnowValid(cache.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
+            player.unvalidatedPosition = player.position.clone();
 
-            player.updateBoundingBox(player.position);
+            player.teleportUtil.setLastKnowValid(cache.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
 
             if (GlobalSetting.REWIND_INFO_DEBUG) {
                 ChatUtil.alert("Required ticks to catch up: " + tickDistance);
@@ -83,17 +82,10 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
 
                 new PlayerTicker(player).tick();
 
-                player.prevPosition = player.position.clone();
-                player.position = player.position.add(player.predictedData.after());
-
-                if (player.canControlEOT()) {
-                    player.eotVelocity = player.claimedEOT;
-                }
-
-                player.postPredictionVelocities.clear();
+                player.teleportUtil.setLastKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
             }
 
-            player.teleportUtil.setLastKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
+            player.unvalidatedPosition = player.position.clone();
         }
     }
 
