@@ -2,6 +2,10 @@ package ac.boar.anticheat.util.math;
 
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;
+import org.geysermc.geyser.level.physics.Direction;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class Box implements Cloneable {
     public final static Box EMPTY = new Box(0, 0, 0, 0, 0, 0);
@@ -80,6 +84,64 @@ public class Box implements Cloneable {
             }
         }
         return maxDist;
+    }
+
+    public Optional<Vec3> clip(Vec3 from, Vec3 to) {
+        return clip(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ, from, to);
+    }
+
+    public static Optional<Vec3> clip(float d, float e, float f, float g, float h, float i, Vec3 vec3, Vec3 vec32) {
+        float[] ds = new float[]{1.0F};
+        float j = vec32.x - vec3.x;
+        float k = vec32.y - vec3.y;
+        float l = vec32.z - vec3.z;
+        Direction direction = getDirection(d, e, f, g, h, i, vec3, ds, (Direction)null, j, k, l);
+        if (direction == null) {
+            return Optional.empty();
+        } else {
+            float m = ds[0];
+            return Optional.of(vec3.add(m * j, m * k, m * l));
+        }
+    }
+
+    @Nullable
+    private static Direction getDirection(Box aABB, Vec3 vec3, float[] ds, @Nullable Direction direction, float d, float e, float f) {
+        return getDirection(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, vec3, ds, direction, d, e, f);
+    }
+
+    @Nullable
+    private static Direction getDirection(float d, float e, float f, float g, float h, float i, Vec3 vec3, float[] ds, @Nullable Direction direction, float j, float k, float l) {
+        if (j > 1.0E-7) {
+            direction = clipPoint(ds, direction, j, k, l, d, e, h, f, i, Direction.WEST, vec3.x, vec3.y, vec3.z);
+        } else if (j < -1.0E-7) {
+            direction = clipPoint(ds, direction, j, k, l, g, e, h, f, i, Direction.EAST, vec3.x, vec3.y, vec3.z);
+        }
+
+        if (k > 1.0E-7) {
+            direction = clipPoint(ds, direction, k, l, j, e, f, i, d, g, Direction.DOWN, vec3.y, vec3.z, vec3.x);
+        } else if (k < -1.0E-7) {
+            direction = clipPoint(ds, direction, k, l, j, h, f, i, d, g, Direction.UP, vec3.y, vec3.z, vec3.x);
+        }
+
+        if (l > 1.0E-7) {
+            direction = clipPoint(ds, direction, l, j, k, f, d, g, e, h, Direction.NORTH, vec3.z, vec3.x, vec3.y);
+        } else if (l < -1.0E-7) {
+            direction = clipPoint(ds, direction, l, j, k, i, d, g, e, h, Direction.SOUTH, vec3.z, vec3.x, vec3.y);
+        }
+
+        return direction;
+    }
+
+    private static Direction clipPoint(float[] ds, @Nullable Direction direction, float d, float e, float f, float g, float h, float i, float j, float k, Direction direction2, float l, float m, float n) {
+        float o = (g - l) / d;
+        float p = m + o * e;
+        float q = n + o * f;
+        if (0.0F < o && o < ds[0] && h - 1.0E-7 < p && p < i + 1.0E-7 && j - 1.0E-7 < q && q < k + 1.0E-7) {
+            ds[0] = o;
+            return direction2;
+        } else {
+            return direction;
+        }
     }
 
     public Box withMinX(float minX) {
@@ -262,6 +324,8 @@ public class Box implements Cloneable {
     public float getLengthZ() {
         return this.maxZ - this.minZ;
     }
+
+
 
     public boolean isNaN() {
         return Double.isNaN(this.minX) || Double.isNaN(this.minY) || Double.isNaN(this.minZ) || Double.isNaN(this.maxX) || Double.isNaN(this.maxY) || Double.isNaN(this.maxZ);

@@ -38,7 +38,6 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
             entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3(packet.getPosition())));
         }
 
-
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
             player.compensatedWorld.removeEntity(packet.getUniqueEntityId());
         }
@@ -97,10 +96,6 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         final BoarPlayer player = event.getPlayer();
         final Vector3f position = raw.sub(0, entity.getType() == EntityType.PLAYER ? EntityDefinitions.PLAYER.offset() : 0, 0);
 
-        if (position.distance(entity.getServerPosition()) < 1.0E-7) {
-            return;
-        }
-
         entity.setServerPosition(position);
 
         // We need 2 transaction to check, if player receive the first transaction they could already have received the packet
@@ -113,7 +108,9 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
             entity.setBoundingBox(entity.getDimensions().getBoxAt(position.getX(), position.getY(), position.getZ()));
         });
 
-        player.latencyUtil.addTransactionToQueue(player.lastSentId + 1, () -> entity.setPrevBoundingBox(null));
-        event.getPostTasks().add(player::sendTransaction);
+        event.getPostTasks().add(() -> {
+            player.sendTransaction();
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> entity.setPrevBoundingBox(null));
+        });
     }
 }

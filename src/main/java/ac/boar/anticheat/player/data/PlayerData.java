@@ -9,20 +9,19 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.Setter;
+import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
-import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerData {
@@ -46,6 +45,7 @@ public class PlayerData {
 
     // Position, rotation, other.
     public Vec3 unvalidatedPosition = Vec3.ZERO, prevUnvalidatedPosition = Vec3.ZERO;
+    public Vector2f interactRotation = Vector2f.ZERO;
 
     public Vec3 position = Vec3.ZERO;
     public float prevYaw, yaw, prevPitch, pitch;

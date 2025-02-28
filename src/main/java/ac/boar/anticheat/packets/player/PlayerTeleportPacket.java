@@ -59,6 +59,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             player.velocity = cache.getVelocity();
             player.setPos(cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
 
+            player.prevUnvalidatedPosition = player.position.clone();
             player.unvalidatedPosition = player.position.clone();
 
             player.teleportUtil.cacheKnowValid(cache.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
@@ -128,6 +129,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance < MAX_TOLERANCE_ERROR) {
             BoarPlugin.LOGGER.info("Accepted teleport, d=" + distance);
             player.lastTickWasTeleport = true;
+            player.teleportUtil.getRewindTeleportCaches().clear();
         } else {
             // This is not the latest teleport, just ignore this one, we only force player to accept the latest one.
             // We don't want to teleport player to old teleport position when they're supposed to teleport to the latest tone.

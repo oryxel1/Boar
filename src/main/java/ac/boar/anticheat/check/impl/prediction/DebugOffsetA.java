@@ -1,6 +1,6 @@
 package ac.boar.anticheat.check.impl.prediction;
 
-import ac.boar.anticheat.check.api.CheckInfo;
+import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;

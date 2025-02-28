@@ -155,6 +155,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         player.yaw = packet.getRotation().getY();
         player.pitch = packet.getRotation().getX();
 
+        player.interactRotation = packet.getInteractRotation().clone();
+
         player.bedrockRotation = packet.getRotation();
         player.cameraOrientation = packet.getCameraOrientation();
     }
