@@ -3,6 +3,7 @@ package ac.boar.anticheat.player.manager;
 import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.player.BoarPlayer;
 
+import ac.boar.plugin.BoarPlugin;
 import ac.boar.util.GeyserUtil;
 import org.geysermc.geyser.api.connection.GeyserConnection;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
@@ -23,5 +24,7 @@ public class BoarPlayerManager extends HashMap<GeyserConnection, BoarPlayer> {
         }
         player.attributes.put(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier(), new PlayerAttributeData(0.1F));
         this.put(connection, player);
+
+        BoarPlugin.LOGGER.info(connection.bedrockUsername() + " joined!");
     }
 }
