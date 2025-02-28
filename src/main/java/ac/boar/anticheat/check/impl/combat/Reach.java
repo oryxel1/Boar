@@ -28,7 +28,6 @@ public final class Reach extends PacketCheck {
         super(player);
     }
 
-    // TODO: interpolation.
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         // I doubt that minecraft still use this packet....
@@ -88,6 +87,7 @@ public final class Reach extends PacketCheck {
 
         if (distance > 3) {
             fail(distance == Double.MAX_VALUE ? "entity not in sight!" : "d=" + distance);
+            event.setCancelled(true);
         }
 
         ChatUtil.alert("d=" + distance);
