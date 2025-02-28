@@ -24,7 +24,6 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             entity.setServerPosition(packet.getPosition());
             entity.setPosition(packet.getPosition());
-            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3(packet.getPosition())));
         }
 
         if (event.getPacket() instanceof AddPlayerPacket packet) {
@@ -35,7 +34,6 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             entity.setServerPosition(packet.getPosition());
             entity.setPosition(packet.getPosition());
-            entity.setBoundingBox(entity.getDimensions().getBoxAt(new Vec3(packet.getPosition())));
         }
 
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
@@ -66,7 +64,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 z = entity.getServerPosition().getZ();
             }
 
-            this.queuePositionUpdate(event, entity, Vector3f.from(x, y, z));
+            this.queuePositionUpdate(event, entity, Vector3f.from(x, y, z), true);
         }
 
         if (event.getPacket() instanceof MoveEntityAbsolutePacket packet) {
@@ -75,7 +73,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            this.queuePositionUpdate(event, entity, packet.getPosition());
+            this.queuePositionUpdate(event, entity, packet.getPosition(), false);
         }
 
         if (event.getPacket() instanceof MovePlayerPacket packet) {
@@ -88,15 +86,23 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            this.queuePositionUpdate(event, entity, packet.getPosition());
+            this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getMode() == MovePlayerPacket.Mode.NORMAL || packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION);
         }
     }
 
-    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw) {
+    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, boolean lerp) {
         final BoarPlayer player = event.getPlayer();
         final Vector3f position = raw.sub(0, entity.getType() == EntityType.PLAYER ? EntityDefinitions.PLAYER.offset() : 0, 0);
 
+        final double distance = entity.getServerPosition().distanceSquared(position);
+
+        if (distance > 4096.0) {
+            lerp = false;
+        }
+
         entity.setServerPosition(position);
+
+        final boolean finalLerpResult = lerp;
 
         // We need 2 transaction to check, if player receive the first transaction they could already have received the packet
         // Or they could lag right before they receive the actual update position packet so we can't be sure
@@ -104,13 +110,12 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         player.sendTransaction();
         player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
             entity.setPosition(position);
-            entity.setPrevBoundingBox(entity.getBoundingBox());
-            entity.setBoundingBox(entity.getDimensions().getBoxAt(position.getX(), position.getY(), position.getZ()));
+            entity.doLerping(finalLerpResult);
         });
 
         event.getPostTasks().add(() -> {
             player.sendTransaction();
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> entity.setPrevBoundingBox(null));
+            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> entity.setPastInterpolation(null));
         });
     }
 }

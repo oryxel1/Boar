@@ -16,6 +16,10 @@ public class MathUtil {
         return value == 0 ? value : value > 0 ? 1 : -1;
     }
 
+    public static float lerp(float delta, float start, float end) {
+        return start + delta * (end - start);
+    }
+
     public static float square(float v) {
         return v * v;
     }

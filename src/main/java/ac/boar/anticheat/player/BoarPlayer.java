@@ -4,6 +4,7 @@ import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.CompensatedWorld;
+import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
@@ -112,6 +113,14 @@ public final class BoarPlayer extends PlayerData {
         }
 
         shouldBeRemoved.forEach(this.activeEffects::remove);
+
+        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+            if (cache.getPastInterpolation() != null) {
+                cache.getPastInterpolation().tick();
+            }
+
+            cache.getInterpolation().tick();
+        }
     }
 
     public boolean isClimbing() {

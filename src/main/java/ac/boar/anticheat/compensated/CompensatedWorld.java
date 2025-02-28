@@ -29,6 +29,7 @@ import java.util.Map;
 
 // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/session/cache/ChunkCache.java
 @RequiredArgsConstructor
+@Getter
 public final class CompensatedWorld {
     private final BoarPlayer player;
     private final Long2ObjectMap<ChunkCache> chunks = new Long2ObjectOpenHashMap<>();

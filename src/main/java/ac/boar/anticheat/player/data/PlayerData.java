@@ -45,7 +45,7 @@ public class PlayerData {
 
     // Position, rotation, other.
     public Vec3 unvalidatedPosition = Vec3.ZERO, prevUnvalidatedPosition = Vec3.ZERO;
-    public Vector2f interactRotation = Vector2f.ZERO;
+    public Vector2f interactRotation = Vector2f.ZERO, prevInteractRotation = Vector2f.ZERO;
 
     public Vec3 position = Vec3.ZERO;
     public float prevYaw, yaw, prevPitch, pitch;
