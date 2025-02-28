@@ -24,6 +24,14 @@ public class MathUtil {
         return v * v;
     }
 
+    public static float clamp(float value, float min, float max) {
+        if (Float.isNaN(value) || Float.isInfinite(value)) {
+            return 0;
+        }
+
+        return value < min ? min : Math.min(value, max);
+    }
+
     public static boolean compare(final Vector3i vector3i, final Vector3i vector3i1) {
         return vector3i != null && vector3i1 != null && vector3i.getX() == vector3i1.getX() && vector3i.getY() == vector3i1.getY() && vector3i.getZ() == vector3i1.getZ();
     }

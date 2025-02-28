@@ -1,6 +1,5 @@
 package ac.boar.anticheat.check.impl.combat;
 
-import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.check.api.impl.PacketCheck;
@@ -41,6 +40,10 @@ public final class Reach extends PacketCheck {
 
         // Not an attack packet.
         if (packet.getActionType() != 1 || packet.getTransactionType() != InventoryTransactionType.ITEM_USE_ON_ENTITY) {
+            return;
+        }
+
+        if (event.isCancelled()) {
             return;
         }
 

@@ -63,6 +63,8 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
             player.sendTransaction(immediate);
             player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
                 player.setSprinting(flags.contains(EntityFlag.SPRINTING));
+
+                System.out.println("Updated sprinting flag: " + flags.contains(EntityFlag.SPRINTING));
             });
         }
 
@@ -88,6 +90,10 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                     // if Geyser decide to change this in the future.
                     for (AttributeModifierData lv5 : data.getModifiers()) {
                         attribute.addTemporaryModifier(lv5);
+                    }
+
+                    if (data.getName().toLowerCase().contains("movement")) {
+                        System.out.println("Attribute speed: " + data.getValue());
                     }
                 }
             });

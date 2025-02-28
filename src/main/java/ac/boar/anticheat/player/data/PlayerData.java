@@ -57,7 +57,7 @@ public class PlayerData {
     public int sinceSprinting, sinceTeleport;
 
     // Information about this tick.
-    public boolean lastTickWasTeleport, lastTickWasRewind;
+    public boolean lastTickWasTeleport, lastTickWasRewind, lastTickWasJoystick;
 
     // "Transaction" related.
     public long lastReceivedId, lastSentId, lastResponseTime = System.currentTimeMillis();

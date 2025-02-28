@@ -13,10 +13,6 @@ public class PlayerTicker extends LivingTicker {
 
     @Override
     public void tickMovement() {
-        if ((player.wasSneaking || player.sneaking) && !player.gliding && !player.isInLava() && !player.touchingWater) {
-            player.input = player.input.multiply(0.3F);
-        }
-
         super.tickMovement();
     }
 

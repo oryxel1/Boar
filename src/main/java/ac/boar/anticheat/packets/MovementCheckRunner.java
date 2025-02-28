@@ -146,7 +146,10 @@ public class MovementCheckRunner implements CloudburstPacketListener {
     public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         player.setInputData(packet.getInputData());
 
-        player.input = new Vec3(MathUtil.sign(packet.getMotion().getX()), 0, MathUtil.sign(packet.getMotion().getY()));
+        // No other choice than to trust player input, I can't predict this, but I kinda add some protection for abuses in InputA check.
+        // This is due to player joystick thingy btw, TODO: figure this out.
+        player.input = new Vec3(MathUtil.clamp(packet.getMotion().getX(), -1, 1), 0, MathUtil.clamp(packet.getMotion().getY(), -1, 1));
+        player.lastTickWasJoystick = packet.getAnalogMoveVector().lengthSquared() > 0;
 
         processInputData(player);
 
