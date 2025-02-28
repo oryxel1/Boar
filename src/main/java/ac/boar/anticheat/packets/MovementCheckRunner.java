@@ -110,7 +110,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         // Have to do this due to loss precision, especially elytra!
-        if (offset < player.getMaxOffset()) {
+        if (player.velocity.distanceTo(player.unvalidatedTickEnd) < player.getMaxOffset()) {
             player.velocity = player.unvalidatedTickEnd.clone();
         }
     }

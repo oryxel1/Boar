@@ -5,6 +5,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.BlockUtil;
 import ac.boar.anticheat.util.math.Vec3;
+import ac.boar.util.MathUtil;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -52,7 +53,7 @@ public class PredictionEngineNormal extends PredictionEngine {
         if (!(f <= 1.0E-5F)) {
             vec3 = new Vec3(vec3.x, Math.max(f, vec3.y), vec3.z);
             if (player.sprinting) {
-                float g = player.yaw * (float) (TrigMath.PI / 180.0F);
+                float g = player.yaw * MathUtil.DEGREE_TO_RAG;
                 vec3 = vec3.add(-TrigMath.sin(g) * 0.2f, 0, TrigMath.cos(g) * 0.2f);
             }
         }

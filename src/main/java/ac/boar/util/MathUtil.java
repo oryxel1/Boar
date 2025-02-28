@@ -6,6 +6,8 @@ import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class MathUtil {
+    public final static float DEGREE_TO_RAG = 0.017453292F;
+
     public static float sign(final float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
             return 0;
@@ -43,8 +45,8 @@ public class MathUtil {
             return Vec3.ZERO;
         } else {
             Vec3 lv = (d > 1.0 ? movementInput.normalize() : movementInput).multiply(speed);
-            float h = TrigMath.sin(yaw * (TrigMath.PI / 180.0F));
-            float i = TrigMath.cos(yaw * (TrigMath.PI / 180.0F));
+            float h = TrigMath.sin(yaw * DEGREE_TO_RAG);
+            float i = TrigMath.cos(yaw * DEGREE_TO_RAG);
             return new Vec3(lv.x * i - lv.z * h, lv.y, lv.z * i + lv.x * h);
         }
     }
