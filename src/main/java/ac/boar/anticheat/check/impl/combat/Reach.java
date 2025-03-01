@@ -83,14 +83,17 @@ public final class Reach extends PacketCheck {
             distance = Math.sqrt(distance);
         }
 
-        // This ain't reliable at all!
-        if (distance > 3.05) {
-            if (distance != Double.MAX_VALUE) {
-                fail("d=" + distance);
-            }
+        // This simply here for now... I'm 100% certain that we now know exactly where entity is on the player side.
+        // But it seems like the hit result is calculated through a difference way, that what causing falses, I guess
+        // I could test this reach check on Java using ViaBedrock later, but for now, just don't use this check.
 
-            event.setCancelled(true);
-        }
+//        if (distance > 3) {
+//            if (distance != Double.MAX_VALUE) {
+//                fail("d=" + distance);
+//            }
+//
+//             event.setCancelled(true);
+//        }
 
         ChatUtil.alert("d=" + distance);
     }

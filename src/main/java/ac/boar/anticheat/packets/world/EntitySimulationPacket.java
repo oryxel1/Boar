@@ -96,6 +96,10 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
         final double distance = entity.getServerPosition().distanceSquared(position);
 
+        if (distance < 1.0E-15) {
+            return;
+        }
+
         if (distance > 4096.0) {
             lerp = false;
         }
