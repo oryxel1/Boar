@@ -16,7 +16,7 @@ public class CheckHolder extends HashMap<Class<?>, Check> {
         this.put(Timer.class, new Timer(player));
 
         this.put(Velocity.class, new Velocity(player));
-        this.put(DebugOffsetA.class, new DebugOffsetA(player));
+        // this.put(DebugOffsetA.class, new DebugOffsetA(player));
         this.put(PredictionA.class, new PredictionA(player));
         this.put(InputA.class, new InputA(player));
 

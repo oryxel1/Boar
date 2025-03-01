@@ -10,14 +10,13 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.util.MathUtil;
-import org.cloudburstmc.math.vector.Vector2f;
+
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
-import java.util.List;
 import java.util.Optional;
 
 @Experimental
@@ -62,25 +61,21 @@ public final class Reach extends PacketCheck {
         }
 
         double distance = Double.MAX_VALUE;
-        final List<Vector2f> rotations = List.of(player.interactRotation, player.prevInteractRotation);
 
-        // This seems to be quite expensive to do 2 times, no?
-        for (final Vector2f rotation : rotations) {
-            final Vec3 rotationVec = MathUtil.getRotationVector(rotation.getX(), rotation.getY());
-            final Vec3 min = player.unvalidatedPosition.add(0, player.dimensions.eyeHeight(), 0);
-            final Vec3 max = min.add(rotationVec.multiply(6));
+        final Vec3 rotationVec = MathUtil.getRotationVector(player.interactRotation.getX(), player.interactRotation.getY());
+        final Vec3 min = player.unvalidatedPosition.add(0, player.dimensions.eyeHeight(), 0);
+        final Vec3 max = min.add(rotationVec.multiply(6));
 
-            final Vec3 hitResult = getEntityHitResult(entity.getInterpolation().getBoundingBox(), min, max);
+        final Vec3 hitResult = getEntityHitResult(entity.getInterpolation().getBoundingBox(), min, max);
 
-            if (hitResult != null) {
-                distance = Math.min(distance, hitResult.squaredDistanceTo(min));
-            }
+        if (hitResult != null) {
+            distance = Math.min(distance, hitResult.squaredDistanceTo(min));
+        }
 
-            if (entity.getPastInterpolation() != null) {
-                final Vec3 prevHitResult = getEntityHitResult(entity.getPastInterpolation().getBoundingBox(), min, max);
-                if (prevHitResult != null) {
-                    distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
-                }
+        if (entity.getPastInterpolation() != null) {
+            final Vec3 prevHitResult = getEntityHitResult(entity.getPastInterpolation().getBoundingBox(), min, max);
+            if (prevHitResult != null) {
+                distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
             }
         }
 
@@ -88,8 +83,12 @@ public final class Reach extends PacketCheck {
             distance = Math.sqrt(distance);
         }
 
-        if (distance > 3) {
-            fail(distance == Double.MAX_VALUE ? "entity not in sight!" : "d=" + distance);
+        // This ain't reliable at all!
+        if (distance > 3.05) {
+            if (distance != Double.MAX_VALUE) {
+                fail("d=" + distance);
+            }
+
             event.setCancelled(true);
         }
 

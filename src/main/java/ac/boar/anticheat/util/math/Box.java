@@ -95,7 +95,7 @@ public class Box implements Cloneable {
         float j = vec32.x - vec3.x;
         float k = vec32.y - vec3.y;
         float l = vec32.z - vec3.z;
-        Direction direction = getDirection(d, e, f, g, h, i, vec3, ds, (Direction)null, j, k, l);
+        Direction direction = getDirection(d, e, f, g, h, i, vec3, ds, null, j, k, l);
         if (direction == null) {
             return Optional.empty();
         } else {
