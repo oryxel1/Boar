@@ -42,6 +42,11 @@ public final class Reach extends PacketCheck {
             return;
         }
 
+        if (player.teleportUtil.teleportInQueue()) {
+            event.setCancelled(true);
+            return;
+        }
+
         if (event.isCancelled()) {
             return;
         }
@@ -87,13 +92,15 @@ public final class Reach extends PacketCheck {
         // But it seems like the hit result is calculated through a difference way, that what causing falses, I guess
         // I could test this reach check on Java using ViaBedrock later, but for now, just don't use this check.
 
-//        if (distance > 3) {
-//            if (distance != Double.MAX_VALUE) {
-//                fail("d=" + distance);
-//            }
-//
-//             event.setCancelled(true);
-//        }
+        if (distance > 3) {
+            if (distance != Double.MAX_VALUE) {
+                fail("d=" + distance);
+            } else {
+                fail("hitboxes!");
+            }
+
+             event.setCancelled(true);
+        }
 
         ChatUtil.alert("d=" + distance);
     }

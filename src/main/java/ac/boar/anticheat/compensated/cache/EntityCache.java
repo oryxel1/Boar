@@ -20,8 +20,11 @@ public class EntityCache {
     private final long transactionId, runtimeId;
     private Vector3f position = Vector3f.ZERO, serverPosition = Vector3f.ZERO;
 
-    private final EntityInterpolation interpolation = new EntityInterpolation(this, new Vec3(this.position));
-    private EntityInterpolation pastInterpolation = new EntityInterpolation(this, new Vec3(this.position));
+    private EntityInterpolation interpolation, pastInterpolation;
+
+    public void init() {
+        this.interpolation = new EntityInterpolation(this, new Vec3(this.position));
+    }
 
     public void doLerping(boolean lerp) {
         this.pastInterpolation = this.interpolation.clone();

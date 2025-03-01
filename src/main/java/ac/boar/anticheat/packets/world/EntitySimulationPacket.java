@@ -24,6 +24,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             entity.setServerPosition(packet.getPosition());
             entity.setPosition(packet.getPosition());
+            entity.init();
         }
 
         if (event.getPacket() instanceof AddPlayerPacket packet) {
@@ -34,6 +35,7 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
 
             entity.setServerPosition(packet.getPosition());
             entity.setPosition(packet.getPosition());
+            entity.init();
         }
 
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
