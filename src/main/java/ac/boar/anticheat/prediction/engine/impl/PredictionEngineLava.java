@@ -5,14 +5,18 @@ import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 public class PredictionEngineLava extends PredictionEngine {
+    private float prevPosY = 0;
+
     public PredictionEngineLava(BoarPlayer player) {
         super(player);
     }
 
     @Override
     protected Vec3 travel(Vec3 vec3) {
+        this.prevPosY = player.position.y;
         return this.updateVelocity(vec3, 0.02F);
     }
 
@@ -32,9 +36,9 @@ public class PredictionEngineLava extends PredictionEngine {
             player.velocity = player.velocity.add(0, -gravity / 4.0F, 0);
         }
 
-//        if (player.horizontalCollision && player.doesNotCollide(lv.x, y + 0.6F - player.position.y + player.prevPosition.y, lv.z)) {
-//            lv.y = 0.3F;
-//        }
+        if (player.horizontalCollision && player.doesNotCollide(player.velocity.x, y + 0.6F - player.position.y + this.prevPosY, player.velocity.z)) {
+            player.velocity.y = 0.3F;
+        }
     }
 
     @Override
@@ -51,6 +55,11 @@ public class PredictionEngineLava extends PredictionEngine {
     }
 
     private Vec3 applyFluidMovingSpeed(float gravity, Vec3 motion) {
+        if (player.hasEffect(Effect.LEVITATION)) {
+            float y = motion.y + (((player.getEffect(Effect.LEVITATION).getAmplifier() + 1) * 0.05F) - motion.y) * 0.2F;
+            return new Vec3(motion.x, y, motion.z);
+        }
+
         if (gravity != 0.0 && !player.swimming) {
             return new Vec3(motion.x, motion.y - (gravity / 16.0F), motion.z);
         }

@@ -26,9 +26,9 @@ public class PlayerEffectPacket implements CloudburstPacketListener {
             player.sendTransaction();
 
             if (packet.getEvent() == MobEffectPacket.Event.ADD) {
-                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.activeEffects.put(effect, new StatusEffect(effect, packet.getAmplifier(), packet.getDuration())));
+                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.getActiveEffects().put(effect, new StatusEffect(effect, packet.getAmplifier(), packet.getDuration() + 1)));
             } else if (packet.getEvent() == MobEffectPacket.Event.REMOVE) {
-                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.activeEffects.remove(effect));
+                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.getActiveEffects().remove(effect));
             }
         }
     }

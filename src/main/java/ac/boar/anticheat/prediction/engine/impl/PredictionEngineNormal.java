@@ -50,7 +50,7 @@ public class PredictionEngineNormal extends PredictionEngine {
             climbable = true;
         }
 
-        final StatusEffect effect = player.activeEffects.get(Effect.LEVITATION);
+        final StatusEffect effect = player.getEffect(Effect.LEVITATION);
         if (!climbable) {
             if (effect != null) {
                 player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;

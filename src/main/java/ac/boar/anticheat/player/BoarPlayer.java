@@ -6,7 +6,6 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.data.FluidState;
-import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
 import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.TeleportUtil;
@@ -104,15 +103,10 @@ public final class BoarPlayer extends PlayerData {
 
     // Prediction related method
     public void tick() {
-        final List<Effect> shouldBeRemoved = new ArrayList<>();
-        for (Map.Entry<Effect, StatusEffect> entry : this.activeEffects.entrySet()) {
-            entry.getValue().tick();
-            if (entry.getValue().getDuration() <= 0) {
-                shouldBeRemoved.add(entry.getKey());
-            }
-        }
-
-        shouldBeRemoved.forEach(this.activeEffects::remove);
+        this.getActiveEffects().entrySet().removeIf(filter -> {
+            filter.getValue().tick();
+            return filter.getValue().getDuration() == 0;
+        });
 
         for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
             if (cache.getPastInterpolation() != null) {
@@ -144,7 +138,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getJumpBoostPower() {
-        return this.hasEffect(Effect.JUMP_BOOST) ? 0.1F * (this.activeEffects.get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
+        return this.hasEffect(Effect.JUMP_BOOST) ? 0.1F * (this.getActiveEffects().get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
     }
 
     public float getBlockJumpFactor() {

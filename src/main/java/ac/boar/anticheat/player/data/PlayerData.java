@@ -65,10 +65,15 @@ public class PlayerData {
     public final LatencyUtil latencyUtil = new LatencyUtil(this);
 
     // Effect status related
-    public final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();
+    @Getter
+    private final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();
 
     public boolean hasEffect(final Effect effect) {
         return this.activeEffects.containsKey(effect);
+    }
+
+    public StatusEffect getEffect(final Effect effect) {
+        return this.activeEffects.get(effect);
     }
 
     // Movement related, (movement input, player EOT, ...)
