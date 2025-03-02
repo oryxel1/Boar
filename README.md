@@ -19,7 +19,6 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 
 ## Problems
 - A lot of movement differences is not implemented.
-- Sprinting movement speed is not synced "perfectly" with Data and Attribute packet.
 - ~~Floating point errors break collision, causing false positive, or loss precision. (Partially fixed)~~
 - ~~Player falses after teleport, I can't figure out why movement act weirdly after teleport yet. (Partially fixed)~~
 - Step motion is different on Bedrock, and collision in general.
