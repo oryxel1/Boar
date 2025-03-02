@@ -2,7 +2,7 @@ package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.data.BreakingData;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.util.MathUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

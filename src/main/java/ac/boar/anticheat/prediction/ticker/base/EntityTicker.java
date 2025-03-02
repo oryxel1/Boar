@@ -2,7 +2,7 @@ package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
@@ -22,6 +22,8 @@ public class EntityTicker {
     }
 
     public void baseTick() {
+        player.inBlockState = null;
+
         player.wasInPowderSnow = player.inPowderSnow;
         player.inPowderSnow = false;
         this.updateWaterState();

@@ -1,4 +1,4 @@
-package ac.boar.anticheat.util;
+package ac.boar.anticheat.util.block;
 
 import ac.boar.anticheat.collision.BedrockCollision;
 import ac.boar.anticheat.player.BoarPlayer;

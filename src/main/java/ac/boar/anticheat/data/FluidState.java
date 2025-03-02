@@ -1,7 +1,7 @@
 package ac.boar.anticheat.data;
 
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
 import org.geysermc.geyser.level.block.Fluid;

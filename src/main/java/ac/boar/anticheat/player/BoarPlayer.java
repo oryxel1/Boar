@@ -8,7 +8,7 @@ import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
-import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
@@ -123,7 +123,15 @@ public final class BoarPlayer extends PlayerData {
         }
     }
 
-    public boolean isClimbing() {
+    public BlockState getInBlockState() {
+        if (this.inBlockState == null) {
+            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i());
+        }
+
+        return this.inBlockState;
+    }
+
+    public boolean onClimbable() {
         final TagCache cache = this.getSession().getTagCache();
 
         Vector3i lv = this.position.toVector3i();

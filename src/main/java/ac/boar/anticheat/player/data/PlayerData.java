@@ -18,6 +18,7 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
@@ -119,6 +120,8 @@ public class PlayerData {
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
     public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
+    public BlockState inBlockState;
+
     // Prediction related method
     public final double getMaxOffset() {
         return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD;
@@ -170,6 +173,8 @@ public class PlayerData {
     public final void setPos(Vec3 vec3) {
         this.position = vec3;
         this.setBoundingBox(vec3);
+
+        this.inBlockState = null;
     }
 
     public final void setBoundingBox(Vec3 vec3) {

@@ -3,7 +3,7 @@ package ac.boar.anticheat.compensated;
 import ac.boar.anticheat.compensated.cache.ChunkCache;
 import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
-import ac.boar.anticheat.util.BlockUtil;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
