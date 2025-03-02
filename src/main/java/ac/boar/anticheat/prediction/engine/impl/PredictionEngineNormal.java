@@ -12,6 +12,8 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 public class PredictionEngineNormal extends PredictionEngine {
+    private float prevSlipperiness = 0.6F;
+
     public PredictionEngineNormal(final BoarPlayer player) {
         super(player);
     }
@@ -19,8 +21,8 @@ public class PredictionEngineNormal extends PredictionEngine {
     @Override
     protected Vec3 travel(Vec3 vec3) {
         final Vector3i lv = player.getBlockPosBelowThatAffectsMyMovement();
-        float f = player.groundCollision ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv)) : 1.0F;
-        return this.applyMovementInput(vec3, f);
+        this.prevSlipperiness = player.groundCollision ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv)) : 1.0F;
+        return this.applyMovementInput(vec3, this.prevSlipperiness);
     }
 
     private Vec3 applyMovementInput(Vec3 vec3, final float slipperiness) {
@@ -31,8 +33,6 @@ public class PredictionEngineNormal extends PredictionEngine {
 
     @Override
     public void finalizeMovement() {
-        final Vector3i lv2 = player.getBlockPosBelowThatAffectsMyMovement();
-        float f = player.wasGroundCollision ? BlockUtil.getBlockSlipperiness(player.compensatedWorld.getBlockState(lv2)) : 1.0F;
         final StatusEffect effect = player.activeEffects.get(Effect.LEVITATION);
         if (effect != null) {
             player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
@@ -43,7 +43,7 @@ public class PredictionEngineNormal extends PredictionEngine {
             player.velocity.y = 0;
         }
 
-        final float g = f * 0.91F;
+        final float g = this.prevSlipperiness * 0.91F;
         player.velocity = player.velocity.multiply(g, 0.98F, g);
     }
 

@@ -57,8 +57,6 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         player.breakingValidator.handle(packet);
 
-        processInputMovePacket(player, packet);
-
         player.prevUnvalidatedPosition = player.unvalidatedPosition;
         player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
 
@@ -69,6 +67,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             ChatUtil.alert("Player trying to send position with tick " + player.tick + " while teleporting!");
             return;
         }
+
+        processInputMovePacket(player, packet);
 
         player.tick();
         if (player.lastTickWasTeleport) {

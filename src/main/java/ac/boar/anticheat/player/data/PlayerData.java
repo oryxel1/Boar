@@ -106,7 +106,7 @@ public class PlayerData {
     public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector closetVector = new Vector(Vec3.ZERO, VectorType.NORMAL);
     public VelocityData velocityData;
-    public boolean groundCollision, wasGroundCollision;
+    public boolean groundCollision;
     public Vec3 stuckSpeedMultiplier = Vec3.ZERO;
 
     public float fallDistance = 0;

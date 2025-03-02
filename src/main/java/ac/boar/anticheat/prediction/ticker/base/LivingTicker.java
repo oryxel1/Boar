@@ -86,7 +86,6 @@ public class LivingTicker extends EntityTicker {
         player.horizontalCollision = bl || bl2;
 
         player.verticalCollision = velocity.y != collided.y;
-        player.wasGroundCollision = player.groundCollision;
         player.groundCollision = player.verticalCollision && velocity.y < 0;
 
         if (isThereStuckSpeed) {

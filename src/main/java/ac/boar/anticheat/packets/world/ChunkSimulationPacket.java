@@ -1,6 +1,5 @@
 package ac.boar.anticheat.packets.world;
 
-import ac.boar.anticheat.validator.ItemTransactionValidator;
 import ac.boar.anticheat.player.BoarPlayer;
 
 import ac.boar.protocol.event.*;
@@ -8,8 +7,6 @@ import ac.boar.protocol.listener.*;
 
 import io.netty.buffer.*;
 import org.cloudburstmc.math.vector.Vector3i;
-import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
-import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
@@ -34,7 +31,7 @@ public class ChunkSimulationPacket implements CloudburstPacketListener, MCPLPack
 
             // Send a transaction if player is inside (or near) that chunk.
             int chunkX = packet.getX() << 4, chunkZ = packet.getZ() << 4;
-            boolean check = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
+            boolean check = Math.abs(player.unvalidatedPosition.x - chunkX) <= 16 || Math.abs(player.unvalidatedPosition.z - chunkZ) <= 16;
             if (check) {
                 event.getPostTasks().add(player::sendTransaction);
             }
@@ -45,7 +42,7 @@ public class ChunkSimulationPacket implements CloudburstPacketListener, MCPLPack
         if (event.getPacket() instanceof ClientboundForgetLevelChunkPacket packet) {
             // Send a transaction if player is inside (or near) that chunk.
             int chunkX = packet.getX() << 4, chunkZ = packet.getZ() << 4;
-            boolean check = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
+            boolean check = Math.abs(player.unvalidatedPosition.x - chunkX) <= 16 || Math.abs(player.unvalidatedPosition.z - chunkZ) <= 16;
             if (check) {
                 event.getPostTasks().add(player::sendTransaction);
             }
