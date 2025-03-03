@@ -36,12 +36,6 @@ public class LivingTicker extends EntityTicker {
     }
 
     public void travel() {
-        if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
-            player.velocity = player.unvalidatedTickEnd.clone();
-            player.setPos(player.unvalidatedPosition);
-            return;
-        }
-
         final PredictionEngine engine;
         if (player.touchingWater || player.isInLava()) {
             if (player.touchingWater) {

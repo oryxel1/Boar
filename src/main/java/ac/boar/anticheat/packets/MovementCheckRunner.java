@@ -90,7 +90,14 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
-        new PlayerTicker(player).tick();
+        if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
+            // TODO: Flying prediction?
+            player.velocity = player.unvalidatedTickEnd.clone();
+            player.setPos(player.unvalidatedPosition);
+            return;
+        } else {
+            new PlayerTicker(player).tick();
+        }
 
         // Instead of comparing velocity calculate by (pos - prevPos) that player sends to our predicted velocity
         // We compare predicted position to player claimed position, this is because player velocity will never be accurate.

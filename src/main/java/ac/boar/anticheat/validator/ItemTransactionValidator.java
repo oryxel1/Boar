@@ -4,8 +4,11 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
+import ac.boar.util.MathUtil;
 import ac.boar.util.StringUtil;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector3f;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
@@ -16,6 +19,8 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySou
 import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
+import org.geysermc.geyser.level.block.property.Properties;
+import org.geysermc.geyser.level.block.type.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +99,43 @@ public final class ItemTransactionValidator {
                 final boolean tooFar = entity.getServerPosition().distance(player.position.toVector3f()) > 6.0 || entity.getPosition().distance(player.position.toVector3f()) > 6.0;
                 if (tooFar) {
                     return false;
+                }
+            }
+
+            case ITEM_USE -> {
+                final Vector3i position = packet.getBlockPosition();
+                final int slot = packet.getHotbarSlot();
+                if (slot < 0 || slot > 8) {
+                    return false;
+                }
+
+                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot).getData();
+                final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
+                if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
+                    return false;
+                }
+
+                double distance = player.position.toVector3f().distanceSquared(position.getX(), position.getY(), position.getZ());
+                if (!MathUtil.isValid(position) || distance > 12) {
+                    return false;
+                }
+
+                final BlockState state = player.compensatedWorld.getBlockState(position);
+                switch (packet.getActionType()) {
+                    case 0 -> {
+                        if (state.getValue(Properties.OPEN) != null) {
+                            int newId = state.withValue(Properties.OPEN, !state.getValue(Properties.OPEN)).javaId();
+                            player.compensatedWorld.updateBlock(position, newId);
+                        }
+                    }
+
+                    case 1 -> {
+
+                    }
+
+                    default -> {
+                        return false;
+                    }
                 }
             }
         }
