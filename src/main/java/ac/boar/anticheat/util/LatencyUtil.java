@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.data.PlayerData;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,14 +23,15 @@ public final class LatencyUtil {
             return;
         }
 
-        if (!this.map.containsKey(id)) {
-            List<Runnable> list = new CopyOnWriteArrayList<>();
-            list.add(runnable);
-            this.map.put(id, list);
-            return;
+        synchronized (this) {
+            if (!this.map.containsKey(id)) {
+                List<Runnable> list = new CopyOnWriteArrayList<>();
+                list.add(runnable);
+                this.map.put(id, list);
+            } else {
+                this.map.get(id).add(runnable);
+            }
         }
-
-        this.map.get(id).add(runnable);
     }
 
     public boolean confirmTransaction(long id) {
@@ -39,20 +39,15 @@ public final class LatencyUtil {
             return false;
         }
 
-        for (Long l : this.sentTransactions) {
+        for (final Long l : this.sentTransactions) {
             if (l > id) {
                 break;
             }
 
+            if (this.map.containsKey(id)) {
+                this.map.remove(id).forEach(Runnable::run);
+            }
             this.sentTransactions.remove(l);
-        }
-
-        Iterator<Map.Entry<Long, List<Runnable>>> iterator = this.map.entrySet().iterator();
-
-        Map.Entry<Long, List<Runnable>> entry;
-        while (iterator.hasNext() && (entry = iterator.next()) != null && entry.getKey() <= id) {
-            entry.getValue().forEach(Runnable::run);
-            iterator.remove();
         }
 
         player.lastReceivedId = id;

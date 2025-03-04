@@ -5,6 +5,7 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.util.MathUtil;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 
 @Getter
 public class EntityInterpolation {

@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.util.MathUtil;
 
+import org.bukkit.Bukkit;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
@@ -82,15 +83,15 @@ public final class Reach extends PacketCheck {
             if (prevHitResult != null) {
                 distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
             }
+
+            Bukkit.broadcastMessage("past interpolation!");
         }
 
         if (distance != Double.MAX_VALUE) {
             distance = Math.sqrt(distance);
         }
 
-        // This simply here for now... I'm 100% certain that we now know exactly where entity is on the player side.
-        // But it seems like the hit result is calculated through a difference way, that what causing falses, I guess
-        // I could test this reach check on Java using ViaBedrock later, but for now, just don't use this check.
+        Bukkit.broadcastMessage("Current interpolation: " + entity.getInterpolation().getPosition().toVector3f());
 
         if (distance > 3) {
             if (distance != Double.MAX_VALUE) {
@@ -106,16 +107,12 @@ public final class Reach extends PacketCheck {
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {
-        Vec3 lv3 = null;
-
         Box lv5 = box.expand(/*(double)lv4.getTargetingMargin()*/ 0.1F);
-        Optional<Vec3> optional = lv5.clip(min, max);
+        Optional<Vec3> vec3 = lv5.clip(min, max);
         if (lv5.contains(min)) {
-            lv3 = optional.orElse(min);
-        } else if (optional.isPresent()) {
-            lv3 = optional.get();
+            return min;
         }
 
-        return lv3;
+        return vec3.orElse(null);
     }
 }

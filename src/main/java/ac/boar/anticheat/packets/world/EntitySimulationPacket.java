@@ -5,6 +5,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.CloudburstPacketListener;
+import org.bukkit.Bukkit;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -84,40 +85,39 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
             }
 
             final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-            if (entity == null) {
+            if (entity == null || packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
                 return;
             }
 
-            this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getMode() == MovePlayerPacket.Mode.NORMAL || packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION);
+            this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getMode() == MovePlayerPacket.Mode.NORMAL);
         }
     }
 
-    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, boolean lerp) {
+    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final boolean lerp) {
         final BoarPlayer player = event.getPlayer();
         final Vector3f position = raw.sub(0, entity.getType() == EntityType.PLAYER ? EntityDefinitions.PLAYER.offset() : 0, 0);
 
         final double distance = entity.getServerPosition().distanceSquared(position);
 
-        if (distance < 1.0E-15) {
+        if (distance < 1.0E-10) {
             return;
         }
 
-        if (distance > 4096.0) {
-            lerp = false;
-        }
-
         entity.setServerPosition(position);
-
-        final boolean finalLerpResult = lerp;
 
         // We need 2 transaction to check, if player receive the first transaction they could already have received the packet
         // Or they could lag right before they receive the actual update position packet so we can't be sure
         // But if player respond to the transaction AFTER the position packet they 100% already receive the packet.
         player.sendTransaction();
+
+        final long id = player.lastSentId;
         player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
             entity.setPosition(position);
-            entity.doLerping(finalLerpResult);
+            entity.doLerping(new Vec3(position), lerp && distance < 4096);
+            // Bukkit.broadcastMessage("Player received position=" + position + ", id=" + id);
         });
+
+        // Bukkit.broadcastMessage("new position=" + position + ", id=" + player.lastSentId);
 
         event.getPostTasks().add(() -> {
             player.sendTransaction();
