@@ -4,7 +4,7 @@ import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.CompensatedWorld;
-import ac.boar.anticheat.compensated.cache.EntityCache;
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
 import ac.boar.anticheat.util.block.BlockUtil;
@@ -108,13 +108,13 @@ public final class BoarPlayer extends PlayerData {
             return filter.getValue().getDuration() == 0;
         });
 
-//        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
-//            if (cache.getPastInterpolation() != null) {
-//                cache.getPastInterpolation().tick();
-//            }
-//
-//            cache.getInterpolation().tick();
-//        }
+        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+            if (cache.getPast() != null) {
+                cache.getPast().tick();
+            }
+
+            cache.getCurrent().tick();
+        }
     }
 
     public BlockState getInBlockState() {

@@ -1,7 +1,7 @@
 package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.ChunkCache;
-import ac.boar.anticheat.compensated.cache.EntityCache;
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
@@ -37,7 +37,7 @@ public final class CompensatedWorld {
 
     // Entity related
 
-    public EntityCache addToCache(final long runtimeId, final long uniqueId) {
+    public EntityCache addToCache(final BoarPlayer player, final long runtimeId, final long uniqueId) {
         final Entity entity = player.getSession().getEntityCache().getEntityByGeyserId(runtimeId);
         if (entity == null || entity.getDefinition() == null || runtimeId == player.runtimeEntityId) {
             return null;
@@ -47,7 +47,7 @@ public final class CompensatedWorld {
         final EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
 
         player.sendTransaction();
-        final EntityCache cache = new EntityCache(definition.entityType(), definition, dimensions, player.lastSentId, runtimeId);
+        final EntityCache cache = new EntityCache(player, definition.entityType(), definition, dimensions, player.lastSentId, runtimeId);
         this.entities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
 

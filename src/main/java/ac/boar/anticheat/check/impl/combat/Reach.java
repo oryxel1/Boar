@@ -3,14 +3,14 @@ package ac.boar.anticheat.check.impl.combat;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.check.api.impl.PacketCheck;
-import ac.boar.anticheat.compensated.cache.EntityCache;
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.util.MathUtil;
 
+import ac.boar.util.MathUtil;
 import org.bukkit.Bukkit;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
@@ -66,44 +66,44 @@ public final class Reach extends PacketCheck {
             return;
         }
 
-//        double distance = Double.MAX_VALUE;
-//
-//        final Vec3 rotationVec = MathUtil.getRotationVector(player.interactRotation.getX(), player.interactRotation.getY());
-//        final Vec3 min = player.unvalidatedPosition.add(0, player.dimensions.eyeHeight(), 0);
-//        final Vec3 max = min.add(rotationVec.multiply(6));
-//
-//        final Vec3 hitResult = getEntityHitResult(entity.getInterpolation().getBoundingBox(), min, max);
-//
-//        if (hitResult != null) {
-//            distance = Math.min(distance, hitResult.squaredDistanceTo(min));
-//        }
-//
-//        if (entity.getPastInterpolation() != null) {
-//            final Vec3 prevHitResult = getEntityHitResult(entity.getPastInterpolation().getBoundingBox(), min, max);
-//            if (prevHitResult != null) {
-//                distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
-//            }
-//
-//            Bukkit.broadcastMessage("past interpolation!");
-//        }
-//
-//        if (distance != Double.MAX_VALUE) {
-//            distance = Math.sqrt(distance);
-//        }
-//
-//        Bukkit.broadcastMessage("Current interpolation: " + entity.getInterpolation().getPosition().toVector3f());
-//
-//        if (distance > 3) {
-//            if (distance != Double.MAX_VALUE) {
-//                fail("d=" + distance);
-//            } else {
-//                fail("hitboxes!");
-//            }
-//
-//             event.setCancelled(true);
-//        }
-//
-//        ChatUtil.alert("d=" + distance);
+        double distance = Double.MAX_VALUE;
+
+        final Vec3 rotationVec = MathUtil.getRotationVector(player.interactRotation.getX(), player.interactRotation.getY());
+        final Vec3 min = player.unvalidatedPosition.add(0, player.dimensions.eyeHeight(), 0);
+        final Vec3 max = min.add(rotationVec.multiply(6));
+
+        final Vec3 hitResult = getEntityHitResult(entity.getCurrent().getBoundingBox(), min, max);
+
+        if (hitResult != null) {
+            distance = Math.min(distance, hitResult.squaredDistanceTo(min));
+        }
+
+        if (entity.getPast() != null) {
+            final Vec3 prevHitResult = getEntityHitResult(entity.getPast().getBoundingBox(), min, max);
+            if (prevHitResult != null) {
+                distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
+            }
+
+            Bukkit.broadcastMessage("past interpolation!");
+        }
+
+        if (distance != Double.MAX_VALUE) {
+            distance = Math.sqrt(distance);
+        }
+
+        Bukkit.broadcastMessage("Current interpolation: " + entity.getCurrent().getPos().toVector3f());
+
+        if (distance > 3) {
+            if (distance != Double.MAX_VALUE) {
+                fail("d=" + distance);
+            } else {
+                fail("hitboxes!");
+            }
+
+             event.setCancelled(true);
+        }
+
+        ChatUtil.alert("d=" + distance);
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {

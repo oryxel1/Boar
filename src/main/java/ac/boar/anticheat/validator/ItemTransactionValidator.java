@@ -1,13 +1,12 @@
 package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.EntityCache;
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.util.MathUtil;
 import ac.boar.util.StringUtil;
 import lombok.RequiredArgsConstructor;
-import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
@@ -96,10 +95,10 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-//                final boolean tooFar = entity.getServerPosition().distance(player.position.toVector3f()) > 6.0 || entity.getPosition().distance(player.position.toVector3f()) > 6.0;
-//                if (tooFar) {
-//                    return false;
-//                }
+                final boolean tooFar = entity.getServerPosition().distanceTo(player.position) > 6;
+                if (tooFar) {
+                    return false;
+                }
             }
 
             case ITEM_USE -> {
