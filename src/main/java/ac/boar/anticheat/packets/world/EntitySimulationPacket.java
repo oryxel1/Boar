@@ -23,9 +23,9 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            entity.setServerPosition(packet.getPosition());
-            entity.setPosition(packet.getPosition());
-            entity.init();
+//            entity.setServerPosition(new Vec3(packet.getPosition()));
+//            entity.setPosition(new Vec3(packet.getPosition()));
+//            entity.init();
         }
 
         if (event.getPacket() instanceof AddPlayerPacket packet) {
@@ -34,9 +34,9 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            entity.setServerPosition(packet.getPosition());
-            entity.setPosition(packet.getPosition());
-            entity.init();
+//            entity.setServerPosition(new Vec3(packet.getPosition()));
+//            entity.setPosition(new Vec3(packet.getPosition()));
+//            entity.init();
         }
 
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
@@ -56,18 +56,18 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            float x = packet.getX(), y = packet.getY(), z = packet.getZ();
-            if (!flags.contains(MoveEntityDeltaPacket.Flag.HAS_X)) {
-                x = entity.getServerPosition().getX();
-            }
-            if (!flags.contains(MoveEntityDeltaPacket.Flag.HAS_Y)) {
-                y = entity.getServerPosition().getY();
-            }
-            if (!flags.contains(MoveEntityDeltaPacket.Flag.HAS_Z)) {
-                z = entity.getServerPosition().getZ();
-            }
+//            float x = packet.getX(), y = packet.getY(), z = packet.getZ();
+//            if (!flags.contains(MoveEntityDeltaPacket.Flag.HAS_X)) {
+//                x = entity.getServerPosition().getX();
+//            }
+//            if (!flags.contains(MoveEntityDeltaPacket.Flag.HAS_Y)) {
+//                y = entity.getServerPosition().getY();
+//            }
+//            if (!flags.contains(MoveEntityDeltaPacket.Flag.HAS_Z)) {
+//                z = entity.getServerPosition().getZ();
+//            }
 
-            this.queuePositionUpdate(event, entity, Vector3f.from(x, y, z), true);
+            // this.queuePositionUpdate(event, entity, Vector3f.from(x, y, z), true);
         }
 
         if (event.getPacket() instanceof MoveEntityAbsolutePacket packet) {
@@ -94,34 +94,5 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
     }
 
     private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final boolean lerp) {
-        final BoarPlayer player = event.getPlayer();
-        final Vector3f position = raw.sub(0, entity.getType() == EntityType.PLAYER ? EntityDefinitions.PLAYER.offset() : 0, 0);
-
-        final double distance = entity.getServerPosition().distanceSquared(position);
-
-        if (distance < 1.0E-10) {
-            return;
-        }
-
-        entity.setServerPosition(position);
-
-        // We need 2 transaction to check, if player receive the first transaction they could already have received the packet
-        // Or they could lag right before they receive the actual update position packet so we can't be sure
-        // But if player respond to the transaction AFTER the position packet they 100% already receive the packet.
-        player.sendTransaction();
-
-        final long id = player.lastSentId;
-        player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
-            entity.setPosition(position);
-            entity.doLerping(new Vec3(position), lerp && distance < 4096);
-            // Bukkit.broadcastMessage("Player received position=" + position + ", id=" + id);
-        });
-
-        // Bukkit.broadcastMessage("new position=" + position + ", id=" + player.lastSentId);
-
-        event.getPostTasks().add(() -> {
-            player.sendTransaction();
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> entity.setPastInterpolation(null));
-        });
     }
 }

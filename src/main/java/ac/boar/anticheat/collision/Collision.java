@@ -18,13 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Collision {
-    public static boolean canFallAtLeast(final BoarPlayer player, final Box box) {
+    public static boolean isSpaceEmpty(final BoarPlayer player, final Box box) {
         return findCollisionsForMovement(player, box, true).isEmpty();
     }
 
     public static boolean canFallAtLeast(final BoarPlayer player, float offsetX, float offsetZ, float f) {
         Box lv = player.boundingBox;
-        return canFallAtLeast(player, new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
+        return isSpaceEmpty(player, new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
     }
 
     private static boolean canBackOffFromEdge(final BoarPlayer player) {

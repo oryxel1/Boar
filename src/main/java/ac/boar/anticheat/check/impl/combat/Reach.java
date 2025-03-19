@@ -66,44 +66,44 @@ public final class Reach extends PacketCheck {
             return;
         }
 
-        double distance = Double.MAX_VALUE;
-
-        final Vec3 rotationVec = MathUtil.getRotationVector(player.interactRotation.getX(), player.interactRotation.getY());
-        final Vec3 min = player.unvalidatedPosition.add(0, player.dimensions.eyeHeight(), 0);
-        final Vec3 max = min.add(rotationVec.multiply(6));
-
-        final Vec3 hitResult = getEntityHitResult(entity.getInterpolation().getBoundingBox(), min, max);
-
-        if (hitResult != null) {
-            distance = Math.min(distance, hitResult.squaredDistanceTo(min));
-        }
-
-        if (entity.getPastInterpolation() != null) {
-            final Vec3 prevHitResult = getEntityHitResult(entity.getPastInterpolation().getBoundingBox(), min, max);
-            if (prevHitResult != null) {
-                distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
-            }
-
-            Bukkit.broadcastMessage("past interpolation!");
-        }
-
-        if (distance != Double.MAX_VALUE) {
-            distance = Math.sqrt(distance);
-        }
-
-        Bukkit.broadcastMessage("Current interpolation: " + entity.getInterpolation().getPosition().toVector3f());
-
-        if (distance > 3) {
-            if (distance != Double.MAX_VALUE) {
-                fail("d=" + distance);
-            } else {
-                fail("hitboxes!");
-            }
-
-             event.setCancelled(true);
-        }
-
-        ChatUtil.alert("d=" + distance);
+//        double distance = Double.MAX_VALUE;
+//
+//        final Vec3 rotationVec = MathUtil.getRotationVector(player.interactRotation.getX(), player.interactRotation.getY());
+//        final Vec3 min = player.unvalidatedPosition.add(0, player.dimensions.eyeHeight(), 0);
+//        final Vec3 max = min.add(rotationVec.multiply(6));
+//
+//        final Vec3 hitResult = getEntityHitResult(entity.getInterpolation().getBoundingBox(), min, max);
+//
+//        if (hitResult != null) {
+//            distance = Math.min(distance, hitResult.squaredDistanceTo(min));
+//        }
+//
+//        if (entity.getPastInterpolation() != null) {
+//            final Vec3 prevHitResult = getEntityHitResult(entity.getPastInterpolation().getBoundingBox(), min, max);
+//            if (prevHitResult != null) {
+//                distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
+//            }
+//
+//            Bukkit.broadcastMessage("past interpolation!");
+//        }
+//
+//        if (distance != Double.MAX_VALUE) {
+//            distance = Math.sqrt(distance);
+//        }
+//
+//        Bukkit.broadcastMessage("Current interpolation: " + entity.getInterpolation().getPosition().toVector3f());
+//
+//        if (distance > 3) {
+//            if (distance != Double.MAX_VALUE) {
+//                fail("d=" + distance);
+//            } else {
+//                fail("hitboxes!");
+//            }
+//
+//             event.setCancelled(true);
+//        }
+//
+//        ChatUtil.alert("d=" + distance);
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {

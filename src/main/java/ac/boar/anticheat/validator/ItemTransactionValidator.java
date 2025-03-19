@@ -96,10 +96,10 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                final boolean tooFar = entity.getServerPosition().distance(player.position.toVector3f()) > 6.0 || entity.getPosition().distance(player.position.toVector3f()) > 6.0;
-                if (tooFar) {
-                    return false;
-                }
+//                final boolean tooFar = entity.getServerPosition().distance(player.position.toVector3f()) > 6.0 || entity.getPosition().distance(player.position.toVector3f()) > 6.0;
+//                if (tooFar) {
+//                    return false;
+//                }
             }
 
             case ITEM_USE -> {

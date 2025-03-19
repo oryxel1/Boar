@@ -108,13 +108,13 @@ public final class BoarPlayer extends PlayerData {
             return filter.getValue().getDuration() == 0;
         });
 
-        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
-            if (cache.getPastInterpolation() != null) {
-                cache.getPastInterpolation().tick();
-            }
-
-            cache.getInterpolation().tick();
-        }
+//        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+//            if (cache.getPastInterpolation() != null) {
+//                cache.getPastInterpolation().tick();
+//            }
+//
+//            cache.getInterpolation().tick();
+//        }
     }
 
     public BlockState getInBlockState() {
@@ -211,6 +211,6 @@ public final class BoarPlayer extends PlayerData {
     }
 
     private boolean doesNotCollide(Box box) {
-        return Collision.canFallAtLeast(this, box) && !containsFluid(box);
+        return Collision.isSpaceEmpty(this, box) && !containsFluid(box);
     }
 }
