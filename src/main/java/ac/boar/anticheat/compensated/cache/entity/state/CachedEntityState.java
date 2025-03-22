@@ -16,7 +16,7 @@ public final class CachedEntityState {
     private final BoarPlayer player;
     private final EntityCache entity;
     private Vec3 pos = Vec3.ZERO;
-    private PositionInterpolator interpolator;
+    private PositionInterpolator interpolator = new PositionInterpolator(this, 3);
 
     public void tick() {
         if (this.isInterpolating()) {
