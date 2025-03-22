@@ -40,7 +40,7 @@ public final class CachedEntityState {
     public CachedEntityState clone() {
         final CachedEntityState state = new CachedEntityState(player, entity);
         state.setPos(this.pos.clone());
-        state.setInterpolator(interpolator.clone());
+        state.setInterpolator(this.interpolator == null ? null : this.interpolator.clone());
 
         return state;
     }
