@@ -72,7 +72,7 @@ public class LivingTicker extends EntityTicker {
 
         player.velocity = velocity.clone();
 
-        // Well we're going to use player sent last position instead of our own since if we use ours then it will lose precision.
+        // Well we're going to use player sent last position instead of our own since if we use ours then we will lose precision.
         player.setPos(player.prevUnvalidatedPosition.add(collided));
 
         boolean bl = velocity.x != collided.x;

@@ -34,12 +34,8 @@ public final class Reach extends PacketCheck {
             event.setCancelled(true);
         }
 
-        if (!(event.getPacket() instanceof InventoryTransactionPacket packet)) {
-            return;
-        }
-
         // Not an attack packet.
-        if (packet.getActionType() != 1 || packet.getTransactionType() != InventoryTransactionType.ITEM_USE_ON_ENTITY) {
+        if (!(event.getPacket() instanceof InventoryTransactionPacket packet) || packet.getActionType() != 1 || packet.getTransactionType() != InventoryTransactionType.ITEM_USE_ON_ENTITY) {
             return;
         }
 
@@ -48,24 +44,30 @@ public final class Reach extends PacketCheck {
             return;
         }
 
-        if (event.isCancelled()) {
-            return;
-        }
-
         final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-        if (entity == null) {
+        // TODO: Non-Player!
+        if (entity == null || entity.getType() != EntityType.PLAYER) {
             return;
         }
-
-        // Not yet...
-        if (entity.getType() != EntityType.PLAYER) {
-            return;
-        }
-
         if (player.gameType == GameType.CREATIVE || player.gameType == GameType.SPECTATOR) {
             return;
         }
 
+        double distance = calculateReach(entity);
+        if (distance > 3) {
+            if (distance != Double.MAX_VALUE) {
+                fail("d=" + distance);
+            } else {
+                fail("hitboxes!");
+            }
+
+            event.setCancelled(true);
+        }
+
+        ChatUtil.alert("d=" + distance);
+    }
+
+    public double calculateReach(final EntityCache entity) {
         double distance = Double.MAX_VALUE;
 
         final Vec3 rotationVec = MathUtil.getRotationVector(player.interactRotation.getX(), player.interactRotation.getY());
@@ -91,19 +93,7 @@ public final class Reach extends PacketCheck {
             distance = Math.sqrt(distance);
         }
 
-        Bukkit.broadcastMessage("Current interpolation: " + entity.getCurrent().getPos().toVector3f());
-
-        if (distance > 3) {
-            if (distance != Double.MAX_VALUE) {
-                fail("d=" + distance);
-            } else {
-                fail("hitboxes!");
-            }
-
-             event.setCancelled(true);
-        }
-
-        ChatUtil.alert("d=" + distance);
+        return Math.sqrt(distance);
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {
