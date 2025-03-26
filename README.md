@@ -1,6 +1,6 @@
 # Boar
 
-### This branch is now discontinued, since I'm working on an recode in [this](https://github.com/Oryxel/Boar/tree/new) branch. Still, feel free to look around (this branch) anyway!
+### This branch is now discontinued, since I'm working on an recode on [this](https://github.com/Oryxel/Boar/tree/new) branch. Still, feel free to look around (this branch) anyway!
 
 Boar is an extra plugin for [GeyserMC](https://github.com/GeyserMC/Geyser) project aims to 
 achieve something similar to [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) on bedrock (but stricter).
