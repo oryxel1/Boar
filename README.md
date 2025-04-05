@@ -1,6 +1,6 @@
 # Boar
 
-### Please keep in mind that this branch is totally outdated, so expect bugs and crap (GeyserMC 2.6.0-2.6.1 is this last stable version.)
+### Please keep in mind that this branch is totally outdated, so expect bugs and crap (GeyserMC 2.6.0-2.6.1 is are the last stable version.)
 
 Boar is an extra plugin for [GeyserMC](https://github.com/GeyserMC/Geyser) project aims to 
 achieve something similar to [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) on bedrock (but stricter).
