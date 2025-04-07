@@ -1,6 +1,7 @@
 package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
+import ac.boar.anticheat.data.BoarBlockState;
 import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
@@ -26,6 +27,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.BlockMappings;
@@ -127,6 +129,15 @@ public final class BoarPlayer extends PlayerData {
 //
 //            cache.getCurrent().tick();
 //        }
+    }
+
+    public float getBlockSpeedFactor() {
+        BoarBlockState blockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0);
+        float f = blockState.getSpeedFactor();
+        if (blockState.getState().is(Blocks.WATER) || blockState.getState().is(Blocks.BUBBLE_COLUMN)) {
+            return f;
+        }
+        return f == 1.0 ? this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement(), 0).getSpeedFactor() : f;
     }
 
     public BlockState getInBlockState() {

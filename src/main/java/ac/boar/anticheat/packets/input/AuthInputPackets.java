@@ -6,6 +6,7 @@ import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
+import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 
@@ -99,14 +100,17 @@ public class AuthInputPackets implements PacketListener {
             new PredictionRunner(player).run();
         }
 
+        final UncertainRunner uncertainRunner = new UncertainRunner(player);
+
         // Instead of comparing velocity calculate by (pos - prevPos) that player sends to our predicted velocity
         // We compare predicted position to player claimed position, this is because player velocity will never be accurate.
         // For example player want to move by 0.1 block in the Z coord, but due to floating point error, when player add this
         // velocity to their position to move, floating point errors fuck this up and make player move just slightly further or less than
         // what player suppose to be. So we also do the same thing to accounted for this!
         // Also, this is more accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
-        final double offset = player.position.distanceTo(player.unvalidatedPosition);
+        final double offset = uncertainRunner.reduceOffset(player.position.distanceTo(player.unvalidatedPosition));
 
+        uncertainRunner.doTickEndUncertain();
         correctInputData(player, packet);
 
         for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {

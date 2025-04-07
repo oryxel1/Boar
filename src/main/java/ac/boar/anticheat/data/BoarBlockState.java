@@ -33,6 +33,7 @@ public class BoarBlockState {
     }
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {
+        // Honey block act the same on Bedrock except it doesn't bound lol, according to BDS.
         if (state.is(Blocks.HONEY_BLOCK)) {
             // Yes lol.
             float d = Math.abs(player.velocity.y);
@@ -41,6 +42,8 @@ public class BoarBlockState {
                 player.velocity = player.velocity.multiply(e, 1, e);
             }
         }
+
+        player.thisTickSlimeUncertain = state.is(Blocks.SLIME_BLOCK) && !player.sneaking;
     }
 
     public void onEntityCollision(final BoarPlayer player, Mutable pos) {
@@ -130,6 +133,14 @@ public class BoarBlockState {
             return;
         }
 
+        if (state.is(Blocks.SLIME_BLOCK)) {
+            if (player.velocity.y < 0.0 && !player.sneaking) {
+                // double d = entity instanceof LivingEntity ? 1.0 : 0.8;
+                player.velocity.y = -player.velocity.y * 1;
+                return;
+            }
+        }
+
         player.velocity.y = 0;
     }
 
@@ -164,6 +175,10 @@ public class BoarBlockState {
 
     public float getJumpFactor() {
         return state.is(Blocks.HONEY_BLOCK) ? 0.6F : 1;
+    }
+
+    public float getSpeedFactor() {
+        return state.is(Blocks.SOUL_SAND) ? 0.75F : 1;
     }
 
     public float getFriction() {
