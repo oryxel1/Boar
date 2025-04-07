@@ -3,6 +3,7 @@ package ac.boar.anticheat.prediction.ticker.base;
 import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.data.BoarBlockState;
 import ac.boar.anticheat.data.FluidState;
+import ac.boar.anticheat.data.PredictionData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
@@ -165,7 +166,7 @@ public class EntityTicker {
             blockState.updateEntityMovementAfterFallOn(player, true);
         }
 
-
+        player.predictionResult = new PredictionData(player.bestPossibility, vec3.clone(), vec32.clone(), player.velocity.clone());
         // There is none of this thing on Bedrock.
 //        float f = this.getBlockSpeedFactor();
 //        this.setDeltaMovement(this.getDeltaMovement().multiply(f, 1.0, f));
