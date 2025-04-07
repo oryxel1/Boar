@@ -4,7 +4,7 @@ import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.prediction.ticker.PlayerTicker;
+import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 
@@ -82,7 +82,7 @@ public class AuthInputPacket implements PacketListener {
             player.setPos(player.unvalidatedPosition);
             return;
         } else {
-            new PlayerTicker(player).tick();
+            new PredictionRunner(player).run();
         }
 
         // Instead of comparing velocity calculate by (pos - prevPos) that player sends to our predicted velocity

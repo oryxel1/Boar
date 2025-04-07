@@ -72,14 +72,14 @@ public final class BreakingBlockValidator {
                 return;
             }
 
-            final BlockState state = player.compensatedWorld.getBlockState(position);
+            final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
             final BreakingData data = findCacheUsingPosition(position);
             if (data == null || !BlockUtil.determineCanBreak(player, state)) {
                 packet.setItemUseTransaction(null);
                 this.resyncBlock(position);
             } else {
                 if (data.getBreakingProcess() >= 1) {
-                    player.compensatedWorld.updateBlock(data.getPosition(), Block.JAVA_AIR_ID);
+                    player.compensatedWorld.updateBlock(data.getPosition(), 0, player.BEDROCK_AIR);
 
                     // We have to manually save this so we can handle it later on lol.
                     final PlayerBlockActionData action = new PlayerBlockActionData();

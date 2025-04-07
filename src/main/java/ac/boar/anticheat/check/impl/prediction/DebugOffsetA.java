@@ -20,9 +20,9 @@ public class DebugOffsetA extends OffsetHandlerCheck {
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         if (actual.length() > 1e-5 || offset > maxOffset || eotOffset > maxOffset) {
-            Bukkit.broadcastMessage((offset > maxOffset ? "§c" : "§a") + "O:" + offset + ", T: " + player.closetVector.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", MO=" + maxOffset);
+            Bukkit.broadcastMessage((offset > maxOffset ? "§c" : "§a") + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", MO=" + maxOffset);
 
-            Bukkit.broadcastMessage("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", JUMPING=" + player.closetVector.isJumping() + ", sinceTeleport=" + player.sinceTeleport);
+            Bukkit.broadcastMessage("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", sinceTeleport=" + player.sinceTeleport);
 
             Bukkit.broadcastMessage("A EOT: " + player.velocity.toVector3f().toString());
             Bukkit.broadcastMessage("EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset + "," + player.unvalidatedTickEnd.toVector3f().toString());

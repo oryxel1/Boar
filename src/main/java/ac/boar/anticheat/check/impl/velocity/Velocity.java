@@ -16,7 +16,7 @@ public class Velocity extends Check {
 //            return false;
 //        }
 
-        if (player.closetVector.getType() == VectorType.VELOCITY) {
+        if (player.bestPossibility.getType() == VectorType.VELOCITY) {
             if (offset > player.getMaxOffset()) {
                 if (player.sinceTeleport > 5) {
                     this.fail("o=" + offset);

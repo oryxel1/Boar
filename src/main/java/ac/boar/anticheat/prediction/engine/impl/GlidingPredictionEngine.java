@@ -7,13 +7,13 @@ import ac.boar.anticheat.util.MathUtil;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.TrigMath;
 
-public class PredictionEngineGliding extends PredictionEngine {
-    public PredictionEngineGliding(final BoarPlayer player) {
+public class GlidingPredictionEngine extends PredictionEngine {
+    public GlidingPredictionEngine(final BoarPlayer player) {
         super(player);
     }
 
     @Override
-    protected Vec3 travel(Vec3 vec3) {
+    public Vec3 travel(Vec3 vec3) {
         float velX = vec3.x, velY = vec3.y, velZ = vec3.z;
 
         final Vec3 view = MathUtil.getRotationVector(player.pitch, player.yaw);
@@ -49,12 +49,5 @@ public class PredictionEngineGliding extends PredictionEngine {
     }
 
     @Override
-    protected Vec3 jump(Vec3 vec3) {
-        return vec3;
-    }
-
-    @Override
-    protected boolean shouldJump() {
-        return false;
-    }
+    public void finalizeMovement() {}
 }

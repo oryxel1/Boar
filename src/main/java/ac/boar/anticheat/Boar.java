@@ -26,7 +26,7 @@ public class Boar {
         new GeyserSessionJoinEvent();
 
         PacketEvents.getApi().register(new NetworkLatencyPacket());
-        PacketEvents.getApi().register(new ChunkSimulationPacket());
+        PacketEvents.getApi().register(new ChunkWorldPackets());
         PacketEvents.getApi().register(new EntitySimulationPacket());
         PacketEvents.getApi().register(new DataSimulationPacket());
         PacketEvents.getApi().register(new PlayerEffectPacket());

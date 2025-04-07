@@ -16,6 +16,10 @@ public class MathUtil {
         return value == 0 ? value : value > 0 ? 1 : -1;
     }
 
+    public static boolean equal(float d, float e) {
+        return Math.abs(e - d) < 1.0E-5F;
+    }
+
     public static float lerp(float delta, float start, float end) {
         return start + delta * (end - start);
     }
@@ -51,7 +55,7 @@ public class MathUtil {
         return new Vec3(i * j, -k, h * j);
     }
 
-    public static Vec3 movementInputToVelocity(final Vec3 movementInput, float speed, float yaw) {
+    public static Vec3 getInputVector(final Vec3 movementInput, float speed, float yaw) {
         double d = movementInput.lengthSquared();
         if (d < 1.0E-7) {
             return Vec3.ZERO;

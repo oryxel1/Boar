@@ -109,7 +109,7 @@ public final class TeleportUtil {
         packet.setRuntimeEntityId(player.runtimeEntityId);
         packet.setPosition(Vector3f.from(Vec3.x, Vec3.y, Vec3.z));
         packet.setRotation(player.bedrockRotation);
-        packet.setOnGround(player.groundCollision);
+        packet.setOnGround(player.onGround);
         packet.setMode(MovePlayerPacket.Mode.TELEPORT);
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
         this.addTeleportToQueue(Vec3,false, true);

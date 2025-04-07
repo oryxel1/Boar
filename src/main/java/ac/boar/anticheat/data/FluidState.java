@@ -33,7 +33,8 @@ public record FluidState(Fluid fluid, float height) {
             float f = lv3.height();
             float g = 0.0F;
             if (f == 0.0F) {
-                if (!BlockUtil.blocksMovement(player, mutable, fluid, player.compensatedWorld.getBlockState(mutable))) {
+                if (player.compensatedWorld.getBlockState(mutable.getX(), mutable.getY(), mutable.getZ(), 0).blocksMovement(
+                        player, mutable, fluid)) {
                     FluidState lv5 = player.compensatedWorld.getFluidState(mutable.getX(), mutable.getY() - 1, mutable.getZ());
                     if (this.isEmptyOrThis(lv5) && lv5.height() > 0.0F) {
                         g = state.height() - (f - 0.8888889F);

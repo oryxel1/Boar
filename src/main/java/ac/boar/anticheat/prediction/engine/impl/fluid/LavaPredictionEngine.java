@@ -1,23 +1,19 @@
-package ac.boar.anticheat.prediction.engine.impl;
+package ac.boar.anticheat.prediction.engine.impl.fluid;
 
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3;
-import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-public class PredictionEngineLava extends PredictionEngine {
-    private float prevPosY = 0;
-
-    public PredictionEngineLava(BoarPlayer player) {
+public class LavaPredictionEngine extends PredictionEngine {
+    public LavaPredictionEngine(BoarPlayer player) {
         super(player);
     }
 
     @Override
-    protected Vec3 travel(Vec3 vec3) {
-        this.prevPosY = player.position.y;
-        return this.updateVelocity(vec3, 0.02F);
+    public Vec3 travel(Vec3 vec3) {
+        return this.moveRelative(vec3, 0.02F);
     }
 
     @Override
@@ -25,7 +21,7 @@ public class PredictionEngineLava extends PredictionEngine {
         final float y = player.velocity.y;
 
         float gravity = player.getEffectiveGravity();
-        if (player.fluidHeight.getOrDefault(Fluid.LAVA, 0F) <= player.getSwimHeight()) {
+        if (player.fluidHeight.getOrDefault(Fluid.LAVA, 0F) <= player.getFluidJumpThreshold()) {
             player.velocity = player.velocity.multiply(0.5F, 0.8F, 0.5F);
             player.velocity = this.applyFluidMovingSpeed(gravity, player.velocity);
         } else {
@@ -35,23 +31,6 @@ public class PredictionEngineLava extends PredictionEngine {
         if (gravity != 0.0) {
             player.velocity = player.velocity.add(0, -gravity / 4.0F, 0);
         }
-
-        if (player.horizontalCollision && player.doesNotCollide(player.velocity.x, y + 0.6F - player.position.y + this.prevPosY, player.velocity.z)) {
-            player.velocity.y = 0.3F;
-        }
-    }
-
-    @Override
-    protected Vec3 jump(Vec3 vec3) {
-        return vec3.add(0, 0.04F, 0);
-    }
-
-    @Override
-    protected boolean shouldJump() {
-        float g = player.fluidHeight.getOrDefault(Fluid.LAVA, 0F);
-        boolean bl = (player.touchingWater && g > 0.0) && !(player.groundCollision && !(g > player.getSwimHeight()));
-        boolean canJumpOnGround = !player.isInLava() || player.groundCollision && !(g > player.getSwimHeight());
-        return !bl && !canJumpOnGround && player.getInputData().contains(PlayerAuthInputData.WANT_UP);
     }
 
     private Vec3 applyFluidMovingSpeed(float gravity, Vec3 motion) {

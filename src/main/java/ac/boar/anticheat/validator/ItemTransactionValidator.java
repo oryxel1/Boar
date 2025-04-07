@@ -1,7 +1,6 @@
 package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
@@ -79,26 +78,26 @@ public final class ItemTransactionValidator {
             }
 
             case ITEM_USE_ON_ENTITY -> {
-                final int slot = packet.getHotbarSlot();
-                if (slot < 0 || slot > 8) {
-                    return false;
-                }
-
-                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot).getData();
-                final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
-                if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
-                    return false;
-                }
-
-                final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-                if (entity == null || entity.getTransactionId() > player.receivedStackId.get()) {
-                    return false;
-                }
-
-                final boolean tooFar = entity.getServerPosition().distanceTo(player.position) > 6;
-                if (tooFar) {
-                    return false;
-                }
+//                final int slot = packet.getHotbarSlot();
+//                if (slot < 0 || slot > 8) {
+//                    return false;
+//                }
+//
+//                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot).getData();
+//                final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
+//                if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
+//                    return false;
+//                }
+//
+//                final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+//                if (entity == null || entity.getTransactionId() > player.receivedStackId.get()) {
+//                    return false;
+//                }
+//
+//                final boolean tooFar = entity.getServerPosition().distanceTo(player.position) > 6;
+//                if (tooFar) {
+//                    return false;
+//                }
             }
 
             case ITEM_USE -> {
@@ -119,12 +118,12 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                final BlockState state = player.compensatedWorld.getBlockState(position);
+                final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
                 switch (packet.getActionType()) {
                     case 0 -> {
                         if (state.getValue(Properties.OPEN) != null) {
                             int newId = state.withValue(Properties.OPEN, !state.getValue(Properties.OPEN)).javaId();
-                            player.compensatedWorld.updateBlock(position, newId);
+                            // player.compensatedWorld.updateBlock(position, 0, newId);
                         }
                     }
 

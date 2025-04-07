@@ -1,17 +1,16 @@
 package ac.boar.anticheat.player;
 
+import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
+import ac.boar.anticheat.util.MathUtil;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.check.api.holder.CheckHolder;
-import ac.boar.anticheat.collision.Collision;
+import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.CompensatedWorld;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
-import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
@@ -20,6 +19,7 @@ import ac.boar.protocol.mitm.CloudburstSendListener;
 import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.ChatUtil;
 import org.cloudburstmc.math.GenericMath;
+import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
@@ -50,7 +50,7 @@ public final class BoarPlayer extends PlayerData {
     public final CheckHolder checkHolder = new CheckHolder(this);
 
     // Lag compensation
-    public final CompensatedWorld compensatedWorld = new CompensatedWorld(this);
+    public final CompensatedWorldImpl compensatedWorld = new CompensatedWorldImpl(this);
     public final CompensatedInventory compensatedInventory = new CompensatedInventory(this);
 
     // Validation
@@ -120,18 +120,18 @@ public final class BoarPlayer extends PlayerData {
             return filter.getValue().getDuration() == 0;
         });
 
-        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
-            if (cache.getPast() != null) {
-                cache.getPast().tick();
-            }
-
-            cache.getCurrent().tick();
-        }
+//        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+//            if (cache.getPast() != null) {
+//                cache.getPast().tick();
+//            }
+//
+//            cache.getCurrent().tick();
+//        }
     }
 
     public BlockState getInBlockState() {
         if (this.inBlockState == null) {
-            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i());
+            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).getState();
         }
 
         return this.inBlockState;
@@ -141,8 +141,7 @@ public final class BoarPlayer extends PlayerData {
         final TagCache cache = this.getSession().getTagCache();
 
         Vector3i lv = this.position.toVector3i();
-        BlockState lv2 = this.compensatedWorld.getBlockState(lv);
-        return cache.is(BlockTag.CLIMBABLE, lv2.block());
+        return cache.is(BlockTag.CLIMBABLE, this.compensatedWorld.getBlockState(lv, 0).getState().block());
     }
 
     public float getJumpPower() {
@@ -153,9 +152,23 @@ public final class BoarPlayer extends PlayerData {
         return this.hasEffect(Effect.JUMP_BOOST) ? 0.1F * (this.getActiveEffects().get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
     }
 
+    public Vec3 jumpFromGround(Vec3 vec3) {
+        float f = this.getJumpPower();
+        if (f <= 1.0E-5f) {
+            return vec3;
+        }
+        vec3 = new Vec3(vec3.x, Math.max(f, vec3.y), vec3.z);
+        if (this.sprinting) {
+            float g = this.yaw * MathUtil.DEGREE_TO_RAG;
+            vec3 = vec3.add(-TrigMath.sin(g) * 0.2F, 0, TrigMath.cos(g) * 0.2F);
+        }
+
+        return vec3;
+    }
+
     public float getBlockJumpFactor() {
-        float f = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.position.toVector3i()));
-        float g = BlockUtil.getBlockJumpFactor(this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()));
+        float f = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).getJumpFactor();
+        float g = this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement(), 0).getJumpFactor();
         return (double)f == 1.0 ? g : f;
     }
 
@@ -191,7 +204,7 @@ public final class BoarPlayer extends PlayerData {
         int j = GenericMath.ceil(lv.maxX);
         int k = GenericMath.floor(lv.minZ);
         int l = GenericMath.ceil(lv.maxZ);
-        return !this.compensatedWorld.isRegionLoaded(i, k, j, l);
+        return !this.compensatedWorld.hasChunksAt(i, k, j, l);
     }
 
     public boolean containsFluid(Box box) {
@@ -223,6 +236,6 @@ public final class BoarPlayer extends PlayerData {
     }
 
     private boolean doesNotCollide(Box box) {
-        return Collision.isSpaceEmpty(this, box) && !containsFluid(box);
+        return this.compensatedWorld.noCollision(box) && !containsFluid(box);
     }
 }

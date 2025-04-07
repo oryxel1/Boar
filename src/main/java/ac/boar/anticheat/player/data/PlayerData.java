@@ -3,7 +3,7 @@ package ac.boar.anticheat.player.data;
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.prediction.engine.data.Vector;
-import ac.boar.anticheat.prediction.engine.data.VectorType;
+import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
 import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
@@ -92,16 +92,16 @@ public class PlayerData {
     public final Set<Ability> abilities = new HashSet<>();
 
     // Prediction related
-    public EntityPose pose = EntityPose.STANDING;
-    public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(EntityPose.STANDING);
+    public Pose pose = Pose.STANDING;
+    public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(Pose.STANDING);
     public Box boundingBox = Box.EMPTY;
 
     public Vec3 prevVelocity = Vec3.ZERO, velocity = Vec3.ZERO;
 
     public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
-    public Vector closetVector = new Vector(Vec3.ZERO, VectorType.NORMAL);
+    public Vector bestPossibility = Vector.NONE;
     public VelocityData velocityData;
-    public boolean groundCollision;
+    public boolean onGround;
     public Vec3 stuckSpeedMultiplier = Vec3.ZERO;
 
     public float fallDistance = 0;
@@ -112,9 +112,17 @@ public class PlayerData {
     public boolean horizontalCollision, verticalCollision;
 
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
+    public float getFluidHeight(Fluid tagKey) {
+        return this.fluidHeight.getOrDefault(tagKey, 0F);
+    }
+
     public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
     public BlockState inBlockState;
+
+    public final EntityDimensions getDimensions(Pose pose) {
+        return PlayerTicker.POSES.get(pose);
+    }
 
     // Prediction related method
     public final double getMaxOffset() {
@@ -147,17 +155,17 @@ public class PlayerData {
         return this.getEffectiveGravity(this.velocity);
     }
 
-    public float getSwimHeight() {
+    public float getFluidJumpThreshold() {
         return this.dimensions.eyeHeight() < 0.4 ? 0.0F : 0.4F;
     }
 
-    public float getMovementSpeed() {
+    public float getSpeed() {
         return this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).getValue();
     }
 
-    public float getMovementSpeed(float slipperiness) {
-        if (groundCollision) {
-            return this.getMovementSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
+    public float getFrictionInfluencedSpeed(float slipperiness) {
+        if (onGround) {
+            return this.getSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
         }
 
         return sprinting ? 0.025999999F : 0.02F;
@@ -175,7 +183,7 @@ public class PlayerData {
         this.boundingBox = this.dimensions.getBoxAt(vec3.x, vec3.y, vec3.z);
     }
 
-    public final void setPose(EntityPose pose) {
+    public final void setPose(Pose pose) {
         this.pose = pose;
         this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }

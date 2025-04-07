@@ -5,7 +5,7 @@ import ac.boar.anticheat.data.teleport.RewindTeleportCache;
 import ac.boar.anticheat.packets.input.AuthInputPacket;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
-import ac.boar.anticheat.prediction.ticker.PlayerTicker;
+import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.plugin.BoarSpigot;
@@ -54,7 +54,7 @@ public class PlayerTeleportPacket implements PacketListener {
 
             final long tickDistance = packet.getTick() - cache.getTick() - 1;
 
-            player.groundCollision = cache.isOnGround();
+            player.onGround = cache.isOnGround();
 
             player.velocity = cache.getVelocity();
             player.setPos(cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
@@ -80,7 +80,7 @@ public class PlayerTeleportPacket implements PacketListener {
                     AuthInputPacket.processAuthInput(player, old);
                 }
 
-                new PlayerTicker(player).tick();
+                new PredictionRunner(player).run();
 
                 player.teleportUtil.cacheKnowValid(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0));
                 player.prevUnvalidatedPosition = player.position.clone();

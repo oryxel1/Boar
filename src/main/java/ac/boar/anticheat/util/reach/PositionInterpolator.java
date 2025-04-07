@@ -3,7 +3,7 @@ package ac.boar.anticheat.util.reach;
 
 import java.util.function.Consumer;
 
-import ac.boar.anticheat.collision.Collision;
+import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.MathUtil;
@@ -80,7 +80,7 @@ public class PositionInterpolator {
         float d = 1.0F / this.data.step;
         if (this.lastPos != null) {
             Vec3 lv = this.entity.getPos().subtract(this.lastPos);
-            if (Collision.isSpaceEmpty(this.entity.getPlayer(), this.entity.calculateBoundingBox().offset(this.data.pos.add(lv)))) {
+            if (this.entity.getPlayer().compensatedWorld.noCollision(this.entity.calculateBoundingBox().offset(this.data.pos.add(lv)))) {
                 this.data.addPos(lv);
             }
         }

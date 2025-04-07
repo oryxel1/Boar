@@ -187,7 +187,7 @@ public class ItemRequestProcessor {
                     return false;
                 }
 
-                final ItemCache sourceData = create ? this.queuedItems.getFirst() : sourceContainer.get(sourceSlot);
+                final ItemCache sourceData = create ? this.queuedItems.get(0) : sourceContainer.get(sourceSlot);
                 final ItemCache destinationData = destinationContainer.get(destinationSlot);
 
                 // Player try to move this item to an already occupied destination, and is sending TAKE/PLACE instead of SWAP.

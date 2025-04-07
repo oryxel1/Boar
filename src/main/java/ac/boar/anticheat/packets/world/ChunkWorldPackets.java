@@ -1,0 +1,190 @@
+package ac.boar.anticheat.packets.world;
+
+import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
+import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.plugin.BoarSpigot;
+import ac.boar.protocol.event.CloudburstPacketEvent;
+import ac.boar.protocol.listener.PacketListener;
+import io.netty.buffer.ByteBuf;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType;
+import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
+import org.cloudburstmc.protocol.bedrock.packet.LevelChunkPacket;
+import org.cloudburstmc.protocol.bedrock.packet.ServerboundLoadingScreenPacket;
+import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
+import org.cloudburstmc.protocol.common.util.VarInts;
+import org.geysermc.geyser.level.BedrockDimension;
+import org.geysermc.geyser.level.chunk.BlockStorage;
+import org.geysermc.geyser.level.chunk.GeyserChunkSection;
+import org.geysermc.geyser.level.chunk.bitarray.BitArray;
+import org.geysermc.geyser.level.chunk.bitarray.BitArrayVersion;
+import org.geysermc.geyser.level.chunk.bitarray.SingletonBitArray;
+
+import java.util.Objects;
+
+public class ChunkWorldPackets implements PacketListener {
+    @Override
+    public void onPacketSend(CloudburstPacketEvent event, boolean immediate) {
+        final BoarPlayer player = event.getPlayer();
+        final CompensatedWorld world = player.compensatedWorld;
+
+        if (event.getPacket() instanceof ChangeDimensionPacket packet) {
+            int dimensionId = packet.getDimension();
+            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
+                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
+
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+                world.getChunks().clear();
+                world.setDimension(dimension);
+
+                player.currentLoadingScreen = packet.getLoadingScreenId();
+                player.inLoadingScreen = true;
+            });
+        }
+
+        // Based off GeyserMC and ViaBedrock code, should be correct!
+        if (event.getPacket() instanceof LevelChunkPacket packet) {
+            int sectionCount = packet.getSubChunksLength();
+
+            // Bedrock ignores this.
+            if (sectionCount == -2) {
+                return;
+            }
+
+            // Sub chunk?
+            if (sectionCount == 0) {
+                return;
+            }
+
+            int dimensionId = packet.getDimension();
+            if (dimensionId < 0 || dimensionId > 2) {
+                // Is this even possible.
+                return;
+            }
+
+            int yOffset = world.getMinY() >> 4, chunkSize = world.getHeightY() >> 4;
+
+            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
+                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
+
+            int dimensionOffset = dimension.minY() >> 4;
+
+            final GeyserChunkSection[] sections = new GeyserChunkSection[dimension.height() >> 4];
+
+            final ByteBuf buffer = packet.getData().copy();
+            try {
+                // Read chunk sections.
+                for (int i = 0; i < sectionCount; i++) {
+                    buffer.readByte(); // Version.
+
+                    short storageLength = buffer.readUnsignedByte();
+                    short subChunkIndex = buffer.readUnsignedByte();
+
+                    // Default size should be at-least 2, so I can do waterlogged block.
+                    // Also, server (atleast GeyserMC) seems to be sending the second layer regardless if that layer have a second block storage.
+                    BlockStorage[] storages = new BlockStorage[Math.max(storageLength, 2)];
+                    for (int n = 0; n < storageLength; n++) {
+                        storages[n] = readStorage(buffer);
+                    }
+                    if (storageLength < 2) {
+                        storages[1] = new BlockStorage(BitArrayVersion.V0.createArray(4096, null), new IntArrayList(16));
+                    }
+
+                    sections[i] = new GeyserChunkSection(storages, subChunkIndex);
+                }
+
+                // As of 1.18.30, the amount of biomes read is dependent on how high Bedrock thinks the dimension is
+                int biomeCount = dimension.height() >> 4;
+                // I don't really care about biomes, just ignore whatever we were able to read.
+                for (int i = 0; i < biomeCount; i++) {
+                    int biomeYOffset = dimensionOffset + i;
+                    if (biomeYOffset < yOffset) {
+                        buffer.skipBytes(1);
+                        continue;
+                    }
+                    if (biomeYOffset >= (chunkSize + yOffset)) {
+                        buffer.skipBytes(1);
+                        continue;
+                    }
+
+                    readStorage(buffer);
+                }
+
+                // Border blocks.
+                buffer.skipBytes(1);
+
+                // Just ignore the rest... TODO: Block entities.
+                do {
+                    buffer.skipBytes(1);
+                } while (buffer.isReadable());
+            } catch (Exception ignored) {
+                // Ignore and just use whatever we were able to read.
+                // ignored.printStackTrace();
+            } finally {
+                buffer.release();
+            }
+
+            // TODO: Should we send stack id all the time?
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+                if (dimension != world.getDimension()) {
+                    BoarSpigot.LOGGER.warning("Dimension mis-match? expected=" + world.getDimension().bedrockId() + ", actual=" + dimensionId);
+                    return;
+                }
+
+                world.addToCache(packet.getChunkX(), packet.getChunkZ(), sections);
+            });
+        }
+
+        if (event.getPacket() instanceof UpdateBlockPacket packet) {
+            player.sendLatencyStack();
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
+        }
+    }
+
+    @Override
+    public void onPacketReceived(CloudburstPacketEvent event) {
+        final BoarPlayer player = event.getPlayer();
+
+        if (event.getPacket() instanceof ServerboundLoadingScreenPacket packet && packet.getType() == ServerboundLoadingScreenPacketType.END_LOADING_SCREEN) {
+            if (Objects.equals(player.currentLoadingScreen, packet.getLoadingScreenId())) {
+                player.currentLoadingScreen = null;
+                player.inLoadingScreen = false;
+            }
+        }
+    }
+
+    // According to ViaBedrock.
+    private BlockStorage readStorage(final ByteBuf buffer) {
+        final short header = buffer.readUnsignedByte();
+        final int bitArrayVersion = header >> 1;
+
+        if (bitArrayVersion == 127) { // 127 = Same values as previous palette
+            return null;
+        }
+
+        final BitArray bitArray;
+        if (bitArrayVersion == 0) {
+            bitArray = BitArrayVersion.get(bitArrayVersion, true).createArray(4096, null);
+        } else {
+            bitArray = BitArrayVersion.get(bitArrayVersion, true).createArray(4096);
+        }
+
+        if (!(bitArray instanceof SingletonBitArray)) {
+            for (int i = 0; i < bitArray.getWords().length; i++) {
+                bitArray.getWords()[i] = buffer.readIntLE();
+            }
+        }
+
+        final int size = bitArray instanceof SingletonBitArray ? 1 : VarInts.readInt(buffer);
+
+        final IntList palette = new IntArrayList(size);
+        for (int i = 0; i < size; i++) {
+            palette.add(VarInts.readInt(buffer));
+        }
+
+        return new BlockStorage(bitArray, palette);
+    }
+}

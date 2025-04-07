@@ -7,6 +7,7 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.MathUtil;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;
@@ -17,23 +18,19 @@ import org.geysermc.geyser.util.BlockUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Collision {
-    public static boolean isSpaceEmpty(final BoarPlayer player, final Box box) {
-        return findCollisionsForMovement(player, box, true).isEmpty();
-    }
-
+public class Collider {
     public static boolean canFallAtLeast(final BoarPlayer player, float offsetX, float offsetZ, float f) {
         Box lv = player.boundingBox;
-        return isSpaceEmpty(player, new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
+        return player.compensatedWorld.noCollision(new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
     }
 
-    private static boolean canBackOffFromEdge(final BoarPlayer player) {
-        return player.groundCollision || player.fallDistance < 0.6F && !canFallAtLeast(player, 0, 0, 0.6F - player.fallDistance);
+    private static boolean isAboveGround(final BoarPlayer player) {
+        return player.onGround || player.fallDistance < 0.6F && !canFallAtLeast(player, 0, 0, 0.6F - player.fallDistance);
     }
 
     public static Vec3 maybeBackOffFromEdge(final BoarPlayer player, final Vec3 movement) {
         final float f = PlayerData.STEP_HEIGHT;
-        if (movement.y <= 0.0 && (player.sneaking || player.wasSneaking) && canBackOffFromEdge(player)) {
+        if (movement.y <= 0.0 && (player.sneaking || player.wasSneaking) && isAboveGround(player)) {
             float d = movement.x;
             float e = movement.z;
             float h = MathUtil.sign(d) * 0.05F;
@@ -77,33 +74,34 @@ public class Collision {
         }
     }
 
-    public static Vec3 collide(final BoarPlayer player, Vec3 movement, boolean compensated) {
+    public static Vec3 collide(final BoarPlayer player, Vec3 movement) {
         Box box = player.boundingBox.clone();
         List<Box> collisions = /* this.getWorld().getEntityCollisions(this, lv.stretch(movement)) */ new ArrayList<>();
-        Vec3 lv2 = movement.lengthSquared() == 0.0 ? movement : collideBoundingBox(player, movement, box, collisions, compensated);
+        Vec3 lv2 = movement.lengthSquared() == 0.0 ? movement : collideBoundingBox(player, movement, box, collisions);
         boolean collisionX = movement.x != lv2.x, collisionZ = movement.z != lv2.z;
         boolean verticalCollision = movement.y != lv2.y;
         boolean onGround = verticalCollision && movement.y < 0.0;
-        if ((onGround || player.groundCollision) && (collisionX || collisionZ)) {
-            Vec3 vec32 = collideBoundingBox(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions, compensated);
-            Vec3 vec33 = collideBoundingBox(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions, compensated);
+        if ((onGround || player.onGround) && (collisionX || collisionZ)) {
+            Vec3 vec32 = collideBoundingBox(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions);
+            Vec3 vec33 = collideBoundingBox(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions);
             if (vec33.y < PlayerData.STEP_HEIGHT) {
-                Vec3 vec34 = collideBoundingBox(player, new Vec3(movement.x, 0, movement.z), box.offset(vec33), collisions, compensated).add(vec33);
+                Vec3 vec34 = collideBoundingBox(player, new Vec3(movement.x, 0, movement.z), box.offset(vec33), collisions).add(vec33);
                 if (vec34.horizontalLengthSquared() > vec32.horizontalLengthSquared()) {
                     vec32 = vec34;
                 }
             }
 
             if (vec32.horizontalLengthSquared() > lv2.horizontalLengthSquared()) {
-                lv2 = vec32.add(collideBoundingBox(player, new Vec3(0, -vec32.y, 0), box.offset(vec32), collisions, compensated));
+                lv2 = vec32.add(collideBoundingBox(player, new Vec3(0, -vec32.y, 0), box.offset(vec32), collisions));
             }
         }
 
         return lv2;
     }
 
-    private static Vec3 collideBoundingBox(final BoarPlayer player, final Vec3 movement, final Box box, final List<Box> collisions, boolean compensated) {
-        collisions.addAll(findCollisionsForMovement(player, box.stretch(movement), compensated));
+    private static Vec3 collideBoundingBox(final BoarPlayer player, final Vec3 movement, final Box box, final List<Box> collisions) {
+        final Box b = box.stretch(movement);
+        collisions.addAll(player.compensatedWorld.collectColliders(player.compensatedWorld.getEntityCollisions(b), b));
         return collideWithShapes(movement, box, collisions);
     }
 
@@ -134,58 +132,6 @@ public class Collision {
         }
 
         return movement;
-    }
-
-    private static List<Box> findCollisionsForMovement(final BoarPlayer player, final Box box, boolean compensated) {
-        final List<Box> collision = new ArrayList<>();
-        final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(box);
-        final Mutable pos = new Mutable();
-        while (iterator.step()) {
-            int x = iterator.getX();
-            int y = iterator.getY();
-            int z = iterator.getZ();
-            int l = iterator.getEdgeCoordinatesCount();
-            if (l != 3 && player.compensatedWorld.isChunkLoaded(x, z)) {
-                pos.set(x, y, z);
-                addCollisionBoxesToList(player, pos, box, collision, compensated);
-            }
-        }
-
-        return collision;
-    }
-
-    private static void addCollisionBoxesToList(final BoarPlayer player, final Mutable pos, final Box boundingBox, final List<Box> list, boolean compensated) {
-        GeyserSession session = player.getSession();
-        BlockState state;
-        if (compensated) {
-            state = player.compensatedWorld.getBlockState(pos);
-        } else {
-            state = session.getGeyser().getWorldManager().blockAt(session, pos.getX(), pos.getY(), pos.getZ());
-        }
-
-        final List<Box> boxes = BedrockCollision.getCollisionBox(player, pos, state);
-        if (boxes != null) {
-            for (Box box : boxes) {
-                box = box.offset(pos.getX(), pos.getY(), pos.getZ());
-                if (box.intersects(boundingBox)) {
-                    list.add(box);
-                }
-            }
-            return;
-        }
-
-        final BlockCollision collision = BlockUtils.getCollision(state.javaId());
-        if (collision == null) {
-            return;
-        }
-
-        for (final BoundingBox geyserBB : collision.getBoundingBoxes()) {
-            final Box box = new Box(geyserBB).offset(pos.getX(), pos.getY(), pos.getZ());
-
-            if (box.intersects(boundingBox)) {
-                list.add(box);
-            }
-        }
     }
 
     private static float calculateMaxOffset(final Axis axis, final Box boundingBox, final List<Box> collision, float maxDist) {

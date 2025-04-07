@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum EntityPose {
+public enum Pose {
 	STANDING(0),
 	GLIDING(1),
 	SLEEPING(2),
