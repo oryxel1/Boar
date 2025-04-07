@@ -66,7 +66,7 @@ public final class TeleportUtil {
         packet.setPredictionType(PredictionType.PLAYER);
 
         this.addRewindToQueue(tick, position, data.tickEnd(), onGround, true);
-        this.player.cloudburstSession.sendPacketImmediately(packet);
+        this.player.cloudburstDownstream.sendPacketImmediately(packet);
 
         if (GlobalSetting.REWIND_INFO_DEBUG) {
             ChatUtil.alert("Attempted to rewind player to tick=" + tick + ", current tick=" + player.tick);
@@ -75,9 +75,9 @@ public final class TeleportUtil {
     }
 
     public void addTeleportToQueue(Vec3 Vec3, boolean respawn, boolean immediate) {
-        this.player.sendTransaction(immediate);
+        this.player.sendLatencyStack(immediate);
 
-        final TeleportCache teleportCache = new TeleportCache(Vec3, this.player.lastSentId);
+        final TeleportCache teleportCache = new TeleportCache(Vec3, this.player.sentStackId.get());
         teleportCache.setRespawnTeleport(respawn);
         this.teleportQueue.add(teleportCache);
 
@@ -85,9 +85,9 @@ public final class TeleportUtil {
     }
 
     public void addRewindToQueue(final long tick, final Vec3 vec3, final Vec3 velocity, final boolean groundCollision, boolean immediate) {
-        this.player.sendTransaction(immediate);
+        this.player.sendLatencyStack(immediate);
 
-        final RewindTeleportCache teleportCache = new RewindTeleportCache(tick, vec3, velocity, groundCollision, this.player.lastSentId);
+        final RewindTeleportCache teleportCache = new RewindTeleportCache(tick, vec3, velocity, groundCollision, this.player.sentStackId.get());
         this.rewindTeleportCaches.add(teleportCache);
     }
 
@@ -114,7 +114,7 @@ public final class TeleportUtil {
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
         this.addTeleportToQueue(Vec3,false, true);
 
-        this.player.cloudburstSession.sendPacketImmediately(packet);
+        this.player.cloudburstDownstream.sendPacketImmediately(packet);
     }
 
     public boolean teleportInQueue() {

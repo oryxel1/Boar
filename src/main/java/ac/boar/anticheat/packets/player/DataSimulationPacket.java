@@ -3,8 +3,7 @@ package ac.boar.anticheat.packets.player;
 import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
-import ac.boar.protocol.listener.MCPLPacketListener;
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
@@ -16,14 +15,14 @@ import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 
 import java.util.EnumSet;
 
-public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacketListener {
+public class DataSimulationPacket implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
 
         if (event.getPacket() instanceof SetPlayerGameTypePacket packet) {
-            player.sendTransaction();
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.gameType = GameType.from(packet.getGamemode()));
+            player.sendLatencyStack();
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = GameType.from(packet.getGamemode()));
         }
 
         if (event.getPacket() instanceof UpdateAbilitiesPacket packet) {
@@ -31,8 +30,8 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                 return;
             }
 
-            event.getPostTasks().add(() -> player.sendTransaction(immediate));
-            player.latencyUtil.addTransactionToQueue(player.lastSentId + 1, () -> {
+            event.getPostTasks().add(() -> player.sendLatencyStack(immediate));
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get() + 1, () -> {
                 player.abilities.clear();
                 for (AbilityLayer layer : packet.getAbilityLayers()) {
                     if (layer.getLayerType() == AbilityLayer.Type.BASE) {
@@ -57,12 +56,12 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                 return;
             }
 
-            // You have to do this outside of this addTransactionToQueue because geyser can change this, uhhh im not good at
+            // You have to do this outside of this addTaskToQueue because geyser can change this, uhhh im not good at
             // explaining thing, just do it outside or else you're going to do de-sync.
             final boolean sprinting = flags.contains(EntityFlag.SPRINTING);
 
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 player.setSprinting(sprinting);
             });
         }
@@ -72,8 +71,8 @@ public class DataSimulationPacket implements CloudburstPacketListener, MCPLPacke
                 return;
             }
 
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 for (final AttributeData data : packet.getAttributes()) {
                     final PlayerAttributeData attribute = player.attributes.get(data.getName());
                     if (attribute == null) {

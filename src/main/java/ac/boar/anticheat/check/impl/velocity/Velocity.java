@@ -12,9 +12,9 @@ public class Velocity extends Check {
     }
 
     public boolean check(final double offset) {
-        if (player.sinceSpawnIn < 5) {
-            return false;
-        }
+//        if (player.sinceSpawnIn < 5) {
+//            return false;
+//        }
 
         if (player.closetVector.getType() == VectorType.VELOCITY) {
             if (offset > player.getMaxOffset()) {
@@ -34,7 +34,7 @@ public class Velocity extends Check {
 //        Iterator<Map.Entry<Long, VelocityData>> iterator = player.queuedVelocities.entrySet().iterator();
 //        Map.Entry<Long, VelocityData> entry;
 //        while (iterator.hasNext() && (entry = iterator.next()) != null) {
-//            if (player.lastReceivedId < entry.getKey()) {
+//            if (player.receivedStackId.get() < entry.getKey()) {
 //                break;
 //            }
 //            iterator.remove();

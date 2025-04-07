@@ -3,7 +3,7 @@ package ac.boar.anticheat.prediction.engine.impl;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.TrigMath;
 

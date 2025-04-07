@@ -1,6 +1,6 @@
 name: Boar
 version: '1.0'
-main: ac.boar.plugin.BoarPlugin
+main: ac.boar.plugin.BoarSpigot
 api-version: '1.21'
 depend:
   - 'Geyser-Spigot'

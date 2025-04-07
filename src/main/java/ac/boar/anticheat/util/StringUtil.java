@@ -1,4 +1,4 @@
-package ac.boar.util;
+package ac.boar.anticheat.util;
 
 public class StringUtil {
     public static String sanitizePrefix(final String string) {

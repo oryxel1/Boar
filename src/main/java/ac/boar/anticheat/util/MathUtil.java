@@ -1,4 +1,4 @@
-package ac.boar.util;
+package ac.boar.anticheat.util;
 
 import ac.boar.anticheat.util.math.Vec3;
 

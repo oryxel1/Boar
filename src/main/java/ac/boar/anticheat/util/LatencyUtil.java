@@ -1,10 +1,9 @@
 package ac.boar.anticheat.util;
 
-import lombok.Getter;
+import ac.boar.anticheat.player.data.PlayerData;
 import lombok.RequiredArgsConstructor;
 
-import ac.boar.anticheat.player.data.PlayerData;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,45 +12,45 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RequiredArgsConstructor
 public final class LatencyUtil {
     private final PlayerData player;
-    @Getter
-    private final List<Long> sentTransactions = new CopyOnWriteArrayList<>();
-    private final Map<Long, List<Runnable>> map = new ConcurrentHashMap<>();
+    private final List<Long> sentStackLatency = new CopyOnWriteArrayList<>();
+    private final Map<Long, StackLatencyData> map = new ConcurrentHashMap<>();
 
-    public void addTransactionToQueue(long id, Runnable runnable) {
-        if (id <= player.lastReceivedId) {
+    public void addLatencyToQueue(long id) {
+        this.sentStackLatency.add(id);
+        this.map.put(id, new StackLatencyData(id));
+    }
+
+    public void addTaskToQueue(long id, Runnable runnable) {
+        if (id <= player.receivedStackId.get() || this.map.containsKey(id)) {
             runnable.run();
             return;
         }
 
         synchronized (this) {
-            if (!this.map.containsKey(id)) {
-                List<Runnable> list = new CopyOnWriteArrayList<>();
-                list.add(runnable);
-                this.map.put(id, list);
-            } else {
-                this.map.get(id).add(runnable);
-            }
+            this.map.get(id).tasks.add(runnable);
         }
     }
 
     public boolean confirmTransaction(long id) {
-        if (!this.sentTransactions.contains(id) || id <= player.lastReceivedId) {
+        if (!this.sentStackLatency.contains(id) || id <= player.receivedStackId.get()) {
             return false;
         }
 
-        for (final Long l : this.sentTransactions) {
-            if (l > id) {
-                break;
+        this.sentStackLatency.removeIf(l -> {
+            if (this.map.containsKey(l) && l <= id) {
+                this.map.remove(l).tasks.forEach(Runnable::run);
             }
 
-            if (this.map.containsKey(id)) {
-                this.map.remove(id).forEach(Runnable::run);
-            }
-            this.sentTransactions.remove(l);
-        }
+            return l <= id;
+        });
 
-        player.lastReceivedId = id;
-        player.lastResponseTime = System.currentTimeMillis();
+        player.receivedStackId.set(id);
         return true;
+    }
+
+    @RequiredArgsConstructor
+    private static class StackLatencyData {
+        private final long stackId;
+        private final List<Runnable> tasks = new ArrayList<>();
     }
 }

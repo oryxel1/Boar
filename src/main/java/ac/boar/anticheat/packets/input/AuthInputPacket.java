@@ -1,40 +1,28 @@
-package ac.boar.anticheat.packets;
+package ac.boar.anticheat.packets.input;
 
-import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
-import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
 
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.cloudburstmc.protocol.bedrock.packet.SetLocalPlayerAsInitializedPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.item.Items;
 
 import java.util.Map;
 
-public class MovementCheckRunner implements CloudburstPacketListener {
+public class AuthInputPacket implements PacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
-
-        if (event.getPacket() instanceof SetLocalPlayerAsInitializedPacket packet) {
-            if (packet.getRuntimeEntityId() != player.runtimeEntityId || player.hasSpawnedIn) {
-                return;
-            }
-
-            player.hasSpawnedIn = true;
-            player.sinceSpawnIn = 0;
-        }
 
         if (!(event.getPacket() instanceof PlayerAuthInputPacket packet)) {
             return;
@@ -42,7 +30,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
 
         // Just to be safe.
         if (player.mcplSession == null) {
-            player.disconnect("Failed to find MCPL session, please rejoin.");
+            player.kick("Failed to find MCPL session, please rejoin.");
             return;
         }
 
@@ -51,7 +39,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
         player.tick++;
         if (packet.getTick() != player.tick || packet.getTick() < 0) {
-            player.disconnect("Invalid tick id=" + packet.getTick());
+            player.kick("Invalid tick id=" + packet.getTick());
             return;
         }
 
@@ -68,7 +56,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
             return;
         }
 
-        processInputMovePacket(player, packet);
+        processAuthInput(player, packet);
 
         if (player.lastTickWasTeleport) {
             player.setPos(player.unvalidatedPosition);
@@ -79,9 +67,8 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
 
         player.sinceTeleport++;
-        player.sinceSpawnIn++;
 
-        if (!player.hasSpawnedIn || player.sinceSpawnIn < 2) {
+        if (!player.inLoadingScreen) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
@@ -149,7 +136,7 @@ public class MovementCheckRunner implements CloudburstPacketListener {
         }
     }
 
-    public static void processInputMovePacket(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+    public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         player.setInputData(packet.getInputData());
 
         // No other choice than to trust player input, I can't predict this, but I kinda add some protection for abuses in InputA check.

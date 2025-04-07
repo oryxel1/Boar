@@ -4,8 +4,8 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
-import ac.boar.util.MathUtil;
-import ac.boar.util.StringUtil;
+import ac.boar.anticheat.util.MathUtil;
+import ac.boar.anticheat.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
@@ -65,7 +65,7 @@ public final class ItemTransactionValidator {
                     slotPacket.setItem(ItemData.AIR);
                     slotPacket.setContainerId(ContainerId.INVENTORY);
                     slotPacket.setSlot(slot);
-                    player.geyserUpstream.sendPacket(slotPacket);
+                    player.cloudburstUpstream.sendPacket(slotPacket);
                 }
 
                 if (dropCounts == slotData.getCount()) {
@@ -91,7 +91,7 @@ public final class ItemTransactionValidator {
                 }
 
                 final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-                if (entity == null || entity.getTransactionId() > player.lastReceivedId) {
+                if (entity == null || entity.getTransactionId() > player.receivedStackId.get()) {
                     return false;
                 }
 

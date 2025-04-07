@@ -6,7 +6,7 @@ import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.BoundingBox;

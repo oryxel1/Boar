@@ -6,7 +6,7 @@ import ac.boar.anticheat.compensated.cache.container.impl.TradeContainerCache;
 import ac.boar.anticheat.data.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
@@ -17,7 +17,7 @@ import org.cloudburstmc.protocol.bedrock.packet.*;
 
 import java.util.Objects;
 
-public class InventorySimulationPacket implements CloudburstPacketListener {
+public class InventorySimulationPacket implements PacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
@@ -73,8 +73,8 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
         final CompensatedInventory inventory = player.compensatedInventory;
 
         if (event.getPacket() instanceof CreativeContentPacket packet) {
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 inventory.getCreativeData().clear();
 
                 for (final CreativeItemData data : packet.getContents()) {
@@ -84,8 +84,8 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
         }
 
         if (event.getPacket() instanceof CraftingDataPacket packet) {
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 inventory.getCraftingData().clear();
 
                 for (final RecipeData data : packet.getCraftingData()) {
@@ -122,8 +122,8 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
 
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
             System.out.println(packet);
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 final ContainerCache container = inventory.getContainer(packet.getId());
                 inventory.openContainer = Objects.requireNonNullElseGet(container, () -> new ContainerCache(inventory, packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
             });
@@ -131,8 +131,8 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
 //
         if (event.getPacket() instanceof UpdateEquipPacket packet) {
 //            System.out.println(packet);
-//            player.sendTransaction(immediate);
-//            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> { try {
+//            player.sendLatencyStack(immediate);
+//            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> { try {
 //                inventory.openContainer = new ContainerCache((byte) packet.getWindowId(),
 //                        ContainerType.from(packet.getWindowType()), Vector3i.ZERO, packet.getUniqueEntityId());
 //            } catch (Exception ignored) {}});
@@ -143,16 +143,16 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
                 return;
             }
 
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> { try {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> { try {
                 inventory.openContainer = new TradeContainerCache(inventory, packet.getOffers(),
                         (byte) packet.getContainerId(), packet.getContainerType(), Vector3i.ZERO, packet.getTraderUniqueEntityId());
             } catch (Exception ignored) {}});
         }
 
         if (event.getPacket() instanceof InventorySlotPacket packet) {
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 // Bundle should be handled separately.
                 if (packet.getContainerId() == 125) {
                     final ItemCache cache;
@@ -184,8 +184,8 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
         }
 
         if (event.getPacket() instanceof InventoryContentPacket packet) {
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 // Bundle should be handled separately.
                 if (packet.getContainerId() == 125) {
                     final ItemCache cache;
@@ -230,8 +230,8 @@ public class InventorySimulationPacket implements CloudburstPacketListener {
 
             final int slot = packet.getSelectedHotbarSlot();
             if (slot >= 0 && slot < 9) {
-                player.sendTransaction();
-                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> inventory.heldItemSlot = slot);
+                player.sendLatencyStack();
+                player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> inventory.heldItemSlot = slot);
             }
         }
     }

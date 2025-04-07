@@ -1,7 +1,7 @@
 package ac.boar.anticheat.prediction.engine.base;
 
 import ac.boar.anticheat.data.VelocityData;
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.BoarPlayer;
@@ -28,12 +28,12 @@ public abstract class PredictionEngine {
 
     public final List<Vector> gatherAllPossibilities() {
         List<Vector> vectors = new ArrayList<>();
-        final VelocityData supposedVelocity = player.getSupposedVelocity();
-        if (supposedVelocity == null) {
-            vectors.add(new Vector(player.velocity, VectorType.NORMAL));
-        } else {
-            vectors.add(new Vector(supposedVelocity.velocity(), VectorType.VELOCITY, supposedVelocity.transactionId()));
-        }
+//        final VelocityData supposedVelocity = player.getSupposedVelocity();
+//        if (supposedVelocity == null) {
+//            vectors.add(new Vector(player.velocity, VectorType.NORMAL));
+//        } else {
+//            vectors.add(new Vector(supposedVelocity.velocity(), VectorType.VELOCITY, supposedVelocity.transactionId()));
+//        }
 
         addVelocityToPossibilities(vectors);
 
@@ -61,7 +61,7 @@ public abstract class PredictionEngine {
 
     private void addVelocityToPossibilities(final List<Vector> vectors) {
         for (final Map.Entry<Long, VelocityData> entry : player.queuedVelocities.entrySet()) {
-            if (entry.getKey() - 1 > player.lastReceivedId) {
+            if (entry.getKey() - 1 > player.receivedStackId.get()) {
                 continue;
             }
 

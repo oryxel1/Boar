@@ -6,7 +6,7 @@ import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.block.specific.PowderSnowBlock;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;

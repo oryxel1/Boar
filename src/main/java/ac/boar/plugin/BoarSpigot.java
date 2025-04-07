@@ -5,8 +5,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 
-public final class BoarPlugin extends JavaPlugin {
-    public static BoarPlugin INSTANCE;
+public final class BoarSpigot extends JavaPlugin {
+    public static BoarSpigot INSTANCE;
     public static Logger LOGGER;
 
     @Override

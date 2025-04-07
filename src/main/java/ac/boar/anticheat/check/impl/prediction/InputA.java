@@ -4,7 +4,7 @@ import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 
 @CheckInfo(name = "Input", type = "A")
 public final class InputA extends OffsetHandlerCheck {

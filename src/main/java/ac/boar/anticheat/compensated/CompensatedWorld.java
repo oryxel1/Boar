@@ -46,8 +46,8 @@ public final class CompensatedWorld {
         final EntityDefinition<?> definition = entity.getDefinition();
         final EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
 
-        player.sendTransaction();
-        final EntityCache cache = new EntityCache(player, definition.entityType(), definition, dimensions, player.lastSentId, runtimeId);
+        player.sendLatencyStack();
+        final EntityCache cache = new EntityCache(player, definition.entityType(), definition, dimensions, player.sentStackId.get(), runtimeId);
         this.entities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
 
@@ -81,7 +81,7 @@ public final class CompensatedWorld {
 
     public boolean isChunkLoaded(int chunkX, int chunkZ) {
         final ChunkCache chunk = this.getChunk(chunkX >> 4, chunkZ >> 4);
-        return chunk != null && chunk.transactionId() <= player.lastReceivedId;
+        return chunk != null && chunk.transactionId() <= player.receivedStackId.get();
     }
 
     private ChunkCache getChunk(int chunkX, int chunkZ) {
@@ -205,8 +205,8 @@ public final class CompensatedWorld {
             return;
         }
 
-        player.sendTransaction(true);
-        player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+        player.sendLatencyStack(true);
+        player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
             this.minY = dimension.minY();
             this.heightY = dimension.maxY();
         });

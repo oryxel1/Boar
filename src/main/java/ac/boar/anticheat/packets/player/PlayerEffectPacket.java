@@ -4,11 +4,11 @@ import ac.boar.anticheat.data.StatusEffect;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.EntityUtil;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.MobEffectPacket;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-public class PlayerEffectPacket implements CloudburstPacketListener {
+public class PlayerEffectPacket implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
@@ -23,12 +23,12 @@ public class PlayerEffectPacket implements CloudburstPacketListener {
                 return;
             }
 
-            player.sendTransaction();
+            player.sendLatencyStack();
 
             if (packet.getEvent() == MobEffectPacket.Event.ADD) {
-                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.getActiveEffects().put(effect, new StatusEffect(effect, packet.getAmplifier(), packet.getDuration() + 1)));
+                player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.getActiveEffects().put(effect, new StatusEffect(effect, packet.getAmplifier(), packet.getDuration() + 1)));
             } else if (packet.getEvent() == MobEffectPacket.Event.REMOVE) {
-                player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.getActiveEffects().remove(effect));
+                player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.getActiveEffects().remove(effect));
             }
         }
     }

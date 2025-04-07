@@ -2,7 +2,7 @@ package ac.boar.protocol.listener;
 
 import ac.boar.protocol.event.CloudburstPacketEvent;
 
-public interface CloudburstPacketListener {
+public interface PacketListener {
     default void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
     }
 

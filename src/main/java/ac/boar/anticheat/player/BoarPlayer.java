@@ -1,5 +1,9 @@
 package ac.boar.anticheat.player;
 
+import ac.boar.geyser.util.GeyserUtil;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.CompensatedInventory;
@@ -12,13 +16,9 @@ import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.validator.ItemTransactionValidator;
-import ac.boar.protocol.network.CloudburstSendListener;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
+import ac.boar.protocol.mitm.CloudburstSendListener;
 import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.ChatUtil;
-import ac.boar.util.GeyserUtil;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
@@ -26,7 +26,7 @@ import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
-import org.geysermc.geyser.registry.type.GeyserBedrockBlock;
+import org.geysermc.geyser.registry.type.BlockMappings;
 import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
@@ -35,12 +35,11 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
 
-@RequiredArgsConstructor
 public final class BoarPlayer extends PlayerData {
     @Getter
     private final GeyserSession session;
-    public BedrockServerSession cloudburstSession;
-    public CloudburstSendListener geyserUpstream;
+    public BedrockServerSession cloudburstDownstream;
+    public CloudburstSendListener cloudburstUpstream;
     public ClientSession mcplSession;
 
     public final long joinedTime = System.currentTimeMillis();
@@ -61,38 +60,51 @@ public final class BoarPlayer extends PlayerData {
     // Mappings
     public final Map<BlockDefinition, Integer> bedrockToJavaBlocks = new HashMap<>();
 
-    public void loadBlockMappings() {
-        final GeyserBedrockBlock[] javaToBedrockBlocks = this.session.getBlockMappings().getJavaToBedrockBlocks();
-        for (int i = 0; i < javaToBedrockBlocks.length; i++) {
-            this.bedrockToJavaBlocks.put(javaToBedrockBlocks[i], i);
+    public BoarPlayer(GeyserSession session) {
+        this.session = session;
+
+        BlockMappings mappings = session.getBlockMappings();
+        for (int i = 0; i < mappings.getJavaToBedrockBlocks().length; i++) {
+            this.bedrockBlockToJava.put(mappings.getJavaToBedrockBlocks()[i].getRuntimeId(), i);
         }
+
+        BEDROCK_AIR = mappings.getBedrockAir().getRuntimeId();
+//
+//        for (GeyserAttributeType type : GeyserAttributeType.values()) {
+//            final String identifier = type.getBedrockIdentifier();
+//            if (identifier == null || this.attributes.containsKey(type.getBedrockIdentifier())) {
+//                continue;
+//            }
+//
+//            this.attributes.put(identifier, new PlayerAttributeData(type.getDefaultValue(), type.getDefaultValue(), type.getMinimum(), type.getMaximum()));
+//        }
     }
 
-    public void sendTransaction() {
-        sendTransaction(false);
+    public void sendLatencyStack() {
+        this.sendLatencyStack(false);
     }
 
-    public void sendTransaction(boolean immediate) {
-        lastSentId++;
-        if (lastSentId == GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP) {
-            lastSentId++;
+    public void sendLatencyStack(boolean immediate) {
+        long id = this.sentStackId.incrementAndGet();
+        if (id == GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP) {
+            id = this.sentStackId.incrementAndGet();
         }
 
         // We have to send negative values since geyser translate positive one.
         final NetworkStackLatencyPacket latencyPacket = new NetworkStackLatencyPacket();
-        latencyPacket.setTimestamp(-lastSentId);
+        latencyPacket.setTimestamp(-id);
         latencyPacket.setFromServer(true);
 
         if (immediate) {
-            this.cloudburstSession.sendPacketImmediately(latencyPacket);
+            this.cloudburstDownstream.sendPacketImmediately(latencyPacket);
         } else {
-            this.cloudburstSession.sendPacket(latencyPacket);
+            this.cloudburstDownstream.sendPacket(latencyPacket);
         }
 
-        this.latencyUtil.getSentTransactions().add(lastSentId);
+        this.latencyUtil.addLatencyToQueue(id);
     }
 
-    public void disconnect(String reason) {
+    public void kick(String reason) {
         this.session.disconnect(ChatUtil.PREFIX + " " + reason);
     }
 

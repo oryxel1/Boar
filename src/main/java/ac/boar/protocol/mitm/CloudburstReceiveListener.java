@@ -1,8 +1,8 @@
-package ac.boar.protocol.network;
+package ac.boar.protocol.mitm;
 
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.protocol.listener.PacketListener;
 import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.BoarPlayer;
@@ -18,7 +18,7 @@ public final class CloudburstReceiveListener implements BedrockPacketHandler {
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {
         final CloudburstPacketEvent event = new CloudburstPacketEvent(this.player, packet);
-        for (final CloudburstPacketListener listener : PacketEvents.getApi().getCloudburst().getListeners()) {
+        for (final PacketListener listener : PacketEvents.getApi().getListeners()) {
             listener.onPacketReceived(event);
         }
 

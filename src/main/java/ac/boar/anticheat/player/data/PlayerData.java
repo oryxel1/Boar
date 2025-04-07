@@ -24,6 +24,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class PlayerData {
     private final static AttributeModifierData SPRINTING_SPEED_BOOST = new AttributeModifierData("D208FC00-42AA-4AAD-9276-D5446530DE43",
@@ -34,13 +35,18 @@ public class PlayerData {
     public final static float STEP_HEIGHT = 0.6F;
     public final static float GRAVITY = 0.08F;
 
+    // Geyser Mappings related
+    public int BEDROCK_AIR = -1;
+    public final Map<Integer, Integer> bedrockBlockToJava = new HashMap<>();
+
     @Getter
     @Setter
     private Set<PlayerAuthInputData> inputData = new HashSet<>();
 
     public long tick = Long.MIN_VALUE;
-    public boolean hasSpawnedIn = false;
-    public long sinceSpawnIn;
+
+    public Integer currentLoadingScreen = null;
+    public boolean inLoadingScreen;
 
     public GameType gameType = GameType.DEFAULT;
 
@@ -61,7 +67,7 @@ public class PlayerData {
     public boolean lastTickWasTeleport, lastTickWasRewind, lastTickWasJoystick;
 
     // "Transaction" related.
-    public long lastReceivedId, lastSentId, lastResponseTime = System.currentTimeMillis();
+    public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
     public final LatencyUtil latencyUtil = new LatencyUtil(this);
 
     // Effect status related
@@ -80,23 +86,6 @@ public class PlayerData {
     public Vec3 input = Vec3.ZERO;
     public Vec3 unvalidatedTickEnd = Vec3.ZERO;
     public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
-
-    public VelocityData getSupposedVelocity() {
-        final Iterator<Map.Entry<Long, VelocityData>> iterator = this.queuedVelocities.entrySet().iterator();
-
-        VelocityData velocity = null;
-        Map.Entry<Long, VelocityData> entry;
-        while (iterator.hasNext() && (entry = iterator.next()) != null) {
-            if (this.lastReceivedId < entry.getKey()) {
-                break;
-            }
-            iterator.remove();
-            velocity = entry.getValue();
-        }
-
-        this.velocityData = velocity;
-        return velocity;
-    }
 
     // Attribute related, abilities
     public final Map<String, PlayerAttributeData> attributes = new HashMap<>();

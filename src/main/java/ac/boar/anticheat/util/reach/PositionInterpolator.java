@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import ac.boar.anticheat.collision.Collision;
 import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.util.MathUtil;
+import ac.boar.anticheat.util.MathUtil;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 

@@ -4,7 +4,7 @@ import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -12,13 +12,13 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.Set;
 
-public class EntitySimulationPacket implements CloudburstPacketListener {
+public class EntitySimulationPacket implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
-            player.sendTransaction(immediate);
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.compensatedWorld.removeEntity(packet.getUniqueEntityId()));
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.compensatedWorld.removeEntity(packet.getUniqueEntityId()));
         }
 
         if (event.getPacket() instanceof AddEntityPacket packet) {
@@ -109,19 +109,19 @@ public class EntitySimulationPacket implements CloudburstPacketListener {
         // We need 2 transaction to check, if player receive the first transaction they could already have received the packet
         // Or they could lag right before they receive the actual update position packet so we can't be sure
         // But if player respond to the transaction AFTER the position packet they 100% already receive the packet.
-        player.sendTransaction();
+        player.sendLatencyStack();
 
-        final long id = player.lastSentId;
-        player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> {
+        final long id = player.sentStackId.get();
+        player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
             entity.interpolate(position, lerp && distance < 4096);
             // Bukkit.broadcastMessage("Player received position=" + position + ", id=" + id);
         });
 
-        // Bukkit.broadcastMessage("New position=" + position + ", id=" + player.lastSentId);
+        // Bukkit.broadcastMessage("New position=" + position + ", id=" + player.sentStackId.get());
 
         event.getPostTasks().add(() -> {
-            player.sendTransaction();
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> entity.setPast(null));
+            player.sendLatencyStack();
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> entity.setPast(null));
         });
     }
 }

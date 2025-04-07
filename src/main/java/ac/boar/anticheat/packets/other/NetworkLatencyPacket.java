@@ -1,11 +1,11 @@
 package ac.boar.anticheat.packets.other;
 
+import ac.boar.geyser.util.GeyserUtil;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
-import ac.boar.util.GeyserUtil;
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 
-public class NetworkLatencyPacket implements CloudburstPacketListener {
+public class NetworkLatencyPacket implements PacketListener {
     private final static long LATENCY_MAGNITUDE = 1000000L;
 
     @Override

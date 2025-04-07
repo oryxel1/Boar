@@ -2,15 +2,15 @@ package ac.boar.anticheat.packets.player;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
-import ac.boar.anticheat.packets.MovementCheckRunner;
+import ac.boar.anticheat.packets.input.AuthInputPacket;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
 import ac.boar.anticheat.prediction.ticker.PlayerTicker;
 import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.plugin.BoarPlugin;
+import ac.boar.plugin.BoarSpigot;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
+import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -18,7 +18,7 @@ import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Queue;
 
-public class PlayerTeleportPacket implements CloudburstPacketListener {
+public class PlayerTeleportPacket implements PacketListener {
     private final static float MAX_TOLERANCE_ERROR = 0.001f;
 
     @Override
@@ -45,7 +45,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
 
         RewindTeleportCache cache;
         while ((cache = queue.peek()) != null) {
-            if (player.lastReceivedId < cache.getTransactionId()) {
+            if (player.receivedStackId.get() < cache.getTransactionId()) {
                 break;
             }
             queue.poll();
@@ -77,7 +77,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
                 currentTick++;
                 if (player.teleportUtil.getAuthInputHistory().containsKey(currentTick)) {
                     final PlayerAuthInputPacket old = player.teleportUtil.getAuthInputHistory().get(currentTick);
-                    MovementCheckRunner.processInputMovePacket(player, old);
+                    AuthInputPacket.processAuthInput(player, old);
                 }
 
                 new PlayerTicker(player).tick();
@@ -96,7 +96,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             return;
         }
 
-        // We can't check for player.lastReceivedId == cache.getTransactionId() since bedrock teleport is different.
+        // We can't check for player.receivedStackId.get() == cache.getTransactionId() since bedrock teleport is different.
         // Instead of respond with an extra move packet like java, it just simply set position
         // and add HANDLE_TELEPORT to input data next tick to let us know that it accepted the teleport.
         // Which also means player will be in the position of the latest teleport they got and accept that one, not every teleport like Java.
@@ -104,7 +104,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         TeleportCache cache = null;
         boolean isThereRespawnTeleport = false;
         while ((temp = queue.peek()) != null) {
-            if (player.lastReceivedId < temp.getTransactionId()) {
+            if (player.receivedStackId.get() < temp.getTransactionId()) {
                 break;
             }
 
@@ -127,7 +127,7 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
         // I have seen it reach 2e-6 in some cases, but I haven't test enough to know.
         double distance = packet.getPosition().distanceSquared(cache.getPosition().toVector3f());
         if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance < MAX_TOLERANCE_ERROR) {
-            BoarPlugin.LOGGER.info("Accepted teleport, d=" + distance);
+            BoarSpigot.LOGGER.info("Accepted teleport, d=" + distance);
             player.lastTickWasTeleport = true;
             player.teleportUtil.getRewindTeleportCaches().clear();
         } else {
@@ -138,10 +138,10 @@ public class PlayerTeleportPacket implements CloudburstPacketListener {
             }
             // Set player back to where they're supposed to be.
             player.teleportUtil.setbackTo(cache);
-            BoarPlugin.LOGGER.info("Received=" + packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0)
+            BoarSpigot.LOGGER.info("Received=" + packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0)
                     + ", Required=" + cache.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f());
-            BoarPlugin.LOGGER.info("Is there handle teleport data: " + packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT));
-            BoarPlugin.LOGGER.info("Player rejected teleport, re-sync teleport....");
+            BoarSpigot.LOGGER.info("Is there handle teleport data: " + packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT));
+            BoarSpigot.LOGGER.info("Player rejected teleport, re-sync teleport....");
         }
     }
 

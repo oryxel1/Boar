@@ -1,10 +1,8 @@
-package ac.boar.protocol.network;
+package ac.boar.protocol.mitm;
 
-import ac.boar.anticheat.GlobalSetting;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-import ac.boar.protocol.listener.CloudburstPacketListener;
-import ac.boar.util.GeyserUtil;
+import ac.boar.protocol.listener.PacketListener;
 import lombok.NonNull;
 
 import ac.boar.anticheat.player.BoarPlayer;
@@ -12,6 +10,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
+import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.session.UpstreamSession;
 
 public final class CloudburstSendListener extends UpstreamSession {
@@ -25,7 +24,7 @@ public final class CloudburstSendListener extends UpstreamSession {
     @Override
     public void sendPacket(@NonNull BedrockPacket packet) {
         final CloudburstPacketEvent event = new CloudburstPacketEvent(this.player, packet);
-        for (final CloudburstPacketListener listener : PacketEvents.getApi().getCloudburst().getListeners()) {
+        for (final PacketListener listener : PacketEvents.getApi().getListeners()) {
             listener.onPacketSend(event, false);
         }
 
@@ -37,15 +36,19 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.runtimeEntityId = start.getRuntimeEntityId();
             player.javaEntityId = player.getSession().getPlayerEntity().getEntityId();
 
-            GeyserUtil.injectMCPL(this.player);
-            player.compensatedWorld.loadDimension(false);
-            player.loadBlockMappings();
+            int dimensionId = start.getDimensionId();
+            // player.compensatedWorld.setDimension(dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END);
+            player.currentLoadingScreen = null;
+            player.inLoadingScreen = true;
+            // player.compensatedWorld.loadDimension(false);
+            // player.loadBlockMappings();
 
+            // We need this to do rewind teleport.
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
-            start.setRewindHistorySize(GlobalSetting.REWIND_HISTORY_SIZE_TICKS);
+            start.setRewindHistorySize(20); // TODO: Settings.
 
-            player.sendTransaction();
-            player.latencyUtil.addTransactionToQueue(player.lastSentId, () -> player.gameType = start.getPlayerGameType());
+//            player.sendLatencyStack();
+//            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());
         }
 
         super.sendPacket(event.getPacket());
@@ -56,7 +59,7 @@ public final class CloudburstSendListener extends UpstreamSession {
     @Override
     public void sendPacketImmediately(@NonNull BedrockPacket packet) {
         final CloudburstPacketEvent event = new CloudburstPacketEvent(this.player, packet);
-        for (final CloudburstPacketListener listener : PacketEvents.getApi().getCloudburst().getListeners()) {
+        for (final PacketListener listener : PacketEvents.getApi().getListeners()) {
             listener.onPacketSend(event, true);
         }
 

@@ -3,8 +3,8 @@ package ac.boar.anticheat.player.manager;
 import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.player.BoarPlayer;
 
-import ac.boar.plugin.BoarPlugin;
-import ac.boar.util.GeyserUtil;
+import ac.boar.geyser.util.GeyserUtil;
+import ac.boar.plugin.BoarSpigot;
 import org.geysermc.geyser.api.connection.GeyserConnection;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.session.GeyserSession;
@@ -18,13 +18,9 @@ public class BoarPlayerManager extends HashMap<GeyserConnection, BoarPlayer> {
         }
 
         final BoarPlayer player = new BoarPlayer((GeyserSession) connection);
-        GeyserUtil.injectCloudburst(player);
-        for (final GeyserAttributeType type : GeyserAttributeType.values()) {
-            player.attributes.put(type.getBedrockIdentifier(), new PlayerAttributeData(type.getDefaultValue()));
-        }
-        player.attributes.put(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier(), new PlayerAttributeData(0.1F));
+        GeyserUtil.hookIntoCloudburstMC(player);
         this.put(connection, player);
 
-        BoarPlugin.LOGGER.info(connection.bedrockUsername() + " joined!");
+        BoarSpigot.LOGGER.info(connection.bedrockUsername() + " joined!");
     }
 }
