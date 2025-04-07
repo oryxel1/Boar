@@ -18,8 +18,6 @@ public class LavaPredictionEngine extends PredictionEngine {
 
     @Override
     public void finalizeMovement() {
-        final float y = player.velocity.y;
-
         float gravity = player.getEffectiveGravity();
         if (player.fluidHeight.getOrDefault(Fluid.LAVA, 0F) <= player.getFluidJumpThreshold()) {
             player.velocity = player.velocity.multiply(0.5F, 0.8F, 0.5F);

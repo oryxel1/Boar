@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.player;
 
-import ac.boar.anticheat.data.PlayerAttributeData;
+import ac.boar.anticheat.data.AttributeInstance;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
@@ -76,7 +76,7 @@ public class PlayerDataPackets implements PacketListener {
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 for (final AttributeData data : packet.getAttributes()) {
-                    final PlayerAttributeData attribute = player.attributes.get(data.getName());
+                    final AttributeInstance attribute = player.attributes.get(data.getName());
                     if (attribute == null) {
                         return;
                     }

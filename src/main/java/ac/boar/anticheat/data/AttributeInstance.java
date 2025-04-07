@@ -8,23 +8,29 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
 import java.util.HashMap;
 import java.util.Map;
 
+// According to BDS, unlike Java, attribute will update its value instantly after adding/removing an attribute instead
+// of setting dirty to true, and dirty will only be set to true IF baseValue is updated.
 @Getter
-public class PlayerAttributeData {
-    @Setter
+public class AttributeInstance {
     private float baseValue;
+
     @Setter
     private float value;
     private boolean dirty = true;
 
     private final Map<String, AttributeModifierData> modifiers = new HashMap<>();
 
-    public PlayerAttributeData(float baseValue) {
+    public AttributeInstance(float baseValue) {
         this.baseValue = baseValue;
     }
 
-    public void update() {
-        this.dirty = true;
-        this.getValue();
+    public void setBaseValue(float baseValue) {
+        if (this.baseValue == baseValue) {
+            return;
+        }
+
+        this.baseValue = value;
+        this.setDirty();
     }
 
     public void clearModifiers() {
@@ -53,6 +59,10 @@ public class PlayerAttributeData {
         }
     }
 
+    protected void update() {
+        this.value = this.computeValue();
+    }
+
     public float getValue() {
         if (this.dirty) {
             this.value = this.computeValue();
@@ -60,6 +70,10 @@ public class PlayerAttributeData {
         }
 
         return this.value;
+    }
+
+    public void setDirty() {
+        this.dirty = true;
     }
 
     private float computeValue() {

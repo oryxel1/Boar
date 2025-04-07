@@ -91,7 +91,7 @@ public class PlayerData {
     public final Map<Long, VelocityData> queuedVelocities = Collections.synchronizedMap(new TreeMap<>());
 
     // Attribute related, abilities
-    public final Map<String, PlayerAttributeData> attributes = new HashMap<>();
+    public final Map<String, AttributeInstance> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();
 
     // Prediction related
@@ -138,7 +138,7 @@ public class PlayerData {
 
     public final void setSprinting(boolean sprinting) {
         this.sprinting = sprinting;
-        final PlayerAttributeData lv = this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier());
+        final AttributeInstance lv = this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier());
         if (lv == null) {
             // wtf?
             return;

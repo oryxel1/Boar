@@ -2,14 +2,13 @@ package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.BoarBlockState;
-import ac.boar.anticheat.data.PlayerAttributeData;
+import ac.boar.anticheat.data.AttributeInstance;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
 import lombok.Getter;
 
 import ac.boar.anticheat.check.api.holder.CheckHolder;
-import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
@@ -78,7 +77,7 @@ public final class BoarPlayer extends PlayerData {
                 continue;
             }
 
-            this.attributes.put(identifier, new PlayerAttributeData(type.getDefaultValue()));
+            this.attributes.put(identifier, new AttributeInstance(type.getDefaultValue()));
         }
     }
 
