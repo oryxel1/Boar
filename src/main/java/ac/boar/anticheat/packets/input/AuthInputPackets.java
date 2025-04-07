@@ -11,6 +11,8 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.anticheat.util.MathUtil;
 
 import ac.boar.protocol.listener.PacketListener;
+import org.bukkit.Bukkit;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -69,6 +71,11 @@ public class AuthInputPackets implements PacketListener {
             }
             return;
         }
+
+//        Bukkit.broadcastMessage("Block above: " + player.compensatedWorld.getBlockState(
+//                GenericMath.floor(player.prevUnvalidatedPosition.x), GenericMath.floor(player.prevUnvalidatedPosition.y) + 2,
+//                GenericMath.floor(player.prevUnvalidatedPosition.z), 0
+//        ).getState().block().toString());
 
         if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
             // TODO: Flying prediction?

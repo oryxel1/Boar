@@ -33,8 +33,8 @@ public class CompensatedWorldImpl extends CompensatedWorld {
     }
 
     public FluidState getFluidState(int x, int y, int z) {
-        final int blockIdLayer0 = this.toJavaId(getBlockAt(x, y, z, 0));
-        final int blockIdLayer1 = this.toJavaId(getBlockAt(x, y, z, 1));
+        final int blockIdLayer0 = getBlockAt(x, y, z, 0);
+        final int blockIdLayer1 = getBlockAt(x, y, z, 1);
         float waterHeight = BlockUtil.getWorldFluidHeight(Fluid.WATER, blockIdLayer0);
         float lavaHeight = BlockUtil.getWorldFluidHeight(Fluid.LAVA, blockIdLayer0);
 

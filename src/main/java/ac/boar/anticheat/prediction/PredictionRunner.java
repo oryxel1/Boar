@@ -93,6 +93,9 @@ public class PredictionRunner {
             // TODO: Since bedrock send enough data for us to calculate we only have 2 possibility: Velocity/LastTick.
             // TODO: Also will this works well when we predicting during rewind?
 
+            final Vec3 oldInput = player.input.clone();
+            System.out.println("find best possibility.");
+
             // Mini prediction engine!
             for (Vector possibility : possibleVelocities) {
                 Vec3 vec3 = possibility.getVelocity().clone();
@@ -126,6 +129,8 @@ public class PredictionRunner {
                     player.bestPossibility = possibility;
                 }
             }
+
+            player.input = oldInput;
         }
 
         if (player.bestPossibility == null) {

@@ -27,6 +27,5 @@ public class DebugOffsetA extends OffsetHandlerCheck {
             Bukkit.broadcastMessage("A EOT: " + player.velocity.toVector3f().toString());
             Bukkit.broadcastMessage("EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset + "," + player.unvalidatedTickEnd.toVector3f().toString());
         }
-
     }
 }

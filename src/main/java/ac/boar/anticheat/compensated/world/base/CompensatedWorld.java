@@ -104,30 +104,26 @@ public class CompensatedWorld {
     }
 
     public BoarBlockState getBlockState(int x, int y, int z, int layer) {
-        return new BoarBlockState(BlockState.of(toJavaId(getBlockAt(x, y, z, layer))));
-    }
-
-    public int toJavaId(int bedrockId) {
-        return player.bedrockBlockToJava.getOrDefault(bedrockId, player.BEDROCK_AIR);
+        return new BoarBlockState(BlockState.of(getBlockAt(x, y, z, layer)));
     }
 
     public int getBlockAt(int x, int y, int z, int layer) {
         GeyserChunkSection[] column = this.getChunk(x >> 4, z >> 4);
         if (column == null) {
-            return player.BEDROCK_AIR;
+            return 0;
         }
 
         if (y < getMinY() || ((y - getMinY()) >> 4) > column.length - 1) {
             // Y likely goes above or below the height limit of this world
-            return player.BEDROCK_AIR;
+            return 0;
         }
 
         GeyserChunkSection chunk = column[(y - getMinY()) >> 4];
         if (chunk != null) {
-            return chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer);
+            return player.bedrockBlockToJava.getOrDefault(chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer), 0);
         }
 
-        return player.BEDROCK_AIR;
+        return 0;
     }
 
     private GeyserChunkSection[] getChunk(int chunkX, int chunkZ) {

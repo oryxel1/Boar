@@ -86,11 +86,11 @@ public class ChunkWorldPackets implements PacketListener {
                     // Also, server (atleast GeyserMC) seems to be sending the second layer regardless if that layer have a second block storage.
                     BlockStorage[] storages = new BlockStorage[Math.max(storageLength, 2)];
                     for (int n = 0; n < storageLength; n++) {
-                        storages[n] = readStorage(buffer);
+                        storages[n] = readStorage(buffer, player.BEDROCK_AIR);
                     }
                     if (storageLength < 2) {
-                        IntArrayList list = new IntArrayList(1);
-                        list.size(1);
+                        final IntArrayList list = new IntArrayList(1);
+                        list.add(player.BEDROCK_AIR);
                         storages[1] = new BlockStorage(BitArrayVersion.V0.createArray(4096, null), list);
                     }
 
@@ -111,7 +111,7 @@ public class ChunkWorldPackets implements PacketListener {
                         continue;
                     }
 
-                    readStorage(buffer);
+                    readStorage(buffer, player.BEDROCK_AIR);
                 }
 
                 // Border blocks.
@@ -159,7 +159,7 @@ public class ChunkWorldPackets implements PacketListener {
     }
 
     // According to ViaBedrock.
-    private BlockStorage readStorage(final ByteBuf buffer) {
+    private BlockStorage readStorage(final ByteBuf buffer, int airId) {
         final short header = buffer.readUnsignedByte();
         final int bitArrayVersion = header >> 1;
 
@@ -183,9 +183,12 @@ public class ChunkWorldPackets implements PacketListener {
         final int size = bitArray instanceof SingletonBitArray ? 1 : VarInts.readInt(buffer);
 
         final IntList palette = new IntArrayList(size);
-        palette.size(size);
         for (int i = 0; i < size; i++) {
             palette.add(VarInts.readInt(buffer));
+        }
+
+        if (palette.isEmpty()) {
+            palette.add(airId);
         }
 
         return new BlockStorage(bitArray, palette);
