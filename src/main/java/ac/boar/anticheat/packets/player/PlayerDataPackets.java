@@ -62,7 +62,9 @@ public class PlayerDataPackets implements PacketListener {
 
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
-                player.setSprinting(sprinting);
+                // This won't affect player movement attribute, only player actual sprinting status.
+                player.sprinting = sprinting;
+                // player.setSprinting(sprinting);
             });
         }
 
