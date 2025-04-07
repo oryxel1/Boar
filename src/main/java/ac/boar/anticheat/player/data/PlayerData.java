@@ -47,6 +47,7 @@ public class PlayerData {
 
     public Integer currentLoadingScreen = null;
     public boolean inLoadingScreen;
+    public int sinceLoadingScreen;
 
     public GameType gameType = GameType.DEFAULT;
 

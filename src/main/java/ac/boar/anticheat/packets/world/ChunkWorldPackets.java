@@ -154,6 +154,7 @@ public class ChunkWorldPackets implements PacketListener {
             if (Objects.equals(player.currentLoadingScreen, packet.getLoadingScreenId())) {
                 player.currentLoadingScreen = null;
                 player.inLoadingScreen = false;
+                player.sinceLoadingScreen = 0;
             }
         }
     }

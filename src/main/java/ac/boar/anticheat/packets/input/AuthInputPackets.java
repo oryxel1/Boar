@@ -65,7 +65,8 @@ public class AuthInputPackets implements PacketListener {
 
         player.sinceTeleport++;
 
-        if (player.inLoadingScreen) {
+        player.sinceLoadingScreen++;
+        if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
@@ -144,7 +145,7 @@ public class AuthInputPackets implements PacketListener {
             packet.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
         }
 
-        // Technically this should be eotVelocity, but since geyser check for this once instead of previous for the ground status
+        // Technically this should just be velocity, but since geyser check for this once instead of previous for the ground status
         // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
         // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
         packet.setDelta(player.prevVelocity.toVector3f());
