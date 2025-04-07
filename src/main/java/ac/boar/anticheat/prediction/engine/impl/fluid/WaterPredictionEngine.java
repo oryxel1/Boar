@@ -17,7 +17,7 @@ public class WaterPredictionEngine extends PredictionEngine {
 
     @Override
     public void finalizeMovement() {
-        float f = (player.sprinting || player.swimming) ? 0.9F : 0.8F;
+        float f = player.swimming ? 0.9F : 0.8F;
         player.velocity = player.velocity.multiply(f, 0.8F, f);
         player.velocity = this.applyFluidMovingSpeed(player.getEffectiveGravity(), player.velocity);
     }

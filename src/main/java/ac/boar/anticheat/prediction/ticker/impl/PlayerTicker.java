@@ -31,6 +31,15 @@ public class PlayerTicker extends LivingTicker {
     }
 
     @Override
+    public void aiStep() {
+        if (player.touchingWater && player.getInputData().contains(PlayerAuthInputData.SNEAKING) /*&& this.isAffectedByFluids()*/) {
+            player.velocity.y -= 0.04F;
+        }
+
+        super.aiStep();
+    }
+
+    @Override
     protected void travel() {
         if (player.swimming) {
             float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;

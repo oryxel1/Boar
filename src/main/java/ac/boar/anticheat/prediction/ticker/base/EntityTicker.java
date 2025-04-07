@@ -111,7 +111,8 @@ public class EntityTicker {
             velocity = velocity.multiply(1.0f / fluidCount);
         }
 
-        player.velocity = player.velocity.add(velocity.multiply(speed));
+        // Fluid pushing is broken as shit.
+        // player.velocity = player.velocity.add(velocity.multiply(speed));
         player.fluidHeight.put(tag, maxFluidHeight);
 
         return found;

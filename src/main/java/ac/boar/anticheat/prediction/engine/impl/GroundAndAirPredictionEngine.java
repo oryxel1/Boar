@@ -6,6 +6,7 @@ import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.block.specific.PowderSnowBlock;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -53,7 +54,12 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
 
     private Vec3 halfRelativeMovementCalculate(Vec3 vec3, float f) {
         vec3 = this.moveRelative(vec3, player.getFrictionInfluencedSpeed(f));
-//        this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
-        return vec3;
+        final boolean collidedOrJumping = player.horizontalCollision ||
+                player.getInputData().contains(PlayerAuthInputData.START_JUMPING) || player.getInputData().contains(PlayerAuthInputData.JUMPING);
+        if (collidedOrJumping && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
+            vec3.y = 0.2F;
+        }
+
+        return this.applyClimbingSpeed(vec3);
     }
 }
