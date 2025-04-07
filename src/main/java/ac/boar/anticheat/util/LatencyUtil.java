@@ -17,16 +17,19 @@ public final class LatencyUtil {
 
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
-        this.map.put(id, new StackLatencyData(id));
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
-        if (id <= player.receivedStackId.get() || this.map.containsKey(id)) {
+        if (id <= player.receivedStackId.get()) {
             runnable.run();
             return;
         }
 
         synchronized (this) {
+            if (!this.map.containsKey(id)) {
+                this.map.put(id, new StackLatencyData(id));
+            }
+
             this.map.get(id).tasks.add(runnable);
         }
     }

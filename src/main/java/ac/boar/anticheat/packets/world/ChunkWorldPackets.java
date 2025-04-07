@@ -89,7 +89,9 @@ public class ChunkWorldPackets implements PacketListener {
                         storages[n] = readStorage(buffer);
                     }
                     if (storageLength < 2) {
-                        storages[1] = new BlockStorage(BitArrayVersion.V0.createArray(4096, null), new IntArrayList(16));
+                        IntArrayList list = new IntArrayList(1);
+                        list.size(1);
+                        storages[1] = new BlockStorage(BitArrayVersion.V0.createArray(4096, null), list);
                     }
 
                     sections[i] = new GeyserChunkSection(storages, subChunkIndex);
@@ -181,6 +183,7 @@ public class ChunkWorldPackets implements PacketListener {
         final int size = bitArray instanceof SingletonBitArray ? 1 : VarInts.readInt(buffer);
 
         final IntList palette = new IntArrayList(size);
+        palette.size(size);
         for (int i = 0; i < size; i++) {
             palette.add(VarInts.readInt(buffer));
         }

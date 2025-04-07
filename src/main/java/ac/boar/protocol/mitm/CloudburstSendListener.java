@@ -37,18 +37,16 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.javaEntityId = player.getSession().getPlayerEntity().getEntityId();
 
             int dimensionId = start.getDimensionId();
-            // player.compensatedWorld.setDimension(dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END);
+            player.compensatedWorld.setDimension(dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END);
             player.currentLoadingScreen = null;
             player.inLoadingScreen = true;
-            // player.compensatedWorld.loadDimension(false);
-            // player.loadBlockMappings();
 
             // We need this to do rewind teleport.
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
             start.setRewindHistorySize(20); // TODO: Settings.
 
-//            player.sendLatencyStack();
-//            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());
+            player.sendLatencyStack();
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());
         }
 
         super.sendPacket(event.getPacket());

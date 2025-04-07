@@ -28,12 +28,6 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
-        // Just to be safe.
-        if (player.mcplSession == null) {
-            player.kick("Failed to find MCPL session, please rejoin.");
-            return;
-        }
-
         if (player.tick == Long.MIN_VALUE) {
             player.tick = Math.max(0, packet.getTick()) - 1;
         }

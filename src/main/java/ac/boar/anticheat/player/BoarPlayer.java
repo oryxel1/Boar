@@ -32,7 +32,6 @@ import org.geysermc.geyser.registry.type.BlockMappings;
 import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
-import org.geysermc.mcprotocollib.network.ClientSession;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
@@ -42,7 +41,6 @@ public final class BoarPlayer extends PlayerData {
     private final GeyserSession session;
     public BedrockServerSession cloudburstDownstream;
     public CloudburstSendListener cloudburstUpstream;
-    public ClientSession mcplSession;
 
     public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;
