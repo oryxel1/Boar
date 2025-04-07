@@ -16,14 +16,6 @@ public class WaterPredictionEngine extends PredictionEngine {
 
     @Override
     public Vec3 travel(Vec3 vec3) {
-//        if (player.swimming) {
-//            float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;
-//            float e = d < -0.2 ? 0.085F : 0.06F;
-//            final FluidState state = player.compensatedWorld.getFluidState(player.position.add(0, 1.0F - 0.1F, 0).toVector3i());
-//            if (d <= 0.0 || player.getInputData().contains(PlayerAuthInputData.WANT_UP) || state.fluid() != Fluid.EMPTY) {
-//                vec3 = vec3.add(0, (d - vec3.y) * e, 0);
-//            }
-//        }
 
         return this.moveRelative(vec3, 0.02F);
     }

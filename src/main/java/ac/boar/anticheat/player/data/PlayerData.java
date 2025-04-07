@@ -64,7 +64,7 @@ public class PlayerData {
     public int sinceSprinting, sinceTeleport;
 
     // Information about this tick.
-    public boolean lastTickWasTeleport, lastTickWasRewind, lastTickWasJoystick;
+    public boolean wasTeleport, wasRewind, lastTickWasJoystick;
 
     // "Transaction" related.
     public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);

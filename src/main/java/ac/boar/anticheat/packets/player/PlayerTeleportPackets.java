@@ -2,7 +2,7 @@ package ac.boar.anticheat.packets.player;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.teleport.RewindTeleportCache;
-import ac.boar.anticheat.packets.input.AuthInputPacket;
+import ac.boar.anticheat.packets.input.AuthInputPackets;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.data.teleport.TeleportCache;
 import ac.boar.anticheat.prediction.PredictionRunner;
@@ -18,7 +18,7 @@ import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Queue;
 
-public class PlayerTeleportPacket implements PacketListener {
+public class PlayerTeleportPackets implements PacketListener {
     private final static float MAX_TOLERANCE_ERROR = 0.001f;
 
     @Override
@@ -34,7 +34,7 @@ public class PlayerTeleportPacket implements PacketListener {
 
     // Rewind should be handled separately since it is not teleport. We also need to catch up with the predicted tick.
     private void handleRewindTeleport(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        if (player.lastTickWasTeleport) {
+        if (player.wasTeleport) {
             return;
         }
 
@@ -50,7 +50,7 @@ public class PlayerTeleportPacket implements PacketListener {
             }
             queue.poll();
 
-            player.lastTickWasRewind = true;
+            player.wasRewind = true;
 
             final long tickDistance = packet.getTick() - cache.getTick() - 1;
 
@@ -77,7 +77,7 @@ public class PlayerTeleportPacket implements PacketListener {
                 currentTick++;
                 if (player.teleportUtil.getAuthInputHistory().containsKey(currentTick)) {
                     final PlayerAuthInputPacket old = player.teleportUtil.getAuthInputHistory().get(currentTick);
-                    AuthInputPacket.processAuthInput(player, old);
+                    AuthInputPackets.processAuthInput(player, old);
                 }
 
                 new PredictionRunner(player).run();
@@ -128,7 +128,7 @@ public class PlayerTeleportPacket implements PacketListener {
         double distance = packet.getPosition().distanceSquared(cache.getPosition().toVector3f());
         if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance < MAX_TOLERANCE_ERROR) {
             BoarSpigot.LOGGER.info("Accepted teleport, d=" + distance);
-            player.lastTickWasTeleport = true;
+            player.wasTeleport = true;
             player.teleportUtil.getRewindTeleportCaches().clear();
         } else {
             // This is not the latest teleport, just ignore this one, we only force player to accept the latest one.

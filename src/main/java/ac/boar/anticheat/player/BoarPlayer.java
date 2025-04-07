@@ -1,6 +1,7 @@
 package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
+import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
@@ -24,6 +25,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
+import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.BlockMappings;
@@ -70,14 +72,14 @@ public final class BoarPlayer extends PlayerData {
 
         BEDROCK_AIR = mappings.getBedrockAir().getRuntimeId();
 //
-//        for (GeyserAttributeType type : GeyserAttributeType.values()) {
-//            final String identifier = type.getBedrockIdentifier();
-//            if (identifier == null || this.attributes.containsKey(type.getBedrockIdentifier())) {
-//                continue;
-//            }
-//
-//            this.attributes.put(identifier, new PlayerAttributeData(type.getDefaultValue(), type.getDefaultValue(), type.getMinimum(), type.getMaximum()));
-//        }
+        for (GeyserAttributeType type : GeyserAttributeType.values()) {
+            final String identifier = type.getBedrockIdentifier();
+            if (identifier == null || this.attributes.containsKey(type.getBedrockIdentifier())) {
+                continue;
+            }
+
+            this.attributes.put(identifier, new PlayerAttributeData(type.getDefaultValue()));
+        }
     }
 
     public void sendLatencyStack() {

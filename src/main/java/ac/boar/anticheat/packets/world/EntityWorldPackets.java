@@ -12,7 +12,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.Set;
 
-public class EntitySimulationPacket implements PacketListener {
+public class EntityWorldPackets implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();

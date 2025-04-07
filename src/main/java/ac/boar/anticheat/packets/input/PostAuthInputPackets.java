@@ -6,7 +6,7 @@ import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 
-public class PostAuthInputPacket implements PacketListener {
+public class PostAuthInputPackets implements PacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
@@ -14,8 +14,8 @@ public class PostAuthInputPacket implements PacketListener {
         if (event.getPacket() instanceof PlayerAuthInputPacket packet) {
             player.teleportUtil.getAuthInputHistory().put(packet.getTick(), packet);
 
-            player.lastTickWasTeleport = false;
-            player.lastTickWasRewind = false;
+            player.wasTeleport = false;
+            player.wasRewind = false;
             // This packet doesn't matter, player supposed to be in the teleported position by now.
             // Cancel it don't let any position pass through unless they properly accept it.
             // Geyser also do this, but we made it stricter by checking for receivedStackId.get(), player can't accept it if they're still lagging.

@@ -19,7 +19,7 @@ import org.geysermc.geyser.item.Items;
 
 import java.util.Map;
 
-public class AuthInputPacket implements PacketListener {
+public class AuthInputPackets implements PacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
@@ -58,7 +58,7 @@ public class AuthInputPacket implements PacketListener {
 
         processAuthInput(player, packet);
 
-        if (player.lastTickWasTeleport) {
+        if (player.wasTeleport) {
             player.setPos(player.unvalidatedPosition);
 
             player.sinceTeleport = 0;

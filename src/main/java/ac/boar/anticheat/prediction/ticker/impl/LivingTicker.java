@@ -48,6 +48,7 @@ public class LivingTicker extends EntityTicker {
         }
 
         this.travelRidden();
+        this.tickBlockCollision();
 
 //        if (this.autoSpinAttackTicks > 0) {
 //            --this.autoSpinAttackTicks;

@@ -1,13 +1,13 @@
 package ac.boar.anticheat;
 
-import ac.boar.anticheat.packets.input.PostAuthInputPacket;
+import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
 import ac.boar.anticheat.packets.player.*;
 import ac.boar.anticheat.packets.world.*;
 import lombok.Getter;
 
-import ac.boar.anticheat.packets.other.NetworkLatencyPacket;
-import ac.boar.anticheat.packets.input.AuthInputPacket;
+import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
+import ac.boar.anticheat.packets.input.AuthInputPackets;
 
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
 import ac.boar.geyser.GeyserSessionJoinEvent;
@@ -25,17 +25,17 @@ public class Boar {
         this.playerManager = new BoarPlayerManager();
         new GeyserSessionJoinEvent();
 
-        PacketEvents.getApi().register(new NetworkLatencyPacket());
+        PacketEvents.getApi().register(new NetworkLatencyPackets());
         PacketEvents.getApi().register(new ChunkWorldPackets());
-        PacketEvents.getApi().register(new EntitySimulationPacket());
-        PacketEvents.getApi().register(new DataSimulationPacket());
-        PacketEvents.getApi().register(new PlayerEffectPacket());
-        PacketEvents.getApi().register(new PlayerTeleportPacket());
-        PacketEvents.getApi().register(new PlayerVelocityPacket());
-        PacketEvents.getApi().register(new InventorySimulationPacket());
-        PacketEvents.getApi().register(new AuthInputPacket());
+        PacketEvents.getApi().register(new EntityWorldPackets());
+        PacketEvents.getApi().register(new PlayerDataPackets());
+        PacketEvents.getApi().register(new PlayerEffectPackets());
+        PacketEvents.getApi().register(new PlayerTeleportPackets());
+        PacketEvents.getApi().register(new PlayerVelocityPackets());
+        PacketEvents.getApi().register(new PlayerInventoryPackets());
+        PacketEvents.getApi().register(new AuthInputPackets());
         PacketEvents.getApi().register(new PacketCheckRunner());
-        PacketEvents.getApi().register(new PostAuthInputPacket());
+        PacketEvents.getApi().register(new PostAuthInputPackets());
     }
 
     public void terminate() {

@@ -5,7 +5,7 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 
-public class NetworkLatencyPacket implements PacketListener {
+public class NetworkLatencyPackets implements PacketListener {
     private final static long LATENCY_MAGNITUDE = 1000000L;
 
     @Override

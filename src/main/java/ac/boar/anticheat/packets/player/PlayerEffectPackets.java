@@ -8,7 +8,7 @@ import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.MobEffectPacket;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-public class PlayerEffectPacket implements PacketListener {
+public class PlayerEffectPackets implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();

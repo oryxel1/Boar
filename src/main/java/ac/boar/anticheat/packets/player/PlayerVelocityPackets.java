@@ -7,7 +7,7 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityMotionPacket;
 
-public class PlayerVelocityPacket implements PacketListener {
+public class PlayerVelocityPackets implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();

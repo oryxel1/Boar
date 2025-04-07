@@ -15,7 +15,7 @@ import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 
 import java.util.EnumSet;
 
-public class DataSimulationPacket implements PacketListener {
+public class PlayerDataPackets implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
