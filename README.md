@@ -1,13 +1,8 @@
 # Boar
 
-### Please keep in mind that this branch is totally outdated, so expect bugs and crap (GeyserMC 2.6.0-2.6.1 is are the last stable version.)
-
 Boar is an extra plugin for [GeyserMC](https://github.com/GeyserMC/Geyser) project aims to 
 achieve something similar to [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) on bedrock (but stricter).
 This project is still in development, and is more like a PoC than an anti-cheat.
-
-- Boar prediction engine also built to (or at-least try to) be compatible with other project (PocketMine, NukkitX) and
-can be port back and forth, but I'm not going to do that here, only for GeyserMC as an **PoC**.
 
 ### ⚠️ WARNING: THIS ONLY FOR BEDROCK PLAYER NOT JAVA PLAYER! YOU WILL NEED TO PAIR THIS WITH ANOTHER JAVA ANTICHEAT!
 A dedicated (proof of concept) anti cheat for GeyserMC project.

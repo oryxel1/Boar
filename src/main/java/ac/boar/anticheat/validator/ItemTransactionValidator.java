@@ -28,7 +28,7 @@ public final class ItemTransactionValidator {
     private final BoarPlayer player;
 
     public boolean handle(final InventoryTransactionPacket packet) {
-//        System.out.println(packet);
+        System.out.println(packet);
 
         final CompensatedInventory inventory = player.compensatedInventory;
         switch (packet.getTransactionType()) {
@@ -107,14 +107,29 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot).getData();
-                final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
-                if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
+                final ItemData SD1 = inventory.inventoryContainer.getHeldItemData();
+
+                boolean noActions = packet.getActions().isEmpty();
+
+                if (!noActions) {
+                    for (final InventoryActionData action : packet.getActions()) {
+                        if (action.getSlot() < 0 || action.getSlot() > 8) {
+                            return false;
+                        }
+
+                        final ItemData SD2 = inventory.inventoryContainer.getItemFromSlot(action.getSlot()).getData();
+                        if (!validate(SD2, action.getFromItem())) {
+                            return false;
+                        }
+                    }
+                }
+
+                if (noActions && !validate(SD1, packet.getItemInHand())) {
                     return false;
                 }
 
                 double distance = player.position.toVector3f().distanceSquared(position.getX(), position.getY(), position.getZ());
-                if (!MathUtil.isValid(position) || distance > 12) {
+                if (!MathUtil.isValid(position) || distance > 12 && position.getX() + position.getY() + position.getZ() != 0) {
                     return false;
                 }
 
@@ -128,11 +143,9 @@ public final class ItemTransactionValidator {
                     }
 
                     case 1 -> {
-
                     }
 
                     default -> {
-                        return false;
                     }
                 }
             }

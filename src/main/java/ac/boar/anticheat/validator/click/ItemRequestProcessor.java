@@ -34,7 +34,7 @@ public class ItemRequestProcessor {
         for (final ItemStackRequestAction action : request.getActions()) {
             System.out.println(action);
             if (!this.handle(action)) {
-                return false;
+                // We ignore this... for now!
             }
         }
 
