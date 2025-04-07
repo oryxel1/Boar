@@ -120,7 +120,7 @@ public class PlayerInventoryPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
-            System.out.println(packet);
+            // System.out.println(packet);
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 final ContainerCache container = inventory.getContainer(packet.getId());

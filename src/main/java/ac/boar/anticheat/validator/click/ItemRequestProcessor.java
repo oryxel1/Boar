@@ -32,7 +32,7 @@ public class ItemRequestProcessor {
 
     public boolean processAll(final ItemStackRequest request) {
         for (final ItemStackRequestAction action : request.getActions()) {
-            System.out.println(action);
+            // System.out.println(action);
             if (!this.handle(action)) {
                 // We ignore this... for now!
             }
@@ -71,7 +71,7 @@ public class ItemRequestProcessor {
                 if (cache.getType() == ContainerType.WORKBENCH) {
                     final RecipeData rawRecipe = inventory.getCraftingData().get(craftAction.getRecipeNetworkId());
                     if (rawRecipe == null) {
-                        System.out.println("No recipe found!");
+                        // System.out.println("No recipe found!");
                         break;
                     }
 
@@ -94,7 +94,7 @@ public class ItemRequestProcessor {
                                 }
 
                                 if (!valid) {
-                                    System.out.println("INVALID CRAFTING - SHAPELESS - INGREDIENTS!");
+                                    // System.out.println("INVALID CRAFTING - SHAPELESS - INGREDIENTS!");
                                     return false;
                                 }
                             }
@@ -117,7 +117,7 @@ public class ItemRequestProcessor {
                             final ItemDefinition claimed = ingredients.get(i).getDefinition();
 
                             if (!ItemTransactionValidator.validate(predicted, claimed)) {
-                                System.out.println("INVALID CRAFTING - SHAPED - INGREDIENTS!");
+                                // System.out.println("INVALID CRAFTING - SHAPED - INGREDIENTS!");
                                 return false;
                             }
                         }
@@ -125,7 +125,7 @@ public class ItemRequestProcessor {
                         results = shaped.getResults();
                     }
 
-                    System.out.println("Valid crafting yay!");
+                    // System.out.println("Valid crafting yay!");
                     if (results != null) {
                         for (final ItemData data : results) {
                             this.queuedItems.add(ItemCache.build(inventory, data));
@@ -159,7 +159,7 @@ public class ItemRequestProcessor {
                     }
                 }
 
-                System.out.println("Valid crafting yay! (2)");
+                // System.out.println("Valid crafting yay! (2)");
             }
 
             case TAKE, PLACE -> {
@@ -194,9 +194,9 @@ public class ItemRequestProcessor {
                 // This is not the same item too, so not possible...
                 if (!destinationData.getData().isNull() && !ItemTransactionValidator.validate(sourceData.getData(), destinationData.getData())) {
                     // for debugging in case I fucked up.
-                    System.out.println("INVALID DESTINATION!");
-                    System.out.println(sourceData);
-                    System.out.println(destinationSlot);
+                    // System.out.println("INVALID DESTINATION!");
+                    // System.out.println(sourceData);
+                    // System.out.println(destinationSlot);
                     return false;
                 }
 
@@ -204,10 +204,10 @@ public class ItemRequestProcessor {
                 // Source data is air, or count is invalid.
                 // Exempt this if player is grabbing from creative menu....
                 if (!(create && player.gameType == GameType.CREATIVE) && (sourceData.getData().isNull() || count <= 0 || count > sourceData.count())) {
-                    System.out.println("INVALID COUNT!"); // for debugging in case I fucked up.
-                    System.out.println("First condition: " + sourceData.getData().isNull());
-                    System.out.println("Count: " + count);
-                    System.out.println("Source Data: " + sourceData);
+//                    System.out.println("INVALID COUNT!"); // for debugging in case I fucked up.
+//                    System.out.println("First condition: " + sourceData.getData().isNull());
+//                    System.out.println("Count: " + count);
+//                    System.out.println("Source Data: " + sourceData);
                     return false;
                 }
 
@@ -249,7 +249,7 @@ public class ItemRequestProcessor {
 
                 // Source/Destination slot is empty! Player is supposed to send TAKE/PLACE instead of SWAP!
                 if (sourceData.getData().isNull() || destinationData.getData().isNull()) {
-                    System.out.println("INVALID SWAP!"); // for debugging in case I fucked up.
+                    // System.out.println("INVALID SWAP!"); // for debugging in case I fucked up.
                     return false;
                 }
 

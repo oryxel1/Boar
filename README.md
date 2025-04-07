@@ -10,9 +10,9 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 
 ## Features
 - A packet managing system for GeyserMC
-- An uncompleted prediction engine that only works on normal/elytra movement (with around 1.0E-8 accuracy).
+- An uncompleted prediction engine that only works on normal/elytra/water/lava movement (with around 1.0E-5 accuracy).
 - 1:1 recreation of player world server-sided that accounted for lag (no placing support yet).
-- A smooth rewind setback system that is the same as server-auth-with-rewind
+- A smooth rewind setback system that is the same as server-auth-with-rewind (even if it falses it will be hard to notice cuz it is pretty smooth lol).
 
 ## Problems
 - A lot of movement differences is not implemented.
@@ -23,7 +23,7 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 
 ### Differences from other Geyser anti-cheat.
 #### You can take a look at a list of "other anti-cheats" [here](https://geysermc.org/wiki/geyser/anticheat-compatibility/)
-- Fully packet-based that support both reading Java-Bedrock packet instead of relying on Bukkit events or java-only packet manager.
+- Fully packet-based that read and interfere directly (if needed) bedrock packet that client/server sent.
 - Fully prediction-based, check player movement on a 1:1 scale, detecting any *1.0E-4* movement abnormality.
 - Fully synced world (and other) that synced with player ping to account for lag.
 

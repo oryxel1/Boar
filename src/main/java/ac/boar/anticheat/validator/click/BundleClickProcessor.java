@@ -15,7 +15,7 @@ public final class BundleClickProcessor {
         }
 
         if (isBundle(action.getDestination()) && isBundle(action.getSource())) {
-            System.out.println("NOT POSSIBLE!");
+            // System.out.println("NOT POSSIBLE!");
             return new BundleResponse(true, false);
         }
 
@@ -41,14 +41,14 @@ public final class BundleClickProcessor {
 
             final ItemCache bundleItem = inventory.getBundleCache().get(source.getContainerName().getDynamicId());
             if (bundleItem == null) {
-                System.out.println("CAN'T FIND BUNDLE CACHE!");
+                // System.out.println("CAN'T FIND BUNDLE CACHE!");
                 return new BundleResponse(true, false);
             }
 
             final ItemCache cache = bundleItem.getBundle().getContents()[sourceSlot];
             if (cache.getData().isNull() || count > cache.count()) {
-                System.out.println("INVALID COUNT!");
-                System.out.println(cache.getData());
+                // System.out.println("INVALID COUNT!");
+                // System.out.println(cache.getData());
                 return new BundleResponse(true, false);
             }
 
@@ -72,13 +72,13 @@ public final class BundleClickProcessor {
 
             final ItemCache bundleItem = inventory.getBundleCache().get(destination.getContainerName().getDynamicId());
             if (bundleItem == null) {
-                System.out.println("CAN'T FIND BUNDLE CACHE!");
+                // System.out.println("CAN'T FIND BUNDLE CACHE!");
                 return new BundleResponse(true, false);
             }
 
             final ItemCache sourceCache = sourceContainer.get(sourceSlot);
             if (sourceCache.getData().isNull() || count > sourceCache.getData().getCount()) {
-                System.out.println("invalid lol!");
+                // System.out.println("invalid lol!");
                 return new BundleResponse(true, false);
             }
 

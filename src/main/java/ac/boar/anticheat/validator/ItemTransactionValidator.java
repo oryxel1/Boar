@@ -28,7 +28,7 @@ public final class ItemTransactionValidator {
     private final BoarPlayer player;
 
     public boolean handle(final InventoryTransactionPacket packet) {
-        System.out.println(packet);
+        // System.out.println(packet);
 
         final CompensatedInventory inventory = player.compensatedInventory;
         switch (packet.getTransactionType()) {
