@@ -120,6 +120,8 @@ public class PlayerData {
 
     public BlockState inBlockState;
 
+    public VehicleData vehicleData = null;
+
     public final EntityDimensions getDimensions(Pose pose) {
         return PlayerTicker.POSES.get(pose);
     }

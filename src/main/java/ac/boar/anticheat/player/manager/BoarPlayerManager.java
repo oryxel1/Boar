@@ -1,12 +1,10 @@
 package ac.boar.anticheat.player.manager;
 
-import ac.boar.anticheat.data.PlayerAttributeData;
 import ac.boar.anticheat.player.BoarPlayer;
 
 import ac.boar.geyser.util.GeyserUtil;
 import ac.boar.plugin.BoarSpigot;
 import org.geysermc.geyser.api.connection.GeyserConnection;
-import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.session.GeyserSession;
 
 import java.util.HashMap;

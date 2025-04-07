@@ -2,6 +2,7 @@ package ac.boar.anticheat;
 
 import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
+import ac.boar.anticheat.packets.other.VehiclePackets;
 import ac.boar.anticheat.packets.player.*;
 import ac.boar.anticheat.packets.world.*;
 import lombok.Getter;
@@ -33,6 +34,7 @@ public class Boar {
         PacketEvents.getApi().register(new PlayerTeleportPackets());
         PacketEvents.getApi().register(new PlayerVelocityPackets());
         PacketEvents.getApi().register(new PlayerInventoryPackets());
+        PacketEvents.getApi().register(new VehiclePackets());
         PacketEvents.getApi().register(new AuthInputPackets());
         PacketEvents.getApi().register(new PacketCheckRunner());
         PacketEvents.getApi().register(new PostAuthInputPackets());

@@ -1,12 +1,8 @@
 package ac.boar.anticheat.prediction.engine.impl.fluid;
 
-import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
-import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
-import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
-import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 public class WaterPredictionEngine extends PredictionEngine {
@@ -16,7 +12,6 @@ public class WaterPredictionEngine extends PredictionEngine {
 
     @Override
     public Vec3 travel(Vec3 vec3) {
-
         return this.moveRelative(vec3, 0.02F);
     }
 

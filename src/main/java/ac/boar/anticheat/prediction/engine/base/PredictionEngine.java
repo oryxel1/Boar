@@ -16,7 +16,7 @@ public abstract class PredictionEngine {
     public abstract void finalizeMovement();
 
     protected final Vec3 moveRelative(Vec3 delta, float f) {
-        Vec3 vec3 = delta.add(MathUtil.getInputVector(player.input, f, player.yaw));;
+        Vec3 vec3 = delta.add(MathUtil.getInputVector(player.input, f, player.yaw));
 
         final boolean collidedOrJumping = player.horizontalCollision ||
                 player.getInputData().contains(PlayerAuthInputData.START_JUMPING) || player.getInputData().contains(PlayerAuthInputData.JUMPING);
