@@ -3,6 +3,7 @@ package ac.boar.anticheat.packets.input;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.util.math.Vec3;
@@ -11,14 +12,13 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.anticheat.util.MathUtil;
 
 import ac.boar.protocol.listener.PacketListener;
-import org.bukkit.Bukkit;
-import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.item.Items;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class AuthInputPackets implements PacketListener {
@@ -81,6 +81,19 @@ public class AuthInputPackets implements PacketListener {
             // TODO: Flying prediction?
             player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
+
+            // Clear velocity out manually since we haven't handled em.
+            Iterator<Map.Entry<Long, VelocityData>> iterator = player.queuedVelocities.entrySet().iterator();
+
+            Map.Entry<Long, VelocityData> entry;
+            while (iterator.hasNext() && (entry = iterator.next()) != null) {
+                if (entry.getKey() >= player.receivedStackId.get()) {
+                    break;
+                } else {
+                    iterator.remove();
+                }
+            }
+
             return;
         } else {
             new PredictionRunner(player).run();

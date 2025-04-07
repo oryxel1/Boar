@@ -80,6 +80,7 @@ public class PredictionRunner {
 
             if (nearestVelocity != null) {
                 possibleVelocities.add(new Vector(VectorType.VELOCITY, nearestVelocity.velocity(), nearestVelocity.stackId()));
+                System.out.println("nearest velocity!");
             }
         }
 
@@ -94,7 +95,6 @@ public class PredictionRunner {
             // TODO: Also will this works well when we predicting during rewind?
 
             final Vec3 oldInput = player.input.clone();
-            System.out.println("find best possibility.");
 
             // Mini prediction engine!
             for (Vector possibility : possibleVelocities) {

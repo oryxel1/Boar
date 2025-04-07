@@ -85,7 +85,7 @@ public class PlayerData {
     // Movement related, (movement input, player EOT, ...)
     public Vec3 input = Vec3.ZERO;
     public Vec3 unvalidatedTickEnd = Vec3.ZERO;
-    public final Map<Long, VelocityData> queuedVelocities = new ConcurrentHashMap<>();
+    public final Map<Long, VelocityData> queuedVelocities = Collections.synchronizedMap(new TreeMap<>());
 
     // Attribute related, abilities
     public final Map<String, PlayerAttributeData> attributes = new HashMap<>();
