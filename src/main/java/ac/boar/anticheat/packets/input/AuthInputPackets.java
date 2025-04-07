@@ -62,7 +62,7 @@ public class AuthInputPackets implements PacketListener {
 
         player.sinceTeleport++;
 
-        if (!player.inLoadingScreen) {
+        if (player.inLoadingScreen) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
                 player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
