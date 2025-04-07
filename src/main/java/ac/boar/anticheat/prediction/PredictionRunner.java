@@ -1,6 +1,7 @@
 package ac.boar.anticheat.prediction;
 
 import ac.boar.anticheat.collision.Collider;
+import ac.boar.anticheat.data.PredictionData;
 import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
@@ -31,6 +32,8 @@ public class PredictionRunner {
         }
 
         new PlayerTicker(player).tick();
+
+        player.predictionResult = new PredictionData(player.bestPossibility, player.beforeCollision.clone(), player.afterCollision.clone(), player.velocity.clone());
     }
 
     private boolean findBestTickStartVelocity() {

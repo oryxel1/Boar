@@ -165,11 +165,12 @@ public class EntityTicker {
         if (vec3.y != vec32.y) {
             blockState.updateEntityMovementAfterFallOn(player, true);
         }
-
-        player.predictionResult = new PredictionData(player.bestPossibility, vec3.clone(), vec32.clone(), player.velocity.clone());
         // There is none of this thing on Bedrock.
 //        float f = this.getBlockSpeedFactor();
 //        this.setDeltaMovement(this.getDeltaMovement().multiply(f, 1.0, f));
 //        profilerFiller.pop();
+
+        player.beforeCollision = vec3.clone();
+        player.afterCollision = vec32.clone();
     }
 }

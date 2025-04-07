@@ -100,6 +100,8 @@ public class PlayerData {
 
     public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector bestPossibility = Vector.NONE;
+    public Vec3 beforeCollision = Vec3.ZERO, afterCollision = Vec3.ZERO;
+
     public VelocityData velocityData;
     public boolean onGround;
     public Vec3 stuckSpeedMultiplier = Vec3.ZERO;
