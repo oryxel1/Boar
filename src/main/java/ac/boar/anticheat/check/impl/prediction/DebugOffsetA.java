@@ -20,7 +20,9 @@ public class DebugOffsetA extends OffsetHandlerCheck {
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         if (actual.length() > 1e-5 || offset > maxOffset || eotOffset > maxOffset) {
-            Bukkit.broadcastMessage((offset > maxOffset ? "§c" : "§a") + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", MO=" + maxOffset);
+            String colorOffset = offset > maxOffset ? "$c" : offset > 1.0E-5 ? "§6" : "§a";
+
+            Bukkit.broadcastMessage(colorOffset + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", MO=" + maxOffset);
 
             Bukkit.broadcastMessage("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", sinceTeleport=" + player.sinceTeleport);
 

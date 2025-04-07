@@ -176,7 +176,7 @@ public class PlayerData {
             return this.getSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
         }
 
-        return sprinting ? 0.025999999F : 0.02F;
+        return sprinting ? 0.026F : 0.02F;
     }
 
     // Others (methods)
