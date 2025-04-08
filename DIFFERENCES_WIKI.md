@@ -74,9 +74,9 @@ public float getValue() {
 
 - As listed above, the differences in packet and class, you might notice that the Bedrock packet can change the value directly and how Bedrock updated the value instantly. The problem is Geyser **DO NOT** translate attribute modifiers *(don't blame them they have a good reason for doing so)*, so when player *START* sprinting, the server send back attribute and the only thing Geyser translate is the calculated **value** and nothing else, baseValue, min, max, and the rest remains the same. The client received this, cleared the modifiers, update to the new value (which is this case is 0.13) and no new modifiers to add! Now the real problem is when the player *STOP* sprinting, player will attempt to remove the sprinting modifier attribute, but the problem is, *there is none to begin which* since it is already cleared from before, therefore nothing to update, the attribute will remains the same value 0.13, therefore the player keep on sprinting even though they already stopped and only will stop when the server send back the value 0.1.
 #### FAQ (For the sections above).
-Why don't Geyser translate the attribute modifier?
+##### Why don't Geyser translate the attribute modifier?
 - They simply can't, UUID, values, and differences in each possible attribute modifier that CAN BE CHANGE between update is not worth it to translate, if they fucked anything up, the attribute value is wrong all the time which is the bad thing.
-  Ok, how IS the *Class* section is any relevant to the *Note for Geyser* section.
+##### Ok, how IS the *Class* section is any relevant to the *Note for Geyser* section.
 - Well if you try to handle it normally with the Java version of the class. It will set dirty to true, the value doesn't get updated instantly, but because of the attribute modifiers is now empty, even tho the value is set to 0.13, the next time you call *getValue()* it will try to update, poof now your value is back to 0.1 which is wrong.
 
 ## Block Friction, Jump Factor
