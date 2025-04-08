@@ -121,10 +121,7 @@ public class PlayerTeleportPackets implements PacketListener {
 
         if (isThereRespawnTeleport) {
             player.tick = packet.getTick() - 1;
-            player.wasSprinting = player.sprinting = false;
-            player.wasSneaking = player.sneaking = false;
-            player.wasGliding = player.gliding = false;
-            player.wasSwimming = player.swimming = false;
+            player.getFlagTracker().clear();
             player.wasFlying = player.flying = false;
         }
 

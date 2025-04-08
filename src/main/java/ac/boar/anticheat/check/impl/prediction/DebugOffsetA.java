@@ -5,6 +5,7 @@ import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
 import org.bukkit.Bukkit;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 
 @CheckInfo(name = "DebugOffset")
 public class DebugOffsetA extends OffsetHandlerCheck {
@@ -24,7 +25,7 @@ public class DebugOffsetA extends OffsetHandlerCheck {
 
             Bukkit.broadcastMessage(colorOffset + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", MO=" + maxOffset);
 
-            Bukkit.broadcastMessage("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.sprinting + ", SNEAKING=" + player.sneaking + ", sinceTeleport=" + player.sinceTeleport);
+            Bukkit.broadcastMessage("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.getFlagTracker().has(EntityFlag.SPRINTING) + ", SNEAKING=" + player.getFlagTracker().has(EntityFlag.SNEAKING) + ", sinceTeleport=" + player.sinceTeleport);
 
             Bukkit.broadcastMessage("A EOT: " + player.velocity.toVector3f().toString());
             Bukkit.broadcastMessage("EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset + "," + player.unvalidatedTickEnd.toVector3f().toString());

@@ -1,19 +1,12 @@
 package ac.boar.anticheat.collision;
 
-import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.math.Box;
-import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.MathUtil;
-import org.cloudburstmc.math.vector.Vector3i;
-import org.geysermc.geyser.level.block.type.BlockState;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.physics.Axis;
-import org.geysermc.geyser.level.physics.BoundingBox;
-import org.geysermc.geyser.session.GeyserSession;
-import org.geysermc.geyser.translator.collision.BlockCollision;
-import org.geysermc.geyser.util.BlockUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +23,7 @@ public class Collider {
 
     public static Vec3 maybeBackOffFromEdge(final BoarPlayer player, final Vec3 movement) {
         final float f = PlayerData.STEP_HEIGHT;
-        if (movement.y <= 0.0 && (player.sneaking || player.wasSneaking) && isAboveGround(player)) {
+        if (movement.y <= 0.0 && player.getFlagTracker().has(EntityFlag.SNEAKING) && isAboveGround(player)) {
             float d = movement.x;
             float e = movement.z;
             float h = MathUtil.sign(d) * 0.05F;

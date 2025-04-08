@@ -3,6 +3,7 @@ package ac.boar.anticheat.prediction.engine.impl.fluid;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -37,7 +38,7 @@ public class LavaPredictionEngine extends PredictionEngine {
             return new Vec3(motion.x, y, motion.z);
         }
 
-        if (gravity != 0.0 && !player.swimming) {
+        if (gravity != 0.0 && !player.getFlagTracker().has(EntityFlag.SWIMMING)) {
             return new Vec3(motion.x, motion.y - (gravity / 16.0F), motion.z);
         }
 

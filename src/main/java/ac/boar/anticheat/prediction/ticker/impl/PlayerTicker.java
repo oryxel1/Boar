@@ -7,6 +7,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import com.google.common.collect.ImmutableMap;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
 
 import java.util.Map;
@@ -41,7 +42,7 @@ public class PlayerTicker extends LivingTicker {
 
     @Override
     protected void travel() {
-        if (player.swimming) {
+        if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
             float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;
             float e = d < -0.2 ? 0.085F : 0.06F;
             final FluidState state = player.compensatedWorld.getFluidState(player.position.add(0, 1.0F - 0.1F, 0).toVector3i());
@@ -64,16 +65,16 @@ public class PlayerTicker extends LivingTicker {
 //        if (this.isSleeping()) {
 //            return Pose.SLEEPING;
 //        }
-        if (player.swimming) {
+        if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
             return Pose.SWIMMING;
         }
-        if (player.gliding) {
+        if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
             return Pose.GLIDING;
         }
 //        if (this.isAutoSpinAttack()) {
 //            return Pose.SPIN_ATTACK;
 //        }
-        if (player.sneaking/* && !this.abilities.flying */) {
+        if (player.getFlagTracker().has(EntityFlag.SNEAKING)/* && !this.abilities.flying */) {
             return Pose.CROUCHING;
         }
         return Pose.STANDING;

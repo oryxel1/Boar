@@ -4,6 +4,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Blocks;
 
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public abstract class PredictionEngine {
     protected final Vec3 applyClimbingSpeed(final Vec3 motion) {
         if (player.onClimbable()) {
             float g = Math.max(motion.y, -0.2F);
-            if (g < 0.0 && !player.compensatedWorld.getBlockState(player.position.toVector3i(), 0).getState().is(Blocks.SCAFFOLDING) && player.sneaking) {
+            if (g < 0.0 && !player.compensatedWorld.getBlockState(player.position.toVector3i(), 0).getState().is(Blocks.SCAFFOLDING) && player.getFlagTracker().has(EntityFlag.SNEAKING)) {
                 g = 0;
             }
 

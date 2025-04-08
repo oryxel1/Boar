@@ -14,6 +14,7 @@ import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 
 import java.util.EnumSet;
+import java.util.Set;
 
 public class PlayerDataPackets implements PacketListener {
     @Override
@@ -56,15 +57,13 @@ public class PlayerDataPackets implements PacketListener {
                 return;
             }
 
-            // You have to do this outside of this addTaskToQueue because geyser can change this, uhhh im not good at
-            // explaining thing, just do it outside or else you're going to do de-sync.
-            final boolean sprinting = flags.contains(EntityFlag.SPRINTING);
+            final Set<EntityFlag> flagsCopy = EnumSet.noneOf(EntityFlag.class);
+            flagsCopy.addAll(flags);
 
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
-                // This won't affect player movement attribute, only player actual sprinting status.
-                player.sprinting = sprinting;
-                // player.setSprinting(sprinting);
+                // This won't affect player movement attribute or anything else, only player actual flags.
+                player.getFlagTracker().set(flagsCopy);
             });
         }
 

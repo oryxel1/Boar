@@ -24,6 +24,7 @@ import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Blocks;
@@ -168,7 +169,7 @@ public final class BoarPlayer extends PlayerData {
             return vec3;
         }
         vec3 = new Vec3(vec3.x, Math.max(f, vec3.y), vec3.z);
-        if (this.sprinting) {
+        if (this.getFlagTracker().has(EntityFlag.SPRINTING)) {
             float g = this.yaw * MathUtil.DEGREE_TO_RAG;
             vec3 = vec3.add(-TrigMath.sin(g) * 0.2F, 0, TrigMath.cos(g) * 0.2F);
         }

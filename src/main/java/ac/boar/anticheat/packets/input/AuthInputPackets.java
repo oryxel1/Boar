@@ -15,6 +15,7 @@ import ac.boar.anticheat.util.MathUtil;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.item.Items;
@@ -54,6 +55,9 @@ public class AuthInputPackets implements PacketListener {
         }
 
         processAuthInput(player, packet);
+        if (player.teleportUtil.teleportInQueue()) {
+            return;
+        }
 
         if (player.wasTeleport) {
             player.setPos(player.unvalidatedPosition);
@@ -150,9 +154,9 @@ public class AuthInputPackets implements PacketListener {
         // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
         packet.setDelta(player.prevVelocity.toVector3f());
 
-        if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
-            packet.getInputData().remove(!player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
-        }
+//        if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
+//            packet.getInputData().remove(!player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
+//        }
     }
 
     public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
@@ -179,10 +183,6 @@ public class AuthInputPackets implements PacketListener {
 
     public static void processInputData(final BoarPlayer player) {
         player.wasFlying = player.flying;
-        player.wasSprinting = player.sprinting;
-        player.wasSneaking = player.sneaking;
-        player.wasGliding = player.gliding;
-        player.wasSwimming = player.swimming;
 
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
@@ -190,43 +190,36 @@ public class AuthInputPackets implements PacketListener {
                     final ContainerCache cache = player.compensatedInventory.armorContainer;
 
                     // Prevent player from spoofing elytra gliding.
-                    player.gliding = player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId();
-                    if (!player.gliding) {
+                    player.getFlagTracker().set(EntityFlag.GLIDING, player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId());
+                    if (!player.getFlagTracker().has(EntityFlag.GLIDING)) {
                         player.teleportUtil.rewind(player.tick - 1);
                     }
                 }
-                case STOP_GLIDING -> player.gliding = false;
+                case STOP_GLIDING -> player.getFlagTracker().set(EntityFlag.GLIDING, false);
 
                 // Don't let player do backwards sprinting!
                 case START_SPRINTING -> {
-                    player.sprinting = player.input.getZ() > 0;
-                    player.setSprinting(player.sprinting);
+                    player.setSprinting(player.input.getZ() > 0);
                 }
                 case STOP_SPRINTING -> {
-                    player.sprinting = false;
                     player.setSprinting(false);
                 }
-                case START_SNEAKING -> player.sneaking = true;
-                case STOP_SNEAKING -> player.sneaking = false;
+                case START_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, true);
+                case STOP_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, false);
 
-                case START_SWIMMING -> player.swimming = true;
-                case STOP_SWIMMING -> player.swimming = false;
+                case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, true);
+                case STOP_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, false);
 
                 case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
                 case STOP_FLYING -> player.flying = false;
             }
         }
 
-        if (player.sprinting) {
-            player.sinceSprinting = 0;
-        } else {
-            player.sinceSprinting++;
-        }
-
-        if (player.sprinting && player.input.getZ() <= 0) {
-            player.sprinting = false;
-            player.sinceSprinting = 1;
-        }
+        // TODO: Do this and don't fuck up because of entity data.
+//        if (player.sprinting && player.input.getZ() <= 0) {
+//            player.sprinting = false;
+//            player.sinceSprinting = 1;
+//        }
 
 //        final StringBuilder builder = new StringBuilder();
 //        player.getInputData().forEach(input -> builder.append(input).append(","));

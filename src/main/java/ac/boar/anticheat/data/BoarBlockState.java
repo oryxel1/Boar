@@ -8,6 +8,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.BlockStateValues;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
@@ -37,13 +38,13 @@ public class BoarBlockState {
         if (state.is(Blocks.HONEY_BLOCK)) {
             // Yes lol.
             float d = Math.abs(player.velocity.y);
-            if (d < 0.1 && !player.sneaking) {
+            if (d < 0.1 && !player.getFlagTracker().has(EntityFlag.SNEAKING)) {
                 float e = 0.4F + d * 0.2F;
                 player.velocity = player.velocity.multiply(e, 1, e);
             }
         }
 
-        player.thisTickSlimeUncertain = state.is(Blocks.SLIME_BLOCK) && !player.sneaking;
+        player.thisTickSlimeUncertain = state.is(Blocks.SLIME_BLOCK) && !player.getFlagTracker().has(EntityFlag.SNEAKING);
     }
 
     public void onEntityCollision(final BoarPlayer player, Mutable pos) {
@@ -123,7 +124,7 @@ public class BoarBlockState {
     public void updateEntityMovementAfterFallOn(BoarPlayer player, boolean living) {
         final TagCache cache = player.getSession().getTagCache();
 
-        if (cache.is(BlockTag.BEDS, state.block()) && player.velocity.y < 0.0 && !player.sneaking) {
+        if (cache.is(BlockTag.BEDS, state.block()) && player.velocity.y < 0.0 && !player.getFlagTracker().has(EntityFlag.SNEAKING)) {
             final float d = living ? 1.0F : 0.8F;
             player.velocity.y = -player.velocity.y * 0.75F * d;
             if (player.velocity.y > 0.75) {
@@ -134,7 +135,7 @@ public class BoarBlockState {
         }
 
         if (state.is(Blocks.SLIME_BLOCK)) {
-            if (player.velocity.y < 0.0 && !player.sneaking) {
+            if (player.velocity.y < 0.0 && !player.getFlagTracker().has(EntityFlag.SNEAKING)) {
                 // double d = entity instanceof LivingEntity ? 1.0 : 0.8;
                 player.velocity.y = -player.velocity.y * 1;
                 return;

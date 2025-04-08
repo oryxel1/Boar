@@ -77,7 +77,7 @@ public class LivingTicker extends EntityTicker {
     protected void travel() {
         if (player.isInLava() || player.touchingWater) {
             this.travelInFluid();
-        } else if (player.gliding) {
+        } else if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
 //            if (this.onClimbable()) {
 //                this.travelInAir(vec3);
 //                this.stopFallFlying();

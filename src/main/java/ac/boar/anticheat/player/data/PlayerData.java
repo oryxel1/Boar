@@ -2,6 +2,7 @@ package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.*;
+import ac.boar.anticheat.player.data.tracker.FlagTracker;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
 import ac.boar.anticheat.util.LatencyUtil;
@@ -16,6 +17,7 @@ import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
@@ -60,9 +62,10 @@ public class PlayerData {
     public Vector3f bedrockRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
 
     // Sprinting, sneaking, swimming and other status.
-    public boolean wasSprinting, sprinting, wasSneaking, sneaking, wasGliding, gliding, wasSwimming, swimming;
-    public boolean wasFlying, flying;
-    public int sinceSprinting, sinceTeleport;
+    @Getter
+    private final FlagTracker flagTracker = new FlagTracker();
+    public boolean flying, wasFlying;
+    public int sinceTeleport;
 
     // Information about this tick.
     public boolean wasTeleport, wasRewind, lastTickWasJoystick;
@@ -138,7 +141,7 @@ public class PlayerData {
     }
 
     public final void setSprinting(boolean sprinting) {
-        this.sprinting = sprinting;
+        this.getFlagTracker().set(EntityFlag.SPRINTING, sprinting);
         final AttributeInstance lv = this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier());
         if (lv == null) {
             // wtf?
@@ -176,7 +179,7 @@ public class PlayerData {
             return this.getSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
         }
 
-        return sprinting ? 0.026F : 0.02F;
+        return this.getFlagTracker().has(EntityFlag.SPRINTING) ? 0.026F : 0.02F;
     }
 
     // Others (methods)

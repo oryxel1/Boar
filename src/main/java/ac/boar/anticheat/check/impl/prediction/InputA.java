@@ -5,6 +5,7 @@ import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.MathUtil;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 
 @CheckInfo(name = "Input", type = "A")
 public final class InputA extends OffsetHandlerCheck {
@@ -24,7 +25,7 @@ public final class InputA extends OffsetHandlerCheck {
             predictedInput = predictedInput.multiply(0.70710677F);
         }
 
-        if (player.sneaking && !player.gliding && !player.isInLava() && !player.touchingWater) {
+        if (player.getFlagTracker().has(EntityFlag.SNEAKING) && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
             predictedInput = predictedInput.multiply(0.3F);
         }
 

@@ -15,6 +15,7 @@ import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class PredictionRunner {
             engine = new WaterPredictionEngine(player);
         } else if (player.isInLava()) {
             engine = new LavaPredictionEngine(player);
-        } else if (player.gliding) {
+        } else if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
             engine = new GlidingPredictionEngine(player);
         } else {
             engine = new GroundAndAirPredictionEngine(player);
