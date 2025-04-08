@@ -121,6 +121,11 @@ public class PlayerTeleportPackets implements PacketListener {
 
         if (isThereRespawnTeleport) {
             player.tick = packet.getTick() - 1;
+            player.wasSprinting = player.sprinting = false;
+            player.wasSneaking = player.sneaking = false;
+            player.wasGliding = player.gliding = false;
+            player.wasSwimming = player.swimming = false;
+            player.wasFlying = player.flying = false;
         }
 
         // This is not precise as java, since it being sent this tick instead of right away (also because of floating point I think?), we can't check for 0

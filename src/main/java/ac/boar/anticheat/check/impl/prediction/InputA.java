@@ -24,7 +24,7 @@ public final class InputA extends OffsetHandlerCheck {
             predictedInput = predictedInput.multiply(0.70710677F);
         }
 
-        if ((player.wasSneaking || player.sneaking) && !player.gliding && !player.isInLava() && !player.touchingWater) {
+        if (player.sneaking && !player.gliding && !player.isInLava() && !player.touchingWater) {
             predictedInput = predictedInput.multiply(0.3F);
         }
 
