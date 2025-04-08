@@ -88,10 +88,17 @@ public class ChunkWorldPackets implements PacketListener {
                     for (int n = 0; n < storageLength; n++) {
                         storages[n] = readStorage(buffer, player.BEDROCK_AIR);
                     }
-                    if (storageLength < 2) {
-                        final IntArrayList list = new IntArrayList(1);
-                        list.add(player.BEDROCK_AIR);
-                        storages[1] = new BlockStorage(BitArrayVersion.V0.createArray(4096, null), list);
+
+                    for (int n = 0; n < storages.length; n++) {
+                        if (storages[n] == null) {
+                            if (n == 1) {
+                                final IntArrayList list = new IntArrayList(1);
+                                list.add(player.BEDROCK_AIR);
+                                storages[n] = new BlockStorage(BitArrayVersion.V0.createArray(4096, null), list);
+                            } else {
+                                storages[n] = new BlockStorage(player.BEDROCK_AIR, BitArrayVersion.V2);
+                            }
+                        }
                     }
 
                     sections[i] = new GeyserChunkSection(storages, subChunkIndex);

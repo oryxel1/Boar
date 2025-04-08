@@ -120,7 +120,11 @@ public class CompensatedWorld {
 
         GeyserChunkSection chunk = column[(y - getMinY()) >> 4];
         if (chunk != null) {
-            return player.bedrockBlockToJava.getOrDefault(chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer), 0);
+            try {
+                return player.bedrockBlockToJava.getOrDefault(chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer), 0);
+            } catch (Exception e) {
+                return 0;
+            }
         }
 
         return 0;
