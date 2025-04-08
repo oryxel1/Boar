@@ -4,6 +4,8 @@ Boar is an extra plugin for [GeyserMC](https://github.com/GeyserMC/Geyser) proje
 achieve something similar to [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) on bedrock (but stricter).
 This project is still in development, and is more like a PoC than an anti-cheat.
 
+### Boar now keep track of the differences between Java - Bedrock [here](https://github.com/Oryxel/Boar/blob/new-engine/DIFFERENCES_WIKI.md) with detailed explainations.
+
 ### ⚠️ WARNING: THIS ONLY FOR BEDROCK PLAYER NOT JAVA PLAYER! YOU WILL NEED TO PAIR THIS WITH ANOTHER JAVA ANTICHEAT!
 A dedicated (proof of concept) anti cheat for GeyserMC project.
 - Warning: No guarantee about performance, lag compatibility, or if I will ever finish this.
