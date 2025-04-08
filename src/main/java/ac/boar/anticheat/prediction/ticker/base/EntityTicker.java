@@ -163,9 +163,10 @@ public class EntityTicker {
             player.velocity = new Vec3(bl ? 0 : player.velocity.x, player.velocity.y, bl2 ? 0 : player.velocity.z);
         }
 
-        if (vec3.y != vec32.y) {
+        if (player.verticalCollision) {
             blockState.updateEntityMovementAfterFallOn(player, true);
         }
+
         float f = player.getBlockSpeedFactor();
         player.velocity = player.velocity.multiply(f, 1, f);
 

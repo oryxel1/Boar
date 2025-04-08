@@ -18,6 +18,9 @@ public class UncertainRunner {
         boolean slimeSmallerOrEqualsY = player.unvalidatedTickEnd.y <= player.velocity.y;
         if (slimeSmallerXZ && slimeSmallerOrEqualsY && player.thisTickSlimeUncertain) {
             player.velocity = player.unvalidatedTickEnd.clone();
+
+            // Hardcoded.
+            player.velocity.y = Math.max(-0.6F, player.velocity.y);
         }
     }
 
