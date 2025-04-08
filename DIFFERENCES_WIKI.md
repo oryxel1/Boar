@@ -244,3 +244,21 @@ if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
 - On Bedrock Edition, the client can entirely control how much they move and is not limited like Java Edition, howerver this is only the case with analog move vector (joystick thingy).
 - If player doesn't use the analog move vector, then their input will act the same as on Java, but if the player is moving in both X and Z axis, their input will be multiply by **1 / sqrt(2)** or *0.70710677*
 - Input multiplier for using item is different from Java, you can debug yourself since I forgot lol.
+
+
+- By the way, here is the actual calculation for the non-analog move vector which is why the 0.70710677 is a thing.
+```java
+if (xAxis != 0.0 || zAxis != 0.0) {
+    float v12 = 1 / (float) GenericMath.sqrt((zAxis * zAxis) + (xAxis * xAxis));
+    if (v12 >= 1.0E-7) {
+        xAxis *= v12;
+        zAxis *= v12;
+    } else {
+        xAxis = zAxis = 0;
+    }
+}
+```
+
+## Minimal motion
+- On Java Edtion, if entity motion is smaller than 0.003 or 0.005 depends on the version the motion going to set to 0.
+- On Bedrock Edition, this value seems to be around the range 1.0E-8 -> 1.0E-9 before the value is set to 0.

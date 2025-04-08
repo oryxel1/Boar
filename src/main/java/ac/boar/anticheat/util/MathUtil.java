@@ -17,7 +17,7 @@ public class MathUtil {
     }
 
     public static boolean equal(float d, float e) {
-        return Math.abs(e - d) < 1.0E-5F;
+        return Math.abs(e - d) < 1.0E-7F;
     }
 
     public static float lerp(float delta, float start, float end) {
