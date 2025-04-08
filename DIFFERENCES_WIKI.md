@@ -174,7 +174,7 @@ private void travelInAir(Vec3 vec3) {
 }
 ```
 
-- However on Java, even though the climbing part after *handleRelativeFrictionAndCalculateMovement* will be the same no differences, climbing will also affect tick end if player is having horizontal collision.
+- However on Bedrock, even though the climbing part after *handleRelativeFrictionAndCalculateMovement* will be the same no differences, climbing will also affect tick end if player is having horizontal collision.
 ```java
 // Bedrock Edition (Boar code, recreation of BDS code)
 @Override
