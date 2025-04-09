@@ -174,10 +174,20 @@ private void travelInAir(Vec3 vec3) {
 }
 ```
 
-- However on Bedrock, even though the climbing part after *handleRelativeFrictionAndCalculateMovement* will be the same no differences, climbing will also affect tick end if player is having horizontal collision.
+- However on Bedrock,Climbing part in *handleRelativeFrictionAndCalculateMovement* will be the move to before move method, climbing will also affect tick end if player is having horizontal collision.
 ```java
-// Bedrock Edition (Boar code, recreation of BDS code)
-@Override
+// Bedrock Edition (Recreation of BDS code)
+private Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
+    this.moveRelative(this.getFrictionInfluencedSpeed(f), vec3);
+    this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
+    Vec3 vec32 = this.getDeltaMovement();
+    if ((this.horizontalCollision || this.jumping) && (this.onClimbable() || this.wasInPowderSnow && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {
+        vec32 = new Vec3(vec32.x, 0.2, vec32.z);
+    }
+    this.move(MoverType.SELF, vec32); // Move player to the calculated position.
+    return vec32;
+}
+
 public void finalizeMovement() {
     boolean climbable = false;
     // If player is climbing with horizontal collision, this will be run!
