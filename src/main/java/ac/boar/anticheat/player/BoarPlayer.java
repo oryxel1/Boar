@@ -59,9 +59,6 @@ public final class BoarPlayer extends PlayerData {
     public final BreakingBlockValidator breakingValidator = new BreakingBlockValidator(this);
     public final ItemTransactionValidator transactionValidator = new ItemTransactionValidator(this);
 
-    // Mappings
-    public final Map<BlockDefinition, Integer> bedrockToJavaBlocks = new HashMap<>();
-
     public BoarPlayer(GeyserSession session) {
         this.session = session;
 
@@ -108,11 +105,6 @@ public final class BoarPlayer extends PlayerData {
 
     public void kick(String reason) {
         this.session.disconnect(ChatUtil.PREFIX + " " + reason);
-    }
-
-    // Mappings related
-    public int bedrockToJavaBlockId(final BlockDefinition definition) {
-        return this.bedrockToJavaBlocks.getOrDefault(definition, -1);
     }
 
     // Prediction related method
