@@ -28,25 +28,7 @@ public final class BreakingBlockValidator {
 
     private final List<BreakingData> cachedBlockBreak = new ArrayList<>();
 
-    @Getter
-    private final List<PlayerBlockActionData> valid = new ArrayList<>();
-
     public void handle(final PlayerAuthInputPacket packet) {
-        if (!this.valid.isEmpty()) {
-            // Geyser refused to translate these actions, rather they fail Geyser validation check,
-            // or we're the one cancelling auth input packet causing this.
-            // Whatever the case is, we need to resync player world.
-            for (final PlayerBlockActionData action : this.valid) {
-                if (action.getAction() == PlayerActionType.CONTINUE_BREAK) {
-                    continue;
-                }
-
-                this.resyncBlock(action.getBlockPosition());
-            }
-
-            this.valid.clear();
-        }
-
         final boolean isPerformingBlockAction = packet.getInputData().contains(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
 
         if (isPerformingBlockAction) {
@@ -80,13 +62,6 @@ public final class BreakingBlockValidator {
             } else {
                 if (data.getBreakingProcess() >= 1) {
                     player.compensatedWorld.updateBlock(data.getPosition(), 0, player.BEDROCK_AIR);
-
-                    // We have to manually save this so we can handle it later on lol.
-                    final PlayerBlockActionData action = new PlayerBlockActionData();
-                    action.setAction(PlayerActionType.STOP_BREAK);
-                    action.setBlockPosition(position);
-                    action.setFace(face);
-                    this.valid.add(action);
                 } else {
                     packet.setItemUseTransaction(null);
                     this.resyncBlock(position);
@@ -103,8 +78,6 @@ public final class BreakingBlockValidator {
     }
 
     private void handleBlockAction(final PlayerAuthInputPacket packet) {
-        this.valid.clear();
-
         for (final PlayerBlockActionData action : packet.getPlayerActions()) {
             if ((action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition()) && action.getAction()
                     != PlayerActionType.START_BREAK)
@@ -129,8 +102,6 @@ public final class BreakingBlockValidator {
                     this.cachedBlockBreak.remove(data);
                 }
                 this.cachedBlockBreak.add(new BreakingData(action.getAction(), action.getBlockPosition(), action.getFace()));
-
-                this.valid.add(action);
             }
 
             // In case of data == null, we can just ignore it, since we're going to cancel
@@ -139,17 +110,14 @@ public final class BreakingBlockValidator {
                 tickBreaking(data);
                 data.setFace(action.getFace());
                 data.setState(PlayerActionType.CONTINUE_BREAK);
-                this.valid.add(action);
             }
 
             if (action.getAction() == PlayerActionType.ABORT_BREAK & data != null) {
                 this.cachedBlockBreak.remove(data);
-                this.valid.add(action);
             }
         }
 
         packet.getPlayerActions().clear();
-        packet.getPlayerActions().addAll(this.valid);
 
         if (packet.getPlayerActions().isEmpty()) {
             packet.getInputData().remove(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
