@@ -23,7 +23,11 @@ public class PlayerInventoryPackets implements PacketListener {
         final CompensatedInventory inventory = player.compensatedInventory;
 
         if (event.getPacket() instanceof InventoryTransactionPacket packet) {
-            event.setCancelled(!player.transactionValidator.handle(packet));
+            boolean cancelled = !player.transactionValidator.handle(packet);
+            if (cancelled) {
+                System.out.println("Cancel inventory action: " + packet);
+            }
+            event.setCancelled(cancelled);
         }
 
         if (event.getPacket() instanceof ItemStackRequestPacket packet) {

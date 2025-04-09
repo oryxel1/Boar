@@ -84,9 +84,7 @@ public class PlayerDataPackets implements PacketListener {
                     attribute.setBaseValue(data.getDefaultValue());
                     attribute.setValue(data.getValue());
 
-                    // Geyser don't translate attribute modifier but calculate the value and send the value to us
-                    // This is useless since there is no modifiers but still be here
-                    // if Geyser decide to change this in the future.
+                    // This is useless since there is no modifiers but still be here if Geyser decide to change this in the future.
                     for (AttributeModifierData lv5 : data.getModifiers()) {
                         attribute.addTemporaryModifier(lv5);
                     }

@@ -52,7 +52,8 @@ public class PlayerTeleportPackets implements PacketListener {
 
             player.wasRewind = true;
 
-            final long tickDistance = packet.getTick() - cache.getTick() - 1;
+            long predictedTick = player.tick + 1;
+            final long tickDistance = predictedTick - cache.getTick() - 1;
 
             player.onGround = cache.isOnGround();
 
@@ -123,6 +124,8 @@ public class PlayerTeleportPackets implements PacketListener {
             player.tick = packet.getTick() - 1;
             player.getFlagTracker().clear();
             player.wasFlying = player.flying = false;
+
+            player.teleportUtil.getRewindTeleportCaches().clear();
         }
 
         // This is not precise as java, since it being sent this tick instead of right away (also because of floating point I think?), we can't check for 0

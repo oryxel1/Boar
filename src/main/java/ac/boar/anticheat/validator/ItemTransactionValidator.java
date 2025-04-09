@@ -129,7 +129,7 @@ public final class ItemTransactionValidator {
                 }
 
                 double distance = player.position.toVector3f().distanceSquared(position.getX(), position.getY(), position.getZ());
-                if (!MathUtil.isValid(position) || distance > 12 && position.getX() + position.getY() + position.getZ() != 0) {
+                if (!MathUtil.isValid(position) || distance > 12 * 12 && position.getX() + position.getY() + position.getZ() != 0) {
                     return false;
                 }
 
