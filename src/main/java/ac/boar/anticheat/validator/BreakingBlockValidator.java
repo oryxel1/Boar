@@ -104,8 +104,7 @@ public final class BreakingBlockValidator {
                 this.cachedBlockBreak.add(new BreakingData(action.getAction(), action.getBlockPosition(), action.getFace()));
             }
 
-            // In case of data == null, we can just ignore it, since we're going to cancel
-            // digging when player send stop digging anyway.
+            // In case of data == null, we can just ignore it, since we're going to cancel digging when player send stop digging anyway.
             if (action.getAction() == PlayerActionType.CONTINUE_BREAK && data != null) {
                 tickBreaking(data);
                 data.setFace(action.getFace());

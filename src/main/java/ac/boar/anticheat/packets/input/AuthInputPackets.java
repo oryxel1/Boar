@@ -7,10 +7,9 @@ import ac.boar.anticheat.data.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.prediction.UncertainRunner;
+import ac.boar.anticheat.util.InputUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-
-import ac.boar.anticheat.util.MathUtil;
 
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
@@ -162,10 +161,7 @@ public class AuthInputPackets implements PacketListener {
     public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         player.setInputData(packet.getInputData());
 
-        // No other choice than to trust player input, I can't predict this, but I kinda add some protection for abuses in InputA check.
-        // This is due to player joystick thingy btw, TODO: figure this out.
-        player.input = new Vec3(MathUtil.clamp(packet.getMotion().getX(), -1, 1), 0, MathUtil.clamp(packet.getMotion().getY(), -1, 1));
-        player.lastTickWasJoystick = packet.getAnalogMoveVector().lengthSquared() > 0;
+        InputUtil.processInput(player, packet);
 
         processInputData(player);
 

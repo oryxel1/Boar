@@ -32,6 +32,14 @@ public class PlayerTicker extends LivingTicker {
     }
 
     @Override
+    public void applyInput() {
+        if (player.getFlagTracker().has(EntityFlag.SNEAKING) && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
+            player.input = player.input.multiply(0.3F);
+        }
+        super.applyInput();
+    }
+
+    @Override
     public void aiStep() {
         if (player.touchingWater && player.getInputData().contains(PlayerAuthInputData.SNEAKING) /*&& this.isAffectedByFluids()*/) {
             player.velocity.y -= 0.04F;

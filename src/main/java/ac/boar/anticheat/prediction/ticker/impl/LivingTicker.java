@@ -30,7 +30,7 @@ public class LivingTicker extends EntityTicker {
         player.velocity.y = Math.abs(player.velocity.y) < 1.0E-8 ? 0 : player.velocity.y;
         player.velocity.z = Math.abs(player.velocity.z) < 1.0E-8 ? 0 : player.velocity.z;
 
-        player.input = player.input.multiply(0.98F);
+        this.applyInput();
 
         boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
                 player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
@@ -72,6 +72,10 @@ public class LivingTicker extends EntityTicker {
 //        }
 
         this.travel();
+    }
+
+    public void applyInput() {
+        player.input = player.input.multiply(0.98F);
     }
 
     protected void travel() {
