@@ -18,7 +18,7 @@ public class WaterPredictionEngine extends PredictionEngine {
 
     @Override
     public void finalizeMovement() {
-        float f = player.getFlagTracker().has(EntityFlag.SWIMMING) ? 0.9F : 0.8F;
+        float f = player.getFlagTracker().has(EntityFlag.SPRINTING) ? 0.9F : 0.8F;
         player.velocity = player.velocity.multiply(f, 0.8F, f);
         player.velocity = this.applyFluidMovingSpeed(player.getEffectiveGravity(), player.velocity);
     }

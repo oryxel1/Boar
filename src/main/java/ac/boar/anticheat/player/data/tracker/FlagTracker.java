@@ -13,8 +13,20 @@ public final class FlagTracker {
     }
 
     public void set(final Set<EntityFlag> flags) {
+        this.set(flags, true);
+    }
+
+    public void set(final Set<EntityFlag> flags, boolean server) {
+        boolean sneaking = this.has(EntityFlag.SNEAKING), swimming = this.has(EntityFlag.SWIMMING);
+
         this.clear();
         this.flags.addAll(flags);
+
+        // The client decide this, not the server.
+        if (server) {
+            this.set(EntityFlag.SNEAKING, sneaking);
+            this.set(EntityFlag.SWIMMING, swimming);
+        }
     }
 
     public void set(final EntityFlag flag, boolean value) {

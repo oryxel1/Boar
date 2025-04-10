@@ -7,6 +7,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.util.InputUtil;
 
+import org.bukkit.Bukkit;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
@@ -121,8 +122,8 @@ public class LegacyAuthInputPackets {
 //            player.sinceSprinting = 1;
 //        }
 
-//        final StringBuilder builder = new StringBuilder();
-//        player.getInputData().forEach(input -> builder.append(input).append(","));
-//        Bukkit.broadcastMessage(builder.toString());
+        final StringBuilder builder = new StringBuilder();
+        player.getInputData().forEach(input -> builder.append(input).append(","));
+        Bukkit.broadcastMessage(builder.toString());
     }
 }

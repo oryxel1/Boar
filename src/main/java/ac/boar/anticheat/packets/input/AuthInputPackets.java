@@ -26,8 +26,10 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
+        boolean noRewindHandle = false;
         if (player.tick == Long.MIN_VALUE) {
             player.tick = Math.max(0, packet.getTick()) - 1;
+            noRewindHandle = true;
         }
         player.tick++;
         if (packet.getTick() != player.tick || packet.getTick() < 0) {
@@ -44,7 +46,7 @@ public class AuthInputPackets implements PacketListener {
         player.prevVelocity = player.velocity.clone();
 
         // Priority teleport.
-        boolean wasTeleport = this.processQueuedTeleports(player, packet);
+        boolean wasTeleport = this.processQueuedTeleports(player, packet, !noRewindHandle);
 
         if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
@@ -94,7 +96,7 @@ public class AuthInputPackets implements PacketListener {
         LegacyAuthInputPackets.doPostPrediction(player, packet);
     }
 
-    private boolean processQueuedTeleports(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+    private boolean processQueuedTeleports(final BoarPlayer player, final PlayerAuthInputPacket packet, boolean handleRewind) {
         final Queue<TeleportCache> queuedTeleports = player.getTeleportUtil().getQueuedTeleports();
         if (queuedTeleports.isEmpty()) {
             return false;
@@ -115,7 +117,9 @@ public class AuthInputPackets implements PacketListener {
             if (cache instanceof TeleportCache.Normal normal) {
                 this.processTeleport(player, normal, packet);
             } else if (cache instanceof TeleportCache.Rewind rewind) {
-                this.processRewind(player, rewind, packet);
+                if (handleRewind) {
+                    this.processRewind(player, rewind, packet);
+                }
             } else {
                 throw new RuntimeException("Failed to process queued teleports, invalid teleport=" + cache);
             }
@@ -170,7 +174,7 @@ public class AuthInputPackets implements PacketListener {
                 LegacyAuthInputPackets.processAuthInput(player, data.packet());
 
                 // Reverted back to the old flags.
-                player.getFlagTracker().set(data.flags());
+                player.getFlagTracker().set(data.flags(), false);
             } else {
                 throw new RuntimeException("Failed find auth input history for rewind.");
             }

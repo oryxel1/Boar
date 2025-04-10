@@ -246,10 +246,6 @@ if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
 }
 ```
 
-## Sprinting in water
-- On Java Edition, sprinting makes player move faster in water but this will required player to be swimming which means fully submerged.
-- On Bedrock Edition, player can send sprinting while being in water without swimming but won't affect their movement until they're actually sprinting.
-
 ## Input
 - On Bedrock Edition, the client can entirely control how much they move (in range of -1 to 1) and is not limited like Java Edition, however this is only the case with analog move vector (joystick thingy).
 - The input will also be normalized **only if** by normalizing the input the player won't gain any advantage before/after the input.

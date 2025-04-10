@@ -32,7 +32,9 @@ public class ChunkWorldPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.tick = Long.MIN_VALUE);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+                player.tick = Long.MIN_VALUE;
+            });
         }
 
         if (event.getPacket() instanceof ChangeDimensionPacket packet) {
@@ -50,7 +52,6 @@ public class ChunkWorldPackets implements PacketListener {
 
                 player.getFlagTracker().clear();
                 player.wasFlying = player.flying = false;
-
                 player.getTeleportUtil().getQueuedTeleports().clear();
             });
         }
