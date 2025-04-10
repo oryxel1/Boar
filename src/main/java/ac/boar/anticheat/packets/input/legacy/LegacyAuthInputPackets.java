@@ -122,8 +122,8 @@ public class LegacyAuthInputPackets {
 //            player.sinceSprinting = 1;
 //        }
 
-        final StringBuilder builder = new StringBuilder();
-        player.getInputData().forEach(input -> builder.append(input).append(","));
-        Bukkit.broadcastMessage(builder.toString());
+//        final StringBuilder builder = new StringBuilder();
+//        player.getInputData().forEach(input -> builder.append(input).append(","));
+//        Bukkit.broadcastMessage(builder.toString());
     }
 }
