@@ -1,7 +1,8 @@
 package ac.boar.anticheat.teleport;
 
 import ac.boar.anticheat.GlobalSetting;
-import ac.boar.anticheat.data.PredictionData;
+import ac.boar.anticheat.data.input.PredictionData;
+import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.teleport.data.rewind.RewindData;
@@ -63,7 +64,7 @@ public class TeleportUtil {
     }
 
     // Rewind teleport part.
-    private final Map<Long, PlayerAuthInputPacket> authInputHistory = new ConcurrentSkipListMap<>();
+    private final Map<Long, TickData> authInputHistory = new ConcurrentSkipListMap<>();
     private final Map<Long, RewindData> rewindHistory = new ConcurrentSkipListMap<>();
 
     public void rewind(long tick) {
@@ -102,7 +103,7 @@ public class TeleportUtil {
             iterator.remove();
         }
 
-        final Iterator<Map.Entry<Long, PlayerAuthInputPacket>> iterator1 = this.authInputHistory.entrySet().iterator();
+        final Iterator<Map.Entry<Long, TickData>> iterator1 = this.authInputHistory.entrySet().iterator();
         while (iterator1.hasNext() && this.authInputHistory.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
             iterator1.next();
             iterator1.remove();

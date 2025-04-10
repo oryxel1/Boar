@@ -2,6 +2,10 @@ package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.*;
+import ac.boar.anticheat.data.input.PredictionData;
+import ac.boar.anticheat.data.input.VelocityData;
+import ac.boar.anticheat.data.vanilla.AttributeInstance;
+import ac.boar.anticheat.data.vanilla.StatusEffect;
 import ac.boar.anticheat.player.data.tracker.FlagTracker;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;

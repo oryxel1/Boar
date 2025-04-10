@@ -1,6 +1,6 @@
 package ac.boar.anticheat.prediction.engine.impl;
 
-import ac.boar.anticheat.data.StatusEffect;
+import ac.boar.anticheat.data.vanilla.StatusEffect;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.block.specific.PowderSnowBlock;

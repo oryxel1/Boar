@@ -2,7 +2,7 @@ package ac.boar.anticheat.compensated.cache.container.impl;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.data.ItemCache;
+import ac.boar.anticheat.data.inventory.ItemCache;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;

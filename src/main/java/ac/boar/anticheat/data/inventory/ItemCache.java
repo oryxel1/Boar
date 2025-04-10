@@ -1,4 +1,4 @@
-package ac.boar.anticheat.data;
+package ac.boar.anticheat.data.inventory;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import lombok.Getter;

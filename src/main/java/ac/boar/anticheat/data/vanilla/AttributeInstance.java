@@ -1,4 +1,4 @@
-package ac.boar.anticheat.data;
+package ac.boar.anticheat.data.vanilla;
 
 import lombok.Getter;
 import lombok.Setter;

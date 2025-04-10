@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.player;
 
-import ac.boar.anticheat.data.StatusEffect;
+import ac.boar.anticheat.data.vanilla.StatusEffect;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.EntityUtil;
 import ac.boar.protocol.event.CloudburstPacketEvent;

@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.player;
 
-import ac.boar.anticheat.data.AttributeInstance;
+import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;

@@ -27,4 +27,11 @@ public final class FlagTracker {
     public boolean has(final EntityFlag flag) {
         return flags.contains(flag);
     }
+
+    public EnumSet<EntityFlag> cloneFlags() {
+        final EnumSet<EntityFlag> flags = EnumSet.noneOf(EntityFlag.class);
+        flags.addAll(this.flags);
+
+        return flags;
+    }
 }

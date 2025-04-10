@@ -1,4 +1,4 @@
-package ac.boar.anticheat.data;
+package ac.boar.anticheat.data.inventory;
 
 import ac.boar.anticheat.validator.ItemTransactionValidator;
 import lombok.Getter;

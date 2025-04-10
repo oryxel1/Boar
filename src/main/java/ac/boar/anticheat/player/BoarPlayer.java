@@ -2,7 +2,7 @@ package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.BoarBlockState;
-import ac.boar.anticheat.data.AttributeInstance;
+import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;

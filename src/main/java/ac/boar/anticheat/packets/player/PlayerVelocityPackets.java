@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.player;
 
-import ac.boar.anticheat.data.VelocityData;
+import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;

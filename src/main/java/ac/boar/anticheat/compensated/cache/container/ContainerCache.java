@@ -1,7 +1,7 @@
 package ac.boar.anticheat.compensated.cache.container;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.data.ItemCache;
+import ac.boar.anticheat.data.inventory.ItemCache;
 import lombok.Getter;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.math.vector.Vector3i;

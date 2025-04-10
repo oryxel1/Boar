@@ -102,12 +102,8 @@ public class LegacyAuthInputPackets {
                 case STOP_GLIDING -> player.getFlagTracker().set(EntityFlag.GLIDING, false);
 
                 // Don't let player do backwards sprinting!
-                case START_SPRINTING -> {
-                    player.setSprinting(player.input.getZ() > 0);
-                }
-                case STOP_SPRINTING -> {
-                    player.setSprinting(false);
-                }
+                case START_SPRINTING -> player.setSprinting(player.input.getZ() > 0);
+                case STOP_SPRINTING -> player.setSprinting(false);
                 case START_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, true);
                 case STOP_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, false);
 

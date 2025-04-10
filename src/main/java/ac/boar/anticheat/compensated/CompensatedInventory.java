@@ -2,7 +2,7 @@ package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.container.impl.PlayerContainerCache;
-import ac.boar.anticheat.data.ItemCache;
+import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;

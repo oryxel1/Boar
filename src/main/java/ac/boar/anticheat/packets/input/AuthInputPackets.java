@@ -1,6 +1,7 @@
 package ac.boar.anticheat.packets.input;
 
-import ac.boar.anticheat.data.VelocityData;
+import ac.boar.anticheat.data.input.TickData;
+import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
@@ -50,8 +51,15 @@ public class AuthInputPackets implements PacketListener {
             if (offset > 1.0E-7) {
                 player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             }
+            System.out.println("Loading!");
             return;
         }
+
+        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
+        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
+
+        LegacyAuthInputPackets.processAuthInput(player, packet);
 
         if (player.isAbilityExempted()) {
             // TODO: Flying prediction?
@@ -77,13 +85,6 @@ public class AuthInputPackets implements PacketListener {
         if (player.getTeleportUtil().isTeleporting()) {
             return;
         }
-
-        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
-        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
-
-        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
-
-        LegacyAuthInputPackets.processAuthInput(player, packet);
 
         // Yes, I'm doing this twice to check for elytra-desync rewind, also don't do this if teleport already handle it.
         if (!player.getTeleportUtil().isTeleporting() && !wasTeleport) {
@@ -165,7 +166,11 @@ public class AuthInputPackets implements PacketListener {
                 player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
                 player.unvalidatedTickEnd = new Vec3(packet.getDelta());
             } else if (player.getTeleportUtil().getAuthInputHistory().containsKey(currentTick)) {
-                LegacyAuthInputPackets.processAuthInput(player, player.getTeleportUtil().getAuthInputHistory().get(currentTick));
+                final TickData data = player.getTeleportUtil().getAuthInputHistory().get(currentTick);
+                LegacyAuthInputPackets.processAuthInput(player, data.packet());
+
+                // Reverted back to the old flags.
+                player.getFlagTracker().set(data.flags());
             } else {
                 throw new RuntimeException("Failed find auth input history for rewind.");
             }

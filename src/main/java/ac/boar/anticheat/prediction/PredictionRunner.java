@@ -1,8 +1,8 @@
 package ac.boar.anticheat.prediction;
 
 import ac.boar.anticheat.collision.Collider;
-import ac.boar.anticheat.data.PredictionData;
-import ac.boar.anticheat.data.VelocityData;
+import ac.boar.anticheat.data.input.PredictionData;
+import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.data.Vector;
