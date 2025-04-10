@@ -29,8 +29,8 @@ import java.util.List;
 public class BoarBlockState {
     private final BlockState state;
 
-    public boolean isAir(BoarPlayer player) {
-        return state.is(Blocks.AIR);
+    public boolean isAir() {
+        return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR);
     }
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {
@@ -48,11 +48,11 @@ public class BoarBlockState {
     }
 
     public void onEntityCollision(final BoarPlayer player, Mutable pos) {
-        if (state.is(Blocks.BUBBLE_COLUMN)) {
-            boolean drag = state.getValue(Properties.DRAG);
+        if (this.state.is(Blocks.BUBBLE_COLUMN)) {
+            boolean drag = this.state.getValue(Properties.DRAG);
 
             final Vec3 lv = player.velocity;
-            if (player.compensatedWorld.getBlockState(pos.getX(), pos.getY() + 1, pos.getZ(), 0).isAir(player)) {
+            if (player.compensatedWorld.getBlockState(pos.getX(), pos.getY() + 1, pos.getZ(), 0).isAir()) {
                 if (drag) {
                     lv.y = Math.max(-0.9F, lv.y - 0.03F);
                 } else {
