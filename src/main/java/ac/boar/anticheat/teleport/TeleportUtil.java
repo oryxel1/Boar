@@ -13,7 +13,6 @@ import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.PredictionType;
 import org.cloudburstmc.protocol.bedrock.packet.CorrectPlayerMovePredictionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
-import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -49,17 +48,16 @@ public class TeleportUtil {
         packet.setPosition(teleport.getPosition().toVector3f());
         packet.setRotation(player.unprocessedRotation);
         packet.setOnGround(player.onGround);
-        packet.setMode(teleport.isKeepVelocity() ? MovePlayerPacket.Mode.NORMAL : MovePlayerPacket.Mode.TELEPORT);
+        packet.setMode(MovePlayerPacket.Mode.TELEPORT);
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
 
-        this.player.cloudburstDownstream.sendPacketImmediately(packet);
         this.queueTeleport(teleport.getPosition(), true, packet.getMode());
+        this.player.cloudburstDownstream.sendPacketImmediately(packet);
     }
 
     public void queueTeleport(final Vec3 position, boolean immediate, MovePlayerPacket.Mode mode) {
         player.sendLatencyStack(immediate);
         this.queuedTeleports.add(new TeleportCache.Normal(player.sentStackId.get(), position, mode == MovePlayerPacket.Mode.NORMAL));
-
         this.lastKnowValid = position.toVector3f();
     }
 
