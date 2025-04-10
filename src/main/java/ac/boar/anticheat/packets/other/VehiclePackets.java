@@ -33,8 +33,7 @@ public class VehiclePackets implements PacketListener {
             }
 
             // Yep.
-            player.teleportUtil.getTeleportQueue().clear();
-            player.teleportUtil.getRewindTeleportCaches().clear();
+            player.getTeleportUtil().getQueuedTeleports().clear();
 
             player.sendLatencyStack(immediate);
             if (link.getType() == EntityLinkData.Type.REMOVE) {

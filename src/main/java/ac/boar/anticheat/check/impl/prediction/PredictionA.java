@@ -4,6 +4,7 @@ import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.check.impl.velocity.Velocity;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 
 @CheckInfo(name = "Prediction", type = "A")
 public class PredictionA extends OffsetHandlerCheck {
@@ -17,19 +18,20 @@ public class PredictionA extends OffsetHandlerCheck {
             return;
         }
 
-        if (((Velocity)player.checkHolder.get(Velocity.class)).check(offset)) {
-            return;
-        }
-
         if (offset > player.getMaxOffset()) {
             if (player.sinceTeleport > 20) {
-                this.fail("o=" + offset);
+                if (player.bestPossibility.getType() == VectorType.VELOCITY) {
+                    player.getCheckHolder().get(Velocity.class).fail("o=" + offset);
+                } else {
+                    this.fail("o=" + offset);
+                }
             }
 
-            if (player.teleportUtil.teleportInQueue()) {
+            if (player.getTeleportUtil().isTeleporting()) {
                 return;
             }
-            player.teleportUtil.rewind(player.tick);
+            System.out.println("Rewinding!");
+            player.getTeleportUtil().rewind(player.tick);
         }
     }
 }

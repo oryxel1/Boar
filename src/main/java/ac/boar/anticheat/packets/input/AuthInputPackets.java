@@ -1,32 +1,26 @@
 package ac.boar.anticheat.packets.input;
 
-import ac.boar.anticheat.check.api.Check;
-import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.VelocityData;
+import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
-import ac.boar.anticheat.prediction.UncertainRunner;
-import ac.boar.anticheat.util.InputUtil;
+import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
-
 import ac.boar.protocol.listener.PacketListener;
-import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
-import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
-import org.geysermc.geyser.item.Items;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Queue;
 
 public class AuthInputPackets implements PacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
-
         if (!(event.getPacket() instanceof PlayerAuthInputPacket packet)) {
             return;
         }
@@ -40,50 +34,28 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
+        player.sinceTeleport++;
+        player.sinceLoadingScreen++;
+
         player.breakingValidator.handle(packet);
+        player.tick();
 
-        player.prevUnvalidatedPosition = player.unvalidatedPosition;
-        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
-
-        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
         player.prevVelocity = player.velocity.clone();
 
-        player.tick();
-        if (player.teleportUtil.teleportInQueue()) {
-            return;
-        }
+        // Priority teleport.
+        boolean wasTeleport = this.processQueuedTeleports(player, packet);
 
-        processAuthInput(player, packet);
-        if (player.teleportUtil.teleportInQueue()) {
-            return;
-        }
-
-        if (player.wasTeleport) {
-            player.setPos(player.unvalidatedPosition);
-
-            player.sinceTeleport = 0;
-            player.velocity = Vec3.ZERO;
-            return;
-        }
-
-        player.sinceTeleport++;
-
-        player.sinceLoadingScreen++;
         if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
-                player.teleportUtil.setbackTo(player.teleportUtil.lastKnowValid);
+                player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             }
             return;
         }
 
-//        Bukkit.broadcastMessage("Block above: " + player.compensatedWorld.getBlockState(
-//                GenericMath.floor(player.prevUnvalidatedPosition.x), GenericMath.floor(player.prevUnvalidatedPosition.y) + 2,
-//                GenericMath.floor(player.prevUnvalidatedPosition.z), 0
-//        ).getState().block().toString());
-
-        if (player.abilities.contains(Ability.MAY_FLY) || player.flying || player.wasFlying) {
+        if (player.isAbilityExempted()) {
             // TODO: Flying prediction?
+            LegacyAuthInputPackets.processAuthInput(player, packet);
             player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
 
@@ -100,125 +72,129 @@ public class AuthInputPackets implements PacketListener {
             }
 
             return;
-        } else {
-            new PredictionRunner(player).run();
         }
 
-        final UncertainRunner uncertainRunner = new UncertainRunner(player);
-
-        // Instead of comparing velocity calculate by (pos - prevPos) that player sends to our predicted velocity
-        // We compare predicted position to player claimed position, this is because player velocity will never be accurate.
-        // For example player want to move by 0.1 block in the Z coord, but due to floating point error, when player add this
-        // velocity to their position to move, floating point errors fuck this up and make player move just slightly further or less than
-        // what player suppose to be. So we also do the same thing to accounted for this!
-        // Also, this is more accurate and a way better method than compare poorly calculated velocity (velocity calculate from pos - prevPos)
-        final double offset = uncertainRunner.reduceOffset(player.position.distanceTo(player.unvalidatedPosition));
-
-        uncertainRunner.doTickEndUncertain();
-        correctInputData(player, packet);
-
-        for (Map.Entry<Class<?>, Check> entry : player.checkHolder.entrySet()) {
-            Check v = entry.getValue();
-            if (v instanceof OffsetHandlerCheck check) {
-                check.onPredictionComplete(offset);
-            }
-        }
-
-        // Have to do this due to loss precision, especially elytra!
-        if (player.velocity.distanceTo(player.unvalidatedTickEnd) < player.getMaxOffset()) {
-            player.velocity = player.unvalidatedTickEnd.clone();
-        }
-    }
-
-    private void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        if (player.wasFlying || player.flying) {
+        if (player.getTeleportUtil().isTeleporting()) {
             return;
         }
 
-        // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/entity/player/input/BedrockMovePlayer.java#L90
-        // Geyser check for our vertical collision for calculation for ground, do this to prevent possible no-fall bypass.
-        packet.getInputData().remove(PlayerAuthInputData.HORIZONTAL_COLLISION);
-        packet.getInputData().remove(PlayerAuthInputData.VERTICAL_COLLISION);
+        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
+        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
 
-        if (player.horizontalCollision) {
-            packet.getInputData().add(PlayerAuthInputData.HORIZONTAL_COLLISION);
+        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
+
+        LegacyAuthInputPackets.processAuthInput(player, packet);
+
+        // Yes, I'm doing this twice to check for elytra-desync rewind, also don't do this if teleport already handle it.
+        if (!player.getTeleportUtil().isTeleporting() && !wasTeleport) {
+            new PredictionRunner(player).run();
         }
 
-        if (player.verticalCollision) {
-            packet.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
+        LegacyAuthInputPackets.doPostPrediction(player, packet);
+    }
+
+    private boolean processQueuedTeleports(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        final Queue<TeleportCache> queuedTeleports = player.getTeleportUtil().getQueuedTeleports();
+        if (queuedTeleports.isEmpty()) {
+            return false;
         }
 
-        // Technically this should just be velocity, but since geyser check for this once instead of previous for the ground status
-        // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
-        // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
-        packet.setDelta(player.prevVelocity.toVector3f());
+        boolean teleport = false;
+        TeleportCache cache;
+        while ((cache = queuedTeleports.peek()) != null) {
+            if (player.receivedStackId.get() < cache.getStackId()) {
+                break;
+            }
 
-//        if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
-//            packet.getInputData().remove(!player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
-//        }
-    }
+            teleport = true;
+            queuedTeleports.poll();
 
-    public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        player.setInputData(packet.getInputData());
-
-        InputUtil.processInput(player, packet);
-
-        processInputData(player);
-
-        player.prevYaw = player.yaw;
-        player.prevPitch = player.pitch;
-        player.yaw = packet.getRotation().getY();
-        player.pitch = packet.getRotation().getX();
-
-        player.prevInteractRotation = player.interactRotation;
-        player.interactRotation = packet.getInteractRotation().clone();
-
-        player.bedrockRotation = packet.getRotation();
-        player.cameraOrientation = packet.getCameraOrientation();
-    }
-
-    public static void processInputData(final BoarPlayer player) {
-        player.wasFlying = player.flying;
-
-        for (final PlayerAuthInputData input : player.getInputData()) {
-            switch (input) {
-                case START_GLIDING -> {
-                    final ContainerCache cache = player.compensatedInventory.armorContainer;
-
-                    // Prevent player from spoofing elytra gliding.
-                    player.getFlagTracker().set(EntityFlag.GLIDING, player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId());
-                    if (!player.getFlagTracker().has(EntityFlag.GLIDING)) {
-                        player.teleportUtil.rewind(player.tick - 1);
-                    }
-                }
-                case STOP_GLIDING -> player.getFlagTracker().set(EntityFlag.GLIDING, false);
-
-                // Don't let player do backwards sprinting!
-                case START_SPRINTING -> {
-                    player.setSprinting(player.input.getZ() > 0);
-                }
-                case STOP_SPRINTING -> {
-                    player.setSprinting(false);
-                }
-                case START_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, true);
-                case STOP_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, false);
-
-                case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, true);
-                case STOP_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, false);
-
-                case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
-                case STOP_FLYING -> player.flying = false;
+            // Bedrock don't reply to teleport individually using a seperate tick packet instead it just simply set its position to
+            // the teleported position and then let us know the *next tick*, so we do the same!
+            if (cache instanceof TeleportCache.Normal normal) {
+                this.processTeleport(player, normal, packet);
+            } else if (cache instanceof TeleportCache.Rewind rewind) {
+                this.processRewind(player, rewind, packet);
+            } else {
+                throw new RuntimeException("Failed to process queued teleports, invalid teleport=" + cache);
             }
         }
 
-        // TODO: Do this and don't fuck up because of entity data.
-//        if (player.sprinting && player.input.getZ() <= 0) {
-//            player.sprinting = false;
-//            player.sinceSprinting = 1;
-//        }
+        return teleport;
+    }
 
-//        final StringBuilder builder = new StringBuilder();
-//        player.getInputData().forEach(input -> builder.append(input).append(","));
-//        Bukkit.broadcastMessage(builder.toString());
+    private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
+        double distance = packet.getPosition().distance(normal.getPosition().toVector3f());
+        // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
+        if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance <= 1.0E-3F) {
+            player.setPos(new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0)));
+            player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
+
+            if (!normal.isKeepVelocity()) {
+                player.velocity = Vec3.ZERO.clone();
+            }
+
+            player.sinceTeleport = 0;
+        } else {
+            // Player rejected teleport OR this is not the latest teleport.
+            if (!player.getTeleportUtil().isTeleporting()) {
+                player.getTeleportUtil().teleportTo(normal);
+            }
+        }
+    }
+
+    private void processRewind(final BoarPlayer player, final TeleportCache.Rewind rewind, final PlayerAuthInputPacket packet) {
+        if (player.isAbilityExempted()) { // Fully exempted from rewind teleport.
+            return;
+        }
+
+        long tickDistance = player.tick - rewind.getTick();
+
+        player.onGround = rewind.isOnGround();
+        player.velocity = rewind.getTickEnd();
+        player.setPos(rewind.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
+
+        player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f(), false);
+
+        long currentTick = rewind.getTick();
+        for (int i = 0; i < tickDistance; i++) {
+            currentTick++;
+            if (currentTick == player.tick) {
+                LegacyAuthInputPackets.processAuthInput(player, packet);
+                player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+                player.unvalidatedTickEnd = new Vec3(packet.getDelta());
+            } else if (player.getTeleportUtil().getAuthInputHistory().containsKey(currentTick)) {
+                LegacyAuthInputPackets.processAuthInput(player, player.getTeleportUtil().getAuthInputHistory().get(currentTick));
+            } else {
+                throw new RuntimeException("Failed find auth input history for rewind.");
+            }
+
+            new PredictionRunner(player).run();
+
+            player.getTeleportUtil().cachePosition(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f(), false);
+            player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
+        }
+
+        player.unvalidatedPosition = player.position.clone();
+    }
+
+    @Override
+    public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
+        if (!(event.getPacket() instanceof MovePlayerPacket packet)) {
+            return;
+        }
+
+        final BoarPlayer player = event.getPlayer();
+        if (packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
+            return;
+        }
+
+        if (player.runtimeEntityId != packet.getRuntimeEntityId()) {
+            return;
+        }
+
+        player.queuedVelocities.clear();
+        player.getTeleportUtil().queueTeleport(new Vec3(packet.getPosition()), immediate, packet.getMode());
     }
 }

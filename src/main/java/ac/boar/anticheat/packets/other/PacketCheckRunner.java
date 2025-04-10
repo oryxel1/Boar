@@ -8,7 +8,7 @@ import ac.boar.protocol.listener.PacketListener;
 public class PacketCheckRunner implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
-        for (final Check check : event.getPlayer().checkHolder.values()) {
+        for (final Check check : event.getPlayer().getCheckHolder().values()) {
             if (!(check instanceof PacketCheck packetCheck)) {
                 continue;
             }
@@ -19,7 +19,7 @@ public class PacketCheckRunner implements PacketListener {
 
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
-        for (final Check check : event.getPlayer().checkHolder.values()) {
+        for (final Check check : event.getPlayer().getCheckHolder().values()) {
             if (!(check instanceof PacketCheck packetCheck)) {
                 continue;
             }

@@ -59,16 +59,13 @@ public class PlayerData {
 
     public Vec3 position = Vec3.ZERO;
     public float prevYaw, yaw, prevPitch, pitch;
-    public Vector3f bedrockRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
+    public Vector3f unprocessedRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
 
     // Sprinting, sneaking, swimming and other status.
     @Getter
     private final FlagTracker flagTracker = new FlagTracker();
     public boolean flying, wasFlying;
     public int sinceTeleport;
-
-    // Information about this tick.
-    public boolean wasTeleport, wasRewind;
 
     // "Transaction" related.
     public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);

@@ -3,6 +3,7 @@ package ac.boar.anticheat.player;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.BoarBlockState;
 import ac.boar.anticheat.data.AttributeInstance;
+import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
@@ -12,7 +13,6 @@ import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.validator.BreakingBlockValidator;
-import ac.boar.anticheat.util.TeleportUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.validator.ItemTransactionValidator;
@@ -23,7 +23,7 @@ import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
-import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
+import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
@@ -36,8 +36,6 @@ import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-import java.util.*;
-
 public final class BoarPlayer extends PlayerData {
     @Getter
     private final GeyserSession session;
@@ -47,9 +45,11 @@ public final class BoarPlayer extends PlayerData {
     public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;
 
-    public final TeleportUtil teleportUtil = new TeleportUtil(this);
+    @Getter
+    private final TeleportUtil teleportUtil = new TeleportUtil(this);
 
-    public final CheckHolder checkHolder = new CheckHolder(this);
+    @Getter
+    private final CheckHolder checkHolder = new CheckHolder(this);
 
     // Lag compensation
     public final CompensatedWorldImpl compensatedWorld = new CompensatedWorldImpl(this);
@@ -101,6 +101,10 @@ public final class BoarPlayer extends PlayerData {
         }
 
         this.latencyUtil.addLatencyToQueue(id);
+    }
+
+    public boolean isAbilityExempted() {
+        return this.abilities.contains(Ability.MAY_FLY) || this.flying || this.wasFlying;
     }
 
     public void kick(String reason) {

@@ -9,10 +9,7 @@ import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType;
-import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
-import org.cloudburstmc.protocol.bedrock.packet.LevelChunkPacket;
-import org.cloudburstmc.protocol.bedrock.packet.ServerboundLoadingScreenPacket;
-import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
+import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.util.VarInts;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.chunk.BlockStorage;
@@ -29,6 +26,15 @@ public class ChunkWorldPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
         final CompensatedWorld world = player.compensatedWorld;
 
+        if (event.getPacket() instanceof RespawnPacket packet && packet.getState() == RespawnPacket.State.SERVER_READY) {
+            if (packet.getRuntimeEntityId() != 0) { // Vanilla behaviour according Geyser.
+                return;
+            }
+
+            player.sendLatencyStack(immediate);
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.tick = Long.MIN_VALUE);
+        }
+
         if (event.getPacket() instanceof ChangeDimensionPacket packet) {
             int dimensionId = packet.getDimension();
             final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
@@ -41,6 +47,11 @@ public class ChunkWorldPackets implements PacketListener {
 
                 player.currentLoadingScreen = packet.getLoadingScreenId();
                 player.inLoadingScreen = true;
+
+                player.getFlagTracker().clear();
+                player.wasFlying = player.flying = false;
+
+                player.getTeleportUtil().getQueuedTeleports().clear();
             });
         }
 

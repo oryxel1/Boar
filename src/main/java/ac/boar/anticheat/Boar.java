@@ -1,5 +1,6 @@
 package ac.boar.anticheat;
 
+import ac.boar.anticheat.packets.input.AuthInputPackets;
 import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
 import ac.boar.anticheat.packets.other.VehiclePackets;
@@ -8,7 +9,6 @@ import ac.boar.anticheat.packets.world.*;
 import lombok.Getter;
 
 import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
-import ac.boar.anticheat.packets.input.AuthInputPackets;
 
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
 import ac.boar.geyser.GeyserSessionJoinEvent;
@@ -31,7 +31,6 @@ public class Boar {
         PacketEvents.getApi().register(new EntityWorldPackets());
         PacketEvents.getApi().register(new PlayerDataPackets());
         PacketEvents.getApi().register(new PlayerEffectPackets());
-        PacketEvents.getApi().register(new PlayerTeleportPackets());
         PacketEvents.getApi().register(new PlayerVelocityPackets());
         PacketEvents.getApi().register(new PlayerInventoryPackets());
         PacketEvents.getApi().register(new VehiclePackets());
