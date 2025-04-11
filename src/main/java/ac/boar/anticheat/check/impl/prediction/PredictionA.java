@@ -27,10 +27,6 @@ public class PredictionA extends OffsetHandlerCheck {
                 }
             }
 
-            if (player.getTeleportUtil().isTeleporting()) {
-                return;
-            }
-            System.out.println("Rewinding!");
             player.getTeleportUtil().rewind(player.tick);
         }
     }

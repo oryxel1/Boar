@@ -26,10 +26,12 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
-        boolean noRewindHandle = false;
+        LegacyAuthInputPackets.processAuthInput(player, packet);
+
+        boolean handleRewind = true;
         if (player.tick == Long.MIN_VALUE) {
             player.tick = Math.max(0, packet.getTick()) - 1;
-            noRewindHandle = true;
+            handleRewind = false;
         }
         player.tick++;
         if (packet.getTick() != player.tick || packet.getTick() < 0) {
@@ -45,15 +47,11 @@ public class AuthInputPackets implements PacketListener {
 
         player.prevVelocity = player.velocity.clone();
 
-        // Priority teleport.
-        boolean wasTeleport = this.processQueuedTeleports(player, packet, !noRewindHandle);
-
         if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
                 player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             }
-            System.out.println("Loading!");
             return;
         }
 
@@ -61,7 +59,14 @@ public class AuthInputPackets implements PacketListener {
         player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
         player.unvalidatedTickEnd = new Vec3(packet.getDelta());
 
-        LegacyAuthInputPackets.processAuthInput(player, packet);
+        // From debugging, prediction should be run first but I'm still unsure about some stuff.
+        // TODO: Is this the case for RESPAWN teleport?
+        new PredictionRunner(player).run();
+
+        // After that we can handle teleport.
+        this.processQueuedTeleports(player, packet, handleRewind);
+
+        // System.out.println("Input: " + packet.getMotion());
 
         if (player.isAbilityExempted()) {
             // TODO: Flying prediction?
@@ -84,32 +89,21 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
-        if (player.getTeleportUtil().isTeleporting()) {
-            return;
-        }
-
-        // Yes, I'm doing this twice to check for elytra-desync rewind, also don't do this if teleport already handle it.
-        if (!player.getTeleportUtil().isTeleporting() && !wasTeleport) {
-            new PredictionRunner(player).run();
-        }
-
         LegacyAuthInputPackets.doPostPrediction(player, packet);
     }
 
-    private boolean processQueuedTeleports(final BoarPlayer player, final PlayerAuthInputPacket packet, boolean handleRewind) {
+    private void processQueuedTeleports(final BoarPlayer player, final PlayerAuthInputPacket packet, boolean doRewind) {
         final Queue<TeleportCache> queuedTeleports = player.getTeleportUtil().getQueuedTeleports();
         if (queuedTeleports.isEmpty()) {
-            return false;
+            return;
         }
 
-        boolean teleport = false;
         TeleportCache cache;
         while ((cache = queuedTeleports.peek()) != null) {
             if (player.receivedStackId.get() < cache.getStackId()) {
                 break;
             }
 
-            teleport = true;
             queuedTeleports.poll();
 
             // Bedrock don't reply to teleport individually using a seperate tick packet instead it just simply set its position to
@@ -117,15 +111,13 @@ public class AuthInputPackets implements PacketListener {
             if (cache instanceof TeleportCache.Normal normal) {
                 this.processTeleport(player, normal, packet);
             } else if (cache instanceof TeleportCache.Rewind rewind) {
-                if (handleRewind) {
+                if (doRewind) {
                     this.processRewind(player, rewind, packet);
                 }
             } else {
                 throw new RuntimeException("Failed to process queued teleports, invalid teleport=" + cache);
             }
         }
-
-        return teleport;
     }
 
     private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
@@ -203,7 +195,6 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
-        player.queuedVelocities.clear();
         player.getTeleportUtil().queueTeleport(new Vec3(packet.getPosition()), immediate, packet.getMode());
     }
 }

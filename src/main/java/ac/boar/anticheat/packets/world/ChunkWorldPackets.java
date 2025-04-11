@@ -2,6 +2,7 @@ package ac.boar.anticheat.packets.world;
 
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.plugin.BoarSpigot;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
@@ -11,6 +12,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.util.VarInts;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.chunk.BlockStorage;
 import org.geysermc.geyser.level.chunk.GeyserChunkSection;
@@ -34,6 +36,9 @@ public class ChunkWorldPackets implements PacketListener {
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 player.tick = Long.MIN_VALUE;
+
+                player.prevUnvalidatedPosition = player.unvalidatedPosition = new Vec3(packet.getPosition()).subtract(0, EntityDefinitions.PLAYER.offset(), 0);
+                player.setPos(player.unvalidatedPosition.clone());
             });
         }
 
