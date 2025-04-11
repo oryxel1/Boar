@@ -7,7 +7,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.util.InputUtil;
 
-import org.bukkit.Bukkit;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
@@ -20,7 +19,7 @@ public class LegacyAuthInputPackets {
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
-        // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point erros.
+        // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.
         final double offset = uncertainRunner.reduceOffset(player.position.distanceTo(player.unvalidatedPosition));
 
         uncertainRunner.doTickEndUncertain();
@@ -40,7 +39,7 @@ public class LegacyAuthInputPackets {
     }
 
     public static void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        if (player.wasFlying || player.flying) {
+        if (player.isAbilityExempted()) {
             return;
         }
 
@@ -57,14 +56,8 @@ public class LegacyAuthInputPackets {
             packet.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
         }
 
-        // Technically this should just be velocity, but since geyser check for this once instead of previous for the ground status
-        // We will have to "correct" this one to previous eot velocity so that ground status is properly calculated!
-        // Prevent cheater simply send (0, 0, 0) value to never be on ground ("NoGround" no-fall), and never receive fall damage.
+        // Prevent player from spoofing this, this should be velocity but have to use prevVelocity since GeyserMC ain't handling this properly.
         packet.setDelta(player.prevVelocity.toVector3f());
-
-//        if (packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) && packet.getInputData().contains(PlayerAuthInputData.STOP_SPRINTING)) {
-//            packet.getInputData().remove(!player.sprinting ? packet.getInputData().contains(PlayerAuthInputData.START_SPRINTING) : PlayerAuthInputData.STOP_SPRINTING);
-//        }
     }
 
     public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {

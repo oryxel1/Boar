@@ -78,6 +78,8 @@ public final class BreakingBlockValidator {
     }
 
     private void handleBlockAction(final PlayerAuthInputPacket packet) {
+        final List<PlayerBlockActionData> valid = new ArrayList<>();
+
         for (final PlayerBlockActionData action : packet.getPlayerActions()) {
             if ((action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition()) && action.getAction()
                     != PlayerActionType.START_BREAK)
@@ -102,6 +104,7 @@ public final class BreakingBlockValidator {
                     this.cachedBlockBreak.remove(data);
                 }
                 this.cachedBlockBreak.add(new BreakingData(action.getAction(), action.getBlockPosition(), action.getFace()));
+                valid.add(action);
             }
 
             // In case of data == null, we can just ignore it, since we're going to cancel digging when player send stop digging anyway.
@@ -109,14 +112,17 @@ public final class BreakingBlockValidator {
                 tickBreaking(data);
                 data.setFace(action.getFace());
                 data.setState(PlayerActionType.CONTINUE_BREAK);
+                valid.add(action);
             }
 
             if (action.getAction() == PlayerActionType.ABORT_BREAK & data != null) {
                 this.cachedBlockBreak.remove(data);
+                valid.add(action);
             }
         }
 
         packet.getPlayerActions().clear();
+        packet.getPlayerActions().addAll(valid);
 
         if (packet.getPlayerActions().isEmpty()) {
             packet.getInputData().remove(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);

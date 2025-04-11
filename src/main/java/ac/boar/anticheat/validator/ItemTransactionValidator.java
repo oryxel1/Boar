@@ -133,6 +133,8 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
+                // The rest is going to validate by Geyser.
+
                 final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
                 switch (packet.getActionType()) {
                     case 0 -> {
@@ -140,12 +142,15 @@ public final class ItemTransactionValidator {
                             int newId = state.withValue(Properties.OPEN, !state.getValue(Properties.OPEN)).javaId();
                             // player.compensatedWorld.updateBlock(position, 0, newId);
                         }
+
+
                     }
 
                     case 1 -> {
-                    }
-
-                    default -> {
+                        // Geyser going to handle this, not me.
+                        if (packet.getItemInHand() == null || !validate(SD1, packet.getItemInHand())) {
+                            return true;
+                        }
                     }
                 }
             }
