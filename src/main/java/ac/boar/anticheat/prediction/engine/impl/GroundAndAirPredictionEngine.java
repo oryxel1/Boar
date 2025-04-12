@@ -54,8 +54,7 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
 
     private Vec3 halfRelativeMovementCalculate(Vec3 vec3, float f) {
         vec3 = this.moveRelative(vec3, player.getFrictionInfluencedSpeed(f));
-        final boolean collidedOrJumping = player.horizontalCollision ||
-                player.getInputData().contains(PlayerAuthInputData.START_JUMPING) || player.getInputData().contains(PlayerAuthInputData.JUMPING);
+        final boolean collidedOrJumping = player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING);
         if (collidedOrJumping && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
             vec3.y = 0.2F;
         }
