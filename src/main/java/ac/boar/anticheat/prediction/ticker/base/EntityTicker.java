@@ -1,7 +1,7 @@
 package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.collision.Collider;
-import ac.boar.anticheat.data.BoarBlockState;
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
@@ -128,7 +128,7 @@ public class EntityTicker {
         final Mutable mutable = new Mutable();
         for (iterator.reset(); iterator.hasNext(); iterator.next()) {
             mutable.set(iterator.getX(), iterator.getY(), iterator.getZ());
-            player.compensatedWorld.getBlockState(iterator.getX(), iterator.getY(), iterator.getZ(), 0).onEntityCollision(player, mutable);
+            player.compensatedWorld.getBlockState(iterator.getX(), iterator.getY(), iterator.getZ(), 0).entityInside(player, mutable);
         }
     }
 

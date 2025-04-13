@@ -19,8 +19,10 @@ public class LegacyAuthInputPackets {
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
+        float extraOffset = uncertainRunner.extraOffset();
+
         // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.
-        final double offset = uncertainRunner.reduceOffset(player.position.distanceTo(player.unvalidatedPosition));
+        double offset = player.position.distanceTo(player.unvalidatedPosition) - extraOffset;
 
         uncertainRunner.doTickEndUncertain();
         correctInputData(player, packet);
@@ -33,7 +35,7 @@ public class LegacyAuthInputPackets {
         }
 
         // Have to do this due to loss precision, especially elytra!
-        if (player.velocity.distanceTo(player.unvalidatedTickEnd) < player.getMaxOffset()) {
+        if (player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getMaxOffset()) {
             player.velocity = player.unvalidatedTickEnd.clone();
         }
     }

@@ -216,7 +216,8 @@ public void finalizeMovement() {
 }
 ```
 
-## Stuck Speed Multiplier (Cobwebs, Sweet Berry, ....)
+## Movement "inside" block.
+### Stuck Speed Multiplier (Cobwebs, Sweet Berry, ....)
 - On Java Edition, the client loop through a list of blocks that near the player, and then update the stuck multiplier, which means if the order for example is in.
 ```
 Sweet Berry
@@ -245,6 +246,9 @@ if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
     player.stuckSpeedMultiplier = movementMultiplier;
 }
 ```
+
+### Honey block
+- Simply take look at [HoneyBlockState](https://github.com/Oryxel/Boar/blob/new-engine/src/main/java/ac/boar/anticheat/data/block/impl/HoneyBlockState.java).
 
 ## Input
 - On Bedrock Edition, the client can entirely control how much they move (in range of -1 to 1) and is not limited like Java Edition, however this is only the case with analog move vector (joystick thingy).

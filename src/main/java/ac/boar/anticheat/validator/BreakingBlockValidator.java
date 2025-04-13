@@ -52,7 +52,7 @@ public final class BreakingBlockValidator {
                 return;
             }
 
-            final BlockState state = player.compensatedWorld.getBlockState(position, 0).state();
+            final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
             final BreakingData data = findCacheUsingPosition(position);
             if (data == null || !BlockUtil.determineCanBreak(player, state)) {
                 packet.setItemUseTransaction(null);

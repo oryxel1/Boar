@@ -24,7 +24,7 @@ public class UncertainRunner {
         }
     }
 
-    public float reduceOffset(float offset) {
-        return offset;
+    public float extraOffset() {
+        return 0;
     }
 }

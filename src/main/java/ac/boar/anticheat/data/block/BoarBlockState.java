@@ -1,10 +1,12 @@
-package ac.boar.anticheat.data;
+package ac.boar.anticheat.data.block;
 
 import ac.boar.anticheat.collision.BedrockCollision;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.BlockStateValues;
@@ -22,26 +24,21 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import java.util.ArrayList;
 import java.util.List;
 
-public record BoarBlockState(BlockState state) {
+@RequiredArgsConstructor
+@Getter
+public class BoarBlockState {
+    private final BlockState state;
+
     public boolean isAir() {
         return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR);
     }
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {
-        // Honey block act the same on Bedrock except it doesn't bound lol, according to BDS.
-        if (state.is(Blocks.HONEY_BLOCK)) {
-            // Yes lol.
-            float d = Math.abs(player.velocity.y);
-            if (d < 0.1 && !player.getFlagTracker().has(EntityFlag.SNEAKING)) {
-                float e = 0.4F + d * 0.2F;
-                player.velocity = player.velocity.multiply(e, 1, e);
-            }
-        }
-
         player.thisTickSlimeUncertain = state.is(Blocks.SLIME_BLOCK) && !player.getFlagTracker().has(EntityFlag.SNEAKING);
+        player.steppingOnHoney = false;
     }
 
-    public void onEntityCollision(final BoarPlayer player, Mutable pos) {
+    public void entityInside(final BoarPlayer player, Mutable pos) {
         if (this.state.is(Blocks.BUBBLE_COLUMN)) {
             boolean drag = this.state.getValue(Properties.DRAG);
 

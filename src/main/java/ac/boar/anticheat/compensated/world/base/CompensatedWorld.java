@@ -1,8 +1,9 @@
 package ac.boar.anticheat.compensated.world.base;
 
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
-import ac.boar.anticheat.data.BoarBlockState;
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.EntityDimensions;
+import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.longs.*;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.entity.EntityDefinition;
 import org.geysermc.geyser.entity.type.Entity;
 import org.geysermc.geyser.level.BedrockDimension;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.chunk.GeyserChunkSection;
 import org.geysermc.geyser.util.MathUtils;
@@ -104,7 +106,12 @@ public class CompensatedWorld {
     }
 
     public BoarBlockState getBlockState(int x, int y, int z, int layer) {
-        return new BoarBlockState(BlockState.of(getBlockAt(x, y, z, layer)));
+        BlockState state = BlockState.of(getBlockAt(x, y, z, layer));
+        if (state.is(Blocks.HONEY_BLOCK)) {
+            return new HoneyBlockState(state);
+        }
+
+        return new BoarBlockState(state);
     }
 
     public int getBlockAt(int x, int y, int z, int layer) {

@@ -1,7 +1,7 @@
 package ac.boar.anticheat.player;
 
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
-import ac.boar.anticheat.data.BoarBlockState;
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.MathUtil;
@@ -130,7 +130,7 @@ public final class BoarPlayer extends PlayerData {
     public float getBlockSpeedFactor() {
         BoarBlockState blockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0);
         float f = blockState.getSpeedFactor();
-        if (blockState.state().is(Blocks.WATER) || blockState.state().is(Blocks.BUBBLE_COLUMN)) {
+        if (blockState.getState().is(Blocks.WATER) || blockState.getState().is(Blocks.BUBBLE_COLUMN)) {
             return f;
         }
         return f == 1.0 ? this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement(), 0).getSpeedFactor() : f;
@@ -138,7 +138,7 @@ public final class BoarPlayer extends PlayerData {
 
     public BlockState getInBlockState() {
         if (this.inBlockState == null) {
-            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).state();
+            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).getState();
         }
 
         return this.inBlockState;
@@ -148,7 +148,7 @@ public final class BoarPlayer extends PlayerData {
         final TagCache cache = this.getSession().getTagCache();
 
         Vector3i lv = this.position.toVector3i();
-        return cache.is(BlockTag.CLIMBABLE, this.compensatedWorld.getBlockState(lv, 0).state().block());
+        return cache.is(BlockTag.CLIMBABLE, this.compensatedWorld.getBlockState(lv, 0).getState().block());
     }
 
     public float getJumpPower() {

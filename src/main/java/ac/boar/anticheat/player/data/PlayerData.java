@@ -78,6 +78,9 @@ public class PlayerData {
     // Uncertain
     public boolean thisTickSlimeUncertain;
 
+    // Block status
+    public boolean steppingOnHoney;
+
     // Effect status related
     @Getter
     private final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();
