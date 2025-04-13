@@ -58,8 +58,8 @@ public class LegacyAuthInputPackets {
             packet.getInputData().add(PlayerAuthInputData.VERTICAL_COLLISION);
         }
 
-        // Prevent player from spoofing this, this should be velocity but have to use prevVelocity since GeyserMC ain't handling this properly.
-        packet.setDelta(player.prevVelocity.toVector3f());
+        // Prevent player from spoofing this to trick Geyser into sending the wrong ground status.
+        packet.setDelta(player.velocity.toVector3f());
     }
 
     public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
