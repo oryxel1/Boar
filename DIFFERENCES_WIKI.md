@@ -6,7 +6,7 @@ So I can keep track of differences between Java - Bedrock in general and also so
 
 ## Attribute
 ### Packet
-- On Java Edition, the attribute packet consist of 2 thing, baseValue and attribute modifiers, when the client received this, it will well clears the modidifer, update the base value, and add new modifiers into the attribute.
+- On Java Edition, the attribute packet consist of 2 thing, baseValue and attribute modifiers, when the client received this, it will clear the modidifer, update the base value, and add new modifiers into the attribute.
 
 - On Bedrock Edition, the attribute packet consist of minium, maximum, defaultMinimum, defaultMaximum, baseValue, **value**, attribute modifiers. Minium, maximum, and baseValue is pretty self explanatory, meanwhile the **value** is the calculated value (after applying attribute modifiers to the base value or could be any value, depends on the server), and attribute modifiers act the same as on Java. Bedrock client (likely) handle this in this order: clearModifier, baseValue, min/max, value, newAttributes, I'm not certain where newAttributes is placed but likely after clear or after value.
 

@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
@@ -32,7 +34,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.36")
 }
 
-tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+tasks.named('shadowJar', ShadowJar) {
     relocate 'it.unimi.dsi.fastutil.ints', 'org.geysermc.geyser.platform.spigot.shaded.it.unimi.dsi.fastutil.ints'
 }
 

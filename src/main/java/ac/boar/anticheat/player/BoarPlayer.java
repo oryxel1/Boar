@@ -130,7 +130,7 @@ public final class BoarPlayer extends PlayerData {
     public float getBlockSpeedFactor() {
         BoarBlockState blockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0);
         float f = blockState.getSpeedFactor();
-        if (blockState.getState().is(Blocks.WATER) || blockState.getState().is(Blocks.BUBBLE_COLUMN)) {
+        if (blockState.state().is(Blocks.WATER) || blockState.state().is(Blocks.BUBBLE_COLUMN)) {
             return f;
         }
         return f == 1.0 ? this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement(), 0).getSpeedFactor() : f;
@@ -138,7 +138,7 @@ public final class BoarPlayer extends PlayerData {
 
     public BlockState getInBlockState() {
         if (this.inBlockState == null) {
-            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).getState();
+            this.inBlockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).state();
         }
 
         return this.inBlockState;
@@ -148,7 +148,7 @@ public final class BoarPlayer extends PlayerData {
         final TagCache cache = this.getSession().getTagCache();
 
         Vector3i lv = this.position.toVector3i();
-        return cache.is(BlockTag.CLIMBABLE, this.compensatedWorld.getBlockState(lv, 0).getState().block());
+        return cache.is(BlockTag.CLIMBABLE, this.compensatedWorld.getBlockState(lv, 0).state().block());
     }
 
     public float getJumpPower() {

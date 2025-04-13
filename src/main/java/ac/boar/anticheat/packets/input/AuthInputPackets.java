@@ -47,6 +47,10 @@ public class AuthInputPackets implements PacketListener {
 
         player.prevVelocity = player.velocity.clone();
 
+        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
+        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
+
         if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
@@ -54,10 +58,6 @@ public class AuthInputPackets implements PacketListener {
             }
             return;
         }
-
-        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
-        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
-        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
 
         // From debugging, prediction should be run first but I'm still unsure about some stuff.
         // TODO: Is this the case for RESPAWN teleport?

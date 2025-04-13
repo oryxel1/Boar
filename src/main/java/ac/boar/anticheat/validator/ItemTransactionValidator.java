@@ -135,7 +135,7 @@ public final class ItemTransactionValidator {
 
                 // The rest is going to validate by Geyser.
 
-                final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
+                final BlockState state = player.compensatedWorld.getBlockState(position, 0).state();
                 switch (packet.getActionType()) {
                     case 0 -> {
                         if (state.getValue(Properties.OPEN) != null) {

@@ -5,8 +5,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.BlockStateValues;
@@ -24,11 +22,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
-public class BoarBlockState {
-    private final BlockState state;
-
+public record BoarBlockState(BlockState state) {
     public boolean isAir() {
         return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR);
     }

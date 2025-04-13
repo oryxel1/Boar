@@ -123,12 +123,7 @@ public class EntityTicker {
             player.compensatedWorld.getBlockState(lv, 0).onSteppedOn(player, lv);
         }
 
-        final Box box = player.boundingBox;
-        final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
-                Math.min(GenericMath.floor(box.minX + 0.001), GenericMath.floor(box.minX - 0.001)),
-                Math.min(GenericMath.floor(box.minY + 0.001), GenericMath.floor(box.minY - 0.001)),
-                Math.min(GenericMath.floor(box.minZ + 0.001), GenericMath.floor(box.minZ - 0.001)),
-                GenericMath.floor(box.maxX - 0.001), GenericMath.floor(box.maxY - 0.001), GenericMath.floor(box.maxZ - 0.001));
+        final BlockPositionIterator iterator = getBlockPositionIterator();
 
         final Mutable mutable = new Mutable();
         for (iterator.reset(); iterator.hasNext(); iterator.next()) {
@@ -171,5 +166,14 @@ public class EntityTicker {
 
         player.beforeCollision = vec3.clone();
         player.afterCollision = vec32.clone();
+    }
+
+    private BlockPositionIterator getBlockPositionIterator() {
+        final Box box = player.boundingBox;
+        return BlockPositionIterator.fromMinMax(
+                Math.min(GenericMath.floor(box.minX + 0.001), GenericMath.floor(box.minX - 0.001)),
+                Math.min(GenericMath.floor(box.minY + 0.001), GenericMath.floor(box.minY - 0.001)),
+                Math.min(GenericMath.floor(box.minZ + 0.001), GenericMath.floor(box.minZ - 0.001)),
+                GenericMath.floor(box.maxX - 0.001), GenericMath.floor(box.maxY - 0.001), GenericMath.floor(box.maxZ - 0.001));
     }
 }

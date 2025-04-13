@@ -4,7 +4,6 @@ import ac.boar.anticheat.data.BreakingData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.MathUtil;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
@@ -12,7 +11,6 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.PlayerBlockActionData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.ItemUseTransaction;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransactionTranslator;
@@ -54,7 +52,7 @@ public final class BreakingBlockValidator {
                 return;
             }
 
-            final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
+            final BlockState state = player.compensatedWorld.getBlockState(position, 0).state();
             final BreakingData data = findCacheUsingPosition(position);
             if (data == null || !BlockUtil.determineCanBreak(player, state)) {
                 packet.setItemUseTransaction(null);

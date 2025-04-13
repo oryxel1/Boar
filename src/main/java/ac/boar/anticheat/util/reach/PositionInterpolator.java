@@ -3,7 +3,6 @@ package ac.boar.anticheat.util.reach;
 
 import java.util.function.Consumer;
 
-import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.MathUtil;
