@@ -27,25 +27,21 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
 
     @Override
     public void finalizeMovement() {
-        boolean climbable = false;
+        final StatusEffect effect = player.getEffect(Effect.LEVITATION);
+        if (effect != null) {
+            player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
+        } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
+            player.velocity.y -= player.getEffectiveGravity();
+        } else {
+            // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
+            player.velocity.y = 0;
+        }
+
+        player.velocity.y *= 0.98F;
+
         // Seems to be the case here!
         if (player.horizontalCollision && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
             player.velocity.y = 0.2F;
-            climbable = true;
-        }
-
-        final StatusEffect effect = player.getEffect(Effect.LEVITATION);
-        if (!climbable) {
-            if (effect != null) {
-                player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
-            } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
-                player.velocity.y -= player.getEffectiveGravity();
-            } else {
-                // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
-                player.velocity.y = 0;
-            }
-
-            player.velocity.y *= 0.98F;
         }
 
         float g = this.prevSlipperiness * 0.91F;
@@ -56,7 +52,7 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
         vec3 = this.moveRelative(vec3, player.getFrictionInfluencedSpeed(f));
         final boolean collidedOrJumping = player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING);
         if (collidedOrJumping && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
-            vec3.y = 0.2F;
+            vec3.y = Math.max(vec3.y, 0.2F);
         }
 
         return this.applyClimbingSpeed(vec3);

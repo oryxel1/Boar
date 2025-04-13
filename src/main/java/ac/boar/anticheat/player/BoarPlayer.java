@@ -145,10 +145,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public boolean onClimbable() {
-        final TagCache cache = this.getSession().getTagCache();
-
-        Vector3i lv = this.position.toVector3i();
-        return cache.is(BlockTag.CLIMBABLE, this.compensatedWorld.getBlockState(lv, 0).getState().block());
+        return this.getSession().getTagCache().is(BlockTag.CLIMBABLE, this.getInBlockState().block());
     }
 
     public float getJumpPower() {

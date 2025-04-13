@@ -182,33 +182,27 @@ private Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
     this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
     Vec3 vec32 = this.getDeltaMovement();
     if ((this.horizontalCollision || this.jumping) && (this.onClimbable() || this.wasInPowderSnow && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {
-        vec32 = new Vec3(vec32.x, 0.2, vec32.z);
+        vec32 = new Vec3(vec32.x, Math.max(vec32.y, 0.2), vec32.z);
     }
     this.move(MoverType.SELF, vec32); // Move player to the calculated position.
     return vec32;
 }
 
 public void finalizeMovement() {
-    boolean climbable = false;
-    // If player is climbing with horizontal collision, this will be run!
-    if (player.horizontalCollision && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
-        player.velocity.y = 0.2F;
-        climbable = true;
+    final StatusEffect effect = player.getEffect(Effect.LEVITATION);
+    if (effect != null) {
+        player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
+    } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
+        player.velocity.y -= player.getEffectiveGravity();
+    } else {
+        // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
+        player.velocity.y = 0;
     }
 
-    // If player match the condition, no tick end is applied.
-    final StatusEffect effect = player.getEffect(Effect.LEVITATION);
-    if (!climbable) {
-        if (effect != null) {
-                player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
-        } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
-            player.velocity.y -= player.getEffectiveGravity();
-        } else {
-            // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
-            player.velocity.y = 0;
-        }
-
-        player.velocity.y *= 0.98F;
+    player.velocity.y *= 0.98F;
+    
+    if (player.horizontalCollision && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
+        player.velocity.y = 0.2F;
     }
 
     float g = this.prevSlipperiness * 0.91F;
