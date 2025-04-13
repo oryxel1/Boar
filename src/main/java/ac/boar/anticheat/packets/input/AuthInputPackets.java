@@ -26,7 +26,7 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
-        LegacyAuthInputPackets.processAuthInput(player, packet);
+        LegacyAuthInputPackets.processAuthInput(player, packet, true);
 
         boolean handleRewind = true;
         if (player.tick == Long.MIN_VALUE) {
@@ -47,8 +47,7 @@ public class AuthInputPackets implements PacketListener {
 
         player.prevVelocity = player.velocity.clone();
 
-        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
-        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+        LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
         player.unvalidatedTickEnd = new Vec3(packet.getDelta());
 
         if (player.inLoadingScreen || player.sinceLoadingScreen < 3) {
@@ -65,12 +64,13 @@ public class AuthInputPackets implements PacketListener {
 
         // After that we can handle teleport.
         this.processQueuedTeleports(player, packet, handleRewind);
+        LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
         // System.out.println("Input: " + packet.getMotion());
 
         if (player.isAbilityExempted()) {
             // TODO: Flying prediction?
-            LegacyAuthInputPackets.processAuthInput(player, packet);
+            LegacyAuthInputPackets.processAuthInput(player, packet, true);
             player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
 
@@ -158,12 +158,12 @@ public class AuthInputPackets implements PacketListener {
         for (int i = 0; i < tickDistance; i++) {
             currentTick++;
             if (currentTick == player.tick) {
-                LegacyAuthInputPackets.processAuthInput(player, packet);
+                LegacyAuthInputPackets.processAuthInput(player, packet, true);
                 player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
                 player.unvalidatedTickEnd = new Vec3(packet.getDelta());
             } else if (player.getTeleportUtil().getAuthInputHistory().containsKey(currentTick)) {
                 final TickData data = player.getTeleportUtil().getAuthInputHistory().get(currentTick);
-                LegacyAuthInputPackets.processAuthInput(player, data.packet());
+                LegacyAuthInputPackets.processAuthInput(player, data.packet(), false);
 
                 // Reverted back to the old flags.
                 player.getFlagTracker().set(data.flags(), false);
@@ -176,8 +176,6 @@ public class AuthInputPackets implements PacketListener {
             player.getTeleportUtil().cachePosition(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f(), false);
             player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
         }
-
-        player.unvalidatedPosition = player.position.clone();
     }
 
     @Override

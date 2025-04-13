@@ -7,15 +7,22 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.util.InputUtil;
 
+import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.item.Items;
 
 import java.util.Map;
 
 public class LegacyAuthInputPackets {
+    public static void updateUnvalidatedPosition(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
+        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+    }
+
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
@@ -62,10 +69,12 @@ public class LegacyAuthInputPackets {
         packet.setDelta(player.velocity.toVector3f());
     }
 
-    public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+    public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet, boolean processInputData) {
         player.setInputData(packet.getInputData());
 
-        InputUtil.processInput(player, packet);
+        if (processInputData) {
+            InputUtil.processInput(player, packet);
+        }
 
         processInputData(player);
 
