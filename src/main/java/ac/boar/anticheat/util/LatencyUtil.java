@@ -34,7 +34,7 @@ public final class LatencyUtil {
         }
     }
 
-    public boolean confirmTransaction(long id) {
+    public boolean confirmStackId(long id) {
         if (!this.sentStackLatency.contains(id) || id <= player.receivedStackId.get()) {
             return false;
         }
