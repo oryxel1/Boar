@@ -15,7 +15,7 @@ public class NetworkLatencyPackets implements PacketListener {
         }
 
         long id = packet.getTimestamp() / LATENCY_MAGNITUDE;
-        if (id >= 0 || id == -GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP) {
+        if (id >= 0 || id == GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP || id == GeyserUtil.MAGIC_VIRTUAL_INVENTORY_HACK) {
             return;
         }
 

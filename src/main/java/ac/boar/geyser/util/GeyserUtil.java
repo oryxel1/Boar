@@ -11,7 +11,8 @@ import org.geysermc.geyser.session.GeyserSession;
 import java.lang.reflect.Field;
 
 public class GeyserUtil {
-    public final static long MAGIC_FORM_IMAGE_HACK_TIMESTAMP = 1234567890L;
+    public final static long MAGIC_FORM_IMAGE_HACK_TIMESTAMP = -1234567890L;
+    public static final long MAGIC_VIRTUAL_INVENTORY_HACK = -9876543210L;
 
     public static void hookIntoCloudburstMC(final BoarPlayer player) {
         final GeyserConnection connection = player.getSession();
