@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 public class LivingTicker extends EntityTicker {
     public LivingTicker(BoarPlayer player) {
@@ -45,6 +46,10 @@ public class LivingTicker extends EntityTicker {
             } else if ((player.onGround || bl && g <= h) && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
                 player.velocity = player.jumpFromGround(player.velocity);
             }
+        }
+
+        if (player.getFlagTracker().has(EntityFlag.GLIDING) && (player.onGround || player.vehicleData != null || player.hasEffect(Effect.LEVITATION))) {
+            player.getFlagTracker().set(EntityFlag.GLIDING, false);
         }
 
         this.travelRidden();
