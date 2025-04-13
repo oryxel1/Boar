@@ -72,11 +72,11 @@ public class LegacyAuthInputPackets {
     public static void processAuthInput(final BoarPlayer player, final PlayerAuthInputPacket packet, boolean processInputData) {
         player.setInputData(packet.getInputData());
 
-        if (processInputData) {
-            InputUtil.processInput(player, packet);
-        }
+        InputUtil.processInput(player, packet);
 
-        processInputData(player);
+        if (processInputData) {
+            processInputData(player);
+        }
 
         player.prevYaw = player.yaw;
         player.prevPitch = player.pitch;
@@ -112,7 +112,7 @@ public class LegacyAuthInputPackets {
                 case START_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, true);
                 case STOP_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, false);
 
-                case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, true);
+                case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, player.touchingWater && player.submergedInWater);
                 case STOP_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, false);
 
                 case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);

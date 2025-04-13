@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.erosion.util.BlockPositionIterator;
 import org.geysermc.geyser.level.block.Fluid;
 
@@ -29,7 +30,13 @@ public class EntityTicker {
         player.inPowderSnow = false;
         this.updateWaterState();
         this.updateSubmergedInWaterState();
-        // this.updateSwimming();
+        this.updateSwimming();
+    }
+
+    private void updateSwimming() {
+        if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
+            player.getFlagTracker().set(EntityFlag.SWIMMING, player.touchingWater && player.vehicleData == null);
+        }
     }
 
     private void updateWaterState() {
