@@ -3,6 +3,7 @@ package ac.boar.anticheat.prediction.engine.impl;
 import ac.boar.anticheat.data.vanilla.StatusEffect;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.block.specific.PowderSnowBlock;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -52,7 +53,7 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
         vec3 = this.moveRelative(vec3, player.getFrictionInfluencedSpeed(f));
         final boolean collidedOrJumping = player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING);
         if (collidedOrJumping && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
-            vec3.y = Math.max(vec3.y, 0.2F);
+            vec3.y = player.bestPossibility.getType() == VectorType.VELOCITY ? vec3.y : 0.2F;
         }
 
         return this.applyClimbingSpeed(vec3);

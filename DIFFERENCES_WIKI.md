@@ -182,7 +182,7 @@ private Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
     this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
     Vec3 vec32 = this.getDeltaMovement();
     if ((this.horizontalCollision || this.jumping) && (this.onClimbable() || this.wasInPowderSnow && PowderSnowBlock.canEntityWalkOnPowderSnow(this))) {
-        vec32 = new Vec3(vec32.x, Math.max(vec32.y, 0.2), vec32.z);
+        vec32 = new Vec3(vec32.x, 0.2, vec32.z);
     }
     this.move(MoverType.SELF, vec32); // Move player to the calculated position.
     return vec32;
