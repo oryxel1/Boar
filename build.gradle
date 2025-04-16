@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta6-20250324.162731-5")
+    compileOnly("org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta6-20250415.154650-7")
     compileOnly("org.geysermc.geyser:core:2.7.0-SNAPSHOT")
     compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("it.unimi.dsi:fastutil:8.5.15")
