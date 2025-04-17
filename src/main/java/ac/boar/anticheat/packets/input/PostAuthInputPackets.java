@@ -21,7 +21,7 @@ public class PostAuthInputPackets implements PacketListener {
                 return;
             }
 
-            player.getTeleportUtil().cachePosition(packet.getTick(), player.position.add(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f(), true);
+            player.getTeleportUtil().clearRewindHistory();
         }
     }
 }

@@ -45,12 +45,10 @@ public class AuthInputPackets implements PacketListener {
         player.breakingValidator.handle(packet);
         player.tick();
 
-        player.prevVelocity = player.velocity.clone();
-
-        LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
         player.unvalidatedTickEnd = new Vec3(packet.getDelta());
 
-        if (player.inLoadingScreen || player.sinceLoadingScreen < 3) {
+        if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
+            LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
             if (offset > 1.0E-7) {
                 player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
@@ -60,11 +58,11 @@ public class AuthInputPackets implements PacketListener {
 
         // From debugging, prediction should be run first but I'm still unsure about some stuff.
         // TODO: Is this the case for RESPAWN teleport?
-        new PredictionRunner(player).run();
+        LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
+        new PredictionRunner(player).run(player.tick);
 
         // After that we can handle teleport.
         this.processQueuedTeleports(player, packet, handleRewind);
-        LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
         // System.out.println("Input: " + packet.getMotion());
 
@@ -152,13 +150,14 @@ public class AuthInputPackets implements PacketListener {
         player.setPos(rewind.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
         player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
 
-        player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f(), false);
+        player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f());
 
         long currentTick = rewind.getTick();
         for (int i = 0; i < tickDistance; i++) {
             currentTick++;
             if (currentTick == player.tick) {
                 LegacyAuthInputPackets.processAuthInput(player, packet, true);
+                player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
                 player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
                 player.unvalidatedTickEnd = new Vec3(packet.getDelta());
             } else if (player.getTeleportUtil().getAuthInputHistory().containsKey(currentTick)) {
@@ -171,10 +170,10 @@ public class AuthInputPackets implements PacketListener {
                 throw new RuntimeException("Failed find auth input history for rewind.");
             }
 
-            new PredictionRunner(player).run();
-
-            player.getTeleportUtil().cachePosition(currentTick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f(), false);
-            player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
+            new PredictionRunner(player).run(currentTick);
+            if (currentTick != player.tick) {
+                player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
+            }
         }
     }
 

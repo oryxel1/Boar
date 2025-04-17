@@ -33,6 +33,11 @@ public class LivingTicker extends EntityTicker {
 
         this.applyInput();
 
+        // Prevent player from "elytra bouncing".
+        if (player.getFlagTracker().has(EntityFlag.GLIDING) && player.onGround && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
+            player.getTeleportUtil().rewind(player.tick - 1);
+        }
+
         boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
                 player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
         if (jumping /*&& this.isAffectedByFluids() */) {

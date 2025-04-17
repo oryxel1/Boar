@@ -107,7 +107,7 @@ public class PlayerData {
     public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(Pose.STANDING);
     public Box boundingBox = Box.EMPTY;
 
-    public Vec3 prevVelocity = Vec3.ZERO, velocity = Vec3.ZERO;
+    public Vec3 velocity = Vec3.ZERO;
 
     public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector bestPossibility = Vector.NONE;

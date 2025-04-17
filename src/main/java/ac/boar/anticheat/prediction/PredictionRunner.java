@@ -16,6 +16,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.level.block.Fluid;
 
 import java.util.ArrayList;
@@ -27,14 +28,14 @@ import java.util.Map;
 public class PredictionRunner {
     private final BoarPlayer player;
 
-    public void run() {
+    public void run(long tick) {
         if (!this.findBestTickStartVelocity()) {
             return;
         }
 
         new PlayerTicker(player).tick();
-
         player.predictionResult = new PredictionData(player.bestPossibility, player.beforeCollision.clone(), player.afterCollision.clone(), player.velocity.clone());
+        player.getTeleportUtil().cachePosition(tick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f());
     }
 
     private boolean findBestTickStartVelocity() {

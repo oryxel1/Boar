@@ -70,6 +70,10 @@ public class TeleportUtil {
     }
 
     public void rewind(final RewindData rewind) {
+        if (this.isTeleporting()) {
+            return;
+        }
+
         final PredictionData data = rewind.data();
 
         final boolean onGround = data.before().y != data.after().y && data.before().y < 0;
@@ -87,14 +91,12 @@ public class TeleportUtil {
         this.player.cloudburstDownstream.sendPacketImmediately(packet);
     }
 
-    public void cachePosition(long tick, Vector3f position, boolean doClearing) {
+    public void cachePosition(long tick, Vector3f position) {
         this.rewindHistory.put(tick, new RewindData(tick, this.lastKnowValid.clone(), player.predictionResult));
         this.lastKnowValid = position;
+    }
 
-        if (!doClearing) {
-            return;
-        }
-
+    public void clearRewindHistory() {
         final Iterator<Map.Entry<Long, RewindData>> iterator = this.rewindHistory.entrySet().iterator();
         while (iterator.hasNext() && this.rewindHistory.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
             iterator.next();
