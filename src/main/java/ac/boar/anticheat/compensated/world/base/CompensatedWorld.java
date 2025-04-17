@@ -4,6 +4,7 @@ import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
+import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.longs.*;
 import lombok.Getter;
@@ -109,6 +110,8 @@ public class CompensatedWorld {
         BlockState state = BlockState.of(getBlockAt(x, y, z, layer));
         if (state.is(Blocks.HONEY_BLOCK)) {
             return new HoneyBlockState(state);
+        } else if (state.is(Blocks.SLIME_BLOCK)) {
+            return new SlimeBlockState(state);
         }
 
         return new BoarBlockState(state);

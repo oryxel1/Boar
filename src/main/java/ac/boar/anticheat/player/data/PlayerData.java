@@ -75,9 +75,6 @@ public class PlayerData {
     public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
     public final LatencyUtil latencyUtil = new LatencyUtil(this);
 
-    // Uncertain
-    public boolean thisTickSlimeUncertain;
-
     // Block status
     public boolean steppingOnHoney;
 

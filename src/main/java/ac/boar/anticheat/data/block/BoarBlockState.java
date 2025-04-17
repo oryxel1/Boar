@@ -34,7 +34,6 @@ public class BoarBlockState {
     }
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {
-        player.thisTickSlimeUncertain = state.is(Blocks.SLIME_BLOCK) && !player.getFlagTracker().has(EntityFlag.SNEAKING);
         player.steppingOnHoney = false;
     }
 
@@ -123,14 +122,6 @@ public class BoarBlockState {
             }
 
             return;
-        }
-
-        if (state.is(Blocks.SLIME_BLOCK)) {
-            if (player.velocity.y < 0.0 && !player.getFlagTracker().has(EntityFlag.SNEAKING)) {
-                // double d = entity instanceof LivingEntity ? 1.0 : 0.8;
-                player.velocity.y = -player.velocity.y * 1;
-                return;
-            }
         }
 
         player.velocity.y = 0;

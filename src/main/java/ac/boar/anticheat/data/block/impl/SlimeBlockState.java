@@ -2,13 +2,12 @@ package ac.boar.anticheat.data.block.impl;
 
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.math.Mutable;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.type.BlockState;
 
-public class HoneyBlockState extends BoarBlockState {
-    public HoneyBlockState(BlockState state) {
+public class SlimeBlockState extends BoarBlockState {
+    public SlimeBlockState(BlockState state) {
         super(state);
     }
 
@@ -20,16 +19,17 @@ public class HoneyBlockState extends BoarBlockState {
             player.velocity = player.velocity.multiply(e, 1, e);
         }
 
-        player.steppingOnHoney = true;
+        player.steppingOnHoney = false;
     }
 
     @Override
-    public void entityInside(BoarPlayer player, Mutable pos) {
-        if (player.steppingOnHoney) {
-            return;
+    public void updateEntityMovementAfterFallOn(BoarPlayer player, boolean living) {
+        if (player.getFlagTracker().has(EntityFlag.SNEAKING)) {
+            player.velocity.y = 0;
+        } else {
+            if (player.velocity.y < 0.0) {
+                player.velocity.y = -player.velocity.y * (living ? 1 : 0.8F);
+            }
         }
-
-        player.velocity = player.velocity.multiply(0.40000001F, 1, 0.40000001F);
-        player.velocity.y = Math.max(-0.12F, player.velocity.y);
     }
 }

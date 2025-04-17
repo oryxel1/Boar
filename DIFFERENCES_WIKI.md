@@ -126,8 +126,6 @@ if (d < 0.1 && !entity.isSteppingCarefully()) {
     entity.setDeltaMovement(entity.getDeltaMovement().multiply(e, 1.0, e));
 }
 ```
-### Slime block
-- No idea yet, it acting weird as hell, looking at BDS code doesn't help, one thing I know that it will also affect y motion instead of just XZ.
 
 ## Speed Factor
 - Doesn't seems to exist at all on Bedrock.

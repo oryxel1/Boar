@@ -68,6 +68,7 @@ public class PlayerTicker extends LivingTicker {
         }
         Pose pose = this.getDesiredPose();
         player.pose = /* this.isSpectator() || this.isPassenger() || */ this.canPlayerFitWithinBlocksAndEntitiesWhen(pose) ? pose : (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING) ? Pose.CROUCHING : Pose.SWIMMING);
+        player.setPose(player.pose);
     }
 
     private Pose getDesiredPose() {

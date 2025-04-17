@@ -155,7 +155,7 @@ public class EntityTicker {
         player.verticalCollision = vec3.y != vec32.y;
         player.onGround = player.verticalCollision && vec3.y < 0.0;
         // this.minorHorizontalCollision = this.horizontalCollision ? this.isHorizontalCollisionMinor(vec32) : false;
-        Vector3i blockPos = player.getOnPos(0.2F);
+        Vector3i blockPos = player.getOnPos(0.2F + 1.0E-5F);
         BoarBlockState blockState = player.compensatedWorld.getBlockState(blockPos, 0);
 //        if (this.isLocalInstanceAuthoritative()) {
 //            this.checkFallDamage(vec32.y, this.onGround(), blockState, blockPos);
