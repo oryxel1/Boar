@@ -21,6 +21,7 @@ public class LegacyAuthInputPackets {
     public static void updateUnvalidatedPosition(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
         player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
     }
 
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {

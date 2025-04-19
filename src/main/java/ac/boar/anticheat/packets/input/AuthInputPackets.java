@@ -45,8 +45,6 @@ public class AuthInputPackets implements PacketListener {
         player.breakingValidator.handle(packet);
         player.tick();
 
-        player.unvalidatedTickEnd = new Vec3(packet.getDelta());
-
         if (player.inLoadingScreen || player.sinceLoadingScreen < 2) {
             LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
             final double offset = player.unvalidatedPosition.distanceTo(player.prevUnvalidatedPosition);
@@ -154,15 +152,18 @@ public class AuthInputPackets implements PacketListener {
 
         long currentTick = rewind.getTick();
         for (int i = 0; i < tickDistance; i++) {
+            if (currentTick != rewind.getTick() && player.position.distanceTo(player.unvalidatedPosition) > player.getMaxOffset()) {
+                player.unvalidatedPosition = player.position.clone();
+            }
+
             currentTick++;
             if (currentTick == player.tick) {
                 LegacyAuthInputPackets.processAuthInput(player, packet, true);
-                player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
-                player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
-                player.unvalidatedTickEnd = new Vec3(packet.getDelta());
+                LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
             } else if (player.getTeleportUtil().getAuthInputHistory().containsKey(currentTick)) {
                 final TickData data = player.getTeleportUtil().getAuthInputHistory().get(currentTick);
                 LegacyAuthInputPackets.processAuthInput(player, data.packet(), false);
+                LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
                 // Reverted back to the old flags.
                 player.getFlagTracker().set(data.flags(), false);
@@ -171,9 +172,6 @@ public class AuthInputPackets implements PacketListener {
             }
 
             new PredictionRunner(player).run(currentTick);
-            if (currentTick != player.tick) {
-                player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
-            }
         }
     }
 
