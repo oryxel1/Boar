@@ -23,9 +23,9 @@ public class PlayerEffectPackets implements PacketListener {
                 return;
             }
 
-            player.sendLatencyStack();
+            player.sendLatencyStack(immediate);
 
-            if (packet.getEvent() == MobEffectPacket.Event.ADD) {
+            if (packet.getEvent() == MobEffectPacket.Event.ADD || packet.getEvent() == MobEffectPacket.Event.MODIFY) {
                 player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.getActiveEffects().put(effect, new StatusEffect(effect, packet.getAmplifier(), packet.getDuration() + 1)));
             } else if (packet.getEvent() == MobEffectPacket.Event.REMOVE) {
                 player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.getActiveEffects().remove(effect));
