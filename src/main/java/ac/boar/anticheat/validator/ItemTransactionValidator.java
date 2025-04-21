@@ -28,8 +28,6 @@ public final class ItemTransactionValidator {
     private final BoarPlayer player;
 
     public boolean handle(final InventoryTransactionPacket packet) {
-        // System.out.println(packet);
-
         final CompensatedInventory inventory = player.compensatedInventory;
         switch (packet.getTransactionType()) {
             case NORMAL -> {
@@ -100,6 +98,13 @@ public final class ItemTransactionValidator {
 //                }
             }
 
+            case ITEM_RELEASE -> {
+                // Self-explanatory.
+                if (packet.getActionType() == 0) {
+                    player.getUseItemCache().release();
+                }
+            }
+
             case ITEM_USE -> {
                 final Vector3i position = packet.getBlockPosition();
                 final int slot = packet.getHotbarSlot();
@@ -146,11 +151,14 @@ public final class ItemTransactionValidator {
 
                     }
 
+                    // This seems to for things that is not related to block interact and only for item interaction.
                     case 1 -> {
                         // Geyser going to handle this, not me.
                         if (packet.getItemInHand() == null || !validate(SD1, packet.getItemInHand())) {
                             return true;
                         }
+
+                        player.getUseItemCache().use(SD1);
                     }
                 }
             }

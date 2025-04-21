@@ -11,7 +11,7 @@ import lombok.Getter;
 import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
 
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
-import ac.boar.geyser.GeyserSessionJoinEvent;
+import ac.boar.geyser.GeyserEvents;
 import ac.boar.protocol.PacketEvents;
 
 @Getter
@@ -24,7 +24,7 @@ public class Boar {
 
     public void init() {
         this.playerManager = new BoarPlayerManager();
-        new GeyserSessionJoinEvent();
+        new GeyserEvents();
 
         PacketEvents.getApi().register(new NetworkLatencyPackets());
         PacketEvents.getApi().register(new ChunkWorldPackets());

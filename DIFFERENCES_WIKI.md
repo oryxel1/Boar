@@ -245,7 +245,7 @@ if (xLargerThanThreshold || yLargerThanThreshold || zLargerThanThreshold) {
 ## Input
 - On Bedrock Edition, the client can entirely control how much they move (in range of -1 to 1) and is not limited like Java Edition, however this is only the case with analog move vector (joystick thingy).
 - The input will also be normalized **only if** by normalizing the input the player won't gain any advantage before/after the input.
-- Input multiplier for using item is different from Java, you can debug yourself since I forgot lol.
+- Input multiplier for using item is different from Java (0.122499995).
 - You can take a look at how Boar handle Input [here](https://github.com/Oryxel/Boar/blob/new-engine/src/main/java/ac/boar/anticheat/util/InputUtil.java)
 
 ## Minimal motion

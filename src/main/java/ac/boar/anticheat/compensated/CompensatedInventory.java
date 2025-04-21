@@ -49,11 +49,16 @@ public class CompensatedInventory {
     private final Map<Integer, ItemCache> bundleCache = new HashMap<>();
 
     public ItemStack translate(ItemData data) {
-        ItemStack stack = ItemTranslator.translateToJava(player.getSession(), data);
-        if (stack == null) {
-            stack = new ItemStack(Items.AIR_ID);
+        try {
+            ItemStack stack = ItemTranslator.translateToJava(player.getSession(), data);
+            if (stack == null) {
+                stack = new ItemStack(Items.AIR_ID);
+            }
+
+            return stack;
+        } catch (Exception ignored) {
+            return new ItemStack(Items.AIR_ID);
         }
-        return stack;
     }
 
     public ItemData translate(ItemStack stack) {

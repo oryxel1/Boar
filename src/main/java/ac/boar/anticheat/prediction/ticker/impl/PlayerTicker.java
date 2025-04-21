@@ -38,6 +38,10 @@ public class PlayerTicker extends LivingTicker {
         if (sneaking && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
             player.input = player.input.multiply(0.3F);
         }
+
+        if (player.getUseItemCache().isUsingItem()) {
+            player.input = player.input.multiply(0.122499995F);
+        }
     }
 
     @Override

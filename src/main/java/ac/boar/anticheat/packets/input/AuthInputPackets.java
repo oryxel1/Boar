@@ -35,6 +35,7 @@ public class AuthInputPackets implements PacketListener {
         }
         player.tick++;
         if (packet.getTick() != player.tick || packet.getTick() < 0) {
+            player.postTick();
             player.kick("Invalid tick id=" + packet.getTick());
             return;
         }
@@ -64,6 +65,7 @@ public class AuthInputPackets implements PacketListener {
 
         // System.out.println("Input: " + packet.getMotion());
 
+        player.postTick();
         if (player.isAbilityExempted()) {
             // TODO: Flying prediction?
             LegacyAuthInputPackets.processAuthInput(player, packet, true);

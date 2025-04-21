@@ -1,6 +1,8 @@
 package ac.boar.anticheat.player;
 
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
+import ac.boar.anticheat.data.UseItemCache;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.teleport.TeleportUtil;
@@ -32,7 +34,6 @@ import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.BlockMappings;
 import org.geysermc.geyser.session.GeyserSession;
-import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -58,6 +59,9 @@ public final class BoarPlayer extends PlayerData {
     // Validation
     public final BreakingBlockValidator breakingValidator = new BreakingBlockValidator(this);
     public final ItemTransactionValidator transactionValidator = new ItemTransactionValidator(this);
+
+    @Getter
+    private final UseItemCache useItemCache = new UseItemCache(this);
 
     public BoarPlayer(GeyserSession session) {
         this.session = session;
@@ -118,13 +122,19 @@ public final class BoarPlayer extends PlayerData {
             return filter.getValue().getDuration() == 0;
         });
 
-//        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
-//            if (cache.getPast() != null) {
-//                cache.getPast().tick();
-//            }
-//
-//            cache.getCurrent().tick();
-//        }
+        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+            if (cache.getPast() != null) {
+                cache.getPast().tick();
+            }
+
+            if (cache.getCurrent() != null) {
+                cache.getCurrent().tick();
+            }
+        }
+    }
+
+    public void postTick() {
+        this.getUseItemCache().tick();
     }
 
     public float getBlockSpeedFactor() {
