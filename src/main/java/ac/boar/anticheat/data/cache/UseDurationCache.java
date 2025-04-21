@@ -17,6 +17,8 @@ public class UseDurationCache {
         USE_DURATIONS.put(Items.ENDER_EYE.javaId(), 0);
         USE_DURATIONS.put(Items.SPYGLASS.javaId(), 1200);
 
+        USE_DURATIONS.put(Items.GOAT_HORN.javaId(), 140);
+
         // Auto generated, well you could get this from ItemData component too but eh.
         USE_DURATIONS.put(Items.APPLE.javaId(), 32);
         USE_DURATIONS.put(Items.MUSHROOM_STEW.javaId(), 32);

@@ -5,6 +5,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
+import org.geysermc.geyser.item.Items;
 
 @RequiredArgsConstructor
 public class UseItemCache {
@@ -13,7 +14,13 @@ public class UseItemCache {
     private ItemData useItem = ItemData.AIR;
     private int useItemRemaining;
 
+    private int goatHornCooldown;
+
     public void tick() {
+        if (this.goatHornCooldown > 0) {
+            this.goatHornCooldown--;
+        }
+
         if (useItemRemaining <= 0 || useItem == ItemData.AIR) {
             return;
         }
@@ -39,9 +46,18 @@ public class UseItemCache {
     }
 
     public void use(final ItemData useItem) {
-        int useDuration = UseDurationCache.getUseDuration(player.compensatedInventory.translate(useItem).getId());
+        int itemId = player.compensatedInventory.translate(useItem).getId();
+        int useDuration = UseDurationCache.getUseDuration(itemId);
         if (useDuration == -1) {
             return;
+        }
+
+        if (itemId == Items.GOAT_HORN.javaId()) {
+            if (goatHornCooldown > 0) {
+                return;
+            }
+
+            this.goatHornCooldown = useDuration;
         }
 
         this.useItem = useItem;
