@@ -165,7 +165,7 @@ public class ChunkWorldPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof UpdateBlockPacket packet) {
-            player.sendLatencyStack();
+            player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
         }
     }

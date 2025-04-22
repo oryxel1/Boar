@@ -82,8 +82,6 @@ public float getValue() {
 ## Block Friction, Jump Factor
 ### getBlockPosBelowThatAffectsMyMovement()
 - On Java Edition, this value try to get the block that 0.5 blocks below you meanwhile on Bedrock it's 0.1
-#### getOnPos()
-- Seems be grabbing the from player pos - offset directly instead of using *supportingBlockPos*.
 ### Block Friction
 - Only that honey block now have the same block friction as slime (0.8)
 ### Jump Factor
