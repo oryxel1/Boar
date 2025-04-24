@@ -95,6 +95,6 @@ public class PlayerTicker extends LivingTicker {
     }
 
     protected boolean canPlayerFitWithinBlocksAndEntitiesWhen(Pose pose) {
-        return player.compensatedWorld.noCollision(player.getDimensions(pose).getBoxAt(player.position).contract(1.0E-7F));
+        return player.compensatedWorld.noCollision(player.getDimensions(pose).getBoxAt(player.unvalidatedPosition).contract(1.0E-7F));
     }
 }
