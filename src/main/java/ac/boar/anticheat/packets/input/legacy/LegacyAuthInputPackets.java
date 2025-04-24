@@ -81,9 +81,7 @@ public class LegacyAuthInputPackets {
 
         InputUtil.processInput(player, packet);
 
-        if (processInputData) {
-            processInputData(player);
-        }
+        player.unprocessedRotation = packet.getRotation();
 
         player.prevYaw = player.yaw;
         player.prevPitch = player.pitch;
@@ -93,8 +91,11 @@ public class LegacyAuthInputPackets {
         player.prevInteractRotation = player.interactRotation;
         player.interactRotation = packet.getInteractRotation().clone();
 
-        player.unprocessedRotation = packet.getRotation();
         player.cameraOrientation = packet.getCameraOrientation();
+
+        if (processInputData) {
+            processInputData(player);
+        }
     }
 
     public static void processInputData(final BoarPlayer player) {
@@ -131,7 +132,7 @@ public class LegacyAuthInputPackets {
                     }
 
                     player.getFlagTracker().set(EntityFlag.DAMAGE_NEARBY_MOBS, true);
-                    System.out.println("Trying to riptide.");
+                    // System.out.println("Trying to riptide.");
 
                     int i = CompensatedInventory.getEnchantments(player.riptideItem).get(BedrockEnchantment.RIPTIDE);
                     float f = 1.5f + 0.75F * (float)(i - 1);
