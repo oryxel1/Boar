@@ -11,6 +11,7 @@ import org.geysermc.geyser.item.Items;
 public class UseItemCache {
     private final BoarPlayer player;
 
+    private int useItemJavaId = -1;
     private ItemData useItem = ItemData.AIR;
     private int useItemRemaining;
 
@@ -35,7 +36,12 @@ public class UseItemCache {
     }
 
     public void release() {
+        if (this.useItemJavaId == Items.TRIDENT.javaId()) {
+            player.setDirtyRiptide(72000 - this.useItemRemaining, this.useItem);
+        }
+
         this.useItem = ItemData.AIR;
+        this.useItemJavaId = -1;
         this.useItemRemaining = 0;
 
         player.getFlagTracker().set(EntityFlag.USING_ITEM, false);
@@ -59,6 +65,8 @@ public class UseItemCache {
 
             this.goatHornCooldown = useDuration;
         }
+
+        this.useItemJavaId = itemId;
 
         this.useItem = useItem;
         this.useItemRemaining = useDuration;

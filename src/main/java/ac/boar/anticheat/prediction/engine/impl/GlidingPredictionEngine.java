@@ -18,7 +18,7 @@ public class GlidingPredictionEngine extends PredictionEngine {
 
         final Vec3 view = MathUtil.getRotationVector(player.pitch, player.yaw);
 
-        float v8 = player.pitch * MathUtil.DEGREE_TO_RAG;
+        float v8 = player.pitch * MathUtil.DEGREE_TO_RAD;
         float v9 = view.horizontalLength();
         float v10 = view.lengthSquared();
         float v11 = vec3.horizontalLength();

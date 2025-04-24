@@ -6,13 +6,17 @@ import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.PotionMixData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.RecipeData;
+import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.item.Items;
 import org.geysermc.geyser.translator.item.ItemTranslator;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
@@ -79,5 +83,26 @@ public class CompensatedInventory {
         }
 
         return null;
+    }
+
+    @NonNull
+    public static Map<BedrockEnchantment, Integer> getEnchantments(final ItemData data) {
+        if (data == null || data.getTag() == null || !data.getTag().containsKey("ench")) {
+            return Map.of();
+        }
+
+        final Map<BedrockEnchantment, Integer> enchantmentMap = new HashMap<>();
+        final List<NbtMap> enchantments = data.getTag().getList("ench", NbtType.COMPOUND);
+
+        for (NbtMap nbtMap : enchantments) {
+            if (!nbtMap.containsKey("id") || !nbtMap.containsKey("lvl")) {
+                continue;
+            }
+
+            BedrockEnchantment bedrockEnchantment = BedrockEnchantment.getByBedrockId(nbtMap.getShort("id"));
+            enchantmentMap.put(bedrockEnchantment, (int) nbtMap.getShort("lvl"));
+        }
+
+        return enchantmentMap;
     }
 }

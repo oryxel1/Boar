@@ -2,17 +2,23 @@ package ac.boar.anticheat.packets.input.legacy;
 
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
+import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
+import ac.boar.anticheat.prediction.ticker.base.EntityTicker;
 import ac.boar.anticheat.util.InputUtil;
 
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
+import org.cloudburstmc.math.GenericMath;
+import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.entity.EntityDefinitions;
+import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.item.Items;
 
 import java.util.Map;
@@ -118,8 +124,43 @@ public class LegacyAuthInputPackets {
 
                 case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
                 case STOP_FLYING -> player.flying = false;
+
+                case START_SPIN_ATTACK -> {
+                    if (!player.dirtyRiptide) {
+                        return;
+                    }
+
+                    player.getFlagTracker().set(EntityFlag.DAMAGE_NEARBY_MOBS, true);
+                    System.out.println("Trying to riptide.");
+
+                    int i = CompensatedInventory.getEnchantments(player.riptideItem).get(BedrockEnchantment.RIPTIDE);
+                    float f = 1.5f + 0.75F * (float)(i - 1);
+
+                    float g = player.unprocessedRotation.getY();
+                    float h = player.unprocessedRotation.getX();
+                    float k = -TrigMath.sin(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
+                    float l = -TrigMath.sin(h * (MathUtil.DEGREE_TO_RAD));
+                    float m = TrigMath.cos(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
+                    float n = (float) GenericMath.sqrt(k * k + l * l + m * m);
+                    player.velocity = player.velocity.add(k * (f / n), l * (f / n), m * (f / n));
+                    player.autoSpinAttackTicks = 20;
+//                    if (player.onGround) {
+//                        new EntityTicker(player).doSelfMove(new Vec3(0, 1.1999999284744263F, 0));
+//                        player.unvalidatedPosition = player.position.clone();
+//                    }
+                }
+
+                case STOP_SPIN_ATTACK -> {
+                    if (player.dirtySpinStop) {
+                        player.stopRiptide();
+                        player.velocity = player.velocity.multiply(-0.2F);
+                    }
+                }
             }
         }
+
+        player.dirtyRiptide = false;
+        player.dirtySpinStop = false;
 
         // TODO: Do this and don't fuck up because of entity data.
 //        if (player.sprinting && player.input.getZ() <= 0) {

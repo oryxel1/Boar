@@ -1,5 +1,6 @@
 package ac.boar.anticheat.prediction.ticker.impl;
 
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.GlidingPredictionEngine;
@@ -7,11 +8,14 @@ import ac.boar.anticheat.prediction.engine.impl.GroundAndAirPredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.fluid.LavaPredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.fluid.WaterPredictionEngine;
 import ac.boar.anticheat.prediction.ticker.base.EntityTicker;
+import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
+
+import java.util.List;
 
 public class LivingTicker extends EntityTicker {
     public LivingTicker(BoarPlayer player) {
@@ -57,18 +61,43 @@ public class LivingTicker extends EntityTicker {
             player.getFlagTracker().set(EntityFlag.GLIDING, false);
         }
 
-        this.travelRidden();
-        this.tickBlockCollision();
+        Box oldBox = player.boundingBox.clone();
 
-//        if (this.autoSpinAttackTicks > 0) {
-//            --this.autoSpinAttackTicks;
-//            this.checkAutoSpinAttack(aABB, this.getBoundingBox());
-//        }
-//
-//        if (this.autoSpinAttackTicks > 0) {
-//            --this.autoSpinAttackTicks;
-//            this.checkAutoSpinAttack(aABB, this.getBoundingBox());
-//        }
+        this.travelRidden();
+        this.applyEffectsFromBlocks();
+
+        if (player.autoSpinAttackTicks > 0) {
+            --player.autoSpinAttackTicks;
+            this.checkAutoSpinAttack(oldBox, player.boundingBox);
+        }
+    }
+
+    protected final void checkAutoSpinAttack(Box aABB, Box aABB2) {
+        Box aABB3 = aABB.union(aABB2);
+
+        List<EntityCache> list = player.compensatedWorld.getEntities().values().stream().toList();
+        if (!list.isEmpty()) {
+            for (EntityCache entity : list) {
+                if (entity.getCurrent() == null) {
+                    continue;
+                }
+
+                if (!entity.getCurrent().getBoundingBox().intersects(aABB3)) {
+                    continue;
+                }
+
+                player.dirtySpinStop = true;
+                // player.autoSpinAttackTicks = 0;
+                // player.velocity = player.velocity.multiply(-0.2F);
+                break;
+            }
+        } else if (player.horizontalCollision) {
+            player.stopRiptide();
+        }
+
+        if (player.autoSpinAttackTicks <= 0) {
+            player.stopRiptide();
+        }
     }
 
     protected void travelRidden() {

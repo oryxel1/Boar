@@ -173,7 +173,7 @@ public final class BoarPlayer extends PlayerData {
         }
         vec3 = new Vec3(vec3.x, Math.max(f, vec3.y), vec3.z);
         if (this.getFlagTracker().has(EntityFlag.SPRINTING)) {
-            float g = this.yaw * MathUtil.DEGREE_TO_RAG;
+            float g = this.yaw * MathUtil.DEGREE_TO_RAD;
             vec3 = vec3.add(-TrigMath.sin(g) * 0.2F, 0, TrigMath.cos(g) * 0.2F);
         }
 

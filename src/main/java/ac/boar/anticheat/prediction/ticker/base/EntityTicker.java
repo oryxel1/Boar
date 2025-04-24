@@ -124,7 +124,7 @@ public class EntityTicker {
         return found;
     }
 
-    protected void tickBlockCollision() {
+    protected void applyEffectsFromBlocks() {
         if (player.onGround) {
             final Vector3i lv = player.getOnPos(0.2F);
             player.compensatedWorld.getBlockState(lv, 0).onSteppedOn(player, lv);
@@ -139,7 +139,7 @@ public class EntityTicker {
         }
     }
 
-    protected final void doSelfMove(Vec3 vec3) {
+    public final void doSelfMove(Vec3 vec3) {
         if (player.stuckSpeedMultiplier.lengthSquared() > 1.0E-7) {
             vec3 = vec3.multiply(player.stuckSpeedMultiplier);
             player.stuckSpeedMultiplier = Vec3.ZERO;

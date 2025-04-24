@@ -85,9 +85,9 @@ public class PlayerTicker extends LivingTicker {
         if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
             return Pose.GLIDING;
         }
-//        if (this.isAutoSpinAttack()) {
-//            return Pose.SPIN_ATTACK;
-//        }
+        if (player.getFlagTracker().has(EntityFlag.DAMAGE_NEARBY_MOBS)) {
+            return Pose.SPIN_ATTACK;
+        }
         if (player.getFlagTracker().has(EntityFlag.SNEAKING)/* && !this.abilities.flying */) {
             return Pose.CROUCHING;
         }

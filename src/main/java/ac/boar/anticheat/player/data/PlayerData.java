@@ -1,6 +1,7 @@
 package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.GlobalSetting;
+import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.data.input.PredictionData;
 import ac.boar.anticheat.data.input.VelocityData;
@@ -22,7 +23,9 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
+import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
@@ -98,6 +101,26 @@ public class PlayerData {
     // Attribute related, abilities
     public final Map<String, AttributeInstance> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();
+
+    // Riptide related
+    public boolean dirtyRiptide, dirtySpinStop;
+    public int autoSpinAttackTicks;
+    public ItemData riptideItem = ItemData.AIR;
+    public void setDirtyRiptide(int j, ItemData data) {
+        if (j < 10 || !CompensatedInventory.getEnchantments(data).containsKey(BedrockEnchantment.RIPTIDE)) {
+            return;
+        }
+
+        this.riptideItem = data;
+        this.dirtyRiptide = true;
+    }
+    public void stopRiptide() {
+        this.dirtyRiptide = this.dirtySpinStop = false;
+        this.autoSpinAttackTicks = 0;
+        this.riptideItem = ItemData.AIR;
+
+        this.getFlagTracker().set(EntityFlag.DAMAGE_NEARBY_MOBS, false);
+    }
 
     // Prediction related
     public Pose pose = Pose.STANDING;
