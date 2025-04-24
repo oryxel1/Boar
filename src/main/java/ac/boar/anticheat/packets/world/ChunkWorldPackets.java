@@ -143,7 +143,7 @@ public class ChunkWorldPackets implements PacketListener {
                 // Border blocks.
                 buffer.skipBytes(1);
 
-                // Just ignore the rest... TODO: Block entities.
+                // Just ignore the rest, I don't need those.
                 do {
                     buffer.skipBytes(1);
                 } while (buffer.isReadable());

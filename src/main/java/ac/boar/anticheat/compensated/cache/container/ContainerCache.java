@@ -32,7 +32,6 @@ public class ContainerCache {
         this.blockPosition = blockPosition;
         this.uniqueEntityId = uniqueEntityId;
 
-        // TODO
         this.offset = switch (type) {
             case ENCHANTMENT -> 14;
             case LOOM -> 9;

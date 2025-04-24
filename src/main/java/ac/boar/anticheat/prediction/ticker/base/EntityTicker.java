@@ -43,7 +43,6 @@ public class EntityTicker {
         player.fluidHeight.clear();
         this.checkWaterState();
 
-        // TODO: lava prediction.
         this.updateFluidHeightAndDoFluidPushing(0F, Fluid.LAVA);
     }
 

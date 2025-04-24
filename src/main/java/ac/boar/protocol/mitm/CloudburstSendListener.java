@@ -1,5 +1,6 @@
 package ac.boar.protocol.mitm;
 
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
@@ -43,7 +44,7 @@ public final class CloudburstSendListener extends UpstreamSession {
 
             // We need this to do rewind teleport.
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
-            start.setRewindHistorySize(20); // TODO: Settings.
+            start.setRewindHistorySize(GlobalSetting.REWIND_HISTORY_SIZE_TICKS);
 
             player.sendLatencyStack();
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());

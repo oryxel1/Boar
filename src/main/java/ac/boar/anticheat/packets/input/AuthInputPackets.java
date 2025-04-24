@@ -59,19 +59,14 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
-        // From debugging, prediction should be run first but I'm still unsure about some stuff.
-        // TODO: Is this the case for RESPAWN teleport?
+        // This is likely the case, prediction run before teleport.
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
         new PredictionRunner(player).run(player.tick);
 
-        // After that we can handle teleport.
         this.processQueuedTeleports(player, packet, handleRewind);
-
-        // System.out.println("Input: " + packet.getMotion());
 
         player.postTick();
         if (player.isAbilityExempted()) {
-            // TODO: Flying prediction?
             LegacyAuthInputPackets.processAuthInput(player, packet, true);
             player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
@@ -108,7 +103,7 @@ public class AuthInputPackets implements PacketListener {
 
             queuedTeleports.poll();
 
-            // Bedrock don't reply to teleport individually using a seperate tick packet instead it just simply set its position to
+            // Bedrock don't reply to teleport individually using a separate tick packet instead it just simply set its position to
             // the teleported position and then let us know the *next tick*, so we do the same!
             if (cache instanceof TeleportCache.Normal normal) {
                 this.processTeleport(player, normal, packet);
@@ -156,6 +151,7 @@ public class AuthInputPackets implements PacketListener {
 
         player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f());
 
+        // Keep running prediction until we catch up with the player current tick.
         long currentTick = rewind.getTick();
         for (int i = 0; i < tickDistance; i++) {
             if (currentTick != rewind.getTick() && player.position.distanceTo(player.unvalidatedPosition) > player.getMaxOffset()) {

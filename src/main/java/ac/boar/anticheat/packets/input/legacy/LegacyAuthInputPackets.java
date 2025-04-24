@@ -163,12 +163,6 @@ public class LegacyAuthInputPackets {
         player.dirtyRiptide = false;
         player.dirtySpinStop = false;
 
-        // TODO: Do this and don't fuck up because of entity data.
-//        if (player.sprinting && player.input.getZ() <= 0) {
-//            player.sprinting = false;
-//            player.sinceSprinting = 1;
-//        }
-
 //        final StringBuilder builder = new StringBuilder();
 //        player.getInputData().forEach(input -> builder.append(input).append(","));
 //        Bukkit.broadcastMessage(builder.toString());

@@ -97,10 +97,6 @@ public class PredictionRunner {
             // There is only one possibility, no need to bruteforce or anything.
             player.bestPossibility = possibleVelocities.get(0);
         } else {
-            // TODO: Does this accounted for edge cases? Should be accurate enough most of the time.
-            // TODO: Since bedrock send enough data for us to calculate we only have 2 possibility: Velocity/LastTick.
-            // TODO: Also will this works well when we predicting during rewind?
-
             final Vec3 oldInput = player.input.clone();
 
             // Mini prediction engine!

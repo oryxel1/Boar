@@ -164,7 +164,6 @@ public class ItemRequestProcessor {
 
             case TAKE, PLACE -> {
                 final TransferItemStackRequestAction transferAction = (TransferItemStackRequestAction) action;
-                // TODO: bundle lol.
 
                 final BundleClickProcessor.BundleResponse response = BundleClickProcessor.processBundleClick(inventory, transferAction);
                 if (response.bundle()) {
@@ -301,7 +300,6 @@ public class ItemRequestProcessor {
             }
 
             case CONSUME -> {
-                // TODO: predict this.
                 final ConsumeAction consumeAction = (ConsumeAction) action;
                 final ItemStackRequestSlotData source = consumeAction.getSource();
                 final ContainerCache sourceContainer = this.findContainer(source.getContainer());

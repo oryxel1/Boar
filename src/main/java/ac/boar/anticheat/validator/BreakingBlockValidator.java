@@ -128,8 +128,7 @@ public final class BreakingBlockValidator {
     }
 
     private void tickBreaking(final BreakingData data) {
-        // TODO: implement this
-        // also before implement this I will have to implement inventory compensation lol.
+        // TODO: Implement block breaking calculation based on BDS.
         data.setBreakingProcess(1);
     }
 
