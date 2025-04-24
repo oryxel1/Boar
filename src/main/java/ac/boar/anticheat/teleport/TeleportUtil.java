@@ -38,6 +38,10 @@ public class TeleportUtil {
     }
 
     public void teleportTo(final TeleportCache cache) {
+        if (this.isTeleporting()) {
+            return;
+        }
+
         if (cache instanceof TeleportCache.Rewind) {
             throw new RuntimeException("You're not suppose to pass rewind teleport to this method!");
         }

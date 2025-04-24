@@ -33,6 +33,8 @@ public class PredictionRunner {
             return;
         }
 
+        player.hasLeastRunPredictionOnce = true;
+
         new PlayerTicker(player).tick();
         player.predictionResult = new PredictionData(player.bestPossibility, player.beforeCollision.clone(), player.afterCollision.clone(), player.velocity.clone());
         player.getTeleportUtil().cachePosition(tick, player.position.add(0, EntityDefinitions.PLAYER.offset(), 0).toVector3f());

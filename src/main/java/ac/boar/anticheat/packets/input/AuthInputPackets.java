@@ -26,6 +26,10 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
+        if (event.isCancelled()) {
+            return;
+        }
+
         LegacyAuthInputPackets.processAuthInput(player, packet, true);
 
         boolean handleRewind = true;

@@ -3,6 +3,7 @@ package ac.boar.anticheat.util;
 import ac.boar.anticheat.util.math.Vec3;
 
 import org.cloudburstmc.math.TrigMath;
+import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.math.vector.Vector3i;
 
 public class MathUtil {
@@ -41,6 +42,11 @@ public class MathUtil {
     }
 
     public static boolean isValid(final Vector3i vector3i) {
+        return Float.isFinite(vector3i.getX()) && Float.isFinite(vector3i.getY()) &&
+                Float.isFinite(vector3i.getZ());
+    }
+
+    public static boolean isValid(final Vector3f vector3i) {
         return Float.isFinite(vector3i.getX()) && Float.isFinite(vector3i.getY()) &&
                 Float.isFinite(vector3i.getZ());
     }

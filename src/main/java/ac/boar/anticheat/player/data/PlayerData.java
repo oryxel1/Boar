@@ -74,6 +74,8 @@ public class PlayerData {
     public boolean flying, wasFlying;
     public int sinceTeleport;
 
+    public boolean hasLeastRunPredictionOnce;
+
     // "Transaction" related.
     public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
     public final LatencyUtil latencyUtil = new LatencyUtil(this);
