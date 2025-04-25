@@ -6,7 +6,6 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
-import ac.boar.anticheat.prediction.ticker.base.EntityTicker;
 import ac.boar.anticheat.util.InputUtil;
 
 import ac.boar.anticheat.util.MathUtil;
@@ -26,7 +25,7 @@ import java.util.Map;
 public class LegacyAuthInputPackets {
     public static void updateUnvalidatedPosition(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         player.prevUnvalidatedPosition = player.unvalidatedPosition.clone();
-        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.unvalidatedPosition = new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0));
         player.unvalidatedTickEnd = new Vec3(packet.getDelta());
     }
 
@@ -81,17 +80,11 @@ public class LegacyAuthInputPackets {
 
         InputUtil.processInput(player, packet);
 
-        player.unprocessedRotation = packet.getRotation();
-
-        player.prevYaw = player.yaw;
-        player.prevPitch = player.pitch;
         player.yaw = packet.getRotation().getY();
         player.pitch = packet.getRotation().getX();
 
-        player.prevInteractRotation = player.interactRotation;
+        player.rotation = packet.getRotation();
         player.interactRotation = packet.getInteractRotation().clone();
-
-        player.cameraOrientation = packet.getCameraOrientation();
 
         if (processInputData) {
             processInputData(player);
@@ -137,8 +130,8 @@ public class LegacyAuthInputPackets {
                     int i = CompensatedInventory.getEnchantments(player.riptideItem).get(BedrockEnchantment.RIPTIDE);
                     float f = 1.5f + 0.75F * (float)(i - 1);
 
-                    float g = player.unprocessedRotation.getY();
-                    float h = player.unprocessedRotation.getX();
+                    float g = player.rotation.getY();
+                    float h = player.rotation.getX();
                     float k = -TrigMath.sin(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
                     float l = -TrigMath.sin(h * (MathUtil.DEGREE_TO_RAD));
                     float m = TrigMath.cos(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));

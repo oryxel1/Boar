@@ -37,7 +37,7 @@ public class ChunkWorldPackets implements PacketListener {
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 player.tick = Long.MIN_VALUE;
 
-                player.prevUnvalidatedPosition = player.unvalidatedPosition = new Vec3(packet.getPosition()).subtract(0, EntityDefinitions.PLAYER.offset(), 0);
+                player.prevUnvalidatedPosition = player.unvalidatedPosition = new Vec3(packet.getPosition()).subtract(0, player.getYOffset(), 0);
                 player.setPos(player.unvalidatedPosition.clone());
 
                 player.hasLeastRunPredictionOnce = false;

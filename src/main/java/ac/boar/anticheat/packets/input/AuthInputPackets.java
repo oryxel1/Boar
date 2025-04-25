@@ -121,7 +121,7 @@ public class AuthInputPackets implements PacketListener {
         double distance = packet.getPosition().distance(normal.getPosition().toVector3f());
         // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
         if ((packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) || normal.isKeepVelocity()) && distance <= 1.0E-3F) {
-            player.setPos(new Vec3(packet.getPosition().sub(0, EntityDefinitions.PLAYER.offset(), 0)));
+            player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
             player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
 
             if (!normal.isKeepVelocity()) {
@@ -146,7 +146,7 @@ public class AuthInputPackets implements PacketListener {
 
         player.onGround = rewind.isOnGround();
         player.velocity = rewind.getTickEnd();
-        player.setPos(rewind.getPosition().subtract(0, EntityDefinitions.PLAYER.offset(), 0));
+        player.setPos(rewind.getPosition().subtract(0, player.getYOffset(), 0));
         player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
 
         player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f());

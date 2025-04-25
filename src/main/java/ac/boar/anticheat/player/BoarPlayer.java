@@ -89,7 +89,7 @@ public final class BoarPlayer extends PlayerData {
 
     public void sendLatencyStack(boolean immediate) {
         long id = this.sentStackId.incrementAndGet();
-        if (id == GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP) {
+        if (id == -GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP || id == -GeyserUtil.MAGIC_VIRTUAL_INVENTORY_HACK) {
             id = this.sentStackId.incrementAndGet();
         }
 

@@ -24,6 +24,7 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Fluid;
@@ -61,12 +62,12 @@ public class PlayerData {
     public GameType gameType = GameType.DEFAULT;
 
     // Position, rotation, other.
+    public float yaw, pitch;
     public Vec3 unvalidatedPosition = Vec3.ZERO, prevUnvalidatedPosition = Vec3.ZERO;
-    public Vector2f interactRotation = Vector2f.ZERO, prevInteractRotation = Vector2f.ZERO;
+    public Vector2f interactRotation = Vector2f.ZERO;
 
     public Vec3 position = Vec3.ZERO;
-    public float prevYaw, yaw, prevPitch, pitch;
-    public Vector3f unprocessedRotation = Vector3f.ZERO, cameraOrientation = Vector3f.ZERO;
+    public Vector3f rotation = Vector3f.ZERO;
 
     // Sprinting, sneaking, swimming and other status.
     @Getter
@@ -160,6 +161,10 @@ public class PlayerData {
         return PlayerTicker.POSES.get(pose);
     }
 
+    public float getYOffset() {
+        return this.vehicleData != null ? 0 : EntityDefinitions.PLAYER.offset();
+    }
+
     // Prediction related method
     public final double getMaxOffset() {
         return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD;
@@ -210,6 +215,10 @@ public class PlayerData {
     // Others (methods)
     public final void setPos(Vec3 vec3) {
         this.position = vec3;
+        if (this.vehicleData != null) {
+            return;
+        }
+
         this.setBoundingBox(vec3);
 
         this.inBlockState = null;

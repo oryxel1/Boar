@@ -50,7 +50,7 @@ public class TeleportUtil {
         final MovePlayerPacket packet = new MovePlayerPacket();
         packet.setRuntimeEntityId(player.runtimeEntityId);
         packet.setPosition(teleport.getPosition().toVector3f());
-        packet.setRotation(player.unprocessedRotation);
+        packet.setRotation(player.rotation);
         packet.setOnGround(player.onGround);
         packet.setMode(MovePlayerPacket.Mode.TELEPORT);
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
