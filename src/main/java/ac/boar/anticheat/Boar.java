@@ -6,6 +6,7 @@ import ac.boar.anticheat.packets.other.PacketCheckRunner;
 import ac.boar.anticheat.packets.other.VehiclePackets;
 import ac.boar.anticheat.packets.player.*;
 import ac.boar.anticheat.packets.world.*;
+import ac.boar.mappings.BedrockMappings;
 import lombok.Getter;
 
 import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
@@ -23,6 +24,8 @@ public class Boar {
     private BoarPlayerManager playerManager;
 
     public void init() {
+        BedrockMappings.load();
+
         this.playerManager = new BoarPlayerManager();
         new GeyserEvents();
 

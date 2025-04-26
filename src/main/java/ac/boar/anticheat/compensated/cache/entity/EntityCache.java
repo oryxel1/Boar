@@ -10,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.geysermc.geyser.entity.EntityDefinition;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
+
+import javax.swing.plaf.PanelUI;
 
 @ToString
 @RequiredArgsConstructor
@@ -25,6 +28,15 @@ public final class EntityCache {
     private Vec3 serverPosition = Vec3.ZERO;
 
     private CachedEntityState past, current;
+
+    public boolean affectedByOffset;
+    public float getYOffset() {
+        if (this.affectedByOffset) {
+            return definition.offset();
+        }
+
+        return 0;
+    }
 
     public void init() {
         this.current = new CachedEntityState(this.player, this);

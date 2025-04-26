@@ -97,7 +97,7 @@ public class EntityWorldPackets implements PacketListener {
 
     private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final boolean lerp) {
         final BoarPlayer player = event.getPlayer();
-        final Vec3 position = new Vec3(raw.sub(0, entity.getType() == EntityType.PLAYER ? player.getYOffset() : 0, 0));
+        final Vec3 position = new Vec3(raw.sub(0, entity.getYOffset(), 0));
 
         final double distance = entity.getServerPosition().squaredDistanceTo(position);
         if (distance < 1.0E-15) {

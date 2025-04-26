@@ -27,11 +27,18 @@ repositories {
 
 dependencies {
     compileOnly("org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta6-20250415.154650-7")
-    compileOnly("org.geysermc.geyser:core:2.7.0-SNAPSHOT")
-    compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("org.geysermc.geyser:core:2.7.0-SNAPSHOT") {
+        exclude group: "com.google.code.gson", module: "gson"
+    }
+    compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT") {
+        exclude group: "com.google.code.gson", module: "gson"
+    }
     compileOnly("it.unimi.dsi:fastutil:8.5.15")
     compileOnly("org.projectlombok:lombok:1.18.36")
     annotationProcessor("org.projectlombok:lombok:1.18.36")
+
+    compileOnly("com.google.code.gson:gson:2.3.1")
+    testImplementation("com.google.code.gson:gson:2.3.1")
 }
 
 tasks.named('shadowJar', ShadowJar) {

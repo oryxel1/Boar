@@ -6,6 +6,7 @@ import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.mappings.BedrockMappings;
 import it.unimi.dsi.fastutil.longs.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.chunk.GeyserChunkSection;
 import org.geysermc.geyser.util.MathUtils;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,10 +56,21 @@ public class CompensatedWorld {
         }
 
         final EntityDefinition<?> definition = entity.getDefinition();
-        final EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
+        boolean affectedByOffset = definition.entityType() == EntityType.PLAYER || definition.entityType() == EntityType.MINECART ||
+                definition.entityType().name().toLowerCase().endsWith("_minecart") ||
+                definition.identifier().equalsIgnoreCase("minecraft:boat") || definition.identifier().equalsIgnoreCase("minecraft:chest_boat");
+
+        EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
+
+        final BedrockMappings.CollisionBox collision = BedrockMappings.getEntityCollisionBoxes().get(definition.identifier());
+        if (collision != null) {
+            dimensions = EntityDimensions.fixed(collision.width(), collision.height());
+        }
 
         player.sendLatencyStack();
         final EntityCache cache = new EntityCache(player, definition.entityType(), definition, dimensions, player.sentStackId.get(), runtimeId);
+        cache.setAffectedByOffset(affectedByOffset);
+
         this.entities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
 

@@ -69,7 +69,7 @@ public class Collider {
 
     public static Vec3 collide(final BoarPlayer player, Vec3 movement) {
         Box box = player.boundingBox.clone();
-        List<Box> collisions = /* this.getWorld().getEntityCollisions(this, lv.stretch(movement)) */ new ArrayList<>();
+        List<Box> collisions = player.compensatedWorld.getEntityCollisions(box.stretch(movement));
         Vec3 lv2 = movement.lengthSquared() == 0.0 ? movement : collideBoundingBox(player, movement, box, collisions);
         boolean collisionX = movement.x != lv2.x, collisionZ = movement.z != lv2.z;
         boolean verticalCollision = movement.y != lv2.y;
@@ -93,8 +93,7 @@ public class Collider {
     }
 
     private static Vec3 collideBoundingBox(final BoarPlayer player, final Vec3 movement, final Box box, final List<Box> collisions) {
-        final Box b = box.stretch(movement);
-        collisions.addAll(player.compensatedWorld.collectColliders(player.compensatedWorld.getEntityCollisions(b), b));
+        collisions.addAll(player.compensatedWorld.collectColliders(collisions, box.stretch(movement)));
         return collideWithShapes(movement, box, collisions);
     }
 

@@ -1,6 +1,7 @@
 package ac.boar.anticheat.compensated.world;
 
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -11,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,30 +73,28 @@ public class CompensatedWorldImpl extends CompensatedWorld {
             if (this.isChunkLoaded(x, z)) {
                 builder.addAll(this.getBlockState(x, y, z, 0).findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB, true));
 
-                // This is geyser so this line is not needed for normal bedrock server Ig feel free to uncomment this line.
+                // This is geyser so this line is not neededm for normal bedrock server Ig feel free to uncomment this line.
                 // builder.addAll(this.getBlockState(x, y, z, 1).findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB));
             }
         }
         return builder.build();
     }
 
-    // TODO: Implement this.
     public List<Box> getEntityCollisions(Box aABB) {
-        return new ArrayList<>();
+        final List<Box> boxes = new ArrayList<>();
 
-//        if (aABB.getSize() < 1.0E-7) {
-//            return List.of();
-//        }
-//        Predicate<Entity> predicate = entity == null ? EntitySelector.CAN_BE_COLLIDED_WITH : EntitySelector.NO_SPECTATORS.and(entity::canCollideWith);
-//        List<Entity> list = this.getEntities(entity, aABB.inflate(1.0E-7), predicate);
-//        if (list.isEmpty()) {
-//            return List.of();
-//        }
-//        ImmutableList.Builder builder = ImmutableList.builderWithExpectedSize(list.size());
-//        for (Entity entity2 : list) {
-//            builder.add(Shapes.create(entity2.getBoundingBox()));
-//        }
-//        return builder.build();
+        aABB = aABB.expand(1.0E-7F);
+        for (EntityCache cache : this.getEntities().values()) {
+            boolean canCollide = cache.getDefinition().identifier().equalsIgnoreCase("minecraft:boat") || cache.getDefinition().identifier().equalsIgnoreCase("minecraft:chest_boat") || cache.getType() == EntityType.SHULKER;
+
+            if (!canCollide || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
+                continue;
+            }
+
+            boxes.add(cache.getCurrent().getBoundingBox());
+        }
+
+        return boxes;
     }
 
     public boolean hasChunksAt(int i, int j, int k, int l) {
