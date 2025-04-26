@@ -32,7 +32,7 @@
     "height": 1.8
   },
   "minecraft:boat": {
-    "width": 1.4,
+    "width": 1.8,
     "height": 0.575
   },
   "minecraft:cat": {
@@ -400,7 +400,7 @@
     "height": 0.6
   },
   "minecraft:chest_boat": {
-    "width": 1.4,
+    "width": 1.8,
     "height": 0.575
   },
   "minecraft:frog": {
