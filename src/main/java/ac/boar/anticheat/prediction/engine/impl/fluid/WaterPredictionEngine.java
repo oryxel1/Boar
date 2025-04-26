@@ -20,10 +20,10 @@ public class WaterPredictionEngine extends PredictionEngine {
     public void finalizeMovement() {
         float f = player.getFlagTracker().has(EntityFlag.SPRINTING) ? 0.9F : 0.8F;
         player.velocity = player.velocity.multiply(f, 0.8F, f);
-        player.velocity = this.applyFluidMovingSpeed(player.getEffectiveGravity(), player.velocity);
+        player.velocity = this.getFluidFallingAdjustedMovement(player.getEffectiveGravity(), player.velocity);
     }
 
-    private Vec3 applyFluidMovingSpeed(float gravity, Vec3 motion) {
+    private Vec3 getFluidFallingAdjustedMovement(float gravity, Vec3 motion) {
         if (player.hasEffect(Effect.LEVITATION)) {
             float y = motion.y + (((player.getEffect(Effect.LEVITATION).getAmplifier() + 1) * 0.05F) - motion.y) * 0.2F;
             return new Vec3(motion.x, y, motion.z);

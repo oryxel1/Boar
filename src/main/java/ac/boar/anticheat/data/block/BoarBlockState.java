@@ -28,6 +28,8 @@ import java.util.List;
 @Getter
 public class BoarBlockState {
     private final BlockState state;
+    private final Vector3i position;
+    private final int layer;
 
     public boolean isAir() {
         return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR);
@@ -35,6 +37,10 @@ public class BoarBlockState {
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {
         player.steppingOnHoney = false;
+    }
+
+    public boolean blocksMotion(final BoarPlayer player) {
+        return !state.is(Blocks.COBWEB) && !state.is(Blocks.BAMBOO_SAPLING) && this.isSolid(player);
     }
 
     public void entityInside(final BoarPlayer player, Mutable pos) {
@@ -85,20 +91,8 @@ public class BoarBlockState {
         }
     }
 
-    public boolean blocksMovement(BoarPlayer player, Mutable vector3i, Fluid fluid) {
-        if (state.is(Blocks.ICE)) {
-            return false;
-        }
-
-        if (BlockStateValues.getFluid(state.javaId()) == fluid) {
-            return false;
-        }
-
-        return !state.is(Blocks.COBWEB) && !state.is(Blocks.BAMBOO_SAPLING) && isSolid(player, vector3i);
-    }
-
-    private boolean isSolid(BoarPlayer player, Mutable vector3i) {
-        List<Box> boxes = findCollision(player, Vector3i.from(vector3i.getX(), vector3i.getY(), vector3i.getZ()), Box.EMPTY, false);
+    private boolean isSolid(BoarPlayer player) {
+        List<Box> boxes = findCollision(player, this.position, Box.EMPTY, false);
         if (boxes.isEmpty()) {
             return false;
         } else {

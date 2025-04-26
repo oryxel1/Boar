@@ -3,6 +3,7 @@ package ac.boar.anticheat.data;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.physics.Direction;
 
@@ -15,39 +16,45 @@ public record FluidState(Fluid fluid, float height) {
         return fluid == player.compensatedWorld.getFluidState(pos.getX(), pos.getY() + 1, pos.getZ()).fluid();
     }
 
-    private boolean isEmptyOrThis(FluidState state) {
+    private boolean affectsFlow(FluidState state) {
         return state.fluid == Fluid.EMPTY || state.fluid.equals(this.fluid);
     }
 
-    public Vec3 getVelocity(final BoarPlayer player, final Mutable vector3i, final FluidState state) {
-        Vec3 lv6 = Vec3.ZERO;
-        final Mutable mutable = new Mutable();
-        for (final Direction lv2 : Direction.HORIZONTAL) {
-            mutable.set(vector3i.getX(), vector3i.getY(), vector3i.getZ()).add(lv2.getUnitVector());
-            FluidState lv3 = player.compensatedWorld.getFluidState(mutable);
-            if (!this.isEmptyOrThis(lv3)) {
-                continue;
-            }
+    public Vec3 getFlow(final BoarPlayer player, final Vector3i vector3i, final FluidState fluidState) {
+        float d = 0.0F;
+        float e = 0.0F;
 
-            float f = lv3.height();
-            float g = 0.0F;
-            if (f == 0.0F) {
-                if (player.compensatedWorld.getBlockState(mutable.getX(), mutable.getY(), mutable.getZ(), 0).blocksMovement(
-                        player, mutable, fluid)) {
-                    FluidState lv5 = player.compensatedWorld.getFluidState(mutable.getX(), mutable.getY() - 1, mutable.getZ());
-                    if (this.isEmptyOrThis(lv5) && lv5.height() > 0.0F) {
-                        g = state.height() - (f - 0.8888889F);
-                    }
+        Mutable mutableBlockPos = new Mutable();
+        for (Direction direction : Direction.HORIZONTAL) {
+            mutableBlockPos.set(vector3i, direction.getUnitVector());
+            FluidState fluidState2 = player.compensatedWorld.getFluidState(mutableBlockPos);
+            if (!this.affectsFlow(fluidState2)) continue;
+            float f = fluidState2.height();
+            float g = 0.0f;
+            if (f == 0.0f) {
+                Vector3i blockPos2 = Vector3i.from(mutableBlockPos.getX(), mutableBlockPos.getY() - 1, mutableBlockPos.getZ());
+                FluidState fluidState3;
+                if (!player.compensatedWorld.getBlockState(mutableBlockPos, 0).blocksMotion(player)
+                        && this.affectsFlow(fluidState3 = player.compensatedWorld.getFluidState(blockPos2)) && (f = fluidState3.height()) > 0.0f) {
+                    g = fluidState.height() - (f - 0.8888889f);
                 }
-            } else if (f > 0.0F) {
-                g = state.height() - f;
+            } else if (f > 0.0f) {
+                g = fluidState.height() - f;
             }
-
-            if (g != 0.0F) {
-                lv6 = lv6.add(lv2.getUnitVector().getX() * g, 0, lv2.getUnitVector().getZ() * g);
-            }
+            if (g == 0.0f) continue;
+            d += (direction.getUnitVector().getX() * g);
+            e += (direction.getUnitVector().getZ() * g);
         }
+        Vec3 vec3 = new Vec3(d, 0, e);
 
-        return lv6.length() > 0 ? lv6.normalize() : lv6;
+//        if (fluidState.getValue(FALLING).booleanValue()) {
+//            for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+//                mutableBlockPos.setWithOffset((Vec3i)blockPos, direction2);
+//                if (!this.isSolidFace(blockGetter, mutableBlockPos, direction2) && !this.isSolidFace(blockGetter, (BlockPos)mutableBlockPos.above(), direction2)) continue;
+//                vec3 = vec3.normalize().add(0.0, -6.0, 0.0);
+//                break;
+//            }
+//        }
+        return vec3.normalize();
     }
 }

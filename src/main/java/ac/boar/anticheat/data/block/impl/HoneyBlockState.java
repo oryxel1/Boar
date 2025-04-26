@@ -8,8 +8,8 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.type.BlockState;
 
 public class HoneyBlockState extends BoarBlockState {
-    public HoneyBlockState(BlockState state) {
-        super(state);
+    public HoneyBlockState(BlockState state, Vector3i position, int layer) {
+        super(state, position, layer);
     }
 
     @Override

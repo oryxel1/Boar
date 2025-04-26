@@ -6,6 +6,7 @@ import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.mappings.BedrockMappings;
 import it.unimi.dsi.fastutil.longs.*;
 import lombok.Getter;
@@ -115,6 +116,10 @@ public class CompensatedWorld {
         palette.setFullBlock(x & 0xF, y & 0xF, z & 0xF, layer, block);
     }
 
+    public BoarBlockState getBlockState(Mutable vector3i, int layer) {
+        return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer);
+    }
+
     public BoarBlockState getBlockState(Vector3i vector3i, int layer) {
         return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer);
     }
@@ -122,12 +127,12 @@ public class CompensatedWorld {
     public BoarBlockState getBlockState(int x, int y, int z, int layer) {
         BlockState state = BlockState.of(getBlockAt(x, y, z, layer));
         if (state.is(Blocks.HONEY_BLOCK)) {
-            return new HoneyBlockState(state);
+            return new HoneyBlockState(state, Vector3i.from(x, y, z), layer);
         } else if (state.is(Blocks.SLIME_BLOCK)) {
-            return new SlimeBlockState(state);
+            return new SlimeBlockState(state, Vector3i.from(x, y, z), layer);
         }
 
-        return new BoarBlockState(state);
+        return new BoarBlockState(state, Vector3i.from(x, y, z), layer);
     }
 
     public int getBlockAt(int x, int y, int z, int layer) {

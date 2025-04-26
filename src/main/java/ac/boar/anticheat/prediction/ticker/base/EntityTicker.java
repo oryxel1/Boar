@@ -4,6 +4,7 @@ import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
@@ -76,48 +77,49 @@ public class EntityTicker {
             return false;
         }
 
-        boolean found = false;
-        Vec3 velocity = Vec3.ZERO;
-        float maxFluidHeight = 0;
-        int fluidCount = 0;
-
         final Box box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
         final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
                 GenericMath.floor(box.minX), GenericMath.floor(box.minY), GenericMath.floor(box.minZ),
-                GenericMath.floor(box.maxX), GenericMath.floor(box.maxY), GenericMath.floor(box.maxZ));
+                GenericMath.ceil(box.maxX), GenericMath.ceil(box.maxY), GenericMath.ceil(box.maxZ));
 
-        final Mutable mutable = new Mutable();
+        float maxFluidHeight = 0.0F;
+        boolean bl = /* this.isPushedByFluid(); */ true;
+        boolean found = false;
+        Vec3 fluidPushVelocity = Vec3.ZERO;
+        int fluidCount = 0;
+
+        Mutable mutable = new Mutable();
         for (iterator.reset(); iterator.hasNext(); iterator.next()) {
             mutable.set(iterator.getX(), iterator.getY(), iterator.getZ());
-            final FluidState state = player.compensatedWorld.getFluidState(mutable);
 
-            if (state.fluid() != tag) {
-                continue;
-            }
-
-            float height = mutable.getY() + state.getHeight(player, mutable);
-            if (height < box.minY) {
-                continue;
-            }
-
+            float f;
+            FluidState fluidState = player.compensatedWorld.getFluidState(iterator.getX(), iterator.getY(), iterator.getZ());
+            if (fluidState.fluid() != (tag) || !((f = (float)iterator.getY() + fluidState.getHeight(player, mutable)) >= box.minY)) continue;
             found = true;
-            maxFluidHeight = Math.max(height - box.minY, maxFluidHeight);
-
-            Vec3 lv5 = state.getVelocity(player, mutable, state);
+            maxFluidHeight = Math.max(f - box.minY, maxFluidHeight);
+            if (!bl) continue;
+            Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(iterator.getX(), iterator.getY(), iterator.getZ()), fluidState);
 //            if (maxFluidHeight < 0.4) {
-//                lv5 = lv5.multiply(maxFluidHeight);
+//                vec32 = vec32.multiply(maxFluidHeight);
 //            }
-            velocity = velocity.add(lv5);
-
-            fluidCount++;
+            fluidPushVelocity = fluidPushVelocity.add(vec32);
+            ++fluidCount;
         }
 
-        if (velocity.length() > 0.0 && fluidCount > 0) {
-            velocity = velocity.multiply(1.0f / fluidCount);
-        }
+        if (fluidPushVelocity.length() > 0.0) {
+            if (fluidCount > 0) {
+                fluidPushVelocity = fluidPushVelocity.multiply(1.0F / fluidCount);
+            }
+            if (!(this instanceof PlayerTicker)) {
+                fluidPushVelocity = fluidPushVelocity.normalize();
+            }
+            fluidPushVelocity = fluidPushVelocity.multiply(speed);
+//            if (Math.abs(vec33.x) < 0.003 && Math.abs(vec33.z) < 0.003 && fluidPushVelocity.length() < 0.0045000000000000005) {
+//                fluidPushVelocity = fluidPushVelocity.normalize().scale(0.0045000000000000005);
+//            }
 
-        // Fluid pushing is broken as shit.
-        // player.velocity = player.velocity.add(velocity.multiply(speed));
+            player.velocity = player.velocity.add(fluidPushVelocity);
+        }
         player.fluidHeight.put(tag, maxFluidHeight);
 
         return found;

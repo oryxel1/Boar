@@ -7,8 +7,8 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.type.BlockState;
 
 public class SlimeBlockState extends BoarBlockState {
-    public SlimeBlockState(BlockState state) {
-        super(state);
+    public SlimeBlockState(BlockState state, Vector3i position, int layer) {
+        super(state, position, layer);
     }
 
     @Override

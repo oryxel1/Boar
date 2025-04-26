@@ -22,7 +22,7 @@ public class LavaPredictionEngine extends PredictionEngine {
         float gravity = player.getEffectiveGravity();
         if (player.fluidHeight.getOrDefault(Fluid.LAVA, 0F) <= player.getFluidJumpThreshold()) {
             player.velocity = player.velocity.multiply(0.5F, 0.8F, 0.5F);
-            player.velocity = this.applyFluidMovingSpeed(gravity, player.velocity);
+            player.velocity = this.getFluidFallingAdjustedMovement(gravity, player.velocity);
         } else {
             player.velocity = player.velocity.multiply(0.5F);
         }
@@ -32,7 +32,7 @@ public class LavaPredictionEngine extends PredictionEngine {
         }
     }
 
-    private Vec3 applyFluidMovingSpeed(float gravity, Vec3 motion) {
+    private Vec3 getFluidFallingAdjustedMovement(float gravity, Vec3 motion) {
         if (player.hasEffect(Effect.LEVITATION)) {
             float y = motion.y + (((player.getEffect(Effect.LEVITATION).getAmplifier() + 1) * 0.05F) - motion.y) * 0.2F;
             return new Vec3(motion.x, y, motion.z);
