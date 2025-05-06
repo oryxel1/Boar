@@ -38,7 +38,7 @@ public class LavaPredictionEngine extends PredictionEngine {
             return new Vec3(motion.x, y, motion.z);
         }
 
-        if (gravity != 0.0 && !player.getFlagTracker().has(EntityFlag.SWIMMING)) {
+        if (gravity != 0.0) {
             return new Vec3(motion.x, motion.y - (gravity / 16.0F), motion.z);
         }
 
