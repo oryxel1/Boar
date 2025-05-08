@@ -63,6 +63,8 @@ public class TeleportUtil {
         player.sendLatencyStack(immediate);
         this.queuedTeleports.add(new TeleportCache.Normal(player.sentStackId.get(), position, mode == MovePlayerPacket.Mode.NORMAL));
         this.lastKnowValid = position.toVector3f();
+
+        this.rewindHistory.clear();
     }
 
     // Rewind teleport part.
