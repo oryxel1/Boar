@@ -18,7 +18,7 @@ public class PlayerVelocityPackets implements PacketListener {
                 return;
             }
 
-            player.sendLatencyStack();
+            player.sendLatencyStack(immediate);
             player.queuedVelocities.put(player.sentStackId.get() + 1, new VelocityData(player.sentStackId.get() + 1, player.tick, new Vec3(packet.getMotion())));
             event.getPostTasks().add(player::sendLatencyStack);
         }

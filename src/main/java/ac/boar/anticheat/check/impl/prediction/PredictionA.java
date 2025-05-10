@@ -19,7 +19,7 @@ public class PredictionA extends OffsetHandlerCheck {
         }
 
         if (offset > player.getMaxOffset()) {
-            if (player.sinceTeleport > 20) {
+            if (shouldDoFail()) {
                 if (player.bestPossibility.getType() == VectorType.VELOCITY) {
                     player.getCheckHolder().get(Velocity.class).fail("o=" + offset);
                 } else {
@@ -29,5 +29,9 @@ public class PredictionA extends OffsetHandlerCheck {
 
             player.getTeleportUtil().rewind(player.tick);
         }
+    }
+
+    public boolean shouldDoFail() {
+        return player.sinceTeleport > 20 && !player.tryingToElytraBoost && !player.getTeleportUtil().isTeleporting() && player.sinceElytraBoost <= 0;
     }
 }

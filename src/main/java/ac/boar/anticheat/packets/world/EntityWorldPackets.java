@@ -7,8 +7,6 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.packet.*;
-import org.geysermc.geyser.entity.EntityDefinitions;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.Set;
 

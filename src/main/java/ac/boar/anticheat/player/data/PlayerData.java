@@ -105,6 +105,10 @@ public class PlayerData {
     public final Map<String, AttributeInstance> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();
 
+    // Ehm hacky
+    public boolean tryingToElytraBoost;
+    public int sinceElytraBoost;
+
     // Riptide related
     public boolean dirtyRiptide, dirtySpinStop;
     public int autoSpinAttackTicks;

@@ -135,6 +135,10 @@ public final class BoarPlayer extends PlayerData {
 
     public void postTick() {
         this.getUseItemCache().tick();
+
+        if (this.sinceElytraBoost > 0) {
+            this.sinceElytraBoost--;
+        }
     }
 
     public float getBlockSpeedFactor() {
