@@ -5,7 +5,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.geysermc.geyser.entity.EntityDefinitions;
 
 public class PostAuthInputPackets implements PacketListener {
     @Override
@@ -13,6 +12,7 @@ public class PostAuthInputPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
 
         if (event.getPacket() instanceof PlayerAuthInputPacket packet) {
+            player.dirtyRiptide = false;
             player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags()));
 
             // Self-explanatory, player ain't supposed to move if they're teleporting.

@@ -1,5 +1,6 @@
 package ac.boar.anticheat.prediction.ticker.impl;
 
+import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
@@ -8,10 +9,14 @@ import ac.boar.anticheat.prediction.engine.impl.GroundAndAirPredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.fluid.LavaPredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.fluid.WaterPredictionEngine;
 import ac.boar.anticheat.prediction.ticker.base.EntityTicker;
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
+import org.cloudburstmc.math.GenericMath;
+import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -25,6 +30,29 @@ public class LivingTicker extends EntityTicker {
     @Override
     public void tick() {
         super.tick();
+
+        if (player.dirtyRiptide && player.getInputData().contains(PlayerAuthInputData.START_SPIN_ATTACK)) {
+            player.getFlagTracker().set(EntityFlag.DAMAGE_NEARBY_MOBS, true);
+            // System.out.println("Trying to riptide.");
+
+            int i = CompensatedInventory.getEnchantments(player.riptideItem).get(BedrockEnchantment.RIPTIDE);
+            float f = 1.5f + 0.75F * (i - 1);
+
+            float g = player.rotation.getY();
+            float h = player.rotation.getX();
+            float k = -TrigMath.sin(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
+            float l = -TrigMath.sin(h * (MathUtil.DEGREE_TO_RAD));
+            float m = TrigMath.cos(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
+            float n = (float) GenericMath.sqrt(k * k + l * l + m * m);
+
+            player.velocity = player.velocity.add(k * (f / n), l * (f / n), m * (f / n));
+            player.autoSpinAttackTicks = 20;
+//            if (player.onGround) {
+//                this.doSelfMove(new Vec3(0, 1.1999999284744263F, 0));
+//                player.prevUnvalidatedPosition = player.position.clone();
+//            }
+        }
+
         this.aiStep();
     }
 

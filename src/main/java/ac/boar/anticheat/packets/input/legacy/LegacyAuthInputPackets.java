@@ -119,31 +119,6 @@ public class LegacyAuthInputPackets {
                 case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
                 case STOP_FLYING -> player.flying = false;
 
-                case START_SPIN_ATTACK -> {
-                    if (!player.dirtyRiptide) {
-                        return;
-                    }
-
-                    player.getFlagTracker().set(EntityFlag.DAMAGE_NEARBY_MOBS, true);
-                    // System.out.println("Trying to riptide.");
-
-                    int i = CompensatedInventory.getEnchantments(player.riptideItem).get(BedrockEnchantment.RIPTIDE);
-                    float f = 1.5f + 0.75F * (float)(i - 1);
-
-                    float g = player.rotation.getY();
-                    float h = player.rotation.getX();
-                    float k = -TrigMath.sin(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
-                    float l = -TrigMath.sin(h * (MathUtil.DEGREE_TO_RAD));
-                    float m = TrigMath.cos(g * (MathUtil.DEGREE_TO_RAD)) * TrigMath.cos(h * (MathUtil.DEGREE_TO_RAD));
-                    float n = (float) GenericMath.sqrt(k * k + l * l + m * m);
-                    player.velocity = player.velocity.add(k * (f / n), l * (f / n), m * (f / n));
-                    player.autoSpinAttackTicks = 20;
-//                    if (player.onGround) {
-//                        new EntityTicker(player).doSelfMove(new Vec3(0, 1.1999999284744263F, 0));
-//                        player.unvalidatedPosition = player.position.clone();
-//                    }
-                }
-
                 case STOP_SPIN_ATTACK -> {
                     if (player.dirtySpinStop) {
                         player.stopRiptide();
@@ -168,7 +143,6 @@ public class LegacyAuthInputPackets {
             }
         }
 
-        player.dirtyRiptide = false;
         player.dirtySpinStop = false;
 
 //        final StringBuilder builder = new StringBuilder();

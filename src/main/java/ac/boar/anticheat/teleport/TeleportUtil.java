@@ -93,7 +93,7 @@ public class TeleportUtil {
         packet.setPredictionType(player.vehicleData != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
 
         player.sendLatencyStack(true);
-        this.queuedTeleports.add(new TeleportCache.Rewind(player.sentStackId.get(), player.tick, new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), onGround));
+        this.queuedTeleports.add(new TeleportCache.Rewind(player.sentStackId.get(), tick, new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), onGround));
         this.player.cloudburstDownstream.sendPacketImmediately(packet);
     }
 
