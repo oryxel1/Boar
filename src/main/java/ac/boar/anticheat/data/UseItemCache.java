@@ -4,7 +4,9 @@ import ac.boar.anticheat.data.cache.UseDurationCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.protocol.bedrock.data.MovementEffectType;
@@ -12,6 +14,8 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.packet.MovementEffectPacket;
 import org.geysermc.geyser.item.Items;
+
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public class UseItemCache {
@@ -22,6 +26,10 @@ public class UseItemCache {
     private int useItemRemaining;
 
     private int goatHornCooldown;
+
+    @Getter
+    @Setter
+    private Consumer<UseItemCache> consumer;
 
     public void tick() {
         if (this.goatHornCooldown > 0) {
@@ -97,19 +105,21 @@ public class UseItemCache {
             return;
         }
 
-        if (itemId == Items.GOAT_HORN.javaId()) {
-            if (goatHornCooldown > 0) {
-                return;
+        this.consumer = useItemCache -> {
+            if (itemId == Items.GOAT_HORN.javaId()) {
+                if (goatHornCooldown > 0) {
+                    return;
+                }
+
+                this.goatHornCooldown = useDuration;
             }
 
-            this.goatHornCooldown = useDuration;
-        }
+            useItemCache.useItemJavaId = itemId;
 
-        this.useItemJavaId = itemId;
+            useItemCache.useItem = useItem;
+            useItemCache.useItemRemaining = useDuration;
 
-        this.useItem = useItem;
-        this.useItemRemaining = useDuration;
-
-        player.getFlagTracker().set(EntityFlag.USING_ITEM, true);
+            player.getFlagTracker().set(EntityFlag.USING_ITEM, true);
+        };
     }
 }

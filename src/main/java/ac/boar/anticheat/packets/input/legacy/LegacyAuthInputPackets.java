@@ -150,6 +150,21 @@ public class LegacyAuthInputPackets {
                         player.velocity = player.velocity.multiply(-0.2F);
                     }
                 }
+
+                case START_USING_ITEM -> {
+                    if (player.getUseItemCache().getConsumer() != null) {
+                        player.getUseItemCache().getConsumer().accept(player.getUseItemCache());
+                    }
+                }
+            }
+        }
+
+        if (player.getUseItemCache().getConsumer() != null) {
+            player.getUseItemCache().setConsumer(null);
+
+            // A bit hacky but ok.
+            if (!player.getInputData().contains(PlayerAuthInputData.START_USING_ITEM)) {
+                player.getSession().releaseItem();
             }
         }
 
