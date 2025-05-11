@@ -1,32 +1,26 @@
 # Boar
 
-Boar is an extra plugin for [GeyserMC](https://github.com/GeyserMC/Geyser) project aims to 
-achieve something similar to [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) on bedrock (but stricter).
-This project is still in development, and is more like a PoC than an anti-cheat.
+Boar is a POC project that allows you to enable [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) for 
+[GeyserMC](https://github.com/GeyserMC/Geyser) project with a few more checks and improvements compare to BDS.
 
-### Boar now keep track of the differences between Java - Bedrock [here](https://github.com/Oryxel/Boar/blob/new-engine/DIFFERENCES_WIKI.md) with detailed explainations.
+### Documented differences between Java - Bedrock [here](https://github.com/Oryxel/Boar/blob/new-engine/DIFFERENCES_WIKI.md) with detailed explainations.
 
 ### ⚠️ WARNING: THIS ONLY FOR BEDROCK PLAYER NOT JAVA PLAYER! YOU WILL NEED TO PAIR THIS WITH ANOTHER JAVA ANTICHEAT!
 A dedicated (proof of concept) anti cheat for GeyserMC project.
 - Warning: No guarantee about performance, lag compatibility, or if I will ever finish this.
 
-## Features
-- A packet managing system for GeyserMC
-- An uncompleted prediction engine that only works on normal/elytra/water/lava movement (with around 1.0E-5 accuracy).
-- 1:1 recreation of player world server-sided that accounted for lag (no placing support yet).
-- A smooth rewind setback system that is the same as server-auth-with-rewind (even if it falses it will be hard to notice cuz it is pretty smooth lol).
+### Features
+- I will keep this short: lag compensation, movement simulation (prediction), smooth rewind setback.
 
-## Problems
-- A lot of movement differences is not implemented.
-- ~~Player falses after teleport, I can't figure out why movement act weirdly after teleport yet. (Partially fixed)~~
-- Step motion is different on Bedrock, and collision in general.
-- A lot of stuff is still unimplemented.
+### Problems
+- A lot of movement differences (and features) is not implemented.
 
 ### Differences from other Geyser anti-cheat.
 #### You can take a look at a list of "other anti-cheats" [here](https://geysermc.org/wiki/geyser/anticheat-compatibility/)
+- It's free..... and open-source, and it's a prediction ac, match BDS rewind stuff, the list go on.
 - Fully packet-based that read and interfere directly (if needed) bedrock packet that client/server sent.
 - Fully prediction-based, check player movement on a 1:1 scale, detecting any *1.0E-4* movement abnormality.
-- Fully synced world (and other) that synced with player ping to account for lag.
+- Fully synced to the player ping to account for lag.
 
 ### Credits
 - https://github.com/GeyserMC/Geyser
