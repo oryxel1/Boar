@@ -81,6 +81,10 @@ public class BedrockCollision {
             return SINGLE_CHEST_SHAPE;
         }
 
+        if (state.is(Blocks.SEA_PICKLE)) {
+            return EMPTY_SHAPE;
+        }
+
         if (state.block() instanceof BedBlock) {
             return BED_SHAPE;
         }
