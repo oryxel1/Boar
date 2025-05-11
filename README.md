@@ -31,8 +31,4 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 ### Credits
 - https://github.com/GeyserMC/Geyser
 - https://github.com/RaphiMC/ViaBedrock
-- https://github.com/ViaVersion/ViaFabricPlus
 - https://github.com/Mojang/bedrock-protocol-docs
-- https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Bedrock_Protocol (wiki.vg)
-
-#### Also checkout "prototype" [branch](https://github.com/Oryxel/Boar/tree/prototype)
