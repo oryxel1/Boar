@@ -34,7 +34,7 @@ public class TeleportUtil {
     }
 
     public void teleportTo(final Vector3f position) {
-        this.teleportTo(new TeleportCache.Normal(0, new Vec3(position), false));
+        this.teleportTo(new TeleportCache.Normal(0, new Vec3(position), false, false));
     }
 
     public void teleportTo(final TeleportCache cache) {
@@ -61,7 +61,7 @@ public class TeleportUtil {
 
     public void queueTeleport(final Vec3 position, boolean immediate, MovePlayerPacket.Mode mode) {
         player.sendLatencyStack(immediate);
-        this.queuedTeleports.add(new TeleportCache.Normal(player.sentStackId.get(), position, mode == MovePlayerPacket.Mode.NORMAL));
+        this.queuedTeleports.add(new TeleportCache.Normal(player.sentStackId.get(), position, mode == MovePlayerPacket.Mode.NORMAL, mode == MovePlayerPacket.Mode.RESPAWN));
         this.lastKnowValid = position.toVector3f();
 
         this.rewindHistory.clear();
