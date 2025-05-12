@@ -6,6 +6,7 @@ import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.mappings.BedrockMappings;
 import it.unimi.dsi.fastutil.longs.*;
@@ -19,6 +20,7 @@ import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.chunk.GeyserChunkSection;
+import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
@@ -117,19 +119,33 @@ public class CompensatedWorld {
     }
 
     public BoarBlockState getBlockState(Mutable vector3i, int layer) {
-        return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer);
+        return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer, true);
     }
 
     public BoarBlockState getBlockState(Vector3i vector3i, int layer) {
-        return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer);
+        return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer, true);
+    }
+
+    public BoarBlockState getBlockState(Vector3i vector3i, int layer, boolean checkForFences) {
+        return getBlockState(vector3i.getX(), vector3i.getY(), vector3i.getZ(), layer, checkForFences);
     }
 
     public BoarBlockState getBlockState(int x, int y, int z, int layer) {
+        return getBlockState(x, y, z, layer, true);
+    }
+
+    public BoarBlockState getBlockState(int x, int y, int z, int layer, boolean checkForFences) {
         BlockState state = BlockState.of(getBlockAt(x, y, z, layer));
         if (state.is(Blocks.HONEY_BLOCK)) {
             return new HoneyBlockState(state, Vector3i.from(x, y, z), layer);
         } else if (state.is(Blocks.SLIME_BLOCK)) {
             return new SlimeBlockState(state, Vector3i.from(x, y, z), layer);
+        }
+
+        // Only check on layer 0, layer 1 is basically just render and the only exception is water (and maybe some other blocks)
+        if (layer == 0 && checkForFences && player.getSession().getTagCache().is(BlockTag.FENCES, state.block())) {
+            // Manually calculate fence block state since this is handled client-sided on Bedrock, not by the server.
+            state = BlockUtil.findFenceBlockState(player, Vector3i.from(x, y, z));
         }
 
         return new BoarBlockState(state, Vector3i.from(x, y, z), layer);

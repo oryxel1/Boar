@@ -41,6 +41,11 @@ public class Box implements Cloneable {
         return new Box(center.x - dx / 2.0F, center.y - dy / 2.0F, center.z - dz / 2.0F, center.x + dx / 2.0F, center.y + dy / 2.0F, center.z + dz / 2.0F);
     }
 
+    public boolean equals(Box box) {
+        return this.minX == box.minX && this.minY == box.minY && this.minZ == box.minZ &&
+                this.maxX == box.maxX && this.maxY == box.maxY && this.maxZ == box.maxZ;
+    }
+
     public float chooseMin(Axis axis) {
         return switch (axis) {
             case X -> this.minX;

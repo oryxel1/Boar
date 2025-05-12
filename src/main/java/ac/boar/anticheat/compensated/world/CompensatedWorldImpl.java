@@ -62,19 +62,11 @@ public class CompensatedWorldImpl extends CompensatedWorld {
             builder.addAll(list);
         }
 
-        // Bedrock void limit.
-//        if (aABB.minY - 1 == this.getDimension().minY() - 40) {
-//            builder.add(new AABB(this.getPlayer().position.x, this.getPlayer().position.y - 1, this.getPlayer().position.z, this.getPlayer().position.x + 1, this.getPlayer().position.y, this.getPlayer().position.z + 1));
-//        }
-
         final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(aABB);
         while (iterator.step()) {
             int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
             if (this.isChunkLoaded(x, z)) {
                 builder.addAll(this.getBlockState(x, y, z, 0).findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB, true));
-
-                // This is geyser so this line is not neededm for normal bedrock server Ig feel free to uncomment this line.
-                // builder.addAll(this.getBlockState(x, y, z, 1).findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB));
             }
         }
         return builder.build();

@@ -18,6 +18,7 @@ import org.geysermc.geyser.level.physics.BoundingBox;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.translator.collision.BlockCollision;
+import org.geysermc.geyser.translator.collision.SolidCollision;
 import org.geysermc.geyser.util.BlockUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -30,6 +31,14 @@ public class BoarBlockState {
     private final BlockState state;
     private final Vector3i position;
     private final int layer;
+
+    public boolean isFaceSturdy(BoarPlayer player) {
+        if (this.state.is(Blocks.SCAFFOLDING)) {
+            return false;
+        }
+
+        return BlockUtils.getCollision(state.javaId()) instanceof SolidCollision;
+    }
 
     public boolean isAir() {
         return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR);
@@ -92,7 +101,7 @@ public class BoarBlockState {
     }
 
     private boolean isSolid(BoarPlayer player) {
-        List<Box> boxes = findCollision(player, this.position, Box.EMPTY, false);
+        List<Box> boxes = findCollision(player, Vector3i.ZERO, Box.EMPTY, false);
         if (boxes.isEmpty()) {
             return false;
         } else {
