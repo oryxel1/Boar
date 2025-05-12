@@ -3,6 +3,7 @@ package ac.boar.protocol.mitm;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.BoarPlayer;
@@ -11,6 +12,7 @@ import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
 import org.cloudburstmc.protocol.common.PacketSignal;
 
 @RequiredArgsConstructor
+@Getter
 public final class CloudburstReceiveListener implements BedrockPacketHandler {
     private final BoarPlayer player;
     private final BedrockPacketHandler oldHandler;

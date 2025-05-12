@@ -9,6 +9,7 @@ import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
+import ac.boar.protocol.mitm.CloudburstReceiveListener;
 import lombok.Getter;
 
 import ac.boar.anticheat.check.api.holder.CheckHolder;
@@ -42,6 +43,7 @@ public final class BoarPlayer extends PlayerData {
     private final GeyserSession session;
     public BedrockServerSession cloudburstDownstream;
     public CloudburstSendListener cloudburstUpstream;
+    public CloudburstReceiveListener downstreamPacketHandler;
 
     public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;

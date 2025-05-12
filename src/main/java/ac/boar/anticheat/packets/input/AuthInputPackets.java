@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.input;
 
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
@@ -12,7 +13,6 @@ import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -150,6 +150,13 @@ public class AuthInputPackets implements PacketListener {
         player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
 
         player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f());
+        if (GlobalSetting.RESEND_POSITION_DURING_REWIND) {
+            final TickData data = player.getTeleportUtil().getAuthInputHistory().get(rewind.getTick());
+            if (data != null) {
+                LegacyAuthInputPackets.correctInputData(player, data.packet());
+                player.downstreamPacketHandler.getOldHandler().handle(data.packet());
+            }
+        }
 
         // Keep running prediction until we catch up with the player current tick.
         long currentTick = rewind.getTick();
@@ -158,6 +165,7 @@ public class AuthInputPackets implements PacketListener {
                 player.unvalidatedPosition = player.position.clone();
             }
 
+            PlayerAuthInputPacket authInputPacket = null;
             currentTick++;
             if (currentTick == player.tick) {
                 LegacyAuthInputPackets.processAuthInput(player, packet, true);
@@ -169,11 +177,19 @@ public class AuthInputPackets implements PacketListener {
 
                 // Reverted back to the old flags.
                 player.getFlagTracker().set(data.flags(), false);
+                authInputPacket = data.packet();
             } else {
                 throw new RuntimeException("Failed find auth input history for rewind.");
             }
 
             new PredictionRunner(player).run(currentTick);
+
+            if (currentTick != player.tick && authInputPacket != null && GlobalSetting.RESEND_POSITION_DURING_REWIND) {
+                authInputPacket.setPosition(player.position.toVector3f());
+                LegacyAuthInputPackets.correctInputData(player, authInputPacket);
+
+                player.downstreamPacketHandler.getOldHandler().handle(authInputPacket);
+            }
         }
     }
 

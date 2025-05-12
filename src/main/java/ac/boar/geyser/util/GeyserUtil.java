@@ -30,7 +30,7 @@ public class GeyserUtil {
     private static void injectCloudburstDownstream(final BoarPlayer player) {
         final BedrockServerSession session = player.cloudburstDownstream;
         final BedrockPacketHandler handler = session.getPacketHandler();
-        session.setPacketHandler(new CloudburstReceiveListener(player, handler));
+        session.setPacketHandler(player.downstreamPacketHandler = new CloudburstReceiveListener(player, handler));
     }
 
     private static void injectCloudburstUpstream(final BoarPlayer player) throws Exception {

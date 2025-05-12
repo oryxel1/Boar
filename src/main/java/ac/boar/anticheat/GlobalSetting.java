@@ -4,4 +4,6 @@ package ac.boar.anticheat;
 public class GlobalSetting {
     public static int REWIND_HISTORY_SIZE_TICKS = 20;
     public static double PLAYER_POSITION_ACCEPTANCE_THRESHOLD = 1.0E-4;
+
+    public static boolean RESEND_POSITION_DURING_REWIND = true;
 }
