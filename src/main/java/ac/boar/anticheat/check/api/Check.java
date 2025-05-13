@@ -25,6 +25,6 @@ public class Check {
 
         final String msg = "§3" + player.getSession().getPlayerEntity().getDisplayName() + "§7 failed §6" + name + "(" + type + ") " +
                 (experimental ? "§2(Experimental) " : "") + "§7x" + vl + " " + verbose;
-        ChatUtil.alert(msg);
+        ChatUtil.alert(player, msg);
     }
 }

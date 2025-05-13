@@ -1,8 +1,5 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
-
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 
@@ -11,10 +8,6 @@ version = '1.0'
 
 repositories {
     mavenCentral()
-    maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
     maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
@@ -30,9 +23,6 @@ dependencies {
     compileOnly("org.geysermc.geyser:core:2.7.1-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
-    compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT") {
-        exclude group: "com.google.code.gson", module: "gson"
-    }
     compileOnly("it.unimi.dsi:fastutil:8.5.15")
     compileOnly("org.projectlombok:lombok:1.18.36")
     annotationProcessor("org.projectlombok:lombok:1.18.36")
@@ -41,9 +31,6 @@ dependencies {
     testImplementation("com.google.code.gson:gson:2.3.1")
 }
 
-tasks.named('shadowJar', ShadowJar) {
-    relocate 'it.unimi.dsi.fastutil.ints', 'org.geysermc.geyser.platform.spigot.shaded.it.unimi.dsi.fastutil.ints'
-}
 
 def targetJavaVersion = 17
 java {

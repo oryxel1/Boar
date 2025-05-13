@@ -2,8 +2,9 @@ package ac.boar.anticheat.packets.world;
 
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.geyser.BlockStorage;
+import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.plugin.BoarSpigot;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import io.netty.buffer.ByteBuf;
@@ -12,10 +13,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.util.VarInts;
-import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.level.BedrockDimension;
-import org.geysermc.geyser.level.chunk.BlockStorage;
-import org.geysermc.geyser.level.chunk.GeyserChunkSection;
 import org.geysermc.geyser.level.chunk.bitarray.BitArray;
 import org.geysermc.geyser.level.chunk.bitarray.BitArrayVersion;
 import org.geysermc.geyser.level.chunk.bitarray.SingletonBitArray;
@@ -90,7 +88,7 @@ public class ChunkWorldPackets implements PacketListener {
 
             int dimensionOffset = dimension.minY() >> 4;
 
-            final GeyserChunkSection[] sections = new GeyserChunkSection[dimension.height() >> 4];
+            final BoarChunkSection[] sections = new BoarChunkSection[dimension.height() >> 4];
 
             final ByteBuf buffer = packet.getData().copy();
             try {
@@ -120,7 +118,7 @@ public class ChunkWorldPackets implements PacketListener {
                         }
                     }
 
-                    sections[i] = new GeyserChunkSection(storages, subChunkIndex);
+                    sections[i] = new BoarChunkSection(storages, subChunkIndex);
                 }
 
                 // As of 1.18.30, the amount of biomes read is dependent on how high Bedrock thinks the dimension is
@@ -144,9 +142,6 @@ public class ChunkWorldPackets implements PacketListener {
                 buffer.skipBytes(1);
 
                 // Just ignore the rest, I don't need those.
-                do {
-                    buffer.skipBytes(1);
-                } while (buffer.isReadable());
             } catch (Exception ignored) {
                 // Ignore and just use whatever we were able to read.
                 // ignored.printStackTrace();
@@ -158,7 +153,6 @@ public class ChunkWorldPackets implements PacketListener {
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 if (dimension != world.getDimension()) {
-                    BoarSpigot.LOGGER.warning("Dimension mis-match? expected=" + world.getDimension().bedrockId() + ", actual=" + dimensionId);
                     return;
                 }
 

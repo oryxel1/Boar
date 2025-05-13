@@ -12,7 +12,6 @@ import lombok.Getter;
 import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
 
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
-import ac.boar.geyser.GeyserEvents;
 import ac.boar.protocol.PacketEvents;
 
 @Getter
@@ -27,7 +26,6 @@ public class Boar {
         BedrockMappings.load();
 
         this.playerManager = new BoarPlayerManager();
-        new GeyserEvents();
 
         PacketEvents.getApi().register(new NetworkLatencyPackets());
         PacketEvents.getApi().register(new ChunkWorldPackets());
