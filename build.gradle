@@ -1,8 +1,5 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
-
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 
@@ -34,9 +31,6 @@ dependencies {
     testImplementation("com.google.code.gson:gson:2.3.1")
 }
 
-tasks.named('shadowJar', ShadowJar) {
-    relocate 'it.unimi.dsi.fastutil.ints', 'org.geysermc.geyser.platform.spigot.shaded.it.unimi.dsi.fastutil.ints'
-}
 
 def targetJavaVersion = 17
 java {

@@ -11,6 +11,7 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 
 ### Features
 - I will keep this short: lag compensation, movement simulation (prediction), smooth rewind setback.
+- Also this anticheat is actually a Geyser extension!
 
 ### Problems
 - A lot of movement differences (and features) is not implemented.

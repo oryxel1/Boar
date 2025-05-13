@@ -7,6 +7,7 @@ import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.block.BlockUtil;
+import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.mappings.BedrockMappings;
 import it.unimi.dsi.fastutil.longs.*;
@@ -19,7 +20,6 @@ import org.geysermc.geyser.entity.type.Entity;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
-import org.geysermc.geyser.level.chunk.GeyserChunkSection;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
@@ -32,7 +32,7 @@ import java.util.Map;
 @Getter
 public class CompensatedWorld {
     private final BoarPlayer player;
-    private final Long2ObjectMap<GeyserChunkSection[]> chunks = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<BoarChunkSection[]> chunks = new Long2ObjectOpenHashMap<>();
 
     private BedrockDimension dimension;
 
@@ -80,7 +80,7 @@ public class CompensatedWorld {
         return cache;
     }
 
-    public void addToCache(int x, int z, GeyserChunkSection[] chunks) {
+    public void addToCache(int x, int z, BoarChunkSection[] chunks) {
         long chunkPosition = MathUtils.chunkPositionToLong(x, z);
         this.chunks.put(chunkPosition, chunks);
     }
@@ -94,7 +94,7 @@ public class CompensatedWorld {
     }
 
     public void updateBlock(int x, int y, int z, int layer, int block) {
-        final GeyserChunkSection[] column = this.getChunk(x >> 4, z >> 4);
+        final BoarChunkSection[] column = this.getChunk(x >> 4, z >> 4);
         if (column == null) {
             return;
         }
@@ -104,11 +104,11 @@ public class CompensatedWorld {
             return;
         }
 
-        GeyserChunkSection palette = column[(y - getMinY()) >> 4];
+        BoarChunkSection palette = column[(y - getMinY()) >> 4];
         if (palette == null) {
             if (block != 0) {
                 // A previously empty chunk, which is no longer empty as a block has been added to it
-                column[(y - getMinY()) >> 4] = palette = new GeyserChunkSection(this.player.BEDROCK_AIR, 0);
+                column[(y - getMinY()) >> 4] = palette = new BoarChunkSection(this.player.BEDROCK_AIR, 0);
             } else {
                 // Nothing to update
                 return;
@@ -152,7 +152,7 @@ public class CompensatedWorld {
     }
 
     public int getBlockAt(int x, int y, int z, int layer) {
-        GeyserChunkSection[] column = this.getChunk(x >> 4, z >> 4);
+        BoarChunkSection[] column = this.getChunk(x >> 4, z >> 4);
         if (column == null) {
             return 0;
         }
@@ -162,7 +162,7 @@ public class CompensatedWorld {
             return 0;
         }
 
-        GeyserChunkSection chunk = column[(y - getMinY()) >> 4];
+        BoarChunkSection chunk = column[(y - getMinY()) >> 4];
         if (chunk != null) {
             try {
                 return player.bedrockBlockToJava.getOrDefault(chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer), 0);
@@ -174,7 +174,7 @@ public class CompensatedWorld {
         return 0;
     }
 
-    private GeyserChunkSection[] getChunk(int chunkX, int chunkZ) {
+    private BoarChunkSection[] getChunk(int chunkX, int chunkZ) {
         long chunkPosition = MathUtils.chunkPositionToLong(chunkX, chunkZ);
         return this.chunks.getOrDefault(chunkPosition, null);
     }

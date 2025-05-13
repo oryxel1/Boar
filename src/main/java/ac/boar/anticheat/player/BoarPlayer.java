@@ -22,6 +22,7 @@ import ac.boar.anticheat.validator.ItemTransactionValidator;
 import ac.boar.protocol.mitm.CloudburstSendListener;
 import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.util.ChatUtil;
+import lombok.Setter;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -30,7 +31,6 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
-import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.BlockMappings;
@@ -64,6 +64,10 @@ public final class BoarPlayer extends PlayerData {
 
     @Getter
     private final UseItemCache useItemCache = new UseItemCache(this);
+
+    @Getter
+    @Setter
+    private boolean debugMode, alertEnabled;
 
     public BoarPlayer(GeyserSession session) {
         this.session = session;
