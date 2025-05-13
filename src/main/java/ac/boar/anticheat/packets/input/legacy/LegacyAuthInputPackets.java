@@ -105,7 +105,10 @@ public class LegacyAuthInputPackets {
                         player.getTeleportUtil().rewind(player.tick - 1);
                     }
                 }
-                case STOP_GLIDING -> player.getFlagTracker().set(EntityFlag.GLIDING, false);
+                case STOP_GLIDING -> {
+                    player.getFlagTracker().set(EntityFlag.GLIDING, false);
+                    player.glideBoostTicks = 0;
+                }
 
                 // Don't let player do backwards sprinting!
                 case START_SPRINTING -> player.setSprinting(player.input.getZ() > 0);

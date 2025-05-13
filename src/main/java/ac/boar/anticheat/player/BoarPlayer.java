@@ -137,19 +137,7 @@ public final class BoarPlayer extends PlayerData {
 
     public void postTick() {
         this.getUseItemCache().tick();
-
-        if (this.sinceElytraBoost > 0) {
-            this.sinceElytraBoost--;
-        }
-    }
-
-    public float getBlockSpeedFactor() {
-        BoarBlockState blockState = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0);
-        float f = blockState.getSpeedFactor();
-        if (blockState.getState().is(Blocks.WATER) || blockState.getState().is(Blocks.BUBBLE_COLUMN)) {
-            return f;
-        }
-        return f == 1.0 ? this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement(), 0).getSpeedFactor() : f;
+        this.glideBoostTicks--;
     }
 
     public BlockState getInBlockState() {

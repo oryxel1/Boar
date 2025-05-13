@@ -169,9 +169,6 @@ public class EntityTicker {
             blockState.updateEntityMovementAfterFallOn(player, true);
         }
 
-        float f = player.getBlockSpeedFactor();
-        player.velocity = player.velocity.multiply(f, 1, f);
-
         player.beforeCollision = vec3.clone();
         player.afterCollision = vec32.clone();
     }

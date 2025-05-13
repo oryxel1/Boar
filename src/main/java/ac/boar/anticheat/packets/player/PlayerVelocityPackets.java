@@ -5,6 +5,9 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
+import org.cloudburstmc.protocol.bedrock.data.MovementEffectType;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.cloudburstmc.protocol.bedrock.packet.MovementEffectPacket;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityMotionPacket;
 
 public class PlayerVelocityPackets implements PacketListener {
@@ -21,6 +24,14 @@ public class PlayerVelocityPackets implements PacketListener {
             player.sendLatencyStack(immediate);
             player.queuedVelocities.put(player.sentStackId.get() + 1, new VelocityData(player.sentStackId.get() + 1, player.tick, new Vec3(packet.getMotion())));
             event.getPostTasks().add(player::sendLatencyStack);
+        }
+
+        if (event.getPacket() instanceof MovementEffectPacket packet) {
+            if (packet.getEntityRuntimeId() != player.runtimeEntityId || packet.getEffectType() != MovementEffectType.GLIDE_BOOST) {
+                return;
+            }
+
+            player.glideBoostTicks = player.getFlagTracker().has(EntityFlag.GLIDING) ? packet.getDuration() / 2 : 0;
         }
     }
 }

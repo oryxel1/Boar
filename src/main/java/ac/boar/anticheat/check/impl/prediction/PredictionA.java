@@ -32,6 +32,6 @@ public class PredictionA extends OffsetHandlerCheck {
     }
 
     public boolean shouldDoFail() {
-        return player.sinceTeleport > 20 && !player.tryingToElytraBoost && !player.getTeleportUtil().isTeleporting() && player.sinceElytraBoost <= 0;
+        return player.sinceTeleport > 20 && !player.getTeleportUtil().isTeleporting();
     }
 }

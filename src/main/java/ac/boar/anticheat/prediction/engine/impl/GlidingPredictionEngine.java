@@ -45,6 +45,12 @@ public class GlidingPredictionEngine extends PredictionEngine {
             velZ += (v15 * view.z * v11 - velZ) * 0.1F;
         }
 
+        if (player.glideBoostTicks > 0) {
+            velX += (view.x * 0.1F) + (((view.x * 1.5F) - velX) * 0.5F);
+            velY += (view.y * 0.1F) + (((view.y * 1.5F) - velY) * 0.5F);
+            velZ += (view.z * 0.1F) + (((view.z * 1.5F) - velZ) * 0.5F);
+        }
+
         return new Vec3(velX * 0.99000001F, velY * 0.98000002f, velZ * 0.99000001F);
     }
 

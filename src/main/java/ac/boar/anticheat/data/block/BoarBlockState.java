@@ -163,10 +163,6 @@ public class BoarBlockState {
         return state.is(Blocks.HONEY_BLOCK) ? 0.6F : 1;
     }
 
-    public float getSpeedFactor() {
-        return state.is(Blocks.SOUL_SAND) ? 0.75F : 1;
-    }
-
     public float getFriction() {
         if (state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.FROSTED_ICE)) {
             return 0.98F;

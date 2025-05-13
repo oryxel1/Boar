@@ -24,5 +24,6 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 
 ### Credits
 - https://github.com/GeyserMC/Geyser
+- https://github.com/oomph-ac/oomp
 - https://github.com/RaphiMC/ViaBedrock
 - https://github.com/Mojang/bedrock-protocol-docs

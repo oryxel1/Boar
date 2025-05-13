@@ -77,6 +77,8 @@ public class PlayerData {
 
     public boolean hasLeastRunPredictionOnce;
 
+    public int glideBoostTicks;
+
     // "Transaction" related.
     public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
     public final LatencyUtil latencyUtil = new LatencyUtil(this);
@@ -104,10 +106,6 @@ public class PlayerData {
     // Attribute related, abilities
     public final Map<String, AttributeInstance> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();
-
-    // Ehm hacky
-    public boolean tryingToElytraBoost;
-    public int sinceElytraBoost;
 
     // Riptide related
     public boolean dirtyRiptide, dirtySpinStop;
