@@ -13,6 +13,7 @@ public class PostAuthInputPackets implements PacketListener {
 
         if (event.getPacket() instanceof PlayerAuthInputPacket packet) {
             player.dirtyRiptide = false;
+            player.thisTickSpinAttack = false;
             player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags()));
 
             // Self-explanatory, player ain't supposed to move if they're teleporting.

@@ -51,6 +51,8 @@ public class LivingTicker extends EntityTicker {
 //                this.doSelfMove(new Vec3(0, 1.1999999284744263F, 0));
 //                player.prevUnvalidatedPosition = player.position.clone();
 //            }
+
+            player.thisTickSpinAttack = true;
         }
 
         this.aiStep();

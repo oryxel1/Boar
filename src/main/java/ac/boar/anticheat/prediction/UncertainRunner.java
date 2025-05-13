@@ -12,6 +12,10 @@ public class UncertainRunner {
     }
 
     public float extraOffset() {
+        if (player.thisTickSpinAttack) {
+            return 0.007F;
+        }
+
         return 0;
     }
 }
