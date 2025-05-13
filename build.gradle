@@ -12,10 +12,6 @@ version = '1.0'
 repositories {
     mavenCentral()
     maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
@@ -28,9 +24,6 @@ repositories {
 dependencies {
     compileOnly("org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta6-20250506.012145-17")
     compileOnly("org.geysermc.geyser:core:2.7.1-SNAPSHOT") {
-        exclude group: "com.google.code.gson", module: "gson"
-    }
-    compileOnly("org.spigotmc:spigot-api:1.21.4-R0.1-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     compileOnly("it.unimi.dsi:fastutil:8.5.15")
