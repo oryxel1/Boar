@@ -53,6 +53,7 @@ public class LivingTicker extends EntityTicker {
 //            }
 
             player.thisTickSpinAttack = true;
+            player.thisTickOnGroundSpinAttack = player.onGround;
         }
 
         this.aiStep();
