@@ -124,7 +124,7 @@ public class PredictionRunner {
 
                 vec3 = Collider.collide(player, Collider.maybeBackOffFromEdge(player, vec3));
 
-                float distance = player.prevUnvalidatedPosition.add(vec3).squaredDistanceTo(player.unvalidatedPosition);
+                float distance = player.position.add(vec3).squaredDistanceTo(player.unvalidatedPosition);
 
                 // Do <= to priority velocity over normal last tick in case if both have the same velocity result.
                 if (distance <= closetDistance) {

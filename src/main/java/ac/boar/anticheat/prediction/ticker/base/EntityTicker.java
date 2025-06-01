@@ -148,7 +148,7 @@ public class EntityTicker {
         }
 
         Vec3 vec32 = Collider.collide(player, vec3 = Collider.maybeBackOffFromEdge(player, vec3));
-        player.setPos(player.prevUnvalidatedPosition.add(vec32));
+        player.setPos(player.position.add(vec32));
 
         boolean bl = !MathUtil.equal(vec3.x, vec32.x);
         boolean bl2 = !MathUtil.equal(vec3.z, vec32.z);

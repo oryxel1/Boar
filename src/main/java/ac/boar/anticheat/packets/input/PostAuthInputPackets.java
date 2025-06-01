@@ -1,6 +1,8 @@
 package ac.boar.anticheat.packets.input;
 
+import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.input.TickData;
+import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
@@ -15,11 +17,15 @@ public class PostAuthInputPackets implements PacketListener {
             player.dirtyRiptide = false;
             player.thisTickSpinAttack = false;
             player.thisTickOnGroundSpinAttack = false;
-            player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags()));
 
             // Self-explanatory, player ain't supposed to move if they're teleporting.
             if (player.getTeleportUtil().isTeleporting()) {
-                event.setCancelled(true);
+                if (GlobalSetting.RESEND_POSITION_DURING_REWIND) {
+                    packet.setPosition(player.position.add(0, player.getYOffset(), 0).toVector3f());
+                    LegacyAuthInputPackets.correctInputData(player, packet);
+                } else {
+                    event.setCancelled(true);
+                }
                 return;
             }
 

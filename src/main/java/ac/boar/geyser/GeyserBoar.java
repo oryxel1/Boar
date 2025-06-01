@@ -3,6 +3,7 @@ package ac.boar.geyser;
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.data.cache.UseDurationCache;
 import ac.boar.anticheat.player.BoarPlayer;
+import lombok.Getter;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.api.command.Command;
 import org.geysermc.geyser.api.command.CommandSource;
@@ -12,14 +13,19 @@ import org.geysermc.geyser.api.event.lifecycle.GeyserDefineCommandsEvent;
 import org.geysermc.geyser.api.event.lifecycle.GeyserPostInitializeEvent;
 import org.geysermc.geyser.api.event.lifecycle.GeyserShutdownEvent;
 import org.geysermc.geyser.api.extension.Extension;
+import org.geysermc.geyser.api.extension.ExtensionLogger;
 import org.geysermc.geyser.session.GeyserSession;
 
 import java.util.List;
 
 public class GeyserBoar implements Extension {
+    @Getter
+    private static ExtensionLogger logger;
+
     @Subscribe
     public void onSessionJoin(SessionLoginEvent event) {
         Boar.getInstance().getPlayerManager().add(event.connection());
+
     }
 
     @Subscribe
@@ -29,6 +35,8 @@ public class GeyserBoar implements Extension {
 
     @Subscribe
     public void onGeyserPostInitializeEvent(GeyserPostInitializeEvent event) {
+        logger = this.logger();
+
         UseDurationCache.init();
         Boar.getInstance().init();
     }

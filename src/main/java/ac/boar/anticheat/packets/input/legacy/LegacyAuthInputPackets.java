@@ -2,22 +2,16 @@ package ac.boar.anticheat.packets.input.legacy;
 
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
-import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.util.InputUtil;
 
-import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
-import org.cloudburstmc.math.GenericMath;
-import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
-import org.geysermc.geyser.entity.EntityDefinitions;
-import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.item.Items;
 
 import java.util.Map;
@@ -50,6 +44,10 @@ public class LegacyAuthInputPackets {
         // Have to do this due to loss precision, especially elytra!
         if (player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getMaxOffset()) {
             player.velocity = player.unvalidatedTickEnd.clone();
+        }
+
+        if (offset < player.getMaxOffset()) {
+            player.position = player.unvalidatedPosition.clone();
         }
     }
 
