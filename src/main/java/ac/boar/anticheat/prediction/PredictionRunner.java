@@ -77,8 +77,8 @@ public class PredictionRunner {
             // Find the nearest velocity that player already accept the first latency stack.
             VelocityData nearestVelocity = null;
             for (final VelocityData data : player.queuedVelocities.values()) {
-                if ((data.stackId() - 1) < player.receivedStackId.get() || data.stackId() > player.receivedStackId.get()) {
-                    continue;
+                if ((data.stackId() - 1) > player.receivedStackId.get()) {
+                    break;
                 }
 
                 // This should only be ONE result, player cannot accept 2 velocity at once since velocity is wrapped between 2 latency stack.
