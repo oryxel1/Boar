@@ -8,13 +8,12 @@ import ac.boar.anticheat.util.MathUtil;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.physics.Axis;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Collider {
     public static boolean canFallAtLeast(final BoarPlayer player, float offsetX, float offsetZ, float f) {
-        Box lv = player.boundingBox;
-        return player.compensatedWorld.noCollision(new Box(lv.minX + offsetX, lv.minY - f - 1.0E-5F, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
+        Box lv = player.boundingBox.expand(-0.025F, 0, -0.025F);
+        return player.compensatedWorld.noCollision(new Box(lv.minX + offsetX, lv.minY - f, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
     }
 
     private static boolean isAboveGround(final BoarPlayer player) {
@@ -22,7 +21,7 @@ public class Collider {
     }
 
     public static Vec3 maybeBackOffFromEdge(final BoarPlayer player, final Vec3 movement) {
-        final float f = PlayerData.STEP_HEIGHT;
+        final float f = PlayerData.STEP_HEIGHT * 1.01F;
         if (movement.y <= 0.0 && player.getFlagTracker().has(EntityFlag.SNEAKING) && isAboveGround(player)) {
             float d = movement.x;
             float e = movement.z;
