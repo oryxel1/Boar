@@ -47,7 +47,9 @@ public class LegacyAuthInputPackets {
         }
 
         if (offset < player.getMaxOffset()) {
-            player.position = player.unvalidatedPosition.clone();
+            Vec3 oldPrevPos = player.prevPosition;
+            player.setPos(player.unvalidatedPosition.clone());
+            player.prevPosition = oldPrevPos;
         }
     }
 
@@ -78,11 +80,15 @@ public class LegacyAuthInputPackets {
 
         InputUtil.processInput(player, packet);
 
+        player.prevYaw = player.yaw;
+        player.prevPitch = player.pitch;
         player.yaw = packet.getRotation().getY();
         player.pitch = packet.getRotation().getX();
 
         player.rotation = packet.getRotation();
         player.interactRotation = packet.getInteractRotation().clone();
+
+        player.inputMode = packet.getInputMode();
 
         if (processInputData) {
             processInputData(player);

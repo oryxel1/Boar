@@ -2,7 +2,6 @@ package ac.boar.anticheat.teleport;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.input.PredictionData;
-import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.teleport.data.rewind.RewindData;
@@ -96,7 +95,9 @@ public class TeleportUtil {
         this.player.cloudburstDownstream.sendPacketImmediately(packet);
 
         player.velocity = data.tickEnd();
-        player.position = new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0));
+
+        player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
+
         player.onGround = onGround;
 
         // System.out.println("Rewind back to tick: " + tick + ", velocity=" + data.tickEnd() + ", position=" + player.position);

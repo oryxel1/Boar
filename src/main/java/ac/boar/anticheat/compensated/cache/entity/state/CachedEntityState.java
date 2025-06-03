@@ -15,6 +15,7 @@ import lombok.Setter;
 public final class CachedEntityState {
     private final BoarPlayer player;
     private final EntityCache entity;
+    private Vec3 prevPos = Vec3.ZERO;
     private Vec3 pos = Vec3.ZERO;
     private PositionInterpolator interpolator = new PositionInterpolator(this, 3);
 
@@ -32,14 +33,32 @@ public final class CachedEntityState {
         return this.calculateBoundingBox();
     }
 
+    public Box getBoundingBox(float f) {
+        return this.calculateBoundingBox(this.prevPos.add(this.pos.subtract(this.prevPos).multiply(f)));
+    }
+
     public Box calculateBoundingBox() {
         return this.entity.getDimensions().getBoxAt(this.pos);
+    }
+
+    public Box calculateBoundingBox(Vec3 vec3) {
+        return this.entity.getDimensions().getBoxAt(vec3);
+    }
+
+    public void setTeleportPos(Vec3 pos) {
+        this.prevPos = this.pos = pos;
+    }
+
+    public void setPos(Vec3 pos) {
+        this.prevPos = this.pos;
+        this.pos = pos;
     }
 
     @Override
     public CachedEntityState clone() {
         final CachedEntityState state = new CachedEntityState(player, entity);
         state.setPos(this.pos.clone());
+        state.setPrevPos(this.prevPos.clone());
         state.setInterpolator(this.interpolator == null ? null : this.interpolator.clone());
 
         return state;

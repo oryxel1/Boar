@@ -46,7 +46,7 @@ public final class EntityCache {
         this.past = this.current.clone();
 
         if (!lerp) {
-            this.current.setPos(pos);
+            this.current.setTeleportPos(pos);
         } else {
             final PositionInterpolator lv = this.current.getInterpolator();
             if (lv != null) {

@@ -17,6 +17,17 @@ public class MathUtil {
         return value == 0 ? value : value > 0 ? 1 : -1;
     }
 
+    public static float wrapDegrees(float f) {
+        float g = f % 360.0f;
+        if (g >= 180.0f) {
+            g -= 360.0f;
+        }
+        if (g < -180.0f) {
+            g += 360.0f;
+        }
+        return g;
+    }
+
     public static boolean equal(float d, float e) {
         return Math.abs(e - d) < 1.0E-7F;
     }

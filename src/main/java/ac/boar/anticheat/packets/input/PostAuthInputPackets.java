@@ -18,7 +18,6 @@ public class PostAuthInputPackets implements PacketListener {
             player.thisTickSpinAttack = false;
             player.thisTickOnGroundSpinAttack = false;
 
-            // Self-explanatory, player ain't supposed to move if they're teleporting.
             if (player.getTeleportUtil().isTeleporting()) {
                 if (GlobalSetting.RESEND_POSITION_DURING_REWIND) {
                     packet.setPosition(player.position.add(0, player.getYOffset(), 0).toVector3f());

@@ -19,6 +19,7 @@ import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
+import org.cloudburstmc.protocol.bedrock.data.InputMode;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
@@ -60,13 +61,14 @@ public class PlayerData {
     public int sinceLoadingScreen;
 
     public GameType gameType = GameType.DEFAULT;
+    public InputMode inputMode = InputMode.UNDEFINED;
 
     // Position, rotation, other.
-    public float yaw, pitch;
+    public float yaw, pitch, prevYaw, prevPitch;
     public Vec3 unvalidatedPosition = Vec3.ZERO, prevUnvalidatedPosition = Vec3.ZERO;
     public Vector2f interactRotation = Vector2f.ZERO;
 
-    public Vec3 position = Vec3.ZERO;
+    public Vec3 position = Vec3.ZERO, prevPosition = Vec3.ZERO;
     public Vector3f rotation = Vector3f.ZERO;
 
     // Sprinting, sneaking, swimming and other status.
@@ -212,6 +214,7 @@ public class PlayerData {
 
     // Others (methods)
     public final void setPos(Vec3 vec3) {
+        this.prevPosition = this.position;
         this.position = vec3;
         if (this.vehicleData != null) {
             return;
