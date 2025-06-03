@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 
@@ -29,8 +30,11 @@ dependencies {
 
     compileOnly("com.google.code.gson:gson:2.3.1")
     testImplementation("com.google.code.gson:gson:2.3.1")
+
+    implementation "it.unimi.dsi:fastutil:8.5.15"
 }
 
+shadowJar { relocate 'it.unimi.dsi.fastutil', 'ac.boar.shaded.fastutil' }
 
 def targetJavaVersion = 17
 java {
