@@ -75,15 +75,11 @@ public class LivingTicker extends EntityTicker {
 
         boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
                 player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
-        if (jumping /*&& this.isAffectedByFluids() */) {
+        if (jumping) {
             float g = player.isInLava() ? player.getFluidHeight(Fluid.LAVA) : player.getFluidHeight(Fluid.WATER);
-            boolean bl = player.touchingWater && g > 0.0;
-            float h = player.getFluidJumpThreshold();
-            if (bl && (!player.onGround || g > h)) {
+            if (g != 0) {
                 player.velocity = player.velocity.add(0, 0.04F, 0);
-            } else if (player.isInLava() && (!player.onGround || g > h)) {
-                player.velocity = player.velocity.add(0, 0.04F, 0);
-            } else if ((player.onGround || bl && g <= h) && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
+            } else if (player.onGround && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
                 player.velocity = player.jumpFromGround(player.velocity);
             }
         }

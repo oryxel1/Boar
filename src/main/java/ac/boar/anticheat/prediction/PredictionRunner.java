@@ -103,16 +103,14 @@ public class PredictionRunner {
             for (Vector possibility : possibleVelocities) {
                 Vec3 vec3 = possibility.getVelocity().clone();
 
-                if (player.getInputData().contains(PlayerAuthInputData.START_JUMPING) && player.onGround && engine instanceof GroundAndAirPredictionEngine) {
-                    vec3 = player.jumpFromGround(vec3);
-                } else if (player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP)) {
+                boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
+                        player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
+                if (jumping) {
                     float g = player.isInLava() ? player.getFluidHeight(Fluid.LAVA) : player.getFluidHeight(Fluid.WATER);
-                    boolean bl = player.touchingWater && g > 0.0;
-                    float h = player.getFluidJumpThreshold();
-                    if (bl && (!player.onGround || g > h)) {
+                    if (g != 0) {
                         vec3 = vec3.add(0, 0.04F, 0);
-                    } else if (player.isInLava() && (!player.onGround || g > h)) {
-                        vec3 = vec3.add(0, 0.04F, 0);
+                    } else if (player.onGround && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
+                        vec3 = player.jumpFromGround(vec3);
                     }
                 }
 

@@ -198,10 +198,6 @@ public class PlayerData {
         return this.getEffectiveGravity(this.velocity);
     }
 
-    public float getFluidJumpThreshold() {
-        return this.dimensions.eyeHeight() < 0.4 ? 0.0F : 0.4F;
-    }
-
     public float getSpeed() {
         return this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).getValue();
     }
