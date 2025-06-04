@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           java-version: 17
       - name: Build Project
-        run: ./gradlew build
+        run: ./gradlew shadowJar
       - name: Upload Artifacts to GitHub
         uses: actions/upload-artifact@v4
         if: success()
