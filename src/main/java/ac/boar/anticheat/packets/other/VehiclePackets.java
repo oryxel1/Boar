@@ -43,7 +43,7 @@ public class VehiclePackets implements PacketListener {
 
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
                 player.vehicleData = new VehicleData();
-                player.vehicleData.canWeControlThisVehicle = link.getType() == EntityLinkData.Type.RIDER;
+                // player.vehicleData.canWeControlThisVehicle = link.getType() == EntityLinkData.Type.RIDER;
                 player.vehicleData.vehicleRuntimeId = entityId;
             });
         }

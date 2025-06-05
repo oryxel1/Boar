@@ -54,6 +54,10 @@ public class AuthInputPackets implements PacketListener {
             return;
         }
 
+        if (player.vehicleData != null) { // TODO: Vehicle prediction.
+            return;
+        }
+
         // This is likely the case, prediction run before teleport.
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
         new PredictionRunner(player).run(player.tick);
