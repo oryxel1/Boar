@@ -140,20 +140,6 @@ public class PredictionRunner {
 
         // We can start the ACTUAL prediction now.
         player.velocity = player.bestPossibility.getVelocity();
-
-        // Also clear out old velocity.
-        if (player.bestPossibility.getType() == VectorType.VELOCITY) {
-            Iterator<Map.Entry<Long, VelocityData>> iterator = player.queuedVelocities.entrySet().iterator();
-
-            Map.Entry<Long, VelocityData> entry;
-            while (iterator.hasNext() && (entry = iterator.next()) != null) {
-                if (entry.getKey() > player.bestPossibility.getStackId()) {
-                    break;
-                } else {
-                    iterator.remove();
-                }
-            }
-        }
         return true;
     }
 }

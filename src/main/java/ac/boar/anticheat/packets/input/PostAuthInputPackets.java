@@ -17,6 +17,7 @@ public class PostAuthInputPackets implements PacketListener {
             player.dirtyRiptide = false;
             player.thisTickSpinAttack = false;
             player.thisTickOnGroundSpinAttack = false;
+            player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags()));
 
             if (player.getTeleportUtil().isTeleporting()) {
                 if (GlobalSetting.RESEND_POSITION_DURING_REWIND) {

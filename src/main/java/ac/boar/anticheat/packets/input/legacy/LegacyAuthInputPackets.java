@@ -3,8 +3,10 @@ package ac.boar.anticheat.packets.input.legacy;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.InputUtil;
 
 import ac.boar.anticheat.util.math.Vec3;
@@ -14,6 +16,7 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.item.Items;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class LegacyAuthInputPackets {
@@ -50,6 +53,20 @@ public class LegacyAuthInputPackets {
             Vec3 oldPrevPos = player.prevPosition;
             player.setPos(player.unvalidatedPosition.clone());
             player.prevPosition = oldPrevPos;
+        }
+
+        // Also clear out old velocity.
+        if (player.bestPossibility.getType() == VectorType.VELOCITY) {
+            Iterator<Map.Entry<Long, VelocityData>> iterator = player.queuedVelocities.entrySet().iterator();
+
+            Map.Entry<Long, VelocityData> entry;
+            while (iterator.hasNext() && (entry = iterator.next()) != null) {
+                if (entry.getKey() > player.bestPossibility.getStackId()) {
+                    break;
+                } else {
+                    iterator.remove();
+                }
+            }
         }
     }
 

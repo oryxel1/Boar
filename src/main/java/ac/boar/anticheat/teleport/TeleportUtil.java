@@ -2,6 +2,7 @@ package ac.boar.anticheat.teleport;
 
 import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.input.PredictionData;
+import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.teleport.data.rewind.RewindData;
@@ -67,6 +68,7 @@ public class TeleportUtil {
     }
 
     // Rewind teleport part.
+    private final Map<Long, TickData> authInputHistory = new ConcurrentSkipListMap<>();
     private final Map<Long, RewindData> rewindHistory = new ConcurrentSkipListMap<>();
 
     public void rewind(long tick) {
@@ -93,14 +95,6 @@ public class TeleportUtil {
         player.sendLatencyStack(true);
         this.queuedTeleports.add(new TeleportCache.Rewind(player.sentStackId.get(), tick, new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), onGround));
         this.player.cloudburstDownstream.sendPacketImmediately(packet);
-
-        player.velocity = data.tickEnd();
-
-        player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
-
-        player.onGround = onGround;
-
-        // System.out.println("Rewind back to tick: " + tick + ", velocity=" + data.tickEnd() + ", position=" + player.position);
     }
 
     public void cachePosition(long tick, Vector3f position) {
@@ -113,6 +107,12 @@ public class TeleportUtil {
         while (iterator.hasNext() && this.rewindHistory.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
             iterator.next();
             iterator.remove();
+        }
+
+        final Iterator<Map.Entry<Long, TickData>> iterator1 = this.authInputHistory.entrySet().iterator();
+        while (iterator1.hasNext() && this.authInputHistory.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
+            iterator1.next();
+            iterator1.remove();
         }
     }
 }
