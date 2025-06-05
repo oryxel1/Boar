@@ -26,10 +26,10 @@ public class LegacyAuthInputPackets {
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
-        float extraOffset = uncertainRunner.extraOffset();
-
         // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.
-        double offset = player.position.distanceTo(player.unvalidatedPosition) - extraOffset;
+        double offset = player.position.distanceTo(player.unvalidatedPosition);
+        float extraOffset = uncertainRunner.extraOffset(offset);
+        offset -= extraOffset;
 
         uncertainRunner.doTickEndUncertain();
         correctInputData(player, packet);

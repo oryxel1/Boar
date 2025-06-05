@@ -1,9 +1,10 @@
 package ac.boar.anticheat.prediction;
 
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 
-// Used to have some stuff here but now that I figured stuff out uhh this is useless, for now.
+// Things that I don't even bother account for...
 @RequiredArgsConstructor
 public class UncertainRunner {
     private final BoarPlayer player;
@@ -11,9 +12,16 @@ public class UncertainRunner {
     public void doTickEndUncertain() {
     }
 
-    public float extraOffset() {
+    public float extraOffset(double offset) {
         if (player.thisTickSpinAttack) {
             return player.thisTickOnGroundSpinAttack ? 0.08F : 0.008F;
+        }
+
+        Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
+        if (player.affectedByFluidPushing && actual.horizontalLength() - player.afterCollision.horizontalLength() <=
+                player.guessedFluidPushingVelocity.horizontalLength() + 0.014F &&
+                Math.abs(player.position.y - player.unvalidatedPosition.y) <= player.getMaxOffset()) {
+            return (float) offset;
         }
 
         return 0;

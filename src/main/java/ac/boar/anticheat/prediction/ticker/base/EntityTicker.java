@@ -25,6 +25,9 @@ public class EntityTicker {
     }
 
     public void baseTick() {
+        player.affectedByFluidPushing = false;
+        player.guessedFluidPushingVelocity = Vec3.ZERO;
+
         player.inBlockState = null;
 
         player.wasInPowderSnow = player.inPowderSnow;
@@ -102,6 +105,8 @@ public class EntityTicker {
 //            if (maxFluidHeight < 0.4) {
 //                vec32 = vec32.multiply(maxFluidHeight);
 //            }
+
+            player.affectedByFluidPushing = true;
             fluidPushVelocity = fluidPushVelocity.add(vec32);
             ++fluidCount;
         }
@@ -118,7 +123,12 @@ public class EntityTicker {
 //                fluidPushVelocity = fluidPushVelocity.normalize().scale(0.0045000000000000005);
 //            }
 
-            player.velocity = player.velocity.add(fluidPushVelocity);
+            // player.velocity = player.velocity.add(fluidPushVelocity); // broken lol...
+
+            player.guessedFluidPushingVelocity = new Vec3(
+                    Math.max(Math.abs(fluidPushVelocity.x), player.guessedFluidPushingVelocity.x),
+                    Math.max(Math.abs(fluidPushVelocity.y), player.guessedFluidPushingVelocity.y),
+                    Math.max(Math.abs(fluidPushVelocity.z), player.guessedFluidPushingVelocity.z));
         }
         player.fluidHeight.put(tag, maxFluidHeight);
 
