@@ -14,12 +14,10 @@ import org.geysermc.geyser.network.UpstreamPacketHandler;
 @Getter
 public final class CloudburstReceiveListener extends UpstreamPacketHandler {
     private final BoarPlayer player;
-    private final UpstreamPacketHandler oldHandler;
 
-    public CloudburstReceiveListener(BoarPlayer player, UpstreamPacketHandler oldHandler) {
+    public CloudburstReceiveListener(BoarPlayer player) {
         super(GeyserImpl.getInstance(), player.getSession());
         this.player = player;
-        this.oldHandler = oldHandler;
     }
 
     @Override
@@ -33,6 +31,6 @@ public final class CloudburstReceiveListener extends UpstreamPacketHandler {
             return PacketSignal.HANDLED;
         }
 
-        return this.oldHandler.handlePacket(event.getPacket());
+        return super.handlePacket(event.getPacket());
     }
 }

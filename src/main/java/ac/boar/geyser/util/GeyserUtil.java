@@ -4,8 +4,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.mitm.CloudburstReceiveListener;
 import ac.boar.protocol.mitm.CloudburstSendListener;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
-import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
-import org.geysermc.geyser.network.UpstreamPacketHandler;
 import org.geysermc.geyser.session.GeyserSession;
 
 import java.lang.reflect.Field;
@@ -25,8 +23,7 @@ public class GeyserUtil {
 
     private static void injectCloudburstDownstream(final BoarPlayer player) {
         final BedrockServerSession session = player.getCloudburstDownstream();
-        final BedrockPacketHandler handler = session.getPacketHandler();
-        session.setPacketHandler(player.downstreamPacketHandler = new CloudburstReceiveListener(player, (UpstreamPacketHandler) handler));
+        session.setPacketHandler(player.downstreamPacketHandler = new CloudburstReceiveListener(player));
     }
 
     private static void injectCloudburstUpstream(final BoarPlayer player) throws Exception {
