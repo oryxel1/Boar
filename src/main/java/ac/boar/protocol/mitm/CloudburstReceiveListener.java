@@ -4,18 +4,23 @@ import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
-import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
 import org.cloudburstmc.protocol.common.PacketSignal;
+import org.geysermc.geyser.GeyserImpl;
+import org.geysermc.geyser.network.UpstreamPacketHandler;
 
-@RequiredArgsConstructor
 @Getter
-public final class CloudburstReceiveListener implements BedrockPacketHandler {
+public final class CloudburstReceiveListener extends UpstreamPacketHandler {
     private final BoarPlayer player;
-    private final BedrockPacketHandler oldHandler;
+    private final UpstreamPacketHandler oldHandler;
+
+    public CloudburstReceiveListener(BoarPlayer player, UpstreamPacketHandler oldHandler) {
+        super(GeyserImpl.getInstance(), player.getSession());
+        this.player = player;
+        this.oldHandler = oldHandler;
+    }
 
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {

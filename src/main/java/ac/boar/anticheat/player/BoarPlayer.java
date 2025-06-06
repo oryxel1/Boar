@@ -41,7 +41,8 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 public final class BoarPlayer extends PlayerData {
     @Getter
     private final GeyserSession session;
-    public BedrockServerSession cloudburstDownstream;
+    @Getter
+    private final BedrockServerSession cloudburstDownstream;
     public CloudburstSendListener cloudburstUpstream;
     public CloudburstReceiveListener downstreamPacketHandler;
 
@@ -70,6 +71,8 @@ public final class BoarPlayer extends PlayerData {
     private boolean debugMode, alertEnabled;
 
     public BoarPlayer(GeyserSession session) {
+        this.cloudburstDownstream = session.getUpstream().getSession();
+
         this.session = session;
 
         BlockMappings mappings = session.getBlockMappings();

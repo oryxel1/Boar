@@ -56,7 +56,7 @@ public class TeleportUtil {
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
 
         this.queueTeleport(teleport.getPosition(), true, packet.getMode());
-        this.player.cloudburstDownstream.sendPacketImmediately(packet);
+        this.player.getCloudburstDownstream().sendPacketImmediately(packet);
     }
 
     public void queueTeleport(final Vec3 position, boolean immediate, MovePlayerPacket.Mode mode) {
@@ -94,7 +94,7 @@ public class TeleportUtil {
 
         player.sendLatencyStack(true);
         this.queuedTeleports.add(new TeleportCache.Rewind(player.sentStackId.get(), tick, new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), onGround));
-        this.player.cloudburstDownstream.sendPacketImmediately(packet);
+        this.player.getCloudburstDownstream().sendPacketImmediately(packet);
     }
 
     public void cachePosition(long tick, Vector3f position) {
