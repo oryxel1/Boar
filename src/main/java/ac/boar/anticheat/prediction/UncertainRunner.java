@@ -13,17 +13,18 @@ public class UncertainRunner {
     }
 
     public float extraOffset(double offset) {
+        float extra = 0;
         if (player.thisTickSpinAttack) {
-            return player.thisTickOnGroundSpinAttack ? 0.08F : 0.008F;
+            extra += player.thisTickOnGroundSpinAttack ? 0.08F : 0.008F;
         }
 
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         if (player.affectedByFluidPushing && actual.horizontalLength() - player.afterCollision.horizontalLength() <=
                 player.guessedFluidPushingVelocity.horizontalLength() + 0.014F &&
                 Math.abs(player.position.y - player.unvalidatedPosition.y) <= player.getMaxOffset()) {
-            return (float) offset;
+            extra = (float) offset;
         }
 
-        return 0;
+        return extra;
     }
 }
