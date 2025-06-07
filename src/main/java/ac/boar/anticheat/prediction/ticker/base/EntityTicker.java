@@ -81,9 +81,6 @@ public class EntityTicker {
         }
 
         final Box box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
-        final BlockPositionIterator iterator = BlockPositionIterator.fromMinMax(
-                GenericMath.floor(box.minX), GenericMath.floor(box.minY), GenericMath.floor(box.minZ),
-                GenericMath.ceil(box.maxX), GenericMath.ceil(box.maxY), GenericMath.ceil(box.maxZ));
 
         float maxFluidHeight = 0.0F;
         boolean bl = /* this.isPushedByFluid(); */ true;
@@ -92,23 +89,29 @@ public class EntityTicker {
         int fluidCount = 0;
 
         Mutable mutable = new Mutable();
-        for (iterator.reset(); iterator.hasNext(); iterator.next()) {
-            mutable.set(iterator.getX(), iterator.getY(), iterator.getZ());
 
-            float f;
-            FluidState fluidState = player.compensatedWorld.getFluidState(iterator.getX(), iterator.getY(), iterator.getZ());
-            if (fluidState.fluid() != (tag) || !((f = (float)iterator.getY() + fluidState.getHeight(player, mutable)) >= box.minY)) continue;
-            found = true;
-            maxFluidHeight = Math.max(f - box.minY, maxFluidHeight);
-            if (!bl) continue;
-            Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(iterator.getX(), iterator.getY(), iterator.getZ()), fluidState);
-//            if (maxFluidHeight < 0.4) {
-//                vec32 = vec32.multiply(maxFluidHeight);
-//            }
+        int i = GenericMath.floor(box.minX);
+        int j = GenericMath.ceil(box.maxX);
+        int k = GenericMath.floor(box.minY);
+        int l = GenericMath.ceil(box.maxY);
+        int m = GenericMath.floor(box.minZ);
+        int n = GenericMath.ceil(box.maxZ);
+        for (int p = i; p < j; ++p) {
+            for (int q = k; q < l; ++q) {
+                for (int r = m; r < n; ++r) {
+                    float f;
+                    FluidState fluidState = player.compensatedWorld.getFluidState(p, q, r);
+                    if (fluidState.fluid() != (tag) || !((f = (float)q + fluidState.getHeight(player, mutable)) >= box.minY)) continue;
+                    found = true;
+                    maxFluidHeight = Math.max(f - box.minY, maxFluidHeight);
+                    if (!bl) continue;
+                    Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(p, q, r), fluidState);
 
-            player.affectedByFluidPushing = true;
-            fluidPushVelocity = fluidPushVelocity.add(vec32);
-            ++fluidCount;
+                    player.affectedByFluidPushing = true;
+                    fluidPushVelocity = fluidPushVelocity.add(vec32);
+                    ++fluidCount;
+                }
+            }
         }
 
         if (fluidPushVelocity.length() > 0.0) {
