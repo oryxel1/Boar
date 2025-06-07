@@ -72,7 +72,8 @@ public class ContainerCache {
     }
 
     public ItemCache get(final int slot) {
-        return this.contents[slot - this.offset];
+        ItemCache cache = this.contents[slot - this.offset];
+        return cache == null ? ItemCache.AIR : cache; // just in case.
     }
 
     public void set(final int slot, final ItemData raw) {
