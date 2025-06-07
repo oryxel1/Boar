@@ -97,7 +97,7 @@ public class BedrockCollision {
             return LECTERN_SHAPE;
         }
 
-        if (state.is(Blocks.CAULDRON)) {
+        if (state.is(Blocks.CAULDRON) || state.is(Blocks.WATER_CAULDRON) || state.is(Blocks.LAVA_CAULDRON) || state.is(Blocks.POWDER_SNOW_CAULDRON)) {
             return CAULDRON_SHAPE;
         }
 
