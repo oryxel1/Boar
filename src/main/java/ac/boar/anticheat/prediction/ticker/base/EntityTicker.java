@@ -80,7 +80,7 @@ public class EntityTicker {
             return false;
         }
 
-        final Box box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
+        final Box box = player.boundingBox.contract(0.001F);
 
         float maxFluidHeight = 0.0F;
         boolean bl = /* this.isPushedByFluid(); */ true;

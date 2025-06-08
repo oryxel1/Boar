@@ -24,14 +24,6 @@ public class BlockUtil {
         return destroyTime != -1 || player.gameType == GameType.CREATIVE;
     }
 
-    public static float getWorldFluidHeight(Fluid fluidType, int blockId) {
-        return (float) switch (fluidType) {
-            case WATER -> BlockStateValues.getWaterHeight(blockId);
-            case LAVA -> BlockStateValues.getLavaHeight(blockId);
-            case EMPTY -> -1;
-        };
-    }
-
     public static BlockState findFenceBlockState(BoarPlayer player, Vector3i position) {
         BlockState main = player.compensatedWorld.getBlockState(position, 0, false).getState();
 

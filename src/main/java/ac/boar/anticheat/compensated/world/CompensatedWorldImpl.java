@@ -5,13 +5,14 @@ import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import com.google.common.collect.ImmutableList;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.property.Properties;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.ArrayList;
@@ -35,25 +36,24 @@ public class CompensatedWorldImpl extends CompensatedWorld {
     }
 
     public FluidState getFluidState(int x, int y, int z) {
-        final int blockIdLayer0 = getBlockAt(x, y, z, 0);
-        final int blockIdLayer1 = getBlockAt(x, y, z, 1);
-        float waterHeight = BlockUtil.getWorldFluidHeight(Fluid.WATER, blockIdLayer0);
-        float lavaHeight = BlockUtil.getWorldFluidHeight(Fluid.LAVA, blockIdLayer0);
-
-        boolean waterlogged = blockIdLayer1 == Blocks.WATER.javaId();
-        if (waterlogged) {
-            return new FluidState(Fluid.WATER, 1);
+        if (getBlockAt(x, y, z, 1) == Blocks.WATER.javaId()) {
+            return new FluidState(Fluid.WATER, 8 / 9F); // Waterlogged
         }
+        final BlockState state = getBlockState(x, y, z, 0).getState();
+        boolean water = state.is(Blocks.WATER);
 
-        if (waterHeight <= 0 && lavaHeight <= 0) {
+        if (!water && !state.is(Blocks.LAVA)) {
             return new FluidState(Fluid.EMPTY, 0);
         }
 
-        if (waterHeight > 0) {
-            return new FluidState(Fluid.WATER, waterHeight);
+        Fluid fluid = water ? Fluid.WATER : Fluid.LAVA;
+
+        int rawLevel = state.getValue(Properties.LEVEL);
+        if (rawLevel == 0 || rawLevel == 8) {
+            return new FluidState(fluid, 8 / 9F);
         }
 
-        return new FluidState(Fluid.LAVA, lavaHeight);
+        return new FluidState(fluid, (8 - rawLevel) / 9F);
     }
 
     public List<Box> collectColliders(List<Box> list, Box aABB) {
