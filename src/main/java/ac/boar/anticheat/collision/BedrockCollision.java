@@ -79,7 +79,7 @@ public class BedrockCollision {
     }
     
     public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
-        if (state.is(Blocks.LANTERN)) {
+        if (state.is(Blocks.LANTERN) || state.is(Blocks.SOUL_LANTERN)) {
             return BELL_SHAPE;
         }
 
