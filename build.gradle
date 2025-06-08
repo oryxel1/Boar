@@ -31,10 +31,16 @@ dependencies {
     compileOnly("com.google.code.gson:gson:2.3.1")
     testImplementation("com.google.code.gson:gson:2.3.1")
 
-    implementation "it.unimi.dsi:fastutil:8.5.15"
+    implementation("it.unimi.dsi:fastutil:8.5.15")
+
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
 }
 
-shadowJar { relocate 'it.unimi.dsi.fastutil', 'ac.boar.shaded.fastutil' }
+shadowJar {
+    relocate 'it.unimi.dsi.fastutil', 'ac.boar.shaded.fastutil'
+    relocate 'com.fasterxml.jackson', 'ac.boar.shaded.jackson'
+    relocate 'org.yaml.snakeyaml', 'ac.boar.shaded.snakeyaml'
+}
 
 def targetJavaVersion = 17
 java {

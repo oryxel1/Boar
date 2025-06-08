@@ -1,6 +1,8 @@
 package ac.boar.anticheat.check.api.holder;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.Check;
+import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.impl.badpackets.BadPacketA;
 import ac.boar.anticheat.check.impl.prediction.DebugOffsetA;
 import ac.boar.anticheat.check.impl.prediction.PredictionA;
@@ -10,6 +12,7 @@ import ac.boar.anticheat.check.impl.velocity.Velocity;
 import ac.boar.anticheat.player.BoarPlayer;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class CheckHolder extends HashMap<Class<?>, Check> {
     public CheckHolder(final BoarPlayer player) {
@@ -22,6 +25,16 @@ public class CheckHolder extends HashMap<Class<?>, Check> {
         this.put(PredictionA.class, new PredictionA(player));
 
         this.put(BadPacketA.class, new BadPacketA(player));
+    }
 
+    @Override
+    public Check put(Class<?> key, Check value) {
+        String name = key.getDeclaredAnnotation(CheckInfo.class).name(), type = key.getDeclaredAnnotation(CheckInfo.class).type();
+        List<String> disabledChecks = Boar.getInstance().getConfig().disabledChecks();
+        if (type.isEmpty() ? disabledChecks.contains(name) : disabledChecks.contains(name + "-" + type)) {
+            return null;
+        }
+
+        return super.put(key, value);
     }
 }

@@ -38,7 +38,7 @@ public class GeyserBoar implements Extension {
         logger = this.logger();
 
         UseDurationCache.init();
-        Boar.getInstance().init();
+        Boar.getInstance().init(this);
     }
 
     @Subscribe

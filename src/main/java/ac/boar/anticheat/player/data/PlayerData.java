@@ -1,6 +1,6 @@
 package ac.boar.anticheat.player.data;
 
-import ac.boar.anticheat.GlobalSetting;
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.*;
 import ac.boar.anticheat.data.input.PredictionData;
@@ -176,7 +176,7 @@ public class PlayerData {
 
     // Prediction related method
     public final double getMaxOffset() {
-        return GlobalSetting.PLAYER_POSITION_ACCEPTANCE_THRESHOLD;
+        return Boar.getInstance().getConfig().acceptanceThreshold();
     }
 
     public final void setSprinting(boolean sprinting) {

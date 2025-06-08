@@ -1,6 +1,5 @@
 package ac.boar.anticheat.packets.input;
 
-import ac.boar.anticheat.GlobalSetting;
 import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;

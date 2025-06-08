@@ -1,11 +1,14 @@
 package ac.boar.anticheat;
 
+import ac.boar.anticheat.config.Config;
+import ac.boar.anticheat.config.ConfigLoader;
 import ac.boar.anticheat.packets.input.AuthInputPackets;
 import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
 import ac.boar.anticheat.packets.other.VehiclePackets;
 import ac.boar.anticheat.packets.player.*;
 import ac.boar.anticheat.packets.world.*;
+import ac.boar.geyser.GeyserBoar;
 import ac.boar.mappings.BedrockMappings;
 import lombok.Getter;
 
@@ -20,9 +23,13 @@ public class Boar {
     private final static Boar instance = new Boar();
     private Boar() {}
 
+    private Config config;
     private BoarPlayerManager playerManager;
 
-    public void init() {
+    public void init(GeyserBoar instance) {
+        this.config = ConfigLoader.load(instance, GeyserBoar.class, Config.class);
+        System.out.println("Load config: " + this.config);
+
         BedrockMappings.load();
 
         this.playerManager = new BoarPlayerManager();

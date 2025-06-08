@@ -1,6 +1,6 @@
 package ac.boar.anticheat.teleport;
 
-import ac.boar.anticheat.GlobalSetting;
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.data.input.PredictionData;
 import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -104,13 +104,13 @@ public class TeleportUtil {
 
     public void clearRewindHistory() {
         final Iterator<Map.Entry<Long, RewindData>> iterator = this.rewindHistory.entrySet().iterator();
-        while (iterator.hasNext() && this.rewindHistory.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
+        while (iterator.hasNext() && this.rewindHistory.size() > Boar.getInstance().getConfig().rewindHistory()) {
             iterator.next();
             iterator.remove();
         }
 
         final Iterator<Map.Entry<Long, TickData>> iterator1 = this.authInputHistory.entrySet().iterator();
-        while (iterator1.hasNext() && this.authInputHistory.size() > GlobalSetting.REWIND_HISTORY_SIZE_TICKS) {
+        while (iterator1.hasNext() && this.authInputHistory.size() > Boar.getInstance().getConfig().rewindHistory()) {
             iterator1.next();
             iterator1.remove();
         }
