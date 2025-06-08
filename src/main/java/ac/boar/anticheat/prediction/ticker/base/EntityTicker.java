@@ -86,6 +86,7 @@ public class EntityTicker {
 
         Box box = player.boundingBox.contract(0.001F);
 
+        // Ugly workaround but works.
         boolean notSwimming = !player.getInputData().contains(PlayerAuthInputData.START_SWIMMING) && !player.getFlagTracker().has(EntityFlag.SWIMMING);
         if (player.submergedFluidTag.isEmpty() && notSwimming && !(player.unvalidatedTickEnd.y > player.velocity.y && tag == Fluid.LAVA) && !affectedByFluid(tag)) {
             box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
