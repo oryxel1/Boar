@@ -52,6 +52,8 @@ public class BedrockCollision {
     private final static List<Box> DOOR_EAST_SHAPE = List.of(new Box(0.8175F, 0, 0, 1, 1, 1));
     private final static List<Box> DOOR_WEST_SHAPE = List.of(new Box(0, 0, 0, 0.1825F, 1, 1));
 
+    private final static List<Box> BELL_SHAPE = List.of(new Box(0.3125F, 0, 0.3125F, 0.6875F, 0.5F, 0.6875F));
+
     static {
         // Scaffolding
         {
@@ -77,6 +79,10 @@ public class BedrockCollision {
     }
     
     public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
+        if (state.is(Blocks.LANTERN)) {
+            return BELL_SHAPE;
+        }
+
         if (state.is(Blocks.ENDER_CHEST)) {
             return SINGLE_CHEST_SHAPE;
         }
