@@ -12,8 +12,10 @@ import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.erosion.util.BlockPositionIterator;
+import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Fluid;
 
 @RequiredArgsConstructor
@@ -46,8 +48,8 @@ public class EntityTicker {
     private void updateWaterState() {
         player.fluidHeight.clear();
         this.checkWaterState();
-
-        this.updateFluidHeightAndDoFluidPushing(0F, Fluid.LAVA);
+        this.updateFluidHeightAndDoFluidPushing(player.compensatedWorld.getDimension().bedrockId() ==
+                BedrockDimension.DEFAULT_NETHER_ID ? 0.007F : 0.0023333333333333335F, Fluid.LAVA);
     }
 
     private void updateSubmergedInWaterState() {
@@ -64,6 +66,8 @@ public class EntityTicker {
         if (e > eyePosition) {
             player.submergedFluidTag.add(lv4.fluid());
         }
+
+        player.submergedFluidTag.remove(Fluid.EMPTY); // not needed lol.
     }
 
     void checkWaterState() {
@@ -80,7 +84,12 @@ public class EntityTicker {
             return false;
         }
 
-        final Box box = player.boundingBox.contract(0.001F);
+        Box box = player.boundingBox.contract(0.001F);
+
+        boolean notSwimming = !player.getInputData().contains(PlayerAuthInputData.START_SWIMMING) && !player.getFlagTracker().has(EntityFlag.SWIMMING);
+        if (player.submergedFluidTag.isEmpty() && notSwimming && !(player.unvalidatedTickEnd.y > player.velocity.y && tag == Fluid.LAVA)) {
+            box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
+        }
 
         float maxFluidHeight = 0.0F;
         boolean bl = /* this.isPushedByFluid(); */ true;
@@ -99,9 +108,9 @@ public class EntityTicker {
         for (int p = i; p < j; ++p) {
             for (int q = k; q < l; ++q) {
                 for (int r = m; r < n; ++r) {
-                    float f;
                     FluidState fluidState = player.compensatedWorld.getFluidState(p, q, r);
-                    if (fluidState.fluid() != (tag) || !((f = (float)q + fluidState.getHeight(player, mutable)) >= box.minY)) continue;
+                    float f = (float)q + fluidState.getHeight(player, mutable);
+                    if (fluidState.fluid() != (tag) || !(f >= box.minY)) continue;
                     found = true;
                     maxFluidHeight = Math.max(f - box.minY, maxFluidHeight);
                     if (!bl) continue;
