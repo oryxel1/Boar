@@ -87,7 +87,7 @@ public class EntityTicker {
         Box box = player.boundingBox.contract(0.001F);
 
         boolean notSwimming = !player.getInputData().contains(PlayerAuthInputData.START_SWIMMING) && !player.getFlagTracker().has(EntityFlag.SWIMMING);
-        if (player.submergedFluidTag.isEmpty() && notSwimming && !(player.unvalidatedTickEnd.y > player.velocity.y && tag == Fluid.LAVA)) {
+        if (player.submergedFluidTag.isEmpty() && notSwimming && !(player.unvalidatedTickEnd.y > player.velocity.y && tag == Fluid.LAVA) && !affectedByFluid(tag)) {
             box = player.boundingBox.expand(0, -0.3F, 0).contract(0.001F);
         }
 
@@ -116,7 +116,7 @@ public class EntityTicker {
                     if (!bl) continue;
                     Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(p, q, r), fluidState);
 
-                    player.affectedByFluidPushing = true;
+                    player.affectedByFluidPushing = vec32.lengthSquared() > 0;
                     fluidPushVelocity = fluidPushVelocity.add(vec32);
                     ++fluidCount;
                 }
@@ -145,6 +145,35 @@ public class EntityTicker {
         player.fluidHeight.put(tag, maxFluidHeight);
 
         return found;
+    }
+
+    private boolean affectedByFluid(Fluid tag) {
+        Box box = player.boundingBox.contract(0.001F);
+
+        Mutable mutable = new Mutable();
+
+        int i = GenericMath.floor(box.minX);
+        int j = GenericMath.ceil(box.maxX);
+        int k = GenericMath.floor(box.minY);
+        int l = GenericMath.ceil(box.maxY);
+        int m = GenericMath.floor(box.minZ);
+        int n = GenericMath.ceil(box.maxZ);
+        for (int p = i; p < j; ++p) {
+            for (int q = k; q < l; ++q) {
+                for (int r = m; r < n; ++r) {
+                    FluidState fluidState = player.compensatedWorld.getFluidState(p, q, r);
+                    float f = (float) q + fluidState.getHeight(player, mutable);
+                    if (fluidState.fluid() != (tag) || !(f >= box.minY)) continue;
+                    Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(p, q, r), fluidState);
+
+                    if (vec32.lengthSquared() > 0) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     protected void applyEffectsFromBlocks() {
