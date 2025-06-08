@@ -1,6 +1,7 @@
 package ac.boar.anticheat.prediction;
 
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +22,13 @@ public class UncertainRunner {
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         if (player.affectedByFluidPushing && actual.horizontalLength() - player.afterCollision.horizontalLength() <=
                 player.guessedFluidPushingVelocity.horizontalLength() + 0.014F &&
-                Math.abs(player.position.y - player.unvalidatedPosition.y) <= player.getMaxOffset()) {
+                Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset()) {
+            extra = (float) offset;
+        }
+
+        if (Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset() &&
+                player.soulSandBelow && actual.horizontalLengthSquared() < player.afterCollision.horizontalLengthSquared() &&
+                MathUtil.sign(actual.x) == MathUtil.sign(player.afterCollision.x) && MathUtil.sign(actual.z) == MathUtil.sign(player.afterCollision.z)) {
             extra = (float) offset;
         }
 

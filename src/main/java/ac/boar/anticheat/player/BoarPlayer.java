@@ -31,6 +31,7 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
+import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.BlockMappings;
@@ -144,6 +145,19 @@ public final class BoarPlayer extends PlayerData {
     public void postTick() {
         this.getUseItemCache().tick();
         this.glideBoostTicks--;
+    }
+
+    public float getFrictionInfluencedSpeed(float slipperiness) {
+        if (this.onGround) {
+            float speed = this.getSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
+            if (!CompensatedInventory.getEnchantments(this.compensatedInventory.armorContainer.get(3).getData()).containsKey(BedrockEnchantment.SOUL_SPEED) && this.soulSandBelow) {
+                speed *= 0.55F; // not accurate, but well I can just give extra offset if player movement is slower than the predicted one.
+            }
+
+            return speed;
+        }
+
+        return this.getFlagTracker().has(EntityFlag.SPRINTING) ? 0.026F : 0.02F;
     }
 
     public BlockState getInBlockState() {

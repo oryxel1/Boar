@@ -16,6 +16,7 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.erosion.util.BlockPositionIterator;
 import org.geysermc.geyser.level.BedrockDimension;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 
 @RequiredArgsConstructor
@@ -37,6 +38,8 @@ public class EntityTicker {
         this.updateWaterState();
         this.updateSubmergedInWaterState();
         this.updateSwimming();
+
+        player.soulSandBelow = player.compensatedWorld.getBlockState(player.getOnPos(1.0E-3F), 0).getState().is(Blocks.SOUL_SAND);
     }
 
     private void updateSwimming() {

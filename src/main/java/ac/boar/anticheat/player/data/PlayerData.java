@@ -153,6 +153,8 @@ public class PlayerData {
 
     public boolean horizontalCollision, verticalCollision;
 
+    public boolean soulSandBelow;
+
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
     public float getFluidHeight(Fluid tagKey) {
         return this.fluidHeight.getOrDefault(tagKey, 0F);
@@ -205,14 +207,6 @@ public class PlayerData {
 
     public float getSpeed() {
         return this.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).getValue();
-    }
-
-    public float getFrictionInfluencedSpeed(float slipperiness) {
-        if (onGround) {
-            return this.getSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
-        }
-
-        return this.getFlagTracker().has(EntityFlag.SPRINTING) ? 0.026F : 0.02F;
     }
 
     // Others (methods)
