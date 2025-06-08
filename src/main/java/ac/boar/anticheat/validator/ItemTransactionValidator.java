@@ -14,6 +14,7 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryActionData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySource;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.LegacySetItemSlotData;
 import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
@@ -159,6 +160,29 @@ public final class ItemTransactionValidator {
                         }
 
                         player.getUseItemCache().use(SD1);
+
+                        List<LegacySetItemSlotData> legacySlots = packet.getLegacySlots();
+                        if (packet.getActions().size() == 1 && !legacySlots.isEmpty()) {
+                            if (packet.getHotbarSlot() != inventory.heldItemSlot) {
+                                break;
+                            }
+
+                            LegacySetItemSlotData slotData = legacySlots.get(0);
+                            if (slotData.getSlots().length == 0) {
+                                break;
+                            }
+
+                            int actualSlot = slotData.getSlots()[0];
+                            if (actualSlot < 0 || actualSlot >= inventory.armorContainer.getContainerSize()) {
+                                break;
+                            }
+
+                            if (slotData.getContainerId() == 6) {
+                                ItemData oldHotbar = inventory.inventoryContainer.getHeldItemData();
+                                inventory.inventoryContainer.set(packet.getHotbarSlot(), inventory.armorContainer.get(actualSlot));
+                                inventory.armorContainer.set(actualSlot, oldHotbar);
+                            }
+                        }
                     }
                 }
             }
