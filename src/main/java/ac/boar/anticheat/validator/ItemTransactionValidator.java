@@ -1,12 +1,16 @@
 package ac.boar.anticheat.validator;
 
+import ac.boar.anticheat.check.impl.place.AirPlace;
 import ac.boar.anticheat.compensated.CompensatedInventory;
+import ac.boar.anticheat.data.block.BoarBlockState;
+import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
@@ -14,12 +18,15 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryActionData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventorySource;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.ItemUseTransaction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.LegacySetItemSlotData;
 import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
-import org.geysermc.geyser.level.block.property.Properties;
-import org.geysermc.geyser.level.block.type.BlockState;
+import org.geysermc.geyser.inventory.GeyserItemStack;
+import org.geysermc.geyser.item.type.BlockItem;
+import org.geysermc.geyser.level.physics.Direction;
+import org.geysermc.geyser.util.BlockUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,20 +148,45 @@ public final class ItemTransactionValidator {
 
                 // The rest is going to validate by Geyser.
 
-                final BlockState state = player.compensatedWorld.getBlockState(position, 0).getState();
+                final BoarBlockState state = player.compensatedWorld.getBlockState(position, 0);
                 switch (packet.getActionType()) {
                     case 0 -> {
-                        if (state.getValue(Properties.OPEN) != null) {
-                            int newId = state.withValue(Properties.OPEN, !state.getValue(Properties.OPEN)).javaId();
-                            // player.compensatedWorld.updateBlock(position, 0, newId);
+                        if (packet.getItemInHand() == null || !validate(SD1, packet.getItemInHand())) {
+                            return true; // nope, not a mistake, Geyser going to take care of it anyway.
                         }
 
+                        if (packet.getClientInteractPrediction() == ItemUseTransaction.PredictedResult.FAILURE) {
+                            return true; // Player claimed to be failing this action, no need to process it.
+                        }
 
+                        int blockFace = packet.getBlockFace();
+                        if (blockFace < 0 || blockFace > 5) {
+                            return false; // Invalid.
+                        }
+
+                        ItemCache heldItem = inventory.inventoryContainer.getHeldItemCache();
+                        boolean heldItemExist = !heldItem.isEmpty();
+                        boolean doingSecondaryAction = player.getInputData().contains(PlayerAuthInputData.SNEAKING) && heldItemExist;
+
+//                        if (!doingSecondaryAction) {
+//                            state.useItemOn(inventory.inventoryContainer.getHeldItemCache(), player);
+//                            return true;
+//                        }
+
+                        GeyserItemStack geyserItemStack = GeyserItemStack.from(inventory.translate(heldItem.getData()));
+                        if (geyserItemStack.asItem() instanceof BlockItem) {
+                            if (state.isAir()) {
+                                player.getCheckHolder().get(AirPlace.class).fail();
+                            }
+
+                            Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
+                        }
+
+                        System.out.println(packet);
                     }
 
                     // This seems to for things that is not related to block interact and only for item interaction.
                     case 1 -> {
-                        // Geyser going to handle this, not me.
                         if (packet.getItemInHand() == null || !validate(SD1, packet.getItemInHand())) {
                             return true;
                         }

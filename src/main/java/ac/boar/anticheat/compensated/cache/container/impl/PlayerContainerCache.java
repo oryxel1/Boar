@@ -13,6 +13,10 @@ public class PlayerContainerCache extends ContainerCache {
         super(inventory, (byte) ContainerId.INVENTORY, ContainerType.INVENTORY, null, -1L);
     }
 
+    public ItemCache getHeldItemCache() {
+        return this.getItemFromSlot(this.inventory.heldItemSlot);
+    }
+
     public ItemData getHeldItemData() {
         return this.getItemFromSlot(this.inventory.heldItemSlot).getData();
     }
