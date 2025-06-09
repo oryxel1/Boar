@@ -14,3 +14,10 @@ player-position-acceptance-threshold: 1.0E-4
 # Checks that you want Boar to disable.
 # Check name should be in format "Name-Type" and if there is no type then "Name", ex: Reach-A (don't actually disable reach check lol).
 disabled-checks: []
+
+# Normally Boar will account for lag, that also including placing, if on the server side the block player place on is Air
+# but on the client side the block player place on is a valid block, Boar going to allow the placement.
+# However, if this config is true, Boar is going to forcefully rewind player and cancel the place if on the server side
+# player block is Air.
+# NOTE: THIS ONLY APPLIED FOR BLOCK PLACING.
+ignore-ghost-block-place: false

@@ -43,7 +43,7 @@ public class GeyserBoar implements Extension {
 
     @Subscribe
     public void onGeyserShutdown(GeyserShutdownEvent event) {
-        Boar.getInstance().terminate();
+        Boar.getInstance().terminate(this);
     }
 
     @Subscribe
