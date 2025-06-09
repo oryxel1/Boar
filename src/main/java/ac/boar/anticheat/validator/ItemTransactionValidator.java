@@ -2,6 +2,7 @@ package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.check.impl.place.AirPlace;
 import ac.boar.anticheat.compensated.CompensatedInventory;
+import ac.boar.anticheat.data.InteractionResult;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -30,8 +31,13 @@ import org.geysermc.geyser.item.Items;
 import org.geysermc.geyser.item.type.BlockItem;
 import org.geysermc.geyser.item.type.Item;
 import org.geysermc.geyser.level.block.Blocks;
+import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.Block;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
+import org.geysermc.geyser.session.cache.TagCache;
+import org.geysermc.geyser.session.cache.tags.BlockTag;
+import org.geysermc.geyser.session.cache.tags.ItemTag;
 import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransactionTranslator;
 import org.geysermc.geyser.util.BlockUtils;
 
@@ -155,7 +161,8 @@ public final class ItemTransactionValidator {
 
                 // The rest is going to validate by Geyser.
 
-                final BoarBlockState state = player.compensatedWorld.getBlockState(position, 0);
+                final BoarBlockState boarState = player.compensatedWorld.getBlockState(position, 0);
+                final BlockState state = boarState.getState();
                 switch (packet.getActionType()) {
                     case 0 -> {
                         if (packet.getItemInHand() == null || !validate(SD1, packet.getItemInHand())) {
@@ -172,24 +179,97 @@ public final class ItemTransactionValidator {
                         }
 
                         ItemCache heldItem = inventory.inventoryContainer.getHeldItemCache();
+                        GeyserItemStack geyserItemStack = GeyserItemStack.from(inventory.translate(heldItem.getData()));
+                        Item item = geyserItemStack.asItem();
+
                         boolean heldItemExist = !heldItem.isEmpty();
                         boolean doingSecondaryAction = player.getInputData().contains(PlayerAuthInputData.SNEAKING) && heldItemExist;
 
-//                        if (!doingSecondaryAction) {
-//                            state.useItemOn(inventory.inventoryContainer.getHeldItemCache(), player);
-//                            return true;
-//                        }
+                        if (!doingSecondaryAction) {
+                            InteractionResult result = InteractionResult.TRY_WITH_EMPTY_HAND;
+                            // useItemOn part.
+                            int itemJavaId = item.javaId();
+                            if (state.is(Blocks.CAULDRON) &&
+                                    (itemJavaId == Items.WATER_BUCKET.javaId() || itemJavaId == Items.LAVA_BUCKET.javaId() ||
+                                            itemJavaId == Items.POWDER_SNOW_BUCKET.javaId())) {
+                                result = InteractionResult.SUCCESS;
+                            }
+
+                            final TagCache tagCache = player.getSession().getTagCache();
+                            if (state.is(Blocks.CAKE) && (tagCache.is(ItemTag.CANDLES, item) || state.getValue(Properties.BITES) == 0)) {
+                                result = InteractionResult.SUCCESS;
+                            }
+
+                            if (tagCache.is(BlockTag.CANDLES, state.block()) && (geyserItemStack.isEmpty() && state.getValue(Properties.LIT))) {
+                                result = InteractionResult.SUCCESS;
+                            }
+
+                            if (state.is(Blocks.CHISELED_BOOKSHELF)) {
+//                                if (!tagCache.is(ItemTag.BOOKSHELF_BOOKS, item)) {
+//                                    result = InteractionResult.TRY_WITH_EMPTY_HAND;
+//                                }
+//                                OptionalInt optionalInt = this.getHitSlot(blockHitResult, blockState);
+//                                if (optionalInt.isEmpty()) {
+//                                    return InteractionResult.PASS;
+//                                }
+//                                if (((Boolean)blockState.getValue(SLOT_OCCUPIED_PROPERTIES.get(optionalInt.getAsInt()))).booleanValue()) {
+//                                    return InteractionResult.TRY_WITH_EMPTY_HAND;
+//                                }
+//                                ChiseledBookShelfBlock.addBook(level, blockPos, player, chiseledBookShelfBlockEntity, itemStack, optionalInt.getAsInt());
+//                                return InteractionResult.SUCCESS;
+                            }
+
+                            if (state.is(Blocks.LECTERN)) {
+                                if (!state.getValue(Properties.HAS_BOOK) && geyserItemStack.isEmpty()) {
+                                    result = InteractionResult.PASS;
+                                }
+                            }
+
+                            if (state.is(Blocks.NOTE_BLOCK)) {
+                                if (tagCache.is(ItemTag.NOTEBLOCK_TOP_INSTRUMENTS, item) && blockFace == Direction.UP.ordinal()) {
+                                    result = InteractionResult.PASS;
+                                }
+                            }
+
+                            if (state.is(Blocks.PUMPKIN) || state.is(Blocks.REDSTONE_ORE)) {
+                                result = InteractionResult.PASS;
+                            }
+
+                            if (state.is(Blocks.RESPAWN_ANCHOR)) {
+                                if (itemJavaId == Items.GLOWSTONE.javaId() && state.getValue(Properties.RESPAWN_ANCHOR_CHARGES) < 4) {
+                                    result = InteractionResult.SUCCESS;
+                                }
+                            }
+
+                            if (tagCache.is(BlockTag.ALL_SIGNS, state.block())) {
+                                result = InteractionResult.PASS;
+                            }
+
+                            if (state.is(Blocks.SWEET_BERRY_BUSH)) {
+                                if (state.getValue(Properties.AGE_3) != 3 && itemJavaId == Items.BONE_MEAL.javaId()) {
+                                    result = InteractionResult.PASS;
+                                }
+                            }
+
+                            if (state.is(Blocks.TNT)) {
+                                if (itemJavaId == Items.FLINT_AND_STEEL.javaId() || itemJavaId == Items.FIRE_CHARGE.javaId()) {
+                                    result = InteractionResult.SUCCESS;
+                                }
+                            }
+
+                            if (result != InteractionResult.TRY_WITH_EMPTY_HAND) {
+                                return true;
+                            }
+                        }
 
                         Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
-                        if (state.isAir()) {
+                        if (boarState.isAir()) {
                             player.getCheckHolder().get(AirPlace.class).fail();
                             BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
                             return false;
                         }
 
                         // TODO: Maybe... move this into a separate class?
-                        GeyserItemStack geyserItemStack = GeyserItemStack.from(inventory.translate(heldItem.getData()));
-                        Item item = geyserItemStack.asItem();
                         if (item instanceof BlockItem blockItem) {
                             Block block = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
                             if (block.javaId() != Blocks.AIR.javaId()) {
