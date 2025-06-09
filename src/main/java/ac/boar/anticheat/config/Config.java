@@ -8,5 +8,5 @@ import java.util.List;
 public record Config(@JsonProperty("player-rewind-history-size-ticks") int rewindHistory,
                      @JsonProperty("player-position-acceptance-threshold") float acceptanceThreshold,
                      @JsonProperty("disabled-checks") List<String> disabledChecks,
-                     @JsonProperty("ignore-ghost-block-place") boolean ignoreGhostBlockPlace) {
+                     @JsonProperty("ignore-ghost-block") boolean ignoreGhostBlock) {
 }

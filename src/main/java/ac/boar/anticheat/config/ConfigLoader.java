@@ -64,7 +64,7 @@ public class ConfigLoader {
                         s = s.replace("player-rewind-history-size-ticks: 20", "player-rewind-history-size-ticks: " + config.rewindHistory());
                         s = s.replace("player-position-acceptance-threshold: 1.0E-4", "player-position-acceptance-threshold: " + config.acceptanceThreshold());
                         s = s.replace("disabled-checks: []", "disabled-checks: " + Arrays.toString(config.disabledChecks().toArray(new String[0])));
-                        s = s.replace("ignore-ghost-block-place: false", "ignore-ghost-block-place: " + config.ignoreGhostBlockPlace());
+                        s = s.replace("ignore-ghost-block: false", "ignore-ghost-block: " + config.ignoreGhostBlock());
                     }
 
                     writer.write(s.toCharArray());

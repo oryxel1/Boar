@@ -24,6 +24,11 @@ public class PostAuthInputPackets implements PacketListener {
                 return;
             }
 
+            if (player.ghostBlockAffected != null && player.ghostBlockAffected.distance(player.position.x, player.position.y, player.position.z) >= 2) {
+                player.ghostBlockAffected = null;
+                player.tickSinceBlockResync = 5;
+            }
+
             if (player.tickSinceBlockResync > 0) player.tickSinceBlockResync--;
             player.getTeleportUtil().clearRewindHistory();
         }

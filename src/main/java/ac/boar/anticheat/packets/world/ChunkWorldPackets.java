@@ -1,7 +1,10 @@
 package ac.boar.anticheat.packets.world;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.geyser.BlockStorage;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Vec3;
@@ -10,10 +13,13 @@ import ac.boar.protocol.listener.PacketListener;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.util.VarInts;
 import org.geysermc.geyser.level.BedrockDimension;
+import org.geysermc.geyser.level.block.Blocks;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.chunk.bitarray.BitArray;
 import org.geysermc.geyser.level.chunk.bitarray.BitArrayVersion;
 import org.geysermc.geyser.level.chunk.bitarray.SingletonBitArray;
@@ -161,8 +167,28 @@ public class ChunkWorldPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof UpdateBlockPacket packet) {
+            // Ugly hack.
+            if (packet.getDataLayer() == 0 && Boar.getConfig().ignoreGhostBlock() && !player.inLoadingScreen && player.sinceLoadingScreen >= 2) {
+                BlockState state = BlockState.of(player.bedrockBlockToJava.getOrDefault(packet.getDefinition().getRuntimeId(), Blocks.AIR.javaId()));
+                if (state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR)) {
+                    int distance = Math.abs(packet.getBlockPosition().getY() - GenericMath.floor(player.position.y - 1));
+                    if (distance <= 1) {
+                        player.ghostBlockAffected = packet.getBlockPosition();
+                        player.tickSinceBlockResync = 5;
+                        world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId());
+                    }
+                }
+            }
+
+            boolean needed = player.ghostBlockAffected != null && player.ghostBlockAffected.equals(packet.getBlockPosition());
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+                world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId());
+
+                if (needed && MathUtil.compare(player.ghostBlockAffected, packet.getBlockPosition())) {
+                    player.ghostBlockAffected = null;
+                }
+            });
         }
     }
 
