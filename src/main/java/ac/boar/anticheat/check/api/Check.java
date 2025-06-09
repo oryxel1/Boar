@@ -22,7 +22,7 @@ public class Check {
     public void fail(String verbose) {
         this.vl++;
 
-        final StringBuilder builder = new StringBuilder("§3" + player.getSession().getPlayerEntity().getDisplayName() + "§7 failed §6 " + name);
+        final StringBuilder builder = new StringBuilder("§3" + player.getSession().getPlayerEntity().getDisplayName() + "§7 failed§6 " + name);
         if (!this.type.isBlank()) {
             builder.append("(").append(type).append(")");
         }
@@ -32,7 +32,6 @@ public class Check {
         }
 
         builder.append(" §7x").append(vl).append(" ").append(verbose);
-
         ChatUtil.alert(player, builder.toString());
     }
 }

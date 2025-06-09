@@ -8,6 +8,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
+import ac.boar.mappings.BedrockMappings;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -25,7 +26,10 @@ import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
 import org.geysermc.geyser.inventory.GeyserItemStack;
 import org.geysermc.geyser.item.type.BlockItem;
+import org.geysermc.geyser.level.block.Blocks;
+import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.physics.Direction;
+import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransactionTranslator;
 import org.geysermc.geyser.util.BlockUtils;
 
 import java.util.ArrayList;
@@ -174,12 +178,22 @@ public final class ItemTransactionValidator {
 //                        }
 
                         GeyserItemStack geyserItemStack = GeyserItemStack.from(inventory.translate(heldItem.getData()));
-                        if (geyserItemStack.asItem() instanceof BlockItem) {
+                        if (geyserItemStack.asItem() instanceof BlockItem blockItem) {
+                            Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
+
                             if (state.isAir()) {
                                 player.getCheckHolder().get(AirPlace.class).fail();
+                                BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
+                                return false;
                             }
 
-                            Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
+                            Block block = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
+                            if (block.javaId() != Blocks.AIR.javaId()) {
+                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(block.javaId())
+                                );
+                            } else {
+                                System.out.println("What? item=" + blockItem.javaIdentifier());
+                            }
                         }
 
                         System.out.println(packet);
