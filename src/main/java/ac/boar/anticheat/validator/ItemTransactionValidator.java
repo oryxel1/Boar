@@ -34,6 +34,7 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
+import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
@@ -163,14 +164,19 @@ public final class ItemTransactionValidator {
 
                 final BoarBlockState boarState = player.compensatedWorld.getBlockState(position, 0);
                 final BlockState state = boarState.getState();
+                final Block block = state.block();
                 switch (packet.getActionType()) {
-                    case 0 -> {
+                    case 0 -> { // TODO: Maybe... move this into a separate class?
                         if (packet.getItemInHand() == null || !validate(SD1, packet.getItemInHand())) {
                             return true; // nope, not a mistake, Geyser going to take care of it anyway.
                         }
 
                         if (packet.getClientInteractPrediction() == ItemUseTransaction.PredictedResult.FAILURE) {
                             return true; // Player claimed to be failing this action, no need to process it.
+                        }
+
+                        if (packet.getBlockPosition() == null) {
+                            return false;
                         }
 
                         int blockFace = packet.getBlockFace();
@@ -200,7 +206,7 @@ public final class ItemTransactionValidator {
                                 result = InteractionResult.SUCCESS;
                             }
 
-                            if (tagCache.is(BlockTag.CANDLES, state.block()) && (geyserItemStack.isEmpty() && state.getValue(Properties.LIT))) {
+                            if (tagCache.is(BlockTag.CANDLES, block) && (geyserItemStack.isEmpty() && state.getValue(Properties.LIT))) {
                                 result = InteractionResult.SUCCESS;
                             }
 
@@ -221,18 +227,18 @@ public final class ItemTransactionValidator {
 
                             if (state.is(Blocks.LECTERN)) {
                                 if (!state.getValue(Properties.HAS_BOOK) && geyserItemStack.isEmpty()) {
-                                    result = InteractionResult.PASS;
+                                    result = InteractionResult.SUCCESS;
                                 }
                             }
 
                             if (state.is(Blocks.NOTE_BLOCK)) {
                                 if (tagCache.is(ItemTag.NOTEBLOCK_TOP_INSTRUMENTS, item) && blockFace == Direction.UP.ordinal()) {
-                                    result = InteractionResult.PASS;
+                                    result = InteractionResult.SUCCESS;
                                 }
                             }
 
                             if (state.is(Blocks.PUMPKIN) || state.is(Blocks.REDSTONE_ORE)) {
-                                result = InteractionResult.PASS;
+                                result = InteractionResult.SUCCESS;
                             }
 
                             if (state.is(Blocks.RESPAWN_ANCHOR)) {
@@ -241,13 +247,13 @@ public final class ItemTransactionValidator {
                                 }
                             }
 
-                            if (tagCache.is(BlockTag.ALL_SIGNS, state.block())) {
-                                result = InteractionResult.PASS;
+                            if (tagCache.is(BlockTag.ALL_SIGNS, block)) {
+                                result = InteractionResult.SUCCESS;
                             }
 
                             if (state.is(Blocks.SWEET_BERRY_BUSH)) {
                                 if (state.getValue(Properties.AGE_3) != 3 && itemJavaId == Items.BONE_MEAL.javaId()) {
-                                    result = InteractionResult.PASS;
+                                    result = InteractionResult.SUCCESS;
                                 }
                             }
 
@@ -255,6 +261,26 @@ public final class ItemTransactionValidator {
                                 if (itemJavaId == Items.FLINT_AND_STEEL.javaId() || itemJavaId == Items.FIRE_CHARGE.javaId()) {
                                     result = InteractionResult.SUCCESS;
                                 }
+                            }
+
+                            if (state.is(Blocks.VAULT) && (geyserItemStack.isEmpty() || !state.getValue(Properties.VAULT_STATE).equals("active"))) {
+                                result = InteractionResult.SUCCESS;
+                            }
+
+                            if (result != InteractionResult.TRY_WITH_EMPTY_HAND) {
+                                return true;
+                            }
+                            // useWithoutItem part.
+
+                            if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.ANVIL) ||
+                                    state.is(Blocks.CHIPPED_ANVIL) || state.is(Blocks.DAMAGED_ANVIL) || state.is(Blocks.BARREL) ||
+                                    state.is(Blocks.BEACON) || tagCache.is(BlockTag.BEDS, block) || state.is(Blocks.BREWING_STAND) ||
+                                    tagCache.is(BlockTag.BUTTONS, block)) {
+                                result = InteractionResult.SUCCESS;
+                            }
+
+                            if (state.is(Blocks.BELL) && packet.getClickPosition() != null && isProperHit(state, Direction.values()[blockFace], packet.getClickPosition().getY() - packet.getBlockPosition().getY())) {
+                                result = InteractionResult.SUCCESS;
                             }
 
                             if (result != InteractionResult.TRY_WITH_EMPTY_HAND) {
@@ -269,11 +295,10 @@ public final class ItemTransactionValidator {
                             return false;
                         }
 
-                        // TODO: Maybe... move this into a separate class?
                         if (item instanceof BlockItem blockItem) {
-                            Block block = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
-                            if (block.javaId() != Blocks.AIR.javaId()) {
-                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(block.javaId()));
+                            Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
+                            if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
+                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(mappedBlock.javaId()));
                             } else {
                                 System.out.println("What? item=" + blockItem.javaIdentifier());
                             }
@@ -407,5 +432,19 @@ public final class ItemTransactionValidator {
         }
 
         return predicted.getRuntimeId() == claimed.getRuntimeId();
+    }
+
+    private static boolean isProperHit(BlockState blockState, Direction direction, double d) {
+        if (direction.getAxis() == Axis.Y || d > 0.8124f) {
+            return false;
+        }
+        Direction direction2 = blockState.getValue(Properties.HORIZONTAL_FACING);
+        String bellAttachType = blockState.getValue(Properties.BELL_ATTACHMENT);
+        return switch (bellAttachType) {
+            case "floor" -> direction2.getAxis() == direction.getAxis();
+            case "single_wall", "double_wall" -> direction2.getAxis() != direction.getAxis();
+            case "ceiling" -> true;
+            default -> false;
+        };
     }
 }
