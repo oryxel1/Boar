@@ -3,7 +3,6 @@ package ac.boar.anticheat.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.geysermc.geyser.api.extension.Extension;
 
 import java.io.*;
@@ -21,7 +20,7 @@ public class ConfigLoader {
         if (!extension.dataFolder().toFile().exists()) {
             if (!extension.dataFolder().toFile().mkdirs()) {
                 extension.logger().error("Failed to create data folder");
-                return null;
+                return defaultConfig;
             }
         }
 
@@ -41,7 +40,7 @@ public class ConfigLoader {
                     .readValue(configFile, configClass);
         } catch (IOException e) {
             extension.logger().error("Failed to load config", e);
-            return null;
+            return defaultConfig;
         }
     }
 
