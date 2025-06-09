@@ -292,6 +292,7 @@ public final class ItemTransactionValidator {
                         if (boarState.isAir()) {
                             player.getCheckHolder().get(AirPlace.class).fail();
                             BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
+                            BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), packet.getBlockPosition());
                             return false;
                         }
 
