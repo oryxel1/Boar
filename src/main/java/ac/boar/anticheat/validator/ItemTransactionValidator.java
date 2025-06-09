@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.StringUtil;
 import ac.boar.mappings.BedrockMappings;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
@@ -25,7 +26,9 @@ import org.cloudburstmc.protocol.bedrock.packet.InventorySlotPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.ItemStackRequestPacket;
 import org.geysermc.geyser.inventory.GeyserItemStack;
+import org.geysermc.geyser.item.Items;
 import org.geysermc.geyser.item.type.BlockItem;
+import org.geysermc.geyser.item.type.Item;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.physics.Direction;
@@ -177,23 +180,48 @@ public final class ItemTransactionValidator {
 //                            return true;
 //                        }
 
+                        Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
+                        if (state.isAir()) {
+                            player.getCheckHolder().get(AirPlace.class).fail();
+                            BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
+                            return false;
+                        }
+
+                        // TODO: Maybe... move this into a separate class?
                         GeyserItemStack geyserItemStack = GeyserItemStack.from(inventory.translate(heldItem.getData()));
-                        if (geyserItemStack.asItem() instanceof BlockItem blockItem) {
-                            Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
-
-                            if (state.isAir()) {
-                                player.getCheckHolder().get(AirPlace.class).fail();
-                                BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
-                                return false;
-                            }
-
+                        Item item = geyserItemStack.asItem();
+                        if (item instanceof BlockItem blockItem) {
                             Block block = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
                             if (block.javaId() != Blocks.AIR.javaId()) {
-                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(block.javaId())
-                                );
+                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(block.javaId()));
                             } else {
                                 System.out.println("What? item=" + blockItem.javaIdentifier());
                             }
+
+                            if (player.gameType != GameType.CREATIVE) {
+                                heldItem.count(heldItem.count() - 1);
+                                if (heldItem.count() <= 0) {
+                                    inventory.inventoryContainer.set(inventory.heldItemSlot, ItemCache.AIR);
+                                }
+                            }
+                        } else if (item.javaId() == Items.WATER_BUCKET.javaId()) {
+                            player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockWater().getRuntimeId());
+
+                            GeyserItemStack stack = GeyserItemStack.of(Items.BUCKET.javaId(), 1);
+                            inventory.inventoryContainer.set(inventory.heldItemSlot, inventory.translate(stack.getItemStack()));
+                        } else if (item.javaId() == Items.LAVA_BUCKET.javaId()) {
+                            player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(Blocks.LAVA.
+                                    defaultBlockState().javaId()));
+
+                            GeyserItemStack stack = GeyserItemStack.of(Items.BUCKET.javaId(), 1);
+                            inventory.inventoryContainer.set(inventory.heldItemSlot, inventory.translate(stack.getItemStack()));
+                        } else if (item.javaId() == Items.POWDER_SNOW_BUCKET.javaId()) {
+                            player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(Blocks.POWDER_SNOW.defaultBlockState().javaId()));
+
+                            GeyserItemStack stack = GeyserItemStack.of(Items.BUCKET.javaId(), 1);
+                            inventory.inventoryContainer.set(inventory.heldItemSlot, inventory.translate(stack.getItemStack()));
+                        } else if (item.javaId() == Items.BUCKET.javaId()) {
+
                         }
 
                         System.out.println(packet);
