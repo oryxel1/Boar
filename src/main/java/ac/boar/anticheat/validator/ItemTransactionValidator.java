@@ -1,6 +1,5 @@
 package ac.boar.anticheat.validator;
 
-import ac.boar.anticheat.check.impl.place.AirPlace;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.InteractionResult;
 import ac.boar.anticheat.data.block.BoarBlockState;
@@ -9,6 +8,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
+import ac.boar.geyser.GeyserBoar;
 import ac.boar.mappings.BedrockMappings;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -290,9 +290,13 @@ public final class ItemTransactionValidator {
 
                         Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
                         if (boarState.isAir()) {
-                            player.getCheckHolder().get(AirPlace.class).fail();
+                            // Player seems to be able to do this... on Vanilla, and even claimed "yeah the block definition for this is air".
+                            // Well an advantage is an advantage... resync.
                             BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
                             BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), packet.getBlockPosition());
+
+                            GeyserBoar.getLogger().severe("AIR PLACEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                            player.tickSinceBlockResync = 5;
                             return false;
                         }
 

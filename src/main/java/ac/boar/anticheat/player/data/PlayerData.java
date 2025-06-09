@@ -166,6 +166,8 @@ public class PlayerData {
 
     public VehicleData vehicleData = null;
 
+    public int tickSinceBlockResync;
+
     public final EntityDimensions getDimensions(Pose pose) {
         return PlayerTicker.POSES.get(pose);
     }
