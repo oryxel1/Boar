@@ -54,4 +54,9 @@ public final class EntityCache {
             }
         }
     }
+
+    public void updateNonMove() {
+        this.past = this.current.clone();
+        this.current.setPrevPos(this.current.getPos());
+    }
 }

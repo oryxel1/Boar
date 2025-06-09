@@ -53,6 +53,7 @@ public class EntityWorldPackets implements PacketListener {
 
             final boolean useless = !flags.contains(MoveEntityDeltaPacket.Flag.HAS_X) && !flags.contains(MoveEntityDeltaPacket.Flag.HAS_Y) && !flags.contains(MoveEntityDeltaPacket.Flag.HAS_Z);
             if (useless) {
+                this.queueNonMoveUpdate(event, entity);
                 return;
             }
 
@@ -85,12 +86,27 @@ public class EntityWorldPackets implements PacketListener {
             }
 
             final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-            if (entity == null || packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
+            if (entity == null) {
                 return;
+            }
+
+            if (packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
+                this.queueNonMoveUpdate(event, entity);
             }
 
             this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getMode() == MovePlayerPacket.Mode.NORMAL);
         }
+    }
+
+    private void queueNonMoveUpdate(final CloudburstPacketEvent event, final EntityCache entity) {
+        final BoarPlayer player = event.getPlayer();
+        player.sendLatencyStack();
+
+        player.latencyUtil.addTaskToQueue(player.sentStackId.get(), entity::updateNonMove);
+        event.getPostTasks().add(() -> {
+            player.sendLatencyStack();
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> entity.setPast(null));
+        });
     }
 
     private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final boolean lerp) {
