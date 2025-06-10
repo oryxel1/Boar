@@ -7,9 +7,9 @@ import ac.boar.anticheat.check.impl.velocity.Velocity;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 
-@CheckInfo(name = "Prediction", type = "A")
-public class PredictionA extends OffsetHandlerCheck {
-    public PredictionA(BoarPlayer player) {
+@CheckInfo(name = "Prediction")
+public class Prediction extends OffsetHandlerCheck {
+    public Prediction(BoarPlayer player) {
         super(player);
     }
 

@@ -19,7 +19,7 @@ import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
 import java.util.Optional;
 
 @Experimental
-@CheckInfo(name = "Reach", type = "A")
+@CheckInfo(name = "Reach")
 public final class Reach extends PacketCheck {
     public Reach(BoarPlayer player) {
         super(player);
@@ -51,7 +51,7 @@ public final class Reach extends PacketCheck {
         double distance = result.distance();
         if (distance > 3.005) {
             if (distance != Double.MAX_VALUE) {
-                fail("d=" + distance + ", deltaTicks=" + result.deltaTicks());
+                fail("d=" + distance);
             } else {
                 // This seems to be falsing from time to time and ehmmmm, this sucks lol.
                 // fail("hitboxes!" + ", deltaTicks=" + result.deltaTicks());
