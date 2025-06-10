@@ -8,6 +8,7 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.property.ChestType;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.*;
+import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.Direction;
 
 import java.util.ArrayList;
@@ -52,7 +53,10 @@ public class BedrockCollision {
     private final static List<Box> DOOR_EAST_SHAPE = List.of(new Box(0.8175F, 0, 0, 1, 1, 1));
     private final static List<Box> DOOR_WEST_SHAPE = List.of(new Box(0, 0, 0, 0.1825F, 1, 1));
 
-    private final static List<Box> LANTER_SHAPE = List.of(new Box(0.3125F, 0, 0.3125F, 0.6875F, 0.5F, 0.6875F));
+    private final static List<Box> LANTERN_SHAPE = List.of(new Box(0.3125F, 0, 0.3125F, 0.6875F, 0.5F, 0.6875F));
+
+    private final static List<Box> ANVIL_X = List.of(new Box(0.0F, 0.0F, 0.125F, 1.0F, 1.0F, 0.875F));
+    private final static List<Box> ANVIL_OTHER = List.of(new Box(0.125F, 0.0F, 0.0F, 0.875F, 1.0F, 1.0F));
 
     static {
         // Scaffolding
@@ -79,8 +83,17 @@ public class BedrockCollision {
     }
     
     public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
+        if (state.is(Blocks.ANVIL) || state.is(Blocks.DAMAGED_ANVIL) || state.is(Blocks.CHIPPED_ANVIL)) {
+            Direction direction = state.getValue(Properties.HORIZONTAL_FACING);
+            if (direction.getAxis() == Axis.X) {
+                return ANVIL_X;
+            } else {
+                return ANVIL_OTHER;
+            }
+        }
+
         if (state.is(Blocks.LANTERN) || state.is(Blocks.SOUL_LANTERN)) {
-            return LANTER_SHAPE;
+            return LANTERN_SHAPE;
         }
 
         if (state.is(Blocks.ENDER_CHEST)) {
