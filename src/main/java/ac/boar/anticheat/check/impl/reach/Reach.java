@@ -5,7 +5,6 @@ import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.check.api.impl.PacketCheck;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.ChatUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
@@ -68,7 +67,7 @@ public final class Reach extends PacketCheck {
             }
         }
 
-        ChatUtil.alert(player,"d=" + distance);
+        // ChatUtil.alert(player,"d=" + distance);
     }
 
     public ReachResult calculateReach(final EntityCache entity) {

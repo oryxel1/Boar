@@ -65,7 +65,7 @@ public class AuthInputPackets implements PacketListener {
         this.processQueuedTeleports(player, packet, handleRewind);
 
         player.postTick();
-        if (player.isAbilityExempted()) {
+        if (player.isFullyExempted()) {
             LegacyAuthInputPackets.processAuthInput(player, packet, true);
             player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
@@ -137,7 +137,7 @@ public class AuthInputPackets implements PacketListener {
     }
 
     private void processRewind(final BoarPlayer player, final TeleportCache.Rewind rewind, final PlayerAuthInputPacket packet) {
-        if (player.isAbilityExempted()) { // Fully exempted from rewind teleport.
+        if (player.isFullyExempted()) { // Fully exempted from rewind teleport.
             return;
         }
 

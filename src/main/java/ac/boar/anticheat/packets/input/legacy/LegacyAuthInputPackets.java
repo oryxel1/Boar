@@ -71,7 +71,7 @@ public class LegacyAuthInputPackets {
     }
 
     public static void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        if (player.isAbilityExempted()) {
+        if (player.isFullyExempted()) {
             return;
         }
 

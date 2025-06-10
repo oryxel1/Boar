@@ -15,7 +15,7 @@ player-position-acceptance-threshold: 1.0E-4
 # NOTE: This is NOT tolerance of discrepancies (that's player-position-acceptance-threshold), this will still do silent
 # correction unless you change player-position-acceptance-threshold.
 # This configuration exists so that some falses or other stuff won't keep spamming the chat/logs.
-differ-till-alert: 0.2
+differ-till-alert: 0.0
 
 # Checks that you want Boar to disable.
 # Check name should be in format "Name-Type" and if there is no type then "Name", ex: Reach-A (don't actually disable reach check lol).

@@ -1,9 +1,9 @@
 package ac.boar.anticheat.player;
 
+import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.UseItemCache;
-import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.MathUtil;
@@ -21,7 +21,6 @@ import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.validator.ItemTransactionValidator;
 import ac.boar.protocol.mitm.CloudburstSendListener;
 import ac.boar.anticheat.player.data.PlayerData;
-import ac.boar.anticheat.util.ChatUtil;
 import lombok.Setter;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.TrigMath;
@@ -71,7 +70,7 @@ public final class BoarPlayer extends PlayerData {
 
     @Getter
     @Setter
-    private boolean debugMode, alertEnabled;
+    private boolean debugMode;
 
     public BoarPlayer(GeyserSession session) {
         this.session = session;
@@ -117,12 +116,12 @@ public final class BoarPlayer extends PlayerData {
         this.latencyUtil.addLatencyToQueue(id);
     }
 
-    public boolean isAbilityExempted() {
-        return this.abilities.contains(Ability.MAY_FLY) || this.flying || this.wasFlying;
+    public boolean isFullyExempted() {
+        return this.abilities.contains(Ability.MAY_FLY) || this.flying || this.wasFlying || this.session.hasPermission("boar.exempt");
     }
 
     public void kick(String reason) {
-        this.session.disconnect(ChatUtil.PREFIX + " " + reason);
+        this.session.disconnect(AlertManager.PREFIX + " " + reason);
     }
 
     // Prediction related method

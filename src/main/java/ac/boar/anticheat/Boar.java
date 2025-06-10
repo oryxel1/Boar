@@ -1,5 +1,6 @@
 package ac.boar.anticheat;
 
+import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.config.Config;
 import ac.boar.anticheat.config.ConfigLoader;
 import ac.boar.anticheat.packets.input.AuthInputPackets;
@@ -28,14 +29,16 @@ public class Boar {
     private Boar() {}
 
     private BoarPlayerManager playerManager;
+    private AlertManager alertManager;
 
     public void init(GeyserBoar instance) {
-        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, new Config(20, 1.0E-4F, 0.2F, List.of(), false));
-        System.out.println("Load config: " + config);
+        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, new Config(20, 1.0E-4F, 0F, List.of(), false));
+        // System.out.println("Load config: " + config);
 
         BedrockMappings.load();
 
         this.playerManager = new BoarPlayerManager();
+        this.alertManager = new AlertManager();
 
         PacketEvents.getApi().register(new NetworkLatencyPackets());
         PacketEvents.getApi().register(new ChunkWorldPackets());
