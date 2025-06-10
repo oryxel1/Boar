@@ -43,6 +43,8 @@ import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransacti
 import org.geysermc.geyser.util.BlockUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -289,6 +291,10 @@ public final class ItemTransactionValidator {
                         }
 
                         Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
+                        if (state.is(Blocks.SCAFFOLDING) && item.javaId() == Items.SCAFFOLDING.javaId()) {
+                            return true; // We don't need to compensate for this.
+                        }
+
                         if (boarState.isAir()) {
                             // Player seems to be able to do this... on Vanilla, and even claimed "yeah the block definition for this is air".
                             // Well an advantage is an advantage... resync.
