@@ -164,6 +164,7 @@ public class PlayerData {
     public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
     public BlockState inBlockState;
+    public boolean scaffoldDescend;
 
     public VehicleData vehicleData = null;
 

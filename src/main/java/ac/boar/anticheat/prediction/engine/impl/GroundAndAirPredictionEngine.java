@@ -28,14 +28,16 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
 
     @Override
     public void finalizeMovement() {
-        final StatusEffect effect = player.getEffect(Effect.LEVITATION);
-        if (effect != null) {
-            player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
-        } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
-            player.velocity.y -= player.getEffectiveGravity();
-        } else {
-            // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
-            player.velocity.y = 0;
+        if (!player.scaffoldDescend) {
+            final StatusEffect effect = player.getEffect(Effect.LEVITATION);
+            if (effect != null) {
+                player.velocity.y += (0.05f * (effect.getAmplifier() + 1) - player.velocity.y) * 0.2f;
+            } else if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
+                player.velocity.y -= player.getEffectiveGravity();
+            } else {
+                // Seems to be 0 all the times, not -0.1 depends on your y, or well I don't know?
+                player.velocity.y = 0;
+            }
         }
 
         player.velocity.y *= 0.98F;

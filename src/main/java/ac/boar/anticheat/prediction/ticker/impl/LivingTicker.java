@@ -17,6 +17,7 @@ import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
@@ -73,14 +74,29 @@ public class LivingTicker extends EntityTicker {
             player.getTeleportUtil().rewind(player.tick - 1);
         }
 
-        boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
-                player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
-        if (jumping) {
-            float g = player.isInLava() ? player.getFluidHeight(Fluid.LAVA) : player.getFluidHeight(Fluid.WATER);
-            if (g != 0) {
-                player.velocity = player.velocity.add(0, 0.04F, 0);
-            } else if (player.onGround && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
-                player.velocity = player.jumpFromGround(player.velocity);
+        if (player.getInBlockState().is(Blocks.SCAFFOLDING) && player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition).y > 0) {
+            if (player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.ASCEND_BLOCK)) {
+                player.velocity.y = 0.15F;
+            }
+        } else {
+            boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
+                    player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
+            if (jumping) {
+                float g = player.isInLava() ? player.getFluidHeight(Fluid.LAVA) : player.getFluidHeight(Fluid.WATER);
+                if (g != 0) {
+                    player.velocity = player.velocity.add(0, 0.04F, 0);
+                } else if (player.onGround && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
+                    player.velocity = player.jumpFromGround(player.velocity);
+                }
+            }
+        }
+
+        player.scaffoldDescend = false;
+        if (player.compensatedWorld.getBlockState(player.getOnPos(1F), 0).getState().is(Blocks.SCAFFOLDING) ||
+                (player.getInBlockState().is(Blocks.SCAFFOLDING) && player.unvalidatedTickEnd.y < 0 && Math.abs(player.unvalidatedTickEnd.y) - 0.15F < 0.01F)) {
+            if (player.getInputData().contains(PlayerAuthInputData.SNEAKING) || player.getInputData().contains(PlayerAuthInputData.DESCEND_BLOCK)) {
+                player.velocity.y = -0.15F;
+                player.scaffoldDescend = true;
             }
         }
 
