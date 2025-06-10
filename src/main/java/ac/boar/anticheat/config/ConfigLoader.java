@@ -65,6 +65,7 @@ public class ConfigLoader {
                         s = s.replace("player-position-acceptance-threshold: 1.0E-4", "player-position-acceptance-threshold: " + config.acceptanceThreshold());
                         s = s.replace("disabled-checks: []", "disabled-checks: " + Arrays.toString(config.disabledChecks().toArray(new String[0])));
                         s = s.replace("ignore-ghost-block: false", "ignore-ghost-block: " + config.ignoreGhostBlock());
+                        s = s.replace("differ-till-alert: 0.2", "differ-till-alert: " + config.alertThreshold());
                     }
 
                     writer.write(s.toCharArray());

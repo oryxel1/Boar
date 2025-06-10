@@ -1,5 +1,6 @@
 package ac.boar.anticheat.check.impl.prediction;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.check.impl.velocity.Velocity;
@@ -19,7 +20,7 @@ public class PredictionA extends OffsetHandlerCheck {
         }
 
         if (offset > player.getMaxOffset()) {
-            if (shouldDoFail()) {
+            if (shouldDoFail() && offset >= Boar.getConfig().alertThreshold()) {
                 if (player.bestPossibility.getType() == VectorType.VELOCITY) {
                     player.getCheckHolder().manuallyFail(Velocity.class, "o=" + offset);
                 } else {
