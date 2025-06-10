@@ -4,6 +4,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.geysermc.geyser.item.Items;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.property.ChestType;
 import org.geysermc.geyser.level.block.property.Properties;
@@ -17,6 +18,7 @@ import java.util.List;
 // Patch collision in bedrock that is different from java, or block with dynamic collision (ex: scaffolding)
 public class BedrockCollision {
     private final static List<Box> EMPTY_SHAPE = List.of();
+    private final static List<Box> SOLID_SHAPE = List.of(new Box(0, 0, 0, 1, 1, 1));
     
     private final static List<Box> BED_SHAPE = List.of(new Box(0, 0, 0, 1, 0.5625F, 1));
     private final static List<Box> HONEY_SHAPE = List.of(new Box(0.0625F, 0, 0.0625F, 0.9375F, 1, 0.9375F));
@@ -55,8 +57,10 @@ public class BedrockCollision {
 
     private final static List<Box> LANTERN_SHAPE = List.of(new Box(0.3125F, 0, 0.3125F, 0.6875F, 0.5F, 0.6875F));
 
-    private final static List<Box> ANVIL_X = List.of(new Box(0.0F, 0.0F, 0.125F, 1.0F, 1.0F, 0.875F));
-    private final static List<Box> ANVIL_OTHER = List.of(new Box(0.125F, 0.0F, 0.0F, 0.875F, 1.0F, 1.0F));
+    private final static List<Box> ANVIL_X_SHAPE = List.of(new Box(0.0F, 0.0F, 0.125F, 1.0F, 1.0F, 0.875F));
+    private final static List<Box> ANVIL_OTHER_SHAPE = List.of(new Box(0.125F, 0.0F, 0.0F, 0.875F, 1.0F, 1.0F));
+
+    private final static List<Box> FALLING_POWDER_SNOW_SNOW = List.of(new Box(0.0F, 0.0F, 0.0F, 0.0625F, 0.05625F, 0.0625F));
 
     static {
         // Scaffolding
@@ -83,12 +87,19 @@ public class BedrockCollision {
     }
     
     public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
+        if (state.is(Blocks.POWDER_SNOW)) {
+            boolean leatherBoostOn = player.compensatedInventory.translate(player.compensatedInventory.armorContainer.get(3).getData()).getId() == Items.LEATHER_BOOTS.javaId();
+            if (leatherBoostOn && player.position.y > vector3i.getY() + 1 - 1.0E-5f && !(player.getInputData().contains(PlayerAuthInputData.SNEAKING)|| player.getInputData().contains(PlayerAuthInputData.DESCEND_BLOCK))) {
+                return SOLID_SHAPE;
+            }
+        }
+
         if (state.is(Blocks.ANVIL) || state.is(Blocks.DAMAGED_ANVIL) || state.is(Blocks.CHIPPED_ANVIL)) {
             Direction direction = state.getValue(Properties.HORIZONTAL_FACING);
             if (direction.getAxis() == Axis.X) {
-                return ANVIL_X;
+                return ANVIL_X_SHAPE;
             } else {
-                return ANVIL_OTHER;
+                return ANVIL_OTHER_SHAPE;
             }
         }
 

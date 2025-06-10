@@ -53,6 +53,10 @@ public class BoarBlockState {
     }
 
     public void entityInside(final BoarPlayer player, Mutable pos) {
+        if (this.state.is(Blocks.POWDER_SNOW) && player.boundingBox.offset(0, 1.0E-3F, 0).contains(pos.getX(), pos.getY(), pos.getZ())) { // UHHHHHHHHHHHHH
+            return;
+        }
+
         if (this.state.is(Blocks.BUBBLE_COLUMN)) {
             boolean drag = this.state.getValue(Properties.DRAG);
 
@@ -75,7 +79,7 @@ public class BoarBlockState {
         Vec3 movementMultiplier = Vec3.ZERO;
         if (state.is(Blocks.SWEET_BERRY_BUSH)) {
             movementMultiplier = new Vec3(0.8F, 0.75F, 0.8F);
-        } else if (state.is(Blocks.POWDER_SNOW)) {
+        } else if (state.is(Blocks.POWDER_SNOW) && player.position.y < pos.getY() + 1 - 1.0E-5f) {
             movementMultiplier = new Vec3(0.9F, 1.5F, 0.9F);
         } else if (state.is(Blocks.COBWEB)) {
             movementMultiplier = new Vec3(0.25F, 0.05F, 0.25F);

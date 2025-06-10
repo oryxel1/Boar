@@ -19,6 +19,7 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.List;
@@ -91,12 +92,13 @@ public class LivingTicker extends EntityTicker {
             }
         }
 
+        BlockState state = player.compensatedWorld.getBlockState(player.getOnPos(1F), 0).getState();
+
         player.scaffoldDescend = false;
-        if (player.compensatedWorld.getBlockState(player.getOnPos(1F), 0).getState().is(Blocks.SCAFFOLDING) ||
-                (player.getInBlockState().is(Blocks.SCAFFOLDING) && player.unvalidatedTickEnd.y < 0 && Math.abs(player.unvalidatedTickEnd.y) - 0.15F < 0.01F)) {
+        if (state.is(Blocks.SCAFFOLDING) || state.is(Blocks.POWDER_SNOW) || ((player.getInBlockState().is(Blocks.SCAFFOLDING) || player.getInBlockState().is(Blocks.POWDER_SNOW)) && player.unvalidatedTickEnd.y < 0 && Math.abs(player.unvalidatedTickEnd.y) - 0.15F < 0.01F)) {
             if (player.getInputData().contains(PlayerAuthInputData.SNEAKING) || player.getInputData().contains(PlayerAuthInputData.DESCEND_BLOCK)) {
                 player.velocity.y = -0.15F;
-                player.scaffoldDescend = true;
+                player.scaffoldDescend = state.is(Blocks.SCAFFOLDING) || player.getInBlockState().is(Blocks.SCAFFOLDING);
             }
         }
 
