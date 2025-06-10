@@ -275,7 +275,7 @@ public final class ItemTransactionValidator {
                             if (state.is(Blocks.FURNACE) || state.is(Blocks.BLAST_FURNACE) || state.is(Blocks.ANVIL) ||
                                     state.is(Blocks.CHIPPED_ANVIL) || state.is(Blocks.DAMAGED_ANVIL) || state.is(Blocks.BARREL) ||
                                     state.is(Blocks.BEACON) || tagCache.is(BlockTag.BEDS, block) || state.is(Blocks.BREWING_STAND) ||
-                                    tagCache.is(BlockTag.BUTTONS, block)) {
+                                    tagCache.is(BlockTag.BUTTONS, block) || state.is(Blocks.LEVER)) {
                                 result = InteractionResult.SUCCESS;
                             }
 
@@ -300,21 +300,7 @@ public final class ItemTransactionValidator {
                             return false;
                         }
 
-                        if (item instanceof BlockItem blockItem) {
-                            Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
-                            if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
-                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(mappedBlock.javaId()));
-                            } else {
-                                System.out.println("What? item=" + blockItem.javaIdentifier());
-                            }
-
-                            if (player.gameType != GameType.CREATIVE) {
-                                heldItem.count(heldItem.count() - 1);
-                                if (heldItem.count() <= 0) {
-                                    inventory.inventoryContainer.set(inventory.heldItemSlot, ItemCache.AIR);
-                                }
-                            }
-                        } else if (item.javaId() == Items.WATER_BUCKET.javaId()) {
+                        if (item.javaId() == Items.WATER_BUCKET.javaId()) {
                             player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockWater().getRuntimeId());
 
                             GeyserItemStack stack = GeyserItemStack.of(Items.BUCKET.javaId(), 1);
@@ -331,10 +317,42 @@ public final class ItemTransactionValidator {
                             GeyserItemStack stack = GeyserItemStack.of(Items.BUCKET.javaId(), 1);
                             inventory.inventoryContainer.set(inventory.heldItemSlot, inventory.translate(stack.getItemStack()));
                         } else if (item.javaId() == Items.BUCKET.javaId()) {
+                            int javaId = -1, layer = 0;
+                            if (state.is(Blocks.WATER)) {
+                                javaId = Items.WATER_BUCKET.javaId();
+                            } else if (player.compensatedWorld.getBlockState(position, 1).getState().is(Blocks.WATER)) {
+                                layer = 1;
+                                javaId = Items.WATER_BUCKET.javaId();
+                            } else if (state.is(Blocks.LAVA)) {
+                                javaId = Items.LAVA_BUCKET.javaId();
+                            } else if (state.is(Blocks.POWDER_SNOW)) {
+                                javaId = Items.POWDER_SNOW_BUCKET.javaId();
+                            }
 
+                            if (javaId == -1) {
+                                return true;
+                            }
+
+                            player.compensatedWorld.updateBlock(newBlockPos, layer, player.getSession().getBlockMappings().getBedrockAir().getRuntimeId());
+
+                            GeyserItemStack stack = GeyserItemStack.of(javaId, 1);
+                            inventory.inventoryContainer.set(inventory.heldItemSlot, inventory.translate(stack.getItemStack()));
+                        } if (item instanceof BlockItem blockItem) { // Handle block item after bucket.
+                            Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
+                            if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
+                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(mappedBlock.javaId()));
+                            } else {
+                                // System.out.println("What? item=" + blockItem.javaIdentifier());
+                            }
+
+                            if (player.gameType != GameType.CREATIVE) {
+                                heldItem.count(heldItem.count() - 1);
+                                if (heldItem.count() <= 0) {
+                                    inventory.inventoryContainer.set(inventory.heldItemSlot, ItemCache.AIR);
+                                }
+                            }
                         }
-
-                        System.out.println(packet);
+                        // System.out.println(packet);
                     }
 
                     // This seems to for things that is not related to block interact and only for item interaction.

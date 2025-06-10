@@ -173,22 +173,14 @@ public class ChunkWorldPackets implements PacketListener {
                 if (state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR)) {
                     int distance = Math.abs(packet.getBlockPosition().getY() - GenericMath.floor(player.position.y - 1));
                     if (distance <= 1) {
-                        player.ghostBlockAffected = packet.getBlockPosition();
                         player.tickSinceBlockResync = 5;
                         world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId());
                     }
                 }
             }
 
-            boolean needed = player.ghostBlockAffected != null && player.ghostBlockAffected.equals(packet.getBlockPosition());
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
-                world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId());
-
-                if (needed && MathUtil.compare(player.ghostBlockAffected, packet.getBlockPosition())) {
-                    player.ghostBlockAffected = null;
-                }
-            });
+            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
         }
     }
 

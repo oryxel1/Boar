@@ -32,7 +32,6 @@ public class PredictionA extends OffsetHandlerCheck {
     }
 
     public boolean shouldDoFail() {
-        return player.sinceTeleport > 20 && !player.getTeleportUtil().isTeleporting() && player.tickSinceBlockResync <= 0 &&
-                player.ghostBlockAffected != null;
+        return player.sinceTeleport > 20 && !player.getTeleportUtil().isTeleporting() && player.tickSinceBlockResync <= 0;
     }
 }
