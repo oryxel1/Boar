@@ -14,3 +14,11 @@ player-position-acceptance-threshold: 1.0E-4
 # Checks that you want Boar to disable.
 # Check name should be in format "Name-Type" and if there is no type then "Name", ex: Reach-A (don't actually disable reach check lol).
 disabled-checks: []
+
+# Normally Boar will account for lag, that also including block, if on the server side the block below player is Air but if
+# on the client side, it's an actual block, then Boar will account for this. However, with this enable, Boar will forcefully
+# rewind player if player is standing on a ghost block, this for ex: prevent player from abusing high ping to climb up walls in
+# region that doesn't allow block placing (ex: WorldEdit).
+
+# NOTE: This will only take effect if player is STANDING on the block.
+ignore-ghost-block: false

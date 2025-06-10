@@ -17,18 +17,21 @@ import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
 import ac.boar.protocol.PacketEvents;
 
+import java.util.List;
+
 @Getter
 public class Boar {
     @Getter
     private final static Boar instance = new Boar();
+    @Getter
+    private static Config config;
     private Boar() {}
 
-    private Config config;
     private BoarPlayerManager playerManager;
 
     public void init(GeyserBoar instance) {
-        this.config = ConfigLoader.load(instance, GeyserBoar.class, Config.class);
-        System.out.println("Load config: " + this.config);
+        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, new Config(20, 1.0E-4F, List.of(), false));
+        System.out.println("Load config: " + config);
 
         BedrockMappings.load();
 
@@ -47,8 +50,10 @@ public class Boar {
         PacketEvents.getApi().register(new PostAuthInputPackets());
     }
 
-    public void terminate() {
+    public void terminate(GeyserBoar instance) {
         PacketEvents.getApi().terminate();
         this.playerManager.clear();
+
+        ConfigLoader.save(instance, GeyserBoar.class, config);
     }
 }

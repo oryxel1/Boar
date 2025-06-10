@@ -24,6 +24,7 @@ public class PostAuthInputPackets implements PacketListener {
                 return;
             }
 
+            if (player.tickSinceBlockResync > 0) player.tickSinceBlockResync--;
             player.getTeleportUtil().clearRewindHistory();
         }
     }

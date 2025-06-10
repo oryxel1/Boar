@@ -32,6 +32,7 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.registry.type.BlockMappings;
@@ -169,7 +170,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public boolean onClimbable() {
-        return this.getSession().getTagCache().is(BlockTag.CLIMBABLE, this.getInBlockState().block());
+        return this.getSession().getTagCache().is(BlockTag.CLIMBABLE, this.getInBlockState().block()) && !this.getInBlockState().is(Blocks.SCAFFOLDING);
     }
 
     public float getJumpPower() {

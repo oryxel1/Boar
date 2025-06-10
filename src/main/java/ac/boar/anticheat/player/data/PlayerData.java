@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.math.vector.Vector3f;
+import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.InputMode;
@@ -163,8 +164,11 @@ public class PlayerData {
     public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
     public BlockState inBlockState;
+    public boolean scaffoldDescend;
 
     public VehicleData vehicleData = null;
+
+    public int tickSinceBlockResync;
 
     public final EntityDimensions getDimensions(Pose pose) {
         return PlayerTicker.POSES.get(pose);

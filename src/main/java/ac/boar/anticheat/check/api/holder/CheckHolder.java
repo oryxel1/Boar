@@ -27,6 +27,17 @@ public class CheckHolder extends HashMap<Class<?>, Check> {
         this.put(BadPacketA.class, new BadPacketA(player));
     }
 
+    public void manuallyFail(Class<?> klass) {
+        this.manuallyFail(klass, "");
+    }
+
+    public void manuallyFail(Class<?> klass, String verbose) {
+        Check check = this.get(klass);
+        if (check != null) {
+            check.fail(verbose);
+        }
+    }
+
     @Override
     public Check put(Class<?> key, Check value) {
         String name = key.getDeclaredAnnotation(CheckInfo.class).name(), type = key.getDeclaredAnnotation(CheckInfo.class).type();

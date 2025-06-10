@@ -7,10 +7,10 @@ import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.MathUtil;
 import lombok.Setter;
+import org.geysermc.geyser.entity.type.player.PlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
 public class PositionInterpolator {
-    public static final int DEFAULT_INTERPOLATION_DURATION = 3;
     private final CachedEntityState entity;
     @Setter
     private int lerpDuration;
@@ -21,15 +21,12 @@ public class PositionInterpolator {
     private Consumer<PositionInterpolator> callback;
 
     public PositionInterpolator(CachedEntityState entity) {
-        this(entity, 3, null);
+        this(entity, entity.getPlayer().getSession().getEntityCache().getEntityByGeyserId(entity.getEntity().getRuntimeId())
+                instanceof PlayerEntity ? 3 : 6, null);
     }
 
     public PositionInterpolator(CachedEntityState entity, int lerpDuration) {
         this(entity, lerpDuration, null);
-    }
-
-    public PositionInterpolator(CachedEntityState entity, @Nullable Consumer<PositionInterpolator> callback) {
-        this(entity, 3, callback);
     }
 
     public PositionInterpolator(CachedEntityState entity, int lerpDuration, @Nullable Consumer<PositionInterpolator> callback) {

@@ -33,6 +33,10 @@ public class ItemCache {
         return this.data.getCount();
     }
 
+    public boolean isEmpty() {
+        return this.data.getCount() <= 0 || this.data.getDefinition().getRuntimeId() == 0 || this.data.getDefinition().getRuntimeId() == -1;
+    }
+
     @Override
     public ItemCache clone() {
         final ItemCache cache = new ItemCache(data);
