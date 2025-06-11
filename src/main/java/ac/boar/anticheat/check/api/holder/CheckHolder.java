@@ -41,7 +41,7 @@ public class CheckHolder extends HashMap<Class<?>, Check> {
     @Override
     public Check put(Class<?> key, Check value) {
         String name = key.getDeclaredAnnotation(CheckInfo.class).name(), type = key.getDeclaredAnnotation(CheckInfo.class).type();
-        List<String> disabledChecks = Boar.getInstance().getConfig().disabledChecks();
+        List<String> disabledChecks = Boar.getConfig().disabledChecks();
         if (type.isEmpty() ? disabledChecks.contains(name) : disabledChecks.contains(name + "-" + type)) {
             return null;
         }

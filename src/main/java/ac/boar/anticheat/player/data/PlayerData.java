@@ -180,7 +180,7 @@ public class PlayerData {
 
     // Prediction related method
     public final double getMaxOffset() {
-        return Boar.getInstance().getConfig().acceptanceThreshold();
+        return Boar.getConfig().acceptanceThreshold();
     }
 
     public final void setSprinting(boolean sprinting) {

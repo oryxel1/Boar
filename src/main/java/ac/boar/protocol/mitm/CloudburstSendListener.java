@@ -44,7 +44,7 @@ public final class CloudburstSendListener extends UpstreamSession {
 
             // We need this to do rewind teleport.
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
-            start.setRewindHistorySize(Boar.getInstance().getConfig().rewindHistory());
+            start.setRewindHistorySize(Boar.getConfig().rewindHistory());
 
             player.sendLatencyStack();
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());
