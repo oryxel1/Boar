@@ -28,7 +28,7 @@ public class PlayerTicker extends LivingTicker {
     @Override
     public void tick() {
         super.tick();
-        this.updatePlayerPose();
+        // this.updatePlayerPose();
     }
 
     @Override
@@ -66,35 +66,32 @@ public class PlayerTicker extends LivingTicker {
         super.travel();
     }
 
-    private void updatePlayerPose() {
-        if (!this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {
-            return;
-        }
-        Pose pose = this.getDesiredPose();
-        player.pose = /* this.isSpectator() || this.isPassenger() || */ this.canPlayerFitWithinBlocksAndEntitiesWhen(pose) ? pose : (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING) ? Pose.CROUCHING : Pose.SWIMMING);
-        player.setPose(player.pose);
-    }
-
-    private Pose getDesiredPose() {
-//        if (this.isSleeping()) {
-//            return Pose.SLEEPING;
+//    private void updatePlayerPose() {
+//        if (!this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {
+//            return;
 //        }
-        if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
-            return Pose.SWIMMING;
-        }
-        if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
-            return Pose.GLIDING;
-        }
-        if (player.getFlagTracker().has(EntityFlag.DAMAGE_NEARBY_MOBS)) {
-            return Pose.SPIN_ATTACK;
-        }
-        if (player.getFlagTracker().has(EntityFlag.SNEAKING)/* && !this.abilities.flying */) {
-            return Pose.CROUCHING;
-        }
-        return Pose.STANDING;
-    }
-
-    protected boolean canPlayerFitWithinBlocksAndEntitiesWhen(Pose pose) {
-        return player.compensatedWorld.noCollision(player.getDimensions(pose).getBoxAt(player.unvalidatedPosition).contract(1.0E-7F));
-    }
+//        Pose pose = this.getDesiredPose();
+//        player.pose = /* this.isSpectator() || this.isPassenger() || */ this.canPlayerFitWithinBlocksAndEntitiesWhen(pose) ? pose : (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING) ? Pose.CROUCHING : Pose.SWIMMING);
+//        player.setPose(player.pose);
+//    }
+//
+//    private Pose getDesiredPose() {
+//        if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
+//            return Pose.SWIMMING;
+//        }
+//        if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
+//            return Pose.GLIDING;
+//        }
+//        if (player.getFlagTracker().has(EntityFlag.DAMAGE_NEARBY_MOBS)) {
+//            return Pose.SPIN_ATTACK;
+//        }
+//        if (player.getFlagTracker().has(EntityFlag.SNEAKING)/* && !this.abilities.flying */) {
+//            return Pose.CROUCHING;
+//        }
+//        return Pose.STANDING;
+//    }
+//
+//    protected boolean canPlayerFitWithinBlocksAndEntitiesWhen(Pose pose) {
+//        return player.compensatedWorld.noCollision(player.getDimensions(pose).getBoxAt(player.unvalidatedPosition).contract(1.0E-7F));
+//    }
 }

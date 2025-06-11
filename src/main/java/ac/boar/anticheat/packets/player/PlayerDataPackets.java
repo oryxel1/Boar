@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.player;
 
+import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.event.CloudburstPacketEvent;
@@ -9,6 +10,7 @@ import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
@@ -52,18 +54,50 @@ public class PlayerDataPackets implements PacketListener {
                 return;
             }
 
+            Float height = packet.getMetadata().get(EntityDataTypes.HEIGHT);
+            Float width = packet.getMetadata().get(EntityDataTypes.WIDTH);
+
             final EnumSet<EntityFlag> flags = packet.getMetadata().getFlags();
-            if (flags == null) {
+            if (flags == null && height == null && width == null) {
                 return;
             }
 
-            final Set<EntityFlag> flagsCopy = EnumSet.noneOf(EntityFlag.class);
-            flagsCopy.addAll(flags);
+            final Set<EntityFlag> flagsCopy;
+            if (flags != null) {
+                flagsCopy = EnumSet.noneOf(EntityFlag.class);
+                flagsCopy.addAll(flags);
+            } else {
+                flagsCopy = null;
+            }
 
             player.sendLatencyStack(immediate);
             player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
-                // This won't affect player movement attribute or anything else, only player actual flags.
-                player.getFlagTracker().set(flagsCopy);
+                if (flagsCopy != null) {
+                    flagsCopy.addAll(flags);
+                }
+
+                // Dimension seems to be controlled server-side as far as I know (tested with clumsy).
+
+                if (width != null) {
+                    player.dimensions = EntityDimensions.fixed(width, player.dimensions.height()).withEyeHeight(player.dimensions.height());
+                    player.boundingBox = player.dimensions.getBoxAt(player.position);
+                    // System.out.println("Update width!");
+                }
+
+                if (height != null) {
+                    float eyeHeight = 1.62F;
+                    if (Math.abs(height - 0.2F) <= 1.0E-3) {
+                        eyeHeight = 0.2F;
+                    } else if (Math.abs(height - 0.6F) <= 1.0E-3) {
+                        eyeHeight = 0.4F;
+                    } else if (Math.abs(height - 1.5F) <= 1.0E-3) {
+                        eyeHeight = 1.27F;
+                    }
+
+                    player.dimensions = EntityDimensions.fixed(player.dimensions.width(), height).withEyeHeight(eyeHeight);
+                    player.boundingBox = player.dimensions.getBoxAt(player.position);
+                    // System.out.println("Update height!");
+                }
             });
         }
 
