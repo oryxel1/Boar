@@ -59,7 +59,7 @@ public class PlayerTicker extends LivingTicker {
             float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;
             float e = d < -0.2 ? 0.085F : 0.06F;
             final FluidState state = player.compensatedWorld.getFluidState(player.position.add(0, 1.0F - 0.1F, 0).toVector3i());
-            if (d <= 0.0 || player.getInputData().contains(PlayerAuthInputData.JUMPING) || state.fluid() != Fluid.EMPTY) {
+            if ((d <= 0.0 || state.fluid() != Fluid.EMPTY) && !player.getInputData().contains(PlayerAuthInputData.JUMPING)) {
                 player.velocity = player.velocity.add(0, (d - player.velocity.y) * e, 0);
             }
         }
