@@ -3,6 +3,7 @@ package ac.boar.anticheat.compensated.world.base;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.EntityDimensions;
+import ac.boar.anticheat.data.block.impl.BedBlockState;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -140,6 +141,8 @@ public class CompensatedWorld {
             return new HoneyBlockState(state, Vector3i.from(x, y, z), layer);
         } else if (state.is(Blocks.SLIME_BLOCK)) {
             return new SlimeBlockState(state, Vector3i.from(x, y, z), layer);
+        } else if (player.getSession().getTagCache().is(BlockTag.BEDS, state.block())) {
+            return new BedBlockState(state, Vector3i.from(x, y, z), layer);
         }
 
         // Only check on layer 0, layer 1 is basically just render and the only exception is water (and maybe some other blocks)

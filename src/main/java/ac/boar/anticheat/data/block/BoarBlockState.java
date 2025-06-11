@@ -119,18 +119,6 @@ public class BoarBlockState {
     }
 
     public void updateEntityMovementAfterFallOn(BoarPlayer player, boolean living) {
-        final TagCache cache = player.getSession().getTagCache();
-
-        if (cache.is(BlockTag.BEDS, state.block()) && player.velocity.y < 0.0 && !player.getFlagTracker().has(EntityFlag.SNEAKING)) {
-            final float d = living ? 1.0F : 0.8F;
-            player.velocity.y = -player.velocity.y * 0.75F * d;
-            if (player.velocity.y > 0.75) {
-                player.velocity.y = 0.75F;
-            }
-
-            return;
-        }
-
         player.velocity.y = 0;
     }
 

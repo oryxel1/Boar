@@ -210,15 +210,14 @@ public class EntityTicker {
         player.horizontalCollision = bl || bl2;
         player.verticalCollision = vec3.y != vec32.y;
         player.onGround = player.verticalCollision && vec3.y < 0.0;
-        // this.minorHorizontalCollision = this.horizontalCollision ? this.isHorizontalCollisionMinor(vec32) : false;
-        Vector3i blockPos = player.getOnPos(0.2F + 1.0E-5F);
-        BoarBlockState blockState = player.compensatedWorld.getBlockState(blockPos, 0);
-//        if (this.isLocalInstanceAuthoritative()) {
-//            this.checkFallDamage(vec32.y, this.onGround(), blockState, blockPos);
-//        }
+
         if (player.horizontalCollision) {
             player.velocity = new Vec3(bl ? 0 : player.velocity.x, player.velocity.y, bl2 ? 0 : player.velocity.z);
         }
+
+        // TODO: What the actual value actually? Player still able to bounce on slime despite being .375 block higher.
+        Vector3i blockPos = Vector3i.from((int) player.position.x, GenericMath.floor(player.position.y - 0.378F), (int) player.position.z);
+        BoarBlockState blockState = player.compensatedWorld.getBlockState(blockPos, 0);
 
         if (player.verticalCollision) {
             blockState.updateEntityMovementAfterFallOn(player, true);

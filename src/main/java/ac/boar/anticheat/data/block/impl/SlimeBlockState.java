@@ -24,7 +24,8 @@ public class SlimeBlockState extends BoarBlockState {
 
     @Override
     public void updateEntityMovementAfterFallOn(BoarPlayer player, boolean living) {
-        if (player.getFlagTracker().has(EntityFlag.SNEAKING)) {
+        // Player sometimes bounce, sometimes not despite the position, so let them decide.
+        if (player.getFlagTracker().has(EntityFlag.SNEAKING) || player.unvalidatedTickEnd.y <= 0) {
             player.velocity.y = 0;
         } else {
             if (player.velocity.y < 0.0) {
