@@ -35,8 +35,6 @@ public class BedrockCollision {
 
     // Scaffolding
     private final static List<Box> SCAFFOLDING_NORMAL_SHAPE;
-    private final static Box SCAFFOLDING_COLLISION_SHAPE = new Box(0, 0, 0, 1, 0.125F, 1);
-    private final static Box SCAFFOLDING_OUTLINE_SHAPE = new Box(0, 0, 0, 1, 1, 1).offset(0, -1, 0);
 
     // Cauldron
     private final static List<Box> CAULDRON_SHAPE;
@@ -222,12 +220,10 @@ public class BedrockCollision {
 
         if (state.is(Blocks.SCAFFOLDING)) {
             boolean above = player.boundingBox.minY > vector3i.getY() + 1 - 1.0E-5F;
-            boolean aboveOutline = player.boundingBox.minY > vector3i.getY() + SCAFFOLDING_OUTLINE_SHAPE.maxY - 1.0E-5F;
             if (above && !player.getInputData().contains(PlayerAuthInputData.WANT_DOWN)) {
                 return SCAFFOLDING_NORMAL_SHAPE;
             } else {
-                return state.getValue(Properties.STABILITY_DISTANCE) != 0 && state.getValue(Properties.BOTTOM)
-                        && aboveOutline ? List.of(SCAFFOLDING_COLLISION_SHAPE) : EMPTY_SHAPE;
+                return EMPTY_SHAPE;
             }
         }
 
