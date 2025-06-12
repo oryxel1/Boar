@@ -26,6 +26,12 @@ public final class Timer extends Check {
 
         if (player.tick == Long.MIN_VALUE) {
             player.tick = this.lastTick;
+        } else {
+            long distanceToPrev = tick - player.tick;
+            if (distanceToPrev != 1) {
+                player.kick("Invalid tick id=" + tick);
+                return true;
+            }
         }
 
         long distance = System.nanoTime() - this.lastNS;
