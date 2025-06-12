@@ -32,7 +32,7 @@ public class Boar {
     private AlertManager alertManager;
 
     public void init(GeyserBoar instance) {
-        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, new Config(20, 1.0E-4F, 0F, List.of(), false));
+        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, new Config(20, 1.0E-4F,  3.005F, 0F, List.of(), false));
         // System.out.println("Load config: " + config);
 
         BedrockMappings.load();

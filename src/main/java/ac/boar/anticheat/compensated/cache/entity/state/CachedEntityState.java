@@ -22,6 +22,8 @@ public final class CachedEntityState {
     public void tick() {
         if (this.isInterpolating()) {
             this.interpolator.tick();
+        } else {
+            this.prevPos = this.pos.clone();
         }
     }
 

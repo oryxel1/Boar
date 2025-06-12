@@ -1,5 +1,6 @@
 package ac.boar.anticheat.check.impl.reach;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.check.api.impl.PacketCheck;
@@ -49,7 +50,7 @@ public final class Reach extends PacketCheck {
         final ReachResult result = calculateReach(entity);
 
         double distance = result.distance();
-        if (distance > 3.005) {
+        if (distance > Boar.getConfig().toleranceReach()) {
             if (distance != Double.MAX_VALUE) {
                 fail("d=" + distance);
             } else {
@@ -58,6 +59,8 @@ public final class Reach extends PacketCheck {
             }
 
             event.setCancelled(true);
+        } else {
+            // Boar.getInstance().getAlertManager().alert("Distance=" + distance + "," + result.deltaTicks());
         }
 
         if (player.inputMode == InputMode.TOUCH) {
@@ -100,7 +103,7 @@ public final class Reach extends PacketCheck {
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {
-        Box lv5 = box.expand(0.1F); // Seems to be the case when debugging/comparing with 1.21 java.
+        Box lv5 = box.expand(0.1F);
         Optional<Vec3> vec3 = lv5.clip(min, max);
         if (lv5.contains(min)) {
             return min;
