@@ -37,23 +37,23 @@ public class CompensatedWorldImpl extends CompensatedWorld {
 
     public FluidState getFluidState(int x, int y, int z) {
         if (getBlockAt(x, y, z, 1) == Blocks.WATER.javaId()) {
-            return new FluidState(Fluid.WATER, 8 / 9F); // Waterlogged
+            return new FluidState(Fluid.WATER, 8 / 9F, 8); // Waterlogged
         }
         final BlockState state = getBlockState(x, y, z, 0).getState();
         boolean water = state.is(Blocks.WATER);
 
         if (!water && !state.is(Blocks.LAVA)) {
-            return new FluidState(Fluid.EMPTY, 0);
+            return new FluidState(Fluid.EMPTY, 0, 0);
         }
 
         Fluid fluid = water ? Fluid.WATER : Fluid.LAVA;
 
         int rawLevel = state.getValue(Properties.LEVEL);
         if (rawLevel == 0 || rawLevel == 8) {
-            return new FluidState(fluid, 8 / 9F);
+            return new FluidState(fluid, 8 / 9F, rawLevel);
         }
 
-        return new FluidState(fluid, (8 - rawLevel) / 9F);
+        return new FluidState(fluid, (8 - rawLevel) / 9F, 8 - rawLevel);
     }
 
     public List<Box> collectColliders(List<Box> list, Box aABB) {

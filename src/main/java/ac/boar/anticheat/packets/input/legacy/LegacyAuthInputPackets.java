@@ -137,7 +137,7 @@ public class LegacyAuthInputPackets {
                 case START_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, true);
                 case STOP_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, false);
 
-                case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, player.touchingWater && player.submergedInWater);
+                case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, true);
                 case STOP_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, false);
 
                 case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);

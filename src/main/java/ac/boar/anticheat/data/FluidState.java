@@ -7,7 +7,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.physics.Direction;
 
-public record FluidState(Fluid fluid, float height) {
+public record FluidState(Fluid fluid, float height, int level) {
     public float getHeight(final BoarPlayer player, final Mutable pos) {
         return isFluidAboveEqual(player, pos) ? 1.0F : this.height();
     }

@@ -38,7 +38,7 @@ public class DebugOffsetA extends OffsetHandlerCheck {
                 GeyserBoar.getLogger().info(predDebug);
             }
 
-            GeyserBoar.getLogger().info("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.getFlagTracker().has(EntityFlag.SPRINTING) + ", SNEAKING=" + player.getFlagTracker().has(EntityFlag.SNEAKING) + ", sinceTeleport=" + player.sinceTeleport);
+            GeyserBoar.getLogger().info("§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.getFlagTracker().has(EntityFlag.SPRINTING) + ", SNEAKING=" + player.getFlagTracker().has(EntityFlag.SNEAKING) + ", water=" + player.touchingWater);
 
             GeyserBoar.getLogger().info("A EOT: " + player.velocity.toVector3f().toString());
             GeyserBoar.getLogger().info("EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset + "," + player.unvalidatedTickEnd.toVector3f().toString());
