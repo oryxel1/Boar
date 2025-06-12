@@ -2,6 +2,7 @@ package ac.boar.anticheat.data.block;
 
 import ac.boar.anticheat.collision.BedrockCollision;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
@@ -12,6 +13,7 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.BoundingBox;
+import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.translator.collision.BlockCollision;
 import org.geysermc.geyser.translator.collision.SolidCollision;
 import org.geysermc.geyser.util.BlockUtils;
@@ -118,6 +120,11 @@ public class BoarBlockState {
     }
 
     public List<Box> findCollision(BoarPlayer player, Vector3i pos, Box playerAABB, boolean checkAAB) {
+        BlockState state = this.state;
+        if (player.getSession().getTagCache().is(BlockTag.FENCES, state.block())) {
+            state = BlockUtil.findFenceBlockState(player, pos);
+        }
+
         final List<Box> list = new ArrayList<>();
         final List<Box> collisions = BedrockCollision.getCollisionBox(player, pos, state);
         if (collisions != null) {

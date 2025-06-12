@@ -4,11 +4,10 @@ import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
-import org.geysermc.geyser.level.block.BlockStateValues;
 import org.geysermc.geyser.level.block.Blocks;
-import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
+import org.geysermc.geyser.registry.BlockRegistries;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 
@@ -24,7 +23,7 @@ public class BlockUtil {
         return destroyTime != -1 || player.gameType == GameType.CREATIVE;
     }
 
-    public static FenceState findFenceBlockState(BoarPlayer player, Vector3i position) {
+    public static BlockState findFenceBlockState(BoarPlayer player, Vector3i position) {
         BlockState main = player.compensatedWorld.getBlockState(position, 0).getState();
 
         BoarBlockState blockState = player.compensatedWorld.getBlockState(position.north(), 0);
@@ -37,7 +36,15 @@ public class BlockUtil {
         boolean south = connectsTo(player, main, blockState3.getState(), blockState3.isFaceSturdy(player), Direction.NORTH);
         boolean west = connectsTo(player, main, blockState4.getState(), blockState4.isFaceSturdy(player), Direction.EAST);
 
-        return new FenceState(north, south, west, east);
+        // A bit hacky but works, Geyser withValue implementation seems to be broken.
+        String identifier = main.block().defaultBlockState().toString().intern();
+        identifier = identifier.replace("north=true", "north=" + north);
+        identifier = identifier.replace("east=true", "east=" + east);
+        identifier = identifier.replace("south=true", "south=" + south);
+        identifier = identifier.replace("west=true", "west=" + west);
+        identifier = identifier.replace("waterlogged=true", "waterlogged=false");
+
+        return BlockState.of(BlockRegistries.JAVA_IDENTIFIER_TO_ID.getOrDefault(identifier, main.javaId()));
         //return main.block().defaultBlockState().withValue(EAST, east).withValue(NORTH, north).withValue(SOUTH, south).withValue(WATERLOGGED,false).withValue(WEST, west); this is broken, geyser fault I think?
     }
 
@@ -71,8 +78,5 @@ public class BlockUtil {
             case 4 -> Direction.NORTH;
             default -> throw new IllegalStateException("Unable to get Y-rotated facing of " + direction);
         };
-    }
-
-    public record FenceState(boolean north, boolean south, boolean west, boolean east) {
     }
 }
