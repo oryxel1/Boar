@@ -146,6 +146,8 @@ public class PlayerData {
 
     public float fallDistance = 0;
 
+    public boolean hasDepthStrider;
+
     public boolean submergedInWater, touchingWater;
     public boolean wasInPowderSnow, inPowderSnow;
 

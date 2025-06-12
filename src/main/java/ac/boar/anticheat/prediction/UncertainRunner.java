@@ -4,6 +4,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 
 // Things that I don't even bother account for...
 @RequiredArgsConstructor
@@ -24,6 +25,13 @@ public class UncertainRunner {
 
         if (Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset() && player.soulSandBelow && actual.horizontalLengthSquared() < player.afterCollision.horizontalLengthSquared() && MathUtil.sameDirection(actual, predicted)) {
             extra = (float) offset;
+        }
+
+        // .... This is weird, no idea why.
+        if (!player.getFlagTracker().has(EntityFlag.SWIMMING) && player.hasDepthStrider) {
+            if (actual.horizontalLengthSquared() < predicted.horizontalLengthSquared() && Math.abs(player.unvalidatedTickEnd.y - player.velocity.y) < player.getMaxOffset()) {
+                extra = (float) offset;
+            }
         }
 
         return extra;

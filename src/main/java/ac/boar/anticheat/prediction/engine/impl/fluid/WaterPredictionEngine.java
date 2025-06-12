@@ -29,13 +29,22 @@ public class WaterPredictionEngine extends PredictionEngine {
             h = 0.33333334f + 0.33333334f * (float)(depthStrider - 1);
         }
 
+        if (!player.onGround && player.getFlagTracker().has(EntityFlag.SWIMMING)) {
+            h *= 0.5F;
+        }
+
         this.tickEndSpeed = h;
 
+        player.hasDepthStrider = this.tickEndSpeed > 0;
         return this.moveRelative(vec3, h > 0 ? 0.02F + ((player.getSpeed() - 0.02F) * h) : 0.02F);
     }
 
     @Override
     public void finalizeMovement() {
+        if (!player.getFlagTracker().has(EntityFlag.SWIMMING) && !player.onGround) {
+            this.tickEndSpeed *= 0.5F;
+        }
+
         boolean sprinting = player.getFlagTracker().has(EntityFlag.SPRINTING);
 
         // Look at https://bugs.mojang.com/browse/MCPE/issues/MCPE-201832, even though player is swimming, they can't move fast
