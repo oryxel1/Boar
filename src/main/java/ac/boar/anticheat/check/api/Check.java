@@ -28,7 +28,7 @@ public class Check {
         }
 
         if (this.experimental) {
-            builder.append(" §2(Experimental)");
+            builder.append(" §a(Experimental)");
         }
 
         builder.append(" §7x").append(vl).append(" ").append(verbose);
