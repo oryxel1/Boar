@@ -21,6 +21,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @RequiredArgsConstructor
 @Getter
@@ -121,9 +122,10 @@ public class BoarBlockState {
 
     public List<Box> findCollision(BoarPlayer player, Vector3i pos, Box playerAABB, boolean checkAAB) {
         BlockState state = this.state;
+
         if (player.getSession().getTagCache().is(BlockTag.FENCES, state.block())) {
             state = BlockUtil.findFenceBlockState(player, getState(), pos);
-        } else if (state.is(Blocks.IRON_BARS)) {
+        } else if (state.is(Blocks.IRON_BARS) || state.toString().toLowerCase(Locale.ROOT).contains("glass_pane")) {
             state = BlockUtil.findIronBarsBlockState(player, getState(), pos);
         }
 

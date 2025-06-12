@@ -11,6 +11,8 @@ import org.geysermc.geyser.registry.BlockRegistries;
 import org.geysermc.geyser.session.cache.TagCache;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 
+import java.util.Locale;
+
 import static org.geysermc.geyser.level.block.property.Properties.*;
 
 public class BlockUtil {
@@ -78,7 +80,7 @@ public class BlockUtil {
 
     private static boolean attachsTo(BoarPlayer player, BlockState blockState, boolean bl) {
         final TagCache tagCache = player.getSession().getTagCache();
-        return !isExceptionForConnection(tagCache, blockState) && bl || blockState.is(Blocks.IRON_BARS) || tagCache.is(BlockTag.WALLS, blockState.block());
+        return !isExceptionForConnection(tagCache, blockState) && bl || blockState.is(Blocks.IRON_BARS) || blockState.toString().toLowerCase(Locale.ROOT).contains("glass_pane") || tagCache.is(BlockTag.WALLS, blockState.block());
     }
 
     private static boolean isSameFence(TagCache tagCache, BlockState blockState, BlockState currentBlockState) {
