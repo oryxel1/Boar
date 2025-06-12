@@ -1,11 +1,13 @@
 package ac.boar.anticheat.data;
 
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.physics.Direction;
+import org.geysermc.geyser.session.cache.tags.BlockTag;
 
 public record FluidState(Fluid fluid, float height, int level) {
     public float getHeight(final BoarPlayer player, final Mutable pos) {
@@ -47,14 +49,29 @@ public record FluidState(Fluid fluid, float height, int level) {
         }
         Vec3 vec3 = new Vec3(d, 0, e);
 
-//        if (fluidState.getValue(FALLING).booleanValue()) {
-//            for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-//                mutableBlockPos.setWithOffset((Vec3i)blockPos, direction2);
-//                if (!this.isSolidFace(blockGetter, mutableBlockPos, direction2) && !this.isSolidFace(blockGetter, (BlockPos)mutableBlockPos.above(), direction2)) continue;
-//                vec3 = vec3.normalize().add(0.0, -6.0, 0.0);
-//                break;
-//            }
-//        }
+        if (level == 8) {
+            for (Direction direction2 : Direction.HORIZONTAL) {
+                mutableBlockPos.set(vector3i, direction2.getUnitVector());
+                if (!this.isSolidFace(player, mutableBlockPos, direction2) && !this.isSolidFace(player, mutableBlockPos.add(0, 1, 0), direction2)) continue;
+                vec3 = vec3.normalize().add(0, -6, 0);
+                break;
+            }
+        }
         return vec3.normalize();
+    }
+
+    private boolean isSolidFace(BoarPlayer player, Mutable blockPos, Direction direction) {
+        BoarBlockState blockState = player.compensatedWorld.getBlockState(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0);
+        FluidState fluidState = player.compensatedWorld.getFluidState(blockPos);
+//        if (fluidState.getType().isSame(this)) {
+//            return false;
+//        }
+        if (direction == Direction.UP) {
+            return true;
+        }
+        if (player.getSession().getTagCache().is(BlockTag.ICE, blockState.getState().block())) {
+            return false;
+        }
+        return blockState.isFaceSturdy(player);
     }
 }

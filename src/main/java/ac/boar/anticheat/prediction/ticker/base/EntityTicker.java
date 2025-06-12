@@ -31,6 +31,7 @@ public class EntityTicker {
     public void baseTick() {
         player.affectedByFluidPushing = false;
         player.guessedFluidPushingVelocity = Vec3.ZERO;
+        player.pushingVelocity = Vec3.ZERO;
 
         player.inBlockState = null;
 
@@ -150,6 +151,9 @@ public class EntityTicker {
                 fluidPushVelocity = fluidPushVelocity.normalize();
             }
             fluidPushVelocity = fluidPushVelocity.multiply(speed);
+
+            player.pushingVelocity = player.pushingVelocity.add(fluidPushVelocity);
+
 //            if (Math.abs(vec33.x) < 0.003 && Math.abs(vec33.z) < 0.003 && fluidPushVelocity.length() < 0.0045000000000000005) {
 //                fluidPushVelocity = fluidPushVelocity.normalize().scale(0.0045000000000000005);
 //            }

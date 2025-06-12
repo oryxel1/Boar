@@ -107,7 +107,7 @@ public class PlayerData {
     public final Map<Long, VelocityData> queuedVelocities = Collections.synchronizedMap(new TreeMap<>());
 
     public boolean affectedByFluidPushing = false;
-    public Vec3 guessedFluidPushingVelocity;
+    public Vec3 guessedFluidPushingVelocity, pushingVelocity;
 
     // Attribute related, abilities
     public final Map<String, AttributeInstance> attributes = new HashMap<>();

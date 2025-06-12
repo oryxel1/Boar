@@ -9,6 +9,10 @@ import org.cloudburstmc.math.vector.Vector3i;
 public class MathUtil {
     public final static float DEGREE_TO_RAD = 0.017453292F;
 
+    public static boolean sameDirection(Vec3 vec3, Vec3 vec32) {
+        return sign(vec3.x) == sign(vec32.x) && sign(vec3.y) == sign(vec32.y) && sign(vec3.z) == sign(vec32.z);
+    }
+
     public static float sign(final float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
             return 0;
