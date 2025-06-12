@@ -87,7 +87,7 @@ public class PredictionRunner {
 
             if (nearestVelocity != null) {
                 possibleVelocities.add(new Vector(VectorType.VELOCITY, nearestVelocity.velocity(), nearestVelocity.stackId()));
-                System.out.println("nearest velocity!");
+                // System.out.println("nearest velocity!");
             }
         }
 

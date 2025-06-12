@@ -303,7 +303,7 @@ public final class ItemTransactionValidator {
                             BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
                             BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), packet.getBlockPosition());
 
-                            GeyserBoar.getLogger().severe("AIR PLACEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+                            // GeyserBoar.getLogger().severe("AIR PLACEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                             player.tickSinceBlockResync = 5;
                             return false;
                         }
