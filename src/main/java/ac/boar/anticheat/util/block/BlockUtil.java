@@ -24,21 +24,21 @@ public class BlockUtil {
         return destroyTime != -1 || player.gameType == GameType.CREATIVE;
     }
 
-    public static BlockState findFenceBlockState(BoarPlayer player, Vector3i position) {
-        BlockState main = player.compensatedWorld.getBlockState(position, 0, false).getState();
+    public static FenceState findFenceBlockState(BoarPlayer player, Vector3i position) {
+        BlockState main = player.compensatedWorld.getBlockState(position, 0).getState();
 
-        BoarBlockState blockState = player.compensatedWorld.getBlockState(position.north(), 0, false);
-        BoarBlockState blockState2 = player.compensatedWorld.getBlockState(position.east(), 0, false);
-        BoarBlockState blockState3 = player.compensatedWorld.getBlockState(position.south(), 0, false);
-        BoarBlockState blockState4 = player.compensatedWorld.getBlockState(position.west(), 0, false);
+        BoarBlockState blockState = player.compensatedWorld.getBlockState(position.north(), 0);
+        BoarBlockState blockState2 = player.compensatedWorld.getBlockState(position.east(), 0);
+        BoarBlockState blockState3 = player.compensatedWorld.getBlockState(position.south(), 0);
+        BoarBlockState blockState4 = player.compensatedWorld.getBlockState(position.west(), 0);
 
         boolean north = connectsTo(player, main, blockState.getState(), blockState.isFaceSturdy(player), Direction.SOUTH);
         boolean east = connectsTo(player, main, blockState2.getState(), blockState2.isFaceSturdy(player), Direction.WEST);
         boolean south = connectsTo(player, main, blockState3.getState(), blockState3.isFaceSturdy(player), Direction.NORTH);
         boolean west = connectsTo(player, main, blockState4.getState(), blockState4.isFaceSturdy(player), Direction.EAST);
 
-        // waterlogged value doesn't matter that much since we check for layer 1 instead
-        return main.block().defaultBlockState().withValue(NORTH, north).withValue(EAST, east).withValue(SOUTH, south).withValue(WEST, west).withValue(WATERLOGGED, false);
+        return new FenceState(north, south, west, east);
+        //return main.block().defaultBlockState().withValue(EAST, east).withValue(NORTH, north).withValue(SOUTH, south).withValue(WATERLOGGED,false).withValue(WEST, west); this is broken, geyser fault I think?
     }
 
     private static boolean connectsTo(BoarPlayer player, BlockState blockState, BlockState neighbour, boolean bl, Direction direction) {
@@ -71,5 +71,8 @@ public class BlockUtil {
             case 4 -> Direction.NORTH;
             default -> throw new IllegalStateException("Unable to get Y-rotated facing of " + direction);
         };
+    }
+
+    public record FenceState(boolean north, boolean south, boolean west, boolean east) {
     }
 }
