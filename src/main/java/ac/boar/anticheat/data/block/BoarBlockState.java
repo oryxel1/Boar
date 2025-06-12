@@ -122,7 +122,9 @@ public class BoarBlockState {
     public List<Box> findCollision(BoarPlayer player, Vector3i pos, Box playerAABB, boolean checkAAB) {
         BlockState state = this.state;
         if (player.getSession().getTagCache().is(BlockTag.FENCES, state.block())) {
-            state = BlockUtil.findFenceBlockState(player, pos);
+            state = BlockUtil.findFenceBlockState(player, getState(), pos);
+        } else if (state.is(Blocks.IRON_BARS)) {
+            state = BlockUtil.findIronBarsBlockState(player, getState(), pos);
         }
 
         final List<Box> list = new ArrayList<>();
