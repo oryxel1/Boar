@@ -2,17 +2,12 @@ package ac.boar.anticheat.data;
 
 import ac.boar.anticheat.data.cache.UseDurationCache;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.MathUtil;
-import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cloudburstmc.math.TrigMath;
-import org.cloudburstmc.nbt.NbtMap;
-import org.cloudburstmc.protocol.bedrock.data.MovementEffectType;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
-import org.cloudburstmc.protocol.bedrock.packet.MovementEffectPacket;
 import org.geysermc.geyser.item.Items;
 
 import java.util.function.Consumer;
@@ -20,6 +15,8 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class UseItemCache {
     private final BoarPlayer player;
+
+    private int previousUseItem;
 
     private int useItemJavaId = -1;
     private ItemData useItem = ItemData.AIR;
@@ -40,9 +37,13 @@ public class UseItemCache {
             return;
         }
 
-        if (player.compensatedInventory.inventoryContainer.getHeldItemData().equals(useItem, true, false, false)) {
+        if (player.compensatedInventory.inventoryContainer.getHeldItemData().equals(useItem, false, false, false)) {
             if (--this.useItemRemaining == 0) {
-                this.release();
+                if (player.getInputData().contains(PlayerAuthInputData.START_USING_ITEM)) {
+                    this.useItemRemaining = this.previousUseItem;
+                } else {
+                    this.release();
+                }
             }
         } else {
             this.release();
@@ -77,6 +78,7 @@ public class UseItemCache {
             return;
         }
 
+        previousUseItem = useDuration;
         this.consumer = useItemCache -> {
             if (itemId == Items.GOAT_HORN.javaId()) {
                 if (goatHornCooldown > 0) {
