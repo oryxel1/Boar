@@ -36,8 +36,7 @@ public record FluidState(Fluid fluid, float height, int level) {
             if (f == 0.0f) {
                 Vector3i blockPos2 = Vector3i.from(mutableBlockPos.getX(), mutableBlockPos.getY() - 1, mutableBlockPos.getZ());
                 FluidState fluidState3;
-                if (!player.compensatedWorld.getBlockState(mutableBlockPos, 0).blocksMotion(player)
-                        && this.affectsFlow(fluidState3 = player.compensatedWorld.getFluidState(blockPos2)) && (f = fluidState3.height()) > 0.0f) {
+                if (!player.compensatedWorld.getBlockState(mutableBlockPos, 0).blocksMotion(player) && this.affectsFlow(fluidState3 = player.compensatedWorld.getFluidState(blockPos2)) && (f = fluidState3.height()) > 0.0f) {
                     g = fluidState.height() - (f - 0.8888889f);
                 }
             } else if (f > 0.0f) {

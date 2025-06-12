@@ -19,6 +19,7 @@ import org.geysermc.erosion.util.BlockPositionIterator;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.type.Block;
 
 @RequiredArgsConstructor
 public class EntityTicker {
@@ -89,81 +90,41 @@ public class EntityTicker {
             return false;
         }
 
-        float maxFluidHeight = 0.0F;
-        boolean bl = /* this.isPushedByFluid(); */ true;
-        boolean found = false;
-        Vec3 fluidPushVelocity = Vec3.ZERO;
-        int fluidCount = 0;
+        Box box = player.boundingBox.expand(0, -0.4F, 0).contract(0.001F);
 
+        int i = GenericMath.floor(box.minX);
+        int j = GenericMath.floor(box.maxX + 1.0D);
+        int k = GenericMath.floor(box.minY);
+        int l = GenericMath.floor(box.maxY + 1.0D);
+        int i1 = GenericMath.floor(box.minZ);
+        int j1 = GenericMath.floor(box.maxZ + 1.0D);
+
+        boolean found = false;
+        Vec3 vec3 = new Vec3(0, 0, 0);
+        float maxFluidHeight = 0;
         Mutable mutable = new Mutable();
 
-        final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(player.boundingBox);
-        while (iterator.step()) {
-            int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
-            if (!player.compensatedWorld.isChunkLoaded(x, z)) {
-                continue;
-            }
-            mutable.set(x, y, z);
+        for (int k1 = i; k1 < j; ++k1) { for (int l1 = k; l1 < l; ++l1) { for (int i2 = i1; i2 < j1; ++i2) {
+            mutable.set(k1, l1, i2);
             FluidState fluidState = player.compensatedWorld.getFluidState(mutable);
-            if (fluidState.fluid() != tag) {
-                continue;
-            }
 
-            float height = y + fluidState.getHeight(player, mutable);
+            if (fluidState.fluid() == tag) {
+                float d0 = l1 + 1 - fluidState.height();
+                maxFluidHeight = Math.max(maxFluidHeight, d0);
 
-            if (!player.boundingBox.intersects(x, y, z, x + 1, y + 1, z + 1)) {
-                continue;
-            }
-
-            float distanceToLeg = height - player.boundingBox.minY;
-
-            System.out.println("Info: " + fluidState.level() + ":" + distanceToLeg);
-            // YES, I know, it's a "bedrock" prediction engine, what are you expecting.
-            if (!player.getFlagTracker().has(EntityFlag.SWIMMING)) {
-                switch (fluidState.level()) {
-                    case 8, 0 -> {if (distanceToLeg < 0.29F) continue;}
-                    case 7 -> {if (distanceToLeg < 0.2F - 5.0E-3) continue;}
-                    case 6 -> {if (distanceToLeg < 0.07) continue;}
-                    case 5 -> {if (distanceToLeg < 0 - 3.0E-3) continue;}
-                    case 4 -> {if (distanceToLeg < -0.15) {continue;}}
-                    case 3 -> {if (distanceToLeg < -0.25 - 3.0E-3) continue;}
-                    case 2 -> {if (distanceToLeg < -0.35 - 3.0E-3) continue;}
-                    case 1 -> {if (distanceToLeg < -0.45 - 3.0E-3) continue;}
-                    default -> {}
+                if (l >= d0) {
+                    found = true;
+                    vec3 = fluidState.getFlow(player, Vector3i.from(k1, l1, i2), fluidState);
                 }
             }
+        }}}
 
-            found = true;
-            maxFluidHeight = Math.max(Math.abs(height - player.boundingBox.minY), maxFluidHeight);
-            if (!bl) continue;
-            Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(x, y, z), fluidState);
-
-            player.affectedByFluidPushing = vec32.lengthSquared() > 0;
-            fluidPushVelocity = fluidPushVelocity.add(vec32);
-            ++fluidCount;
+        if (vec3.lengthSquared() > 0.0D) {
+            vec3 = vec3.normalize();
+            player.velocity = player.velocity.add(vec3.multiply(speed));
         }
 
-        if (fluidPushVelocity.length() > 0.0) {
-            if (fluidCount > 0) {
-                fluidPushVelocity = fluidPushVelocity.multiply(1.0F / fluidCount);
-            }
-            if (!(this instanceof PlayerTicker)) {
-                fluidPushVelocity = fluidPushVelocity.normalize();
-            }
-            fluidPushVelocity = fluidPushVelocity.multiply(speed);
-
-            player.pushingVelocity = player.pushingVelocity.add(fluidPushVelocity);
-
-//            if (Math.abs(vec33.x) < 0.003 && Math.abs(vec33.z) < 0.003 && fluidPushVelocity.length() < 0.0045000000000000005) {
-//                fluidPushVelocity = fluidPushVelocity.normalize().scale(0.0045000000000000005);
-//            }
-
-            // player.velocity = player.velocity.add(fluidPushVelocity); // broken lol...
-
-            player.guessedFluidPushingVelocity = new Vec3(Math.max(Math.abs(fluidPushVelocity.x), player.guessedFluidPushingVelocity.x), Math.max(Math.abs(fluidPushVelocity.y), player.guessedFluidPushingVelocity.y), Math.max(Math.abs(fluidPushVelocity.z), player.guessedFluidPushingVelocity.z));
-        }
         player.fluidHeight.put(tag, maxFluidHeight);
-
         return found;
     }
 

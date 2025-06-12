@@ -32,15 +32,13 @@ public class UncertainRunner {
                     extra += yOffset;
                 }
 
-                if (actual.horizontalLength() - predicted.horizontalLength() <= pushingMax.horizontalLength() + 0.014F && yOffset - extra <= player.getMaxOffset()) {
+                if (actual.horizontalLength() - predicted.horizontalLength() - pushingMax.horizontalLength() - 0.0145F <= player.getMaxOffset() && yOffset - extra <= player.getMaxOffset()) {
                     extra = (float) offset;
                 }
             }
         }
 
-        if (Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset() &&
-                player.soulSandBelow && actual.horizontalLengthSquared() < player.afterCollision.horizontalLengthSquared() &&
-                MathUtil.sign(actual.x) == MathUtil.sign(player.afterCollision.x) && MathUtil.sign(actual.z) == MathUtil.sign(player.afterCollision.z)) {
+        if (Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset() && player.soulSandBelow && actual.horizontalLengthSquared() < player.afterCollision.horizontalLengthSquared() && MathUtil.sameDirection(actual, predicted)) {
             extra = (float) offset;
         }
 
