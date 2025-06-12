@@ -109,7 +109,7 @@ public class EntityTicker {
 
                 if (l >= d0) {
                     found = true;
-                    vec3 = fluidState.getFlow(player, Vector3i.from(k1, l1, i2), fluidState);
+                    vec3 = fluidState.getFlow(player, Vector3i.from(k1, l1, i2));
                 }
             }
         }}}

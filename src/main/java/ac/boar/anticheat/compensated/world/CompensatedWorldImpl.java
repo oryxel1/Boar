@@ -53,7 +53,7 @@ public class CompensatedWorldImpl extends CompensatedWorld {
             return new FluidState(fluid, 8 / 9F, rawLevel);
         }
 
-        return new FluidState(fluid, (8 - rawLevel) / 9F, 8 - rawLevel);
+        return new FluidState(fluid, (8 - rawLevel) / 9F, rawLevel);
     }
 
     public List<Box> collectColliders(List<Box> list, Box aABB) {
