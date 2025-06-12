@@ -17,7 +17,7 @@ public final class Timer extends Check {
     }
 
     public boolean tick(long tick) {
-        if (this.lastNS == 0 || player.inLoadingScreen) {
+        if (this.lastNS == 0 || player.inLoadingScreen || player.sinceLoadingScreen < 20) {
             this.lastNS = System.nanoTime();
             this.lastTick = tick;
             this.balance = 0;
