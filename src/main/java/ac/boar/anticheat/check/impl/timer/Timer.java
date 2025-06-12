@@ -1,5 +1,6 @@
 package ac.boar.anticheat.check.impl.timer;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
@@ -40,14 +41,15 @@ public final class Timer extends Check {
         boolean valid = true;
         // GeyserBoar.getLogger().info("New balance: " + this.balance + "," + distance);
         if (this.balance > AVERAGE_DISTANCE + 1e+7) {
-            this.fail("balance=" + this.balance);
+            this.fail("balance=" + this.balance + ", player is ahead!");
             player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             this.balance -= AVERAGE_DISTANCE;
             valid = false;
         }
 
+        int predictedTickAdvance = (int) (distance / AVERAGE_DISTANCE);
         if (distance > AVERAGE_DISTANCE) {
-            player.tick += Math.min(tick - this.lastTick, (distance / AVERAGE_DISTANCE));
+            player.tick += Math.min(tick - this.lastTick, predictedTickAdvance);
         } else {
             player.tick += 1;
         }
@@ -57,7 +59,13 @@ public final class Timer extends Check {
             return true;
         }
 
-        this.balance -= distance - neededDistance;
+        if (distance > AVERAGE_DISTANCE + 1e+7 && this.balance < 0) {
+            fail("balance=" + this.balance + ", player is behind!");
+            this.balance += AVERAGE_DISTANCE * (predictedTickAdvance - (tick - this.lastTick));
+        } else {
+            this.balance -= distance - neededDistance;
+        }
+
         this.lastNS = System.nanoTime();
         this.lastTick = player.tick;
         return !valid;
