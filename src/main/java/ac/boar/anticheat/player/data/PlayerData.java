@@ -106,9 +106,6 @@ public class PlayerData {
     public Vec3 unvalidatedTickEnd = Vec3.ZERO;
     public final Map<Long, VelocityData> queuedVelocities = Collections.synchronizedMap(new TreeMap<>());
 
-    public boolean affectedByFluidPushing = false;
-    public Vec3 guessedFluidPushingVelocity, pushingVelocity;
-
     // Attribute related, abilities
     public final Map<String, AttributeInstance> attributes = new HashMap<>();
     public final Set<Ability> abilities = new HashSet<>();

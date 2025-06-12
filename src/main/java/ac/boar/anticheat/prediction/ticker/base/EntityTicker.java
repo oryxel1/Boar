@@ -19,7 +19,6 @@ import org.geysermc.erosion.util.BlockPositionIterator;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
-import org.geysermc.geyser.level.block.type.Block;
 
 @RequiredArgsConstructor
 public class EntityTicker {
@@ -30,10 +29,6 @@ public class EntityTicker {
     }
 
     public void baseTick() {
-        player.affectedByFluidPushing = false;
-        player.guessedFluidPushingVelocity = Vec3.ZERO;
-        player.pushingVelocity = Vec3.ZERO;
-
         player.inBlockState = null;
 
         player.wasInPowderSnow = player.inPowderSnow;
@@ -126,35 +121,6 @@ public class EntityTicker {
 
         player.fluidHeight.put(tag, maxFluidHeight);
         return found;
-    }
-
-    private boolean affectedByFluid(Fluid tag) {
-        Box box = player.boundingBox.contract(0.001F);
-
-        Mutable mutable = new Mutable();
-
-        int i = GenericMath.floor(box.minX);
-        int j = GenericMath.ceil(box.maxX);
-        int k = GenericMath.floor(box.minY);
-        int l = GenericMath.ceil(box.maxY);
-        int m = GenericMath.floor(box.minZ);
-        int n = GenericMath.ceil(box.maxZ);
-        for (int p = i; p < j; ++p) {
-            for (int q = k; q < l; ++q) {
-                for (int r = m; r < n; ++r) {
-                    FluidState fluidState = player.compensatedWorld.getFluidState(p, q, r);
-                    float f = (float) q + fluidState.getHeight(player, mutable);
-                    if (fluidState.fluid() != (tag) || !(f >= box.minY)) continue;
-                    Vec3 vec32 = fluidState.getFlow(player, Vector3i.from(p, q, r), fluidState);
-
-                    if (vec32.lengthSquared() > 0) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     protected void applyEffectsFromBlocks() {
