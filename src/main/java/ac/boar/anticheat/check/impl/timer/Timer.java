@@ -58,12 +58,12 @@ public final class Timer extends Check {
             return true;
         }
 
-        if (distance > AVERAGE_DISTANCE + 1e+7 && this.balance < 0) {
-            // fail("balance=" + this.balance + ", player is behind!");
-            this.balance += AVERAGE_DISTANCE * (predictedTickAdvance - (tick - this.lastTick) - 1);
-        } else {
-            this.balance -= distance - neededDistance;
-        }
+//        if (distance > AVERAGE_DISTANCE + 1e+7 && this.balance < 0) {
+//            // fail("balance=" + this.balance + ", player is behind!");
+//            this.balance += AVERAGE_DISTANCE * (predictedTickAdvance - (tick - this.lastTick) - 1);
+//        } else {
+//        }
+        this.balance -= distance - neededDistance;
 
         this.lastNS = System.nanoTime();
         this.lastTick = player.tick;
