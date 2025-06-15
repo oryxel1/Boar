@@ -73,9 +73,7 @@ public class BlockUtil {
     private static boolean connectsTo(BoarPlayer player, BlockState blockState, BlockState neighbour, boolean bl, Direction direction) {
         final TagCache tagCache = player.getSession().getTagCache();
 
-        boolean bl2 = isSameFence(tagCache, neighbour, blockState);
-        boolean bl3 = tagCache.is(BlockTag.FENCE_GATES, neighbour.block()) && connectsToDirection(neighbour, direction);
-        return !isExceptionForConnection(tagCache, neighbour) && bl || bl2 || bl3;
+        return !isExceptionForConnection(tagCache, neighbour) && bl || isSameFence(tagCache, neighbour, blockState) || connectsToDirection(tagCache, neighbour, direction);
     }
 
     private static boolean attachsTo(BoarPlayer player, BlockState blockState, boolean bl) {
@@ -88,7 +86,11 @@ public class BlockUtil {
                 tagCache.is(BlockTag.WOODEN_FENCES, currentBlockState.block());
     }
 
-    public static boolean connectsToDirection(BlockState blockState, Direction direction) {
+    public static boolean connectsToDirection(TagCache cache, BlockState blockState, Direction direction) {
+        if (!cache.is(BlockTag.FENCE_GATES, blockState.block())) {
+            return false;
+        }
+
         return blockState.getValue(FACING).getAxis() == getClockWise(direction).getAxis();
     }
 
