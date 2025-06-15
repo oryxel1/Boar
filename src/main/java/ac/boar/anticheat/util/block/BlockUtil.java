@@ -91,7 +91,7 @@ public class BlockUtil {
             return false;
         }
 
-        return blockState.getValue(FACING).getAxis() == getClockWise(direction).getAxis();
+        return blockState.getValue(HORIZONTAL_FACING).getAxis() == getClockWise(direction).getAxis();
     }
 
     public static boolean isExceptionForConnection(TagCache cache, BlockState blockState) {
