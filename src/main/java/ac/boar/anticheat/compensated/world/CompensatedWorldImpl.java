@@ -36,7 +36,7 @@ public class CompensatedWorldImpl extends CompensatedWorld {
     }
 
     public FluidState getFluidState(int x, int y, int z) {
-        if (getBlockAt(x, y, z, 1) == Blocks.WATER.javaId()) {
+        if (getBlockState(x, y, z, 1).getState().is(Blocks.WATER)) {
             return new FluidState(Fluid.WATER, 8 / 9F, 8); // Waterlogged
         }
         final BlockState state = getBlockState(x, y, z, 0).getState();
