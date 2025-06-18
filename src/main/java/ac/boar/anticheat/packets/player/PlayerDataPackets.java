@@ -81,7 +81,7 @@ public class PlayerDataPackets implements PacketListener {
                 // Dimension seems to be controlled server-side as far as I know (tested with clumsy).
 
                 if (width != null) {
-                    player.dimensions = EntityDimensions.fixed(width, player.dimensions.height()).withEyeHeight(player.dimensions.height());
+                    player.dimensions = EntityDimensions.fixed(width, player.dimensions.height()).withEyeHeight(player.dimensions.eyeHeight());
                     player.boundingBox = player.dimensions.getBoxAt(player.position);
                     // System.out.println("Update width!");
                 }
