@@ -117,7 +117,13 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public boolean isFullyExempted() {
-        return this.abilities.contains(Ability.MAY_FLY) || this.flying || this.wasFlying || this.session.hasPermission("boar.exempt");
+        try { // Ye, well whatever.
+            if (this.session.hasPermission("boar.exempt")) {
+                return true;
+            }
+        } catch (Exception ignored) {}
+
+        return this.abilities.contains(Ability.MAY_FLY) || this.flying || this.wasFlying;
     }
 
     public void kick(String reason) {
