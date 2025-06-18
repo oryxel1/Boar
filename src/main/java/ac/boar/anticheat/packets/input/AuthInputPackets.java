@@ -70,9 +70,10 @@ public class AuthInputPackets implements PacketListener {
 
         // This is likely the case, prediction run before teleport.
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
-        new PredictionRunner(player).run(player.tick);
+        new PredictionRunner(player).run();
 
         this.processQueuedTeleports(player, packet, handleRewind);
+        player.getTeleportUtil().cachePosition(player.tick, player.position.add(0, player.getYOffset(), 0).toVector3f());
 
         player.postTick();
         if (player.isFullyExempted()) {
@@ -181,7 +182,8 @@ public class AuthInputPackets implements PacketListener {
                 throw new RuntimeException("Failed find auth input history for rewind.");
             }
 
-            new PredictionRunner(player).run(currentTick);
+            new PredictionRunner(player).run();
+            player.getTeleportUtil().cachePosition(currentTick, player.position.add(0, player.getYOffset(), 0).toVector3f());
         }
     }
 
