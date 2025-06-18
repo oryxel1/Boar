@@ -64,6 +64,8 @@ public class ChunkWorldPackets implements PacketListener {
                 player.getFlagTracker().clear();
                 player.wasFlying = player.flying = false;
                 player.getTeleportUtil().getQueuedTeleports().clear();
+
+                player.tick = Long.MIN_VALUE;
             });
         }
 
