@@ -37,8 +37,8 @@ public class PlayerDataPackets implements PacketListener {
             player.latencyUtil.addTaskToQueue(player.sentStackId.get() + 1, () -> {
                 player.abilities.clear();
                 for (AbilityLayer layer : packet.getAbilityLayers()) {
-                    // TODO: Figure this out? also "fly" speed doesn't seems to even be fly speed.
-                    // Default value for fly is 0.1 and walk is 0.2... wtf? well I will let server attribute to handle it for now.
+                    // TODO: Figure this out? also "fly" speed doesn't seems to even be fly speed. too lazy to look at vanilla code brah
+                    // also how can we be sure it's the same as java? well ignore this for now, attribute will handle this.
 //                    if (layer.getLayerType() == AbilityLayer.Type.BASE) {
 //                        player.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).setBaseValue(layer.getWalkSpeed());
 //                    }
