@@ -35,7 +35,7 @@ public class PlayerTicker extends LivingTicker {
     public void applyInput() {
         super.applyInput();
         boolean sneaking = player.getFlagTracker().has(EntityFlag.SNEAKING) || player.getInputData().contains(PlayerAuthInputData.STOP_SNEAKING);
-        if (sneaking && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
+        if ((sneaking || player.pose == Pose.SWIMMING && !player.getFlagTracker().has(EntityFlag.SWIMMING)) && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
             player.input = player.input.multiply(0.3F);
         }
 

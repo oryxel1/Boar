@@ -183,7 +183,7 @@ public class AuthInputPackets implements PacketListener {
             }
 
             new PredictionRunner(player).run();
-            player.getTeleportUtil().cachePosition(currentTick, player.position.add(0, player.getYOffset(), 0).toVector3f());
+            // player.getTeleportUtil().cachePosition(currentTick, player.position.add(0, player.getYOffset(), 0).toVector3f());
         }
     }
 

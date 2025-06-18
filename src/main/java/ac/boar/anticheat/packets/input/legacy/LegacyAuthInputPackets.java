@@ -3,6 +3,7 @@ package ac.boar.anticheat.packets.input.legacy;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.Pose;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
@@ -155,6 +156,9 @@ public class LegacyAuthInputPackets {
                         player.getUseItemCache().getConsumer().accept(player.getUseItemCache());
                     }
                 }
+
+                case START_CRAWLING -> player.pose = Pose.SWIMMING;
+                case STOP_CRAWLING -> player.pose = Pose.STANDING;
             }
         }
 
