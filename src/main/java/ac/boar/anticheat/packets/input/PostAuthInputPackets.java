@@ -18,6 +18,10 @@ public class PostAuthInputPackets implements PacketListener {
             player.thisTickOnGroundSpinAttack = false;
             player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags()));
 
+            if (player.vehicleData != null && player.getSession().getPlayerEntity().getVehicle() == null) {
+                event.setCancelled(true);
+            }
+
             if (player.getTeleportUtil().isTeleporting()) {
                 packet.setPosition(player.position.add(0, player.getYOffset(), 0).toVector3f());
                 LegacyAuthInputPackets.correctInputData(player, packet);

@@ -54,11 +54,11 @@ public class WaterPredictionEngine extends PredictionEngine {
         // On versions below 1.21.80 player can move fast in water by sprinting without swimming but on 1.21.80 this is fixed.
         // HOWEVER, this bugs one again reintroduce itself on 1.21.81+ for certain reason.
         if (sprinting && !fastTickEnd) {
-            if (!GameProtocol.is1_21_80orHigher(player.getSession())) {
+            // If it's below 1.21.80 or 1.21.90+ then we are sure!
+            if (!GameProtocol.is1_21_80orHigher(player.getSession()) || GameProtocol.is1_21_90orHigher(player.getSession())) {
                 fastTickEnd = true;
             } else {
-                Vec3 slow = player.velocity.multiply(0.8F + ((0.54600006f - 0.8F) * this.tickEndSpeed),
-                        0.8F, 0.8F + ((0.54600006f - 0.8F) * this.tickEndSpeed));
+                Vec3 slow = player.velocity.multiply(0.8F + ((0.54600006f - 0.8F) * this.tickEndSpeed), 0.8F, 0.8F + ((0.54600006f - 0.8F) * this.tickEndSpeed));
 
                 // We have to guess based off player claimed tick end since there is no way to know if this is 1.21.80 or 1.21.81+
                 if (slow.horizontalLengthSquared() < player.unvalidatedTickEnd.horizontalLengthSquared()) {
