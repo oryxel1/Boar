@@ -1,16 +1,11 @@
 package ac.boar.anticheat.prediction.ticker.impl;
 
-import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.FluidState;
-import ac.boar.anticheat.data.Pose;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
-import com.google.common.collect.ImmutableMap;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
-
-import java.util.Map;
 
 public class PlayerTicker extends LivingTicker {
     public PlayerTicker(BoarPlayer player) {

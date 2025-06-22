@@ -102,15 +102,15 @@ public class TeleportUtil {
         this.lastKnowValid = position;
     }
 
-    public void clearRewindHistory() {
+    public void pollRewindHistory() {
         final Iterator<Map.Entry<Long, RewindData>> iterator = this.rewindHistory.entrySet().iterator();
-        while (iterator.hasNext() && this.rewindHistory.size() > Boar.getInstance().getConfig().rewindHistory()) {
+        while (iterator.hasNext() && this.rewindHistory.size() > Boar.getConfig().rewindHistory()) {
             iterator.next();
             iterator.remove();
         }
 
         final Iterator<Map.Entry<Long, TickData>> iterator1 = this.authInputHistory.entrySet().iterator();
-        while (iterator1.hasNext() && this.authInputHistory.size() > Boar.getInstance().getConfig().rewindHistory()) {
+        while (iterator1.hasNext() && this.authInputHistory.size() > Boar.getConfig().rewindHistory()) {
             iterator1.next();
             iterator1.remove();
         }

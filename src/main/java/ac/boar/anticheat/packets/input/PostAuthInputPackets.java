@@ -29,7 +29,7 @@ public class PostAuthInputPackets implements PacketListener {
             }
 
             if (player.tickSinceBlockResync > 0) player.tickSinceBlockResync--;
-            player.getTeleportUtil().clearRewindHistory();
+            player.getTeleportUtil().pollRewindHistory();
         }
     }
 }

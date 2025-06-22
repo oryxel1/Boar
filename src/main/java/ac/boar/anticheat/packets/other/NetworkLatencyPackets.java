@@ -19,7 +19,7 @@ public class NetworkLatencyPackets implements PacketListener {
             return;
         }
 
-        boolean cancelled = event.getPlayer().latencyUtil.confirmStackId(Math.abs(id));
+        boolean cancelled = event.getPlayer().getLatencyUtil().confirmStackId(Math.abs(id));
         event.setCancelled(cancelled);
     }
 }
