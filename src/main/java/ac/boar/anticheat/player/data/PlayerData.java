@@ -126,7 +126,7 @@ public class PlayerData {
 
     public Vec3 velocity = Vec3.ZERO;
 
-    public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
+    public PredictionData predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector bestPossibility = Vector.NONE;
     public Vec3 beforeCollision = Vec3.ZERO, afterCollision = Vec3.ZERO;
 

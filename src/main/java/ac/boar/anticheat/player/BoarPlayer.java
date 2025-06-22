@@ -122,7 +122,7 @@ public final class BoarPlayer extends PlayerData {
         this.latencyUtil.addLatencyToQueue(id);
     }
 
-    public boolean isFullyExempted() {
+    public boolean isMovementExempted() {
         try { // Ye, well whatever.
             if (this.session.hasPermission("boar.exempt")) {
                 return true;

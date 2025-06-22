@@ -79,7 +79,7 @@ public class TestAuthInputPackets implements PacketListener {
         player.getTeleportUtil().cachePosition(player.tick, player.position.add(0, player.getYOffset(), 0).toVector3f());
 
         player.postTick();
-        if (player.isFullyExempted()) {
+        if (player.isMovementExempted()) {
             LegacyAuthInputPackets.processAuthInput(player, packet, true);
             player.velocity = player.unvalidatedTickEnd.clone();
             player.setPos(player.unvalidatedPosition);
@@ -130,29 +130,10 @@ public class TestAuthInputPackets implements PacketListener {
         }
     }
 
-    private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
-        double distance = packet.getPosition().distance(normal.getPosition().toVector3f());
-        // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
-        if ((packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) || normal.isKeepVelocity() || normal.isRespawn()) && distance <= 1.0E-3F) {
-            player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
-            player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
 
-            if (!normal.isKeepVelocity()) {
-                player.velocity = Vec3.ZERO.clone();
-            }
-
-            // This value can be true but since Geyser always send false then it is always false.
-            player.onGround = false;
-        } else {
-            // Player rejected teleport OR this is not the latest teleport.
-            if (!player.getTeleportUtil().isTeleporting()) {
-                player.getTeleportUtil().teleportTo(normal);
-            }
-        }
-    }
 
     private void processRewind(final BoarPlayer player, final TeleportCache.Rewind rewind, final PlayerAuthInputPacket packet) {
-        if (player.isFullyExempted()) { // Fully exempted from rewind teleport.
+        if (player.isMovementExempted()) { // Fully exempted from rewind teleport.
             return;
         }
 
@@ -193,25 +174,6 @@ public class TestAuthInputPackets implements PacketListener {
 
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
-        if (!(event.getPacket() instanceof MovePlayerPacket packet)) {
-            return;
-        }
 
-        final BoarPlayer player = event.getPlayer();
-        if (packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
-            return;
-        }
-
-        if (player.runtimeEntityId != packet.getRuntimeEntityId()) {
-            return;
-        }
-
-        // I think... there is some interpolation or some smoothing when we use NORMAL?
-        // Well it's a pain in the ass the support it, so just send teleport....
-        if (packet.getMode() == MovePlayerPacket.Mode.NORMAL) {
-            packet.setMode(MovePlayerPacket.Mode.TELEPORT);
-        }
-
-        player.getTeleportUtil().queueTeleport(new Vec3(packet.getPosition()), immediate, packet.getMode());
     }
 }

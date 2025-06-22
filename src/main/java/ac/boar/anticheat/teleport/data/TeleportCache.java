@@ -12,13 +12,11 @@ public class TeleportCache {
 
     @Getter
     public static class Normal extends TeleportCache {
-        private final boolean keepVelocity;
-        private final boolean respawn;
+        private final boolean silent;
 
-        public Normal(long stackId, Vec3 position, boolean keepVelocity, boolean respawn) {
+        public Normal(long stackId, Vec3 position, boolean silent) {
             super(stackId, position);
-            this.keepVelocity = keepVelocity;
-            this.respawn = respawn;
+            this.silent = silent;
         }
     }
 
