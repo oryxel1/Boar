@@ -14,9 +14,12 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
+import org.geysermc.geyser.level.BedrockDimension;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -36,6 +39,7 @@ public class AuthInputPackets implements PacketListener {
             }
 
             if (packet.getAction() == PlayerActionType.DIMENSION_CHANGE_SUCCESS) {
+                player.acceptedDimensionSwitch = true;
             }
         }
 
@@ -121,7 +125,7 @@ public class AuthInputPackets implements PacketListener {
             if (cache instanceof TeleportCache.Normal normal) {
                 this.processTeleport(player, normal, packet);
             } else if (cache instanceof TeleportCache.DimensionSwitch dimension) {
-
+                this.processDimensionSwitch(player, dimension, packet)
             } else if (cache instanceof TeleportCache.Rewind rewind) {
                 this.processRewind(player, rewind, packet);
             } else {
@@ -131,13 +135,26 @@ public class AuthInputPackets implements PacketListener {
     }
 
     private void processDimensionSwitch(final BoarPlayer player, final TeleportCache.DimensionSwitch dimension, final PlayerAuthInputPacket packet) {
+        if (!player.acceptedDimensionSwitch) {
+            return;
+        }
 
+        // Dimension switch should be followed with teleport so we don't have to do resync if the position mismatch.
+        if (packet.getPosition().distance(dimension.getPosition().toVector3f()) <= 1.0E-3F) {
+            player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
+            player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
+
+            player.velocity = Vec3.ZERO.clone();
+            player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
+
+            player.onGround = false;
+        }
     }
 
     private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
         double distance = packet.getPosition().distance(normal.getPosition().toVector3f());
         // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
-        if ((packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT)) && distance <= 1.0E-3F) {
+        if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance <= 1.0E-3F) {
             player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
             player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
 
@@ -201,6 +218,29 @@ public class AuthInputPackets implements PacketListener {
     @Override
     public void onPacketSend(CloudburstPacketEvent event, boolean immediate) {
         final BoarPlayer player = event.getPlayer();
+
+        if (event.getPacket() instanceof ChangeDimensionPacket packet) {
+            int dimensionId = packet.getDimension();
+            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
+                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
+
+            player.sendLatencyStack(immediate);
+            player.getTeleportUtil().getQueuedTeleports().add(new TeleportCache.DimensionSwitch(player.sentStackId.get(), new Vec3(packet.getPosition().up(EntityDefinitions.PLAYER.offset()))));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                player.compensatedWorld.getChunks().clear();
+                player.compensatedWorld.setDimension(dimension);
+
+                player.currentLoadingScreen = packet.getLoadingScreenId();
+                player.inLoadingScreen = true;
+
+                player.getFlagTracker().clear();
+                player.getFlagTracker().flying(false);
+                player.getTeleportUtil().getQueuedTeleports().clear();
+
+                player.tick = Long.MIN_VALUE;
+            });
+        }
+
         if (event.getPacket() instanceof MovePlayerPacket packet) {
             if (packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
                 // TODO: Actually... does this affect player motion?

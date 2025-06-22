@@ -46,27 +46,6 @@ public class ChunkWorldPackets implements PacketListener {
             });
         }
 
-        if (event.getPacket() instanceof ChangeDimensionPacket packet) {
-            int dimensionId = packet.getDimension();
-            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
-                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
-
-            player.sendLatencyStack(immediate);
-            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
-                world.getChunks().clear();
-                world.setDimension(dimension);
-
-                player.currentLoadingScreen = packet.getLoadingScreenId();
-                player.inLoadingScreen = true;
-
-                player.getFlagTracker().clear();
-                player.getFlagTracker().flying(false);
-                player.getTeleportUtil().getQueuedTeleports().clear();
-
-                player.tick = Long.MIN_VALUE;
-            });
-        }
-
         // Based off GeyserMC and ViaBedrock code, should be correct!
         if (event.getPacket() instanceof LevelChunkPacket packet) {
             int sectionCount = packet.getSubChunksLength();
