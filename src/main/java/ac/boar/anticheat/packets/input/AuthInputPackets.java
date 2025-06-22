@@ -142,6 +142,9 @@ public class AuthInputPackets implements PacketListener {
                 player.velocity = Vec3.ZERO.clone();
             }
 
+            // This value can be true but since Geyser always send false then it is always false.
+            player.onGround = false;
+
             player.sinceTeleport = 0;
         } else {
             // Player rejected teleport OR this is not the latest teleport.
@@ -204,6 +207,12 @@ public class AuthInputPackets implements PacketListener {
 
         if (player.runtimeEntityId != packet.getRuntimeEntityId()) {
             return;
+        }
+
+        // I think... there is some interpolation or some smoothing when we use NORMAL?
+        // Well it's a pain in the ass the support it, so just send teleport....
+        if (packet.getMode() == MovePlayerPacket.Mode.NORMAL) {
+            packet.setMode(MovePlayerPacket.Mode.TELEPORT);
         }
 
         player.getTeleportUtil().queueTeleport(new Vec3(packet.getPosition()), immediate, packet.getMode());
