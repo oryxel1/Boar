@@ -157,8 +157,8 @@ public class LegacyAuthInputPackets {
                     }
                 }
 
-                case START_CRAWLING -> player.pose = Pose.SWIMMING;
-                case STOP_CRAWLING -> player.pose = Pose.STANDING;
+                case START_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, true);
+                case STOP_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, false);
             }
         }
 

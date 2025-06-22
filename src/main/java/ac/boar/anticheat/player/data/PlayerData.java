@@ -131,8 +131,7 @@ public class PlayerData {
     }
 
     // Prediction related
-    public Pose pose = Pose.STANDING;
-    public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(Pose.STANDING);
+    public EntityDimensions dimensions = EntityDimensions.changing(0.6F, 1.8F).withEyeHeight(1.62F);
     public Box boundingBox = Box.EMPTY;
 
     public Vec3 velocity = Vec3.ZERO;
@@ -149,7 +148,6 @@ public class PlayerData {
     public boolean hasDepthStrider;
 
     public boolean submergedInWater, touchingWater;
-    public boolean wasInPowderSnow, inPowderSnow;
 
     public boolean horizontalCollision, verticalCollision;
 
@@ -169,17 +167,13 @@ public class PlayerData {
 
     public int tickSinceBlockResync;
 
-    public final EntityDimensions getDimensions(Pose pose) {
-        return PlayerTicker.POSES.get(pose);
-    }
-
     public float getYOffset() {
         return this.vehicleData != null ? 0 : EntityDefinitions.PLAYER.offset();
     }
 
     // Prediction related method
     public final double getMaxOffset() {
-        return Boar.getInstance().getConfig().acceptanceThreshold();
+        return Boar.getConfig().acceptanceThreshold();
     }
 
     public final void setSprinting(boolean sprinting) {
@@ -227,10 +221,5 @@ public class PlayerData {
 
     public final void setBoundingBox(Vec3 vec3) {
         this.boundingBox = this.dimensions.getBoxAt(vec3.x, vec3.y, vec3.z);
-    }
-
-    public final void setPose(Pose pose) {
-        this.pose = pose;
-        this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }
 }

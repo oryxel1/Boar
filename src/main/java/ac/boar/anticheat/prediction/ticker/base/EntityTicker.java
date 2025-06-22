@@ -31,7 +31,6 @@ public class EntityTicker {
     public void baseTick() {
         player.inBlockState = null;
 
-        player.wasInPowderSnow = player.inPowderSnow;
         player.inPowderSnow = false;
         this.updateWaterState();
         this.updateSubmergedInWaterState();

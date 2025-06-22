@@ -7,15 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 public record EntityDimensions(float width, float height, float eyeHeight, boolean fixed) {
-	public final static Map<Pose, EntityDimensions> POSE_DIMENSIONS = ImmutableMap.<Pose, EntityDimensions>builder()
-			.put(Pose.STANDING, EntityDimensions.changing(0.6F, 1.8F).withEyeHeight(1.62F))
-			.put(Pose.SLEEPING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F))
-			.put(Pose.GLIDING, EntityDimensions.changing(0.6F, 0.6F).withEyeHeight(0.4F))
-			.put(Pose.SWIMMING, EntityDimensions.changing(0.6F, 0.6F).withEyeHeight(0.4F))
-			.put(Pose.SPIN_ATTACK, EntityDimensions.changing(0.6F, 0.6F).withEyeHeight(0.4F))
-			.put(Pose.CROUCHING, EntityDimensions.changing(0.6F, 1.5F).withEyeHeight(1.27F))
-			.put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(1.62F)).build();
-
 	private EntityDimensions(float width, float height, boolean fixed) {
 		this(width, height, getDefaultEyeHeight(height), fixed);
 	}
