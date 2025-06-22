@@ -6,9 +6,25 @@ import ac.boar.anticheat.player.data.VehicleData;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityLinkData;
+import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
 import org.cloudburstmc.protocol.bedrock.packet.SetEntityLinkPacket;
 
 public class VehiclePackets implements PacketListener {
+    @Override
+    public void onPacketReceived(CloudburstPacketEvent event) {
+        final BoarPlayer player = event.getPlayer();
+
+        if (event.getPacket() instanceof InteractPacket packet) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                return;
+            }
+
+            if (packet.getAction() == InteractPacket.Action.LEAVE_VEHICLE) {
+                player.vehicleData = null;
+            }
+        }
+    }
+
     @Override
     public void onPacketSend(CloudburstPacketEvent event, boolean immediate) {
         final BoarPlayer player = event.getPlayer();
