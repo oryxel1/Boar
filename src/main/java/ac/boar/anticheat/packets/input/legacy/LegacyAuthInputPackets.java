@@ -27,6 +27,9 @@ public class LegacyAuthInputPackets {
     }
 
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        player.postTick();
+        player.getTeleportUtil().cachePosition(player.tick, player.position.add(0, player.getYOffset(), 0).toVector3f());
+
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
         // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.

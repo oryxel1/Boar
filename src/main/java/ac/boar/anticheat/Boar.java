@@ -3,6 +3,7 @@ package ac.boar.anticheat;
 import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.config.Config;
 import ac.boar.anticheat.config.ConfigLoader;
+import ac.boar.anticheat.packets.input.AuthInputPackets;
 import ac.boar.anticheat.packets.input.TestAuthInputPackets;
 import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
@@ -49,7 +50,8 @@ public class Boar {
         PacketEvents.getApi().register(new PlayerInventoryPackets());
         PacketEvents.getApi().register(new VehiclePackets());
         PacketEvents.getApi().register(new PacketCheckRunner());
-        PacketEvents.getApi().register(new TestAuthInputPackets());
+        //PacketEvents.getApi().register(new TestAuthInputPackets());
+        PacketEvents.getApi().register(new AuthInputPackets());
         PacketEvents.getApi().register(new PostAuthInputPackets());
     }
 
