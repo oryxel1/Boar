@@ -34,7 +34,7 @@ public class TeleportUtil {
     }
 
     public void teleportTo(final Vector3f position) {
-        this.teleportTo(new TeleportCache.Normal(0, new Vec3(position), false));
+        this.teleportTo(new TeleportCache.Normal(0, new Vec3(position)));
     }
 
     public void teleportTo(final TeleportCache cache) {
@@ -55,18 +55,14 @@ public class TeleportUtil {
         packet.setMode(MovePlayerPacket.Mode.TELEPORT);
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
 
-        this.queueTeleport(teleport.getPosition(), true, teleport.isSilent());
+        this.queueTeleport(teleport.getPosition(), true);
         this.player.getCloudburstDownstream().sendPacketImmediately(packet);
     }
 
-    public void queueTeleport(final Vec3 position, boolean immediate, boolean silent) {
+    public void queueTeleport(final Vec3 position, boolean immediate) {
         player.sendLatencyStack(immediate);
-        this.queuedTeleports.add(new TeleportCache.Normal(player.sentStackId.get(), position, silent));
+        this.queuedTeleports.add(new TeleportCache.Normal(player.sentStackId.get(), position));
         this.lastKnowValid = position.toVector3f();
-
-        if (silent) {
-            player.sendLatencyStack(immediate);
-        }
     }
 
     // Rewind teleport part.

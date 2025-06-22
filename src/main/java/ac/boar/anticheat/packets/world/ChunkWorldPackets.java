@@ -43,8 +43,6 @@ public class ChunkWorldPackets implements PacketListener {
 
                 player.prevUnvalidatedPosition = player.unvalidatedPosition = new Vec3(packet.getPosition()).subtract(0, player.getYOffset(), 0);
                 player.setPos(player.unvalidatedPosition.clone());
-
-                player.hasLeastRunPredictionOnce = false;
             });
         }
 

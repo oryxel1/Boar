@@ -8,13 +8,14 @@ import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.prediction.engine.data.Vector;
-import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
+import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
 import java.util.Iterator;
@@ -29,6 +30,15 @@ public class AuthInputPackets implements PacketListener {
         }
 
         final BoarPlayer player = event.getPlayer();
+        if (event.getPacket() instanceof PlayerActionPacket packet) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                return;
+            }
+
+            if (packet.getAction() == PlayerActionType.DIMENSION_CHANGE_SUCCESS) {
+            }
+        }
+
         if (!(event.getPacket() instanceof PlayerAuthInputPacket packet)) {
             return;
         }
@@ -104,32 +114,30 @@ public class AuthInputPackets implements PacketListener {
                 break;
             }
 
-            boolean poll;
+            queuedTeleports.poll();
 
             // Bedrock don't reply to teleport individually using a separate tick packet instead it just simply set its position to
             // the teleported position and then let us know the *next tick*, so we do the same!
             if (cache instanceof TeleportCache.Normal normal) {
-                poll = this.processTeleport(player, normal, packet);
+                this.processTeleport(player, normal, packet);
+            } else if (cache instanceof TeleportCache.DimensionSwitch dimension) {
+
             } else if (cache instanceof TeleportCache.Rewind rewind) {
                 this.processRewind(player, rewind, packet);
-                poll = true;
             } else {
                 throw new RuntimeException("Failed to process queued teleports, invalid teleport=" + cache);
-            }
-
-            if (poll) {
-                queuedTeleports.poll();
-            } else {
-                // We stop processing since player likely haven't received the reset and 2 teleport won't hang on the same stack id.
-                break;
             }
         }
     }
 
-    private boolean processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
+    private void processDimensionSwitch(final BoarPlayer player, final TeleportCache.DimensionSwitch dimension, final PlayerAuthInputPacket packet) {
+
+    }
+
+    private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
         double distance = packet.getPosition().distance(normal.getPosition().toVector3f());
         // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
-        if ((packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) || normal.isSilent()) && distance <= 1.0E-3F) {
+        if ((packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT)) && distance <= 1.0E-3F) {
             player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
             player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
 
@@ -139,23 +147,11 @@ public class AuthInputPackets implements PacketListener {
             // This value can be true but since Geyser always send false then it is always false.
             player.onGround = false;
         } else {
-            boolean isThisTheLastTeleport = player.getTeleportUtil().getQueuedTeleports().size() == 1;
             // Player rejected teleport OR this is not the latest teleport.
-            if (!isThisTheLastTeleport) {
-                return true;
+            if (!player.getTeleportUtil().isTeleporting()) {
+                player.getTeleportUtil().teleportTo(normal);
             }
-
-            // If this is a packet that does re position player but with no way to confirm it (PlayerAuthInputData.HANDLE_TELEPORT for ex)
-            // Then if player "reject" this teleport, we will have to wait till player receive the second stack latency
-            // to see if player actually reject this or not.
-            if (normal.isSilent() && player.receivedStackId.get() < normal.getStackId() + 1) {
-                return false;
-            }
-
-            player.getTeleportUtil().teleportTo(normal);
         }
-
-        return true;
     }
 
     // Wouldn't it be nice to provide us a way to know when player accept rewind mojang :(
@@ -221,7 +217,7 @@ public class AuthInputPackets implements PacketListener {
                 packet.setMode(MovePlayerPacket.Mode.TELEPORT);
             }
 
-            player.getTeleportUtil().queueTeleport(new Vec3(packet.getPosition()), immediate, packet.getMode() != MovePlayerPacket.Mode.TELEPORT);
+            player.getTeleportUtil().queueTeleport(new Vec3(packet.getPosition()), immediate);
         }
     }
 }
