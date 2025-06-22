@@ -114,8 +114,6 @@ public class LegacyAuthInputPackets {
     }
 
     public static void processInputData(final BoarPlayer player) {
-        player.wasFlying = player.flying;
-
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
                 case START_GLIDING -> {
@@ -141,8 +139,8 @@ public class LegacyAuthInputPackets {
                 case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, true);
                 case STOP_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, false);
 
-                case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
-                case STOP_FLYING -> player.flying = false;
+                case START_FLYING -> player.getFlagTracker().setFlying(player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING));
+                case STOP_FLYING -> player.getFlagTracker().setFlying(false);
 
                 case STOP_SPIN_ATTACK -> {
                     if (player.dirtySpinStop) {

@@ -1,5 +1,6 @@
 package ac.boar.anticheat.player.data.tracker;
 
+import lombok.Getter;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 
 import java.util.EnumSet;
@@ -7,6 +8,15 @@ import java.util.Set;
 
 public final class FlagTracker {
     private final Set<EntityFlag> flags = EnumSet.noneOf(EntityFlag.class);
+    @Getter
+    private boolean flying, wasFlying;
+    public void flying(boolean flying) {
+        this.flying = this.wasFlying = flying;
+    }
+    public void setFlying(boolean flying) {
+        this.wasFlying = this.flying;
+        this.flying = flying;
+    }
 
     public void clear() {
         this.flags.clear();

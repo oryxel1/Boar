@@ -15,7 +15,7 @@ public class Prediction extends OffsetHandlerCheck {
 
     @Override
     public void onPredictionComplete(double offset) {
-        if (System.currentTimeMillis() - player.joinedTime < 2000L) {
+        if (player.tick < 10) {
             return;
         }
 
@@ -33,6 +33,6 @@ public class Prediction extends OffsetHandlerCheck {
     }
 
     public boolean shouldDoFail() {
-        return player.sinceTeleport > 20 && !player.getTeleportUtil().isTeleporting() && player.tickSinceBlockResync <= 0;
+        return !player.getTeleportUtil().isTeleporting() && player.tickSinceBlockResync <= 0;
     }
 }

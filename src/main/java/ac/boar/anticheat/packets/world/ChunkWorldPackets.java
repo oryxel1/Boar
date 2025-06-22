@@ -38,7 +38,7 @@ public class ChunkWorldPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 player.tick = Long.MIN_VALUE;
 
                 player.prevUnvalidatedPosition = player.unvalidatedPosition = new Vec3(packet.getPosition()).subtract(0, player.getYOffset(), 0);
@@ -54,7 +54,7 @@ public class ChunkWorldPackets implements PacketListener {
                     : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 world.getChunks().clear();
                 world.setDimension(dimension);
 
@@ -62,7 +62,7 @@ public class ChunkWorldPackets implements PacketListener {
                 player.inLoadingScreen = true;
 
                 player.getFlagTracker().clear();
-                player.wasFlying = player.flying = false;
+                player.getFlagTracker().flying(false);
                 player.getTeleportUtil().getQueuedTeleports().clear();
 
                 player.tick = Long.MIN_VALUE;
@@ -159,7 +159,7 @@ public class ChunkWorldPackets implements PacketListener {
 
             // TODO: Should we send stack id all the time?
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 if (dimension != world.getDimension()) {
                     return;
                 }
@@ -182,7 +182,7 @@ public class ChunkWorldPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
         }
     }
 

@@ -53,7 +53,6 @@ public class TestAuthInputPackets implements PacketListener {
             }
         }
 
-        player.sinceTeleport++;
         player.sinceLoadingScreen++;
 
         player.breakingValidator.handle(packet);
@@ -144,8 +143,6 @@ public class TestAuthInputPackets implements PacketListener {
 
             // This value can be true but since Geyser always send false then it is always false.
             player.onGround = false;
-
-            player.sinceTeleport = 0;
         } else {
             // Player rejected teleport OR this is not the latest teleport.
             if (!player.getTeleportUtil().isTeleporting()) {

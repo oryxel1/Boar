@@ -79,7 +79,7 @@ public class PlayerInventoryPackets implements PacketListener {
 
         if (event.getPacket() instanceof CreativeContentPacket packet) {
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 inventory.getCreativeData().clear();
 
                 for (final CreativeItemData data : packet.getContents()) {
@@ -90,7 +90,7 @@ public class PlayerInventoryPackets implements PacketListener {
 
         if (event.getPacket() instanceof CraftingDataPacket packet) {
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 inventory.getCraftingData().clear();
 
                 for (final RecipeData data : packet.getCraftingData()) {
@@ -128,7 +128,7 @@ public class PlayerInventoryPackets implements PacketListener {
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
             // System.out.println(packet);
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 final ContainerCache container = inventory.getContainer(packet.getId());
                 inventory.openContainer = Objects.requireNonNullElseGet(container, () -> new ContainerCache(inventory, packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
             });
@@ -137,7 +137,7 @@ public class PlayerInventoryPackets implements PacketListener {
         if (event.getPacket() instanceof UpdateEquipPacket packet) {
 //            System.out.println(packet);
 //            player.sendLatencyStack(immediate);
-//            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> { try {
+//            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> { try {
 //                inventory.openContainer = new ContainerCache((byte) packet.getWindowId(),
 //                        ContainerType.from(packet.getWindowType()), Vector3i.ZERO, packet.getUniqueEntityId());
 //            } catch (Exception ignored) {}});
@@ -149,7 +149,7 @@ public class PlayerInventoryPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> { try {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> { try {
                 inventory.openContainer = new TradeContainerCache(inventory, packet.getOffers(),
                         (byte) packet.getContainerId(), packet.getContainerType(), Vector3i.ZERO, packet.getTraderUniqueEntityId());
             } catch (Exception ignored) {}});
@@ -157,7 +157,7 @@ public class PlayerInventoryPackets implements PacketListener {
 
         if (event.getPacket() instanceof InventorySlotPacket packet) {
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 // Bundle should be handled separately.
                 if (packet.getContainerId() == 125) {
                     final ItemCache cache;
@@ -190,7 +190,7 @@ public class PlayerInventoryPackets implements PacketListener {
 
         if (event.getPacket() instanceof InventoryContentPacket packet) {
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 // Bundle should be handled separately.
                 if (packet.getContainerId() == 125) {
                     final ItemCache cache;
@@ -236,7 +236,7 @@ public class PlayerInventoryPackets implements PacketListener {
             final int slot = packet.getSelectedHotbarSlot();
             if (slot >= 0 && slot < 9) {
                 player.sendLatencyStack();
-                player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> inventory.heldItemSlot = slot);
+                player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> inventory.heldItemSlot = slot);
             }
         }
     }

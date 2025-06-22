@@ -75,16 +75,8 @@ public class PlayerData {
     // Sprinting, sneaking, swimming and other status.
     @Getter
     private final FlagTracker flagTracker = new FlagTracker();
-    public boolean flying, wasFlying;
-    public int sinceTeleport;
-
-    public boolean hasLeastRunPredictionOnce;
 
     public int glideBoostTicks;
-
-    // "Transaction" related.
-    public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
-    public final LatencyUtil latencyUtil = new LatencyUtil(this);
 
     // Block status
     public boolean steppingOnHoney;
@@ -92,11 +84,9 @@ public class PlayerData {
     // Effect status related
     @Getter
     private final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();
-
     public boolean hasEffect(final Effect effect) {
         return this.activeEffects.containsKey(effect);
     }
-
     public StatusEffect getEffect(final Effect effect) {
         return this.activeEffects.get(effect);
     }
@@ -146,19 +136,14 @@ public class PlayerData {
     public float fallDistance = 0;
 
     public boolean hasDepthStrider;
-
-    public boolean submergedInWater, touchingWater;
-
+    public boolean touchingWater;
     public boolean horizontalCollision, verticalCollision;
-
     public boolean soulSandBelow;
 
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
     public float getFluidHeight(Fluid tagKey) {
         return this.fluidHeight.getOrDefault(tagKey, 0F);
     }
-
-    public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
     public BlockState inBlockState;
     public boolean scaffoldDescend;

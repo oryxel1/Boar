@@ -6,6 +6,7 @@ import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.UseItemCache;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.teleport.TeleportUtil;
+import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
@@ -39,6 +40,8 @@ import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public final class BoarPlayer extends PlayerData {
     @Getter
     private final GeyserSession session;
@@ -48,7 +51,6 @@ public final class BoarPlayer extends PlayerData {
     public CloudburstSendListener cloudburstUpstream;
     public CloudburstReceiveListener downstreamPacketHandler;
 
-    public final long joinedTime = System.currentTimeMillis();
     public long runtimeEntityId, javaEntityId;
 
     @Getter
@@ -56,6 +58,10 @@ public final class BoarPlayer extends PlayerData {
 
     @Getter
     private final CheckHolder checkHolder = new CheckHolder(this);
+
+    @Getter
+    private final LatencyUtil latencyUtil = new LatencyUtil(this);
+    public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
 
     // Lag compensation
     public final CompensatedWorldImpl compensatedWorld = new CompensatedWorldImpl(this);
@@ -123,7 +129,7 @@ public final class BoarPlayer extends PlayerData {
             }
         } catch (Exception ignored) {}
 
-        return this.abilities.contains(Ability.MAY_FLY) || this.flying || this.wasFlying;
+        return this.abilities.contains(Ability.MAY_FLY) || this.getFlagTracker().isFlying() || this.getFlagTracker().isWasFlying();
     }
 
     public void kick(String reason) {

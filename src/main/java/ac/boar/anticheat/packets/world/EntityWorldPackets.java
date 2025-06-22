@@ -16,7 +16,7 @@ public class EntityWorldPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.compensatedWorld.removeEntity(packet.getUniqueEntityId()));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> player.compensatedWorld.removeEntity(packet.getUniqueEntityId()));
         }
 
         if (event.getPacket() instanceof AddEntityPacket packet) {
@@ -110,7 +110,7 @@ public class EntityWorldPackets implements PacketListener {
         player.sendLatencyStack();
 
         final long id = player.sentStackId.get();
-        player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+        player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
             entity.interpolate(position, lerp && distance < 4096);
             // Bukkit.broadcastMessage("Player received position=" + position + ", id=" + id);
         });
@@ -119,7 +119,7 @@ public class EntityWorldPackets implements PacketListener {
 
         event.getPostTasks().add(() -> {
             player.sendLatencyStack();
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> entity.setPast(null));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> entity.setPast(null));
         });
     }
 }

@@ -31,9 +31,8 @@ public class EntityTicker {
     public void baseTick() {
         player.inBlockState = null;
 
-        player.inPowderSnow = false;
         this.updateWaterState();
-        this.updateSubmergedInWaterState();
+        // this.updateSubmergedInWaterState();
         this.updateSwimming();
 
         player.soulSandBelow = player.compensatedWorld.getBlockState(player.getOnPos(1.0E-3F), 0).getState().is(Blocks.SOUL_SAND);
@@ -50,24 +49,6 @@ public class EntityTicker {
         this.checkWaterState();
         this.updateFluidHeightAndDoFluidPushing(player.compensatedWorld.getDimension().bedrockId() ==
                 BedrockDimension.DEFAULT_NETHER_ID ? 0.007F : 0.0023333333333333335F, Fluid.LAVA);
-    }
-
-    private void updateSubmergedInWaterState() {
-        player.submergedInWater = player.submergedFluidTag.contains(Fluid.WATER);
-        player.submergedFluidTag.clear();
-//        if (this.getVehicle() instanceof AbstractBoatEntity lv2 && !lv2.isSubmergedInWater() && lv2.getBoundingBox().maxY >= d && lv2.getBoundingBox().minY <= d) {
-//            return;
-//        }
-
-        final float eyePosition = player.position.y + player.dimensions.eyeHeight();
-        final Mutable mutable = new Mutable(player.position.x, eyePosition, player.position.z);
-        final FluidState lv4 = player.compensatedWorld.getFluidState(mutable);
-        float e = mutable.getY() + lv4.getHeight(player, mutable);
-        if (e > eyePosition) {
-            player.submergedFluidTag.add(lv4.fluid());
-        }
-
-        player.submergedFluidTag.remove(Fluid.EMPTY); // not needed lol.
     }
 
     void checkWaterState() {
