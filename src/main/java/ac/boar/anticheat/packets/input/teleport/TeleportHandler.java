@@ -54,8 +54,6 @@ public class TeleportHandler {
 
             player.velocity = Vec3.ZERO.clone();
             player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
-
-            player.onGround = false;
         }
 
         player.acceptedDimensionSwitch = false;

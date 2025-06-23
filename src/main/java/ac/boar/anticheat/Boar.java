@@ -4,7 +4,6 @@ import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.config.Config;
 import ac.boar.anticheat.config.ConfigLoader;
 import ac.boar.anticheat.packets.input.AuthInputPackets;
-import ac.boar.anticheat.packets.input.TestAuthInputPackets;
 import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
 import ac.boar.anticheat.packets.other.VehiclePackets;

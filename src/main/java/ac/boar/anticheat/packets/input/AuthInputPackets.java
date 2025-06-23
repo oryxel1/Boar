@@ -14,10 +14,7 @@ import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
-import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
-import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
-import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
-import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.level.BedrockDimension;
 
@@ -46,6 +43,8 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             return;
         }
 
+        player.sinceLoadingScreen++;
+
         // TODO: ugggggh, current timer logic is a bit broken.
         // -------------------------------------------------------------------------
         Timer timer = (Timer) player.getCheckHolder().get(Timer.class);
@@ -60,7 +59,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             }
         } else {
             player.tick++;
-            if (packet.getTick() != player.tick || packet.getTick() < 0) {
+            if (packet.getTick() != player.tick || packet.getTick() <= 0) {
                 player.kick("Invalid tick id=" + packet.getTick());
                 return;
             }
@@ -100,6 +99,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         } else {
             new PredictionRunner(player).run();
         }
+
         this.processQueuedTeleports(player, packet);
         LegacyAuthInputPackets.doPostPrediction(player, packet);
     }
@@ -127,6 +127,17 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
                 player.getTeleportUtil().getQueuedTeleports().clear();
 
                 player.tick = Long.MIN_VALUE;
+            });
+        }
+
+        if (event.getPacket() instanceof RespawnPacket packet && packet.getState() == RespawnPacket.State.SERVER_READY) {
+            if (packet.getRuntimeEntityId() != 0) { // Vanilla behaviour according Geyser.
+                return;
+            }
+
+            player.sendLatencyStack(immediate);
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                player.tick = Long.MIN_VALUE; // I only need this.
             });
         }
 

@@ -38,7 +38,6 @@ public class LegacyAuthInputPackets {
         offset -= extraOffset;
 
         uncertainRunner.doTickEndUncertain();
-        correctInputData(player, packet);
 
         for (Map.Entry<Class<?>, Check> entry : player.getCheckHolder().entrySet()) {
             Check v = entry.getValue();
@@ -51,6 +50,7 @@ public class LegacyAuthInputPackets {
         if (player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getMaxOffset()) {
             player.velocity = player.unvalidatedTickEnd.clone();
         }
+        correctInputData(player, packet);
 
         if (offset < player.getMaxOffset()) {
             Vec3 oldPrevPos = player.prevPosition;

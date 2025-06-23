@@ -16,6 +16,7 @@ public class Prediction extends OffsetHandlerCheck {
     @Override
     public void onPredictionComplete(double offset) {
         if (player.tick < 10) {
+            System.out.println(player.tick);
             return;
         }
 
@@ -33,6 +34,6 @@ public class Prediction extends OffsetHandlerCheck {
     }
 
     public boolean shouldDoFail() {
-        return !player.getTeleportUtil().isTeleporting() && player.tickSinceBlockResync <= 0;
+        return player.tickSinceBlockResync <= 0;
     }
 }
