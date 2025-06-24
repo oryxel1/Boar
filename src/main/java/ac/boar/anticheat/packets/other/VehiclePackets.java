@@ -37,8 +37,13 @@ public class VehiclePackets implements PacketListener {
             long entityId = packet.getEntityLink().getFrom();
             long riderId = packet.getEntityLink().getTo();
 
-            // We don't have to handle this.
+            // We handle this separately.
             if (riderId != player.runtimeEntityId) {
+                final EntityCache riderCache = player.compensatedWorld.getEntity(riderId);
+                if (riderCache != null) {
+                    riderCache.setInVehicle(link.getType() != EntityLinkData.Type.REMOVE);
+                }
+
                 return;
             }
 

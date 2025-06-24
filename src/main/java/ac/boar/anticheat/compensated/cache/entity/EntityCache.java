@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.geysermc.geyser.entity.EntityDefinition;
-import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
-
-import javax.swing.plaf.PanelUI;
 
 @ToString
 @RequiredArgsConstructor
@@ -26,6 +23,7 @@ public final class EntityCache {
     private final EntityDimensions dimensions;
     private final long transactionId, runtimeId;
     private Vec3 serverPosition = Vec3.ZERO;
+    private boolean inVehicle;
 
     private CachedEntityState past, current;
 
