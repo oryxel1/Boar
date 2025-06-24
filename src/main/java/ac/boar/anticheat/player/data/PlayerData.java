@@ -57,6 +57,8 @@ public class PlayerData {
 
     public long tick = Long.MIN_VALUE;
 
+    public boolean acceptedDimensionSwitch;
+
     public Integer currentLoadingScreen = null;
     public boolean inLoadingScreen;
     public int sinceLoadingScreen;
@@ -75,16 +77,8 @@ public class PlayerData {
     // Sprinting, sneaking, swimming and other status.
     @Getter
     private final FlagTracker flagTracker = new FlagTracker();
-    public boolean flying, wasFlying;
-    public int sinceTeleport;
-
-    public boolean hasLeastRunPredictionOnce;
 
     public int glideBoostTicks;
-
-    // "Transaction" related.
-    public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
-    public final LatencyUtil latencyUtil = new LatencyUtil(this);
 
     // Block status
     public boolean steppingOnHoney;
@@ -92,11 +86,9 @@ public class PlayerData {
     // Effect status related
     @Getter
     private final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();
-
     public boolean hasEffect(final Effect effect) {
         return this.activeEffects.containsKey(effect);
     }
-
     public StatusEffect getEffect(final Effect effect) {
         return this.activeEffects.get(effect);
     }
@@ -131,13 +123,12 @@ public class PlayerData {
     }
 
     // Prediction related
-    public Pose pose = Pose.STANDING;
-    public EntityDimensions dimensions = EntityDimensions.POSE_DIMENSIONS.get(Pose.STANDING);
+    public EntityDimensions dimensions = EntityDimensions.changing(0.6F, 1.8F).withEyeHeight(1.62F);
     public Box boundingBox = Box.EMPTY;
 
     public Vec3 velocity = Vec3.ZERO;
 
-    public PredictionData predictionResult = new PredictionData(Vector.NONE, Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
+    public PredictionData predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector bestPossibility = Vector.NONE;
     public Vec3 beforeCollision = Vec3.ZERO, afterCollision = Vec3.ZERO;
 
@@ -147,20 +138,14 @@ public class PlayerData {
     public float fallDistance = 0;
 
     public boolean hasDepthStrider;
-
-    public boolean submergedInWater, touchingWater;
-    public boolean wasInPowderSnow, inPowderSnow;
-
+    public boolean touchingWater;
     public boolean horizontalCollision, verticalCollision;
-
     public boolean soulSandBelow;
 
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
     public float getFluidHeight(Fluid tagKey) {
         return this.fluidHeight.getOrDefault(tagKey, 0F);
     }
-
-    public final List<Fluid> submergedFluidTag = new CopyOnWriteArrayList<>();
 
     public BlockState inBlockState;
     public boolean scaffoldDescend;
@@ -169,17 +154,13 @@ public class PlayerData {
 
     public int tickSinceBlockResync;
 
-    public final EntityDimensions getDimensions(Pose pose) {
-        return PlayerTicker.POSES.get(pose);
-    }
-
     public float getYOffset() {
         return this.vehicleData != null ? 0 : EntityDefinitions.PLAYER.offset();
     }
 
     // Prediction related method
     public final double getMaxOffset() {
-        return Boar.getInstance().getConfig().acceptanceThreshold();
+        return Boar.getConfig().acceptanceThreshold();
     }
 
     public final void setSprinting(boolean sprinting) {
@@ -227,10 +208,5 @@ public class PlayerData {
 
     public final void setBoundingBox(Vec3 vec3) {
         this.boundingBox = this.dimensions.getBoxAt(vec3.x, vec3.y, vec3.z);
-    }
-
-    public final void setPose(Pose pose) {
-        this.pose = pose;
-        this.dimensions = EntityDimensions.POSE_DIMENSIONS.get(pose);
     }
 }

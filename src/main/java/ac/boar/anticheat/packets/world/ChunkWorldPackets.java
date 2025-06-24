@@ -32,43 +32,6 @@ public class ChunkWorldPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
         final CompensatedWorld world = player.compensatedWorld;
 
-        if (event.getPacket() instanceof RespawnPacket packet && packet.getState() == RespawnPacket.State.SERVER_READY) {
-            if (packet.getRuntimeEntityId() != 0) { // Vanilla behaviour according Geyser.
-                return;
-            }
-
-            player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
-                player.tick = Long.MIN_VALUE;
-
-                player.prevUnvalidatedPosition = player.unvalidatedPosition = new Vec3(packet.getPosition()).subtract(0, player.getYOffset(), 0);
-                player.setPos(player.unvalidatedPosition.clone());
-
-                player.hasLeastRunPredictionOnce = false;
-            });
-        }
-
-        if (event.getPacket() instanceof ChangeDimensionPacket packet) {
-            int dimensionId = packet.getDimension();
-            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
-                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
-
-            player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
-                world.getChunks().clear();
-                world.setDimension(dimension);
-
-                player.currentLoadingScreen = packet.getLoadingScreenId();
-                player.inLoadingScreen = true;
-
-                player.getFlagTracker().clear();
-                player.wasFlying = player.flying = false;
-                player.getTeleportUtil().getQueuedTeleports().clear();
-
-                player.tick = Long.MIN_VALUE;
-            });
-        }
-
         // Based off GeyserMC and ViaBedrock code, should be correct!
         if (event.getPacket() instanceof LevelChunkPacket packet) {
             int sectionCount = packet.getSubChunksLength();
@@ -159,7 +122,7 @@ public class ChunkWorldPackets implements PacketListener {
 
             // TODO: Should we send stack id all the time?
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 if (dimension != world.getDimension()) {
                     return;
                 }
@@ -182,7 +145,7 @@ public class ChunkWorldPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
         }
     }
 

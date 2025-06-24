@@ -37,8 +37,13 @@ public class VehiclePackets implements PacketListener {
             long entityId = packet.getEntityLink().getFrom();
             long riderId = packet.getEntityLink().getTo();
 
-            // We don't have to handle this.
+            // We handle this separately.
             if (riderId != player.runtimeEntityId) {
+                final EntityCache riderCache = player.compensatedWorld.getEntity(riderId);
+                if (riderCache != null) {
+                    riderCache.setInVehicle(link.getType() != EntityLinkData.Type.REMOVE);
+                }
+
                 return;
             }
 
@@ -53,11 +58,11 @@ public class VehiclePackets implements PacketListener {
 
             player.sendLatencyStack(immediate);
             if (link.getType() == EntityLinkData.Type.REMOVE) {
-                player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.vehicleData = null);
+                player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> player.vehicleData = null);
                 return;
             }
 
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 player.vehicleData = new VehicleData();
                 // player.vehicleData.canWeControlThisVehicle = link.getType() == EntityLinkData.Type.RIDER;
                 player.vehicleData.vehicleRuntimeId = entityId;

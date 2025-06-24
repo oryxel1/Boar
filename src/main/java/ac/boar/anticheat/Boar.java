@@ -49,6 +49,7 @@ public class Boar {
         PacketEvents.getApi().register(new PlayerInventoryPackets());
         PacketEvents.getApi().register(new VehiclePackets());
         PacketEvents.getApi().register(new PacketCheckRunner());
+        //PacketEvents.getApi().register(new TestAuthInputPackets());
         PacketEvents.getApi().register(new AuthInputPackets());
         PacketEvents.getApi().register(new PostAuthInputPackets());
     }

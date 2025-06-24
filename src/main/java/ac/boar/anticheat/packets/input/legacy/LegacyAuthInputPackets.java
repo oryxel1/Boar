@@ -3,7 +3,6 @@ package ac.boar.anticheat.packets.input.legacy;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.data.Pose;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
@@ -28,6 +27,9 @@ public class LegacyAuthInputPackets {
     }
 
     public static void doPostPrediction(final BoarPlayer player, final PlayerAuthInputPacket packet) {
+        player.postTick();
+        player.getTeleportUtil().cachePosition(player.tick, player.position.add(0, player.getYOffset(), 0).toVector3f());
+
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
         // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.
@@ -36,7 +38,6 @@ public class LegacyAuthInputPackets {
         offset -= extraOffset;
 
         uncertainRunner.doTickEndUncertain();
-        correctInputData(player, packet);
 
         for (Map.Entry<Class<?>, Check> entry : player.getCheckHolder().entrySet()) {
             Check v = entry.getValue();
@@ -49,6 +50,7 @@ public class LegacyAuthInputPackets {
         if (player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getMaxOffset()) {
             player.velocity = player.unvalidatedTickEnd.clone();
         }
+        correctInputData(player, packet);
 
         if (offset < player.getMaxOffset()) {
             Vec3 oldPrevPos = player.prevPosition;
@@ -72,7 +74,7 @@ public class LegacyAuthInputPackets {
     }
 
     public static void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
-        if (player.isFullyExempted()) {
+        if (player.isMovementExempted()) {
             return;
         }
 
@@ -114,8 +116,6 @@ public class LegacyAuthInputPackets {
     }
 
     public static void processInputData(final BoarPlayer player) {
-        player.wasFlying = player.flying;
-
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
                 case START_GLIDING -> {
@@ -141,8 +141,8 @@ public class LegacyAuthInputPackets {
                 case START_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, true);
                 case STOP_SWIMMING -> player.getFlagTracker().set(EntityFlag.SWIMMING, false);
 
-                case START_FLYING -> player.flying = player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING);
-                case STOP_FLYING -> player.flying = false;
+                case START_FLYING -> player.getFlagTracker().setFlying(player.abilities.contains(Ability.MAY_FLY) || player.abilities.contains(Ability.FLYING));
+                case STOP_FLYING -> player.getFlagTracker().setFlying(false);
 
                 case STOP_SPIN_ATTACK -> {
                     if (player.dirtySpinStop) {
@@ -157,8 +157,8 @@ public class LegacyAuthInputPackets {
                     }
                 }
 
-                case START_CRAWLING -> player.pose = Pose.SWIMMING;
-                case STOP_CRAWLING -> player.pose = Pose.STANDING;
+                case START_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, true);
+                case STOP_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, false);
             }
         }
 

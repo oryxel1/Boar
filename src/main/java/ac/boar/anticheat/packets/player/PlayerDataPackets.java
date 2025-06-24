@@ -25,7 +25,7 @@ public class PlayerDataPackets implements PacketListener {
 
         if (event.getPacket() instanceof SetPlayerGameTypePacket packet) {
             player.sendLatencyStack();
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> player.gameType = GameType.from(packet.getGamemode()));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> player.gameType = GameType.from(packet.getGamemode()));
         }
 
         if (event.getPacket() instanceof UpdateAbilitiesPacket packet) {
@@ -34,7 +34,7 @@ public class PlayerDataPackets implements PacketListener {
             }
 
             event.getPostTasks().add(() -> player.sendLatencyStack(immediate));
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get() + 1, () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get() + 1, () -> {
                 player.abilities.clear();
                 for (AbilityLayer layer : packet.getAbilityLayers()) {
                     // TODO: Figure this out? also "fly" speed doesn't seems to even be fly speed. too lazy to look at vanilla code brah
@@ -46,12 +46,15 @@ public class PlayerDataPackets implements PacketListener {
                     player.abilities.addAll(layer.getAbilityValues());
                 }
 
-                player.wasFlying = player.flying;
-                player.flying = player.abilities.contains(Ability.FLYING) || player.abilities.contains(Ability.MAY_FLY) && player.flying;
+                player.getFlagTracker().setFlying(player.abilities.contains(Ability.FLYING) || player.abilities.contains(Ability.MAY_FLY) && player.getFlagTracker().isFlying());
             });
         }
 
         if (event.getPacket() instanceof SetEntityDataPacket packet) {
+            if (player.vehicleData != null) {
+                return;
+            }
+
             if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
                 return;
             }
@@ -73,7 +76,7 @@ public class PlayerDataPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 if (flagsCopy != null) {
                     flagsCopy.addAll(flags);
                 }
@@ -109,7 +112,11 @@ public class PlayerDataPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.latencyUtil.addTaskToQueue(player.sentStackId.get(), () -> {
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                if (player.vehicleData != null) {
+                    return;
+                }
+
                 for (final AttributeData data : packet.getAttributes()) {
                     final AttributeInstance attribute = player.attributes.get(data.getName());
                     if (attribute == null) {

@@ -39,7 +39,7 @@ public final class Reach extends PacketCheck {
         }
 
         final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-        if (entity == null) {
+        if (entity == null || entity.isInVehicle()) { // TODO: Impl reach check inside vehicle properly!
             return;
         }
 

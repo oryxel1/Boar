@@ -1,26 +1,13 @@
 package ac.boar.anticheat.prediction.ticker.impl;
 
-import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.FluidState;
-import ac.boar.anticheat.data.Pose;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
-import com.google.common.collect.ImmutableMap;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Fluid;
 
-import java.util.Map;
-
 public class PlayerTicker extends LivingTicker {
-    public static final Map<Pose, EntityDimensions> POSES = ImmutableMap.<Pose, EntityDimensions>builder().
-            put(Pose.STANDING, EntityDimensions.changing(0.6f, 1.8f).withEyeHeight(1.62f)).put(Pose.SLEEPING,
-                    EntityDimensions.fixed(0.2f, 0.2f).withEyeHeight(0.2f)).
-            put(Pose.GLIDING, EntityDimensions.changing(0.6f, 0.6f).withEyeHeight(0.4f)).put(Pose.SWIMMING,
-                    EntityDimensions.changing(0.6f, 0.6f).withEyeHeight(0.4f)).put(Pose.SPIN_ATTACK, EntityDimensions.changing(0.6f, 0.6f)
-                    .withEyeHeight(0.4f)).put(Pose.CROUCHING, EntityDimensions.changing(0.6f, 1.5f).withEyeHeight(1.27f)).put(Pose.DYING,
-                    EntityDimensions.fixed(0.2f, 0.2f).withEyeHeight(1.62f)).build();
-
     public PlayerTicker(BoarPlayer player) {
         super(player);
     }
@@ -35,7 +22,7 @@ public class PlayerTicker extends LivingTicker {
     public void applyInput() {
         super.applyInput();
         boolean sneaking = player.getFlagTracker().has(EntityFlag.SNEAKING) || player.getInputData().contains(PlayerAuthInputData.STOP_SNEAKING);
-        if ((sneaking || player.pose == Pose.SWIMMING && !player.getFlagTracker().has(EntityFlag.SWIMMING)) && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
+        if ((sneaking || player.getFlagTracker().has(EntityFlag.CRAWLING)) && !player.getFlagTracker().has(EntityFlag.GLIDING) && !player.isInLava() && !player.touchingWater) {
             player.input = player.input.multiply(0.3F);
         }
 

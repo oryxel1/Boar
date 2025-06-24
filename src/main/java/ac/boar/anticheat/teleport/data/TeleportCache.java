@@ -3,6 +3,7 @@ package ac.boar.anticheat.teleport.data;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerActionPacket;
 
 @RequiredArgsConstructor
 @Getter
@@ -12,13 +13,17 @@ public class TeleportCache {
 
     @Getter
     public static class Normal extends TeleportCache {
-        private final boolean keepVelocity;
-        private final boolean respawn;
+        // private final boolean silent;
 
-        public Normal(long stackId, Vec3 position, boolean keepVelocity, boolean respawn) {
+        public Normal(long stackId, Vec3 position) {
             super(stackId, position);
-            this.keepVelocity = keepVelocity;
-            this.respawn = respawn;
+            // this.silent = silent;
+        }
+    }
+
+    public static class DimensionSwitch extends TeleportCache {
+        public DimensionSwitch(long stackId, Vec3 position) {
+            super(stackId, position);
         }
     }
 

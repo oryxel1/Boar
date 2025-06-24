@@ -19,11 +19,12 @@ public class BadPacketA extends PacketCheck {
             if (!MathUtil.isValid(packet.getPosition()) || !MathUtil.isValid(packet.getRotation()) || !MathUtil.isValid(packet.getDelta())) {
                 event.setCancelled(true);
 
-                if (player.hasLeastRunPredictionOnce) {
-                    player.getTeleportUtil().rewind(player.tick - 1);
-                } else {
-                    player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
-                }
+                player.getTeleportUtil().rewind(player.tick - 1);
+//                if (player.hasLeastRunPredictionOnce) {
+//                    player.getTeleportUtil().rewind(player.tick - 1);
+//                } else {
+//                    player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
+//                }
             }
         }
     }

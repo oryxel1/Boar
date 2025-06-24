@@ -1,6 +1,6 @@
 package ac.boar.anticheat.util;
 
-import ac.boar.anticheat.player.data.PlayerData;
+import ac.boar.anticheat.player.BoarPlayer;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @RequiredArgsConstructor
 public final class LatencyUtil {
-    private final PlayerData player;
+    private final BoarPlayer player;
     private final List<Long> sentStackLatency = new CopyOnWriteArrayList<>();
     private final Map<Long, StackLatencyData> map = new ConcurrentHashMap<>();
 
