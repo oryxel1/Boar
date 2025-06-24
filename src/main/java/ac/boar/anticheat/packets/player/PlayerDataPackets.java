@@ -51,6 +51,10 @@ public class PlayerDataPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof SetEntityDataPacket packet) {
+            if (player.vehicleData != null) {
+                return;
+            }
+
             if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
                 return;
             }
@@ -109,6 +113,10 @@ public class PlayerDataPackets implements PacketListener {
 
             player.sendLatencyStack(immediate);
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                if (player.vehicleData != null) {
+                    return;
+                }
+
                 for (final AttributeData data : packet.getAttributes()) {
                     final AttributeInstance attribute = player.attributes.get(data.getName());
                     if (attribute == null) {
