@@ -29,16 +29,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         }
 
         final BoarPlayer player = event.getPlayer();
-        if (event.getPacket() instanceof PlayerActionPacket packet) {
-            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
-                return;
-            }
-
-            if (packet.getAction() == PlayerActionType.DIMENSION_CHANGE_SUCCESS) {
-                player.acceptedDimensionSwitch = true;
-            }
-        }
-
         if (!(event.getPacket() instanceof PlayerAuthInputPacket packet)) {
             return;
         }

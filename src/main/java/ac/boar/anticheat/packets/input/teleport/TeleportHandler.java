@@ -43,10 +43,6 @@ public class TeleportHandler {
     }
 
     private void processDimensionSwitch(final BoarPlayer player, final TeleportCache.DimensionSwitch dimension, final PlayerAuthInputPacket packet) {
-        if (!player.acceptedDimensionSwitch) {
-            return;
-        }
-
         // Dimension switch should be followed with teleport so we don't have to do resync if the position mismatch.
         if (packet.getPosition().distance(dimension.getPosition().toVector3f()) <= 1.0E-3F) {
             player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
@@ -55,8 +51,6 @@ public class TeleportHandler {
             player.velocity = Vec3.ZERO.clone();
             player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
         }
-
-        player.acceptedDimensionSwitch = false;
     }
 
     private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {

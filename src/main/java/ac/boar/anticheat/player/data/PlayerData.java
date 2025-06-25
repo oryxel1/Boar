@@ -57,8 +57,6 @@ public class PlayerData {
 
     public long tick = Long.MIN_VALUE;
 
-    public boolean acceptedDimensionSwitch;
-
     public Integer currentLoadingScreen = null;
     public boolean inLoadingScreen;
     public int sinceLoadingScreen;
