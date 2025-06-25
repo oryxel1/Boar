@@ -114,7 +114,9 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
                 player.getFlagTracker().clear();
                 player.getFlagTracker().flying(false);
-                player.getTeleportUtil().getQueuedTeleports().clear();
+
+                // We shouldn't do this, if we still are handling things correctly, we wouldn't have to clear teleport.
+                // player.getTeleportUtil().getQueuedTeleports().clear();
 
                 player.tick = Long.MIN_VALUE;
             });
