@@ -87,6 +87,10 @@ public class BedrockCollision {
     }
     
     public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
+        if (vector3i.getY() == player.compensatedWorld.getDimension().minY() - 41) {
+            return SOLID_SHAPE;
+        }
+
         if (state.is(Blocks.POWDER_SNOW)) {
             boolean leatherBoostOn = player.compensatedInventory.translate(player.compensatedInventory.armorContainer.get(3).getData()).getId() == Items.LEATHER_BOOTS.javaId();
             if (leatherBoostOn && player.position.y > vector3i.getY() + 1 - 1.0E-5f && !(player.getInputData().contains(PlayerAuthInputData.SNEAKING)|| player.getInputData().contains(PlayerAuthInputData.DESCEND_BLOCK))) {
