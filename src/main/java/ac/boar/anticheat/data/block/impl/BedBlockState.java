@@ -16,8 +16,6 @@ public class BedBlockState extends BoarBlockState {
 
     @Override
     public void updateEntityMovementAfterFallOn(BoarPlayer player, boolean living) {
-        player.steppingOnHoney = false;
-
         // Don't ask questions, just know that it does works.
         List<Box> boxes = this.findCollision(player, getPosition(), null, false);
         float maxY = 0;

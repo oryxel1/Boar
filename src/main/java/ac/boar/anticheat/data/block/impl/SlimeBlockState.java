@@ -18,8 +18,6 @@ public class SlimeBlockState extends BoarBlockState {
             float e = 0.4F + d * 0.2F;
             player.velocity = player.velocity.multiply(e, 1, e);
         }
-
-        player.steppingOnHoney = false;
     }
 
     @Override

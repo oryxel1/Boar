@@ -43,7 +43,6 @@ public class BoarBlockState {
     }
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {
-        player.steppingOnHoney = false;
     }
 
     public boolean blocksMotion(final BoarPlayer player) {
