@@ -37,7 +37,7 @@ public class Vec3 implements Cloneable {
     }
 
     public Vector3i toVector3i() {
-        return Vector3i.from(this.x, this.y, this.z);
+        return Vector3i.from(GenericMath.floor(this.x), GenericMath.floor(this.y), GenericMath.floor(this.z));
     }
 
     public Vector3d toVector3d() {
