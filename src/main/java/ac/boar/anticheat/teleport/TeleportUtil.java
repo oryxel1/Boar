@@ -55,8 +55,8 @@ public class TeleportUtil {
         packet.setMode(MovePlayerPacket.Mode.TELEPORT);
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
 
-        this.queueTeleport(teleport.getPosition(), true);
-        this.player.getCloudburstDownstream().sendPacketImmediately(packet);
+        this.queueTeleport(teleport.getPosition(), false);
+        this.player.getCloudburstDownstream().sendPacket(packet);
     }
 
     public void queueTeleport(final Vec3 position, boolean immediate) {
@@ -90,9 +90,9 @@ public class TeleportUtil {
         packet.setDelta(data.tickEnd().toVector3f());
         packet.setPredictionType(player.vehicleData != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
 
-        player.sendLatencyStack(true);
+        player.sendLatencyStack();
         this.queuedTeleports.add(new TeleportCache.Rewind(player.sentStackId.get(), tick, new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), onGround));
-        this.player.getCloudburstDownstream().sendPacketImmediately(packet);
+        this.player.getCloudburstDownstream().sendPacket(packet);
     }
 
     public void cachePosition(long tick, Vector3f position) {
