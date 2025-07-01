@@ -1,5 +1,6 @@
-package ac.boar.anticheat.packets.player;
+package ac.boar.anticheat.packets.server;
 
+import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -13,12 +14,11 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.*;
-import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 
 import java.util.EnumSet;
 import java.util.Set;
 
-public class PlayerDataPackets implements PacketListener {
+public class ServerDataPackets implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
@@ -51,11 +51,18 @@ public class PlayerDataPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof SetEntityDataPacket packet) {
-            if (player.vehicleData != null) {
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                final EntityCache cache = player.compensatedWorld.getEntity(player.runtimeEntityId);
+                if (cache == null) {
+                    return;
+                }
+
+                player.sendLatencyStack(immediate);
+                player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> cache.setMetadata(packet.getMetadata()));
                 return;
             }
 
-            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+            if (player.vehicleData != null) {
                 return;
             }
 

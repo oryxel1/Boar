@@ -60,20 +60,12 @@ public class CompensatedWorld {
         }
 
         final EntityDefinition<?> definition = entity.getDefinition();
-        boolean affectedByOffset = definition.entityType() == EntityType.PLAYER || definition.entityType() == EntityType.MINECART ||
-                definition.entityType().name().toLowerCase().endsWith("_minecart") ||
-                definition.identifier().equalsIgnoreCase("minecraft:boat") || definition.identifier().equalsIgnoreCase("minecraft:chest_boat");
-
-        EntityDimensions dimensions = EntityDimensions.fixed(definition.width(), definition.height());
-
-        final BedrockMappings.CollisionBox collision = BedrockMappings.getEntityCollisionBoxes().get(definition.identifier());
-        if (collision != null) {
-            dimensions = EntityDimensions.fixed(collision.width(), collision.height());
-        }
+        boolean affectedByOffset = definition.entityType() == EntityType.PLAYER || definition.identifier().equalsIgnoreCase("minecraft:boat") || definition.identifier().equalsIgnoreCase("minecraft:chest_boat");
 
         player.sendLatencyStack();
-        final EntityCache cache = new EntityCache(player, definition.entityType(), definition, dimensions, player.sentStackId.get(), runtimeId);
+        final EntityCache cache = new EntityCache(player, definition.entityType(), definition, player.sentStackId.get(), runtimeId);
         cache.setAffectedByOffset(affectedByOffset);
+        cache.setDimensions(EntityDimensions.fixed(0, 0));
 
         this.entities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);

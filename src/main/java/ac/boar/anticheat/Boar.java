@@ -8,7 +8,9 @@ import ac.boar.anticheat.packets.input.PostAuthInputPackets;
 import ac.boar.anticheat.packets.other.PacketCheckRunner;
 import ac.boar.anticheat.packets.other.VehiclePackets;
 import ac.boar.anticheat.packets.player.*;
-import ac.boar.anticheat.packets.world.*;
+import ac.boar.anticheat.packets.server.ServerChunkPackets;
+import ac.boar.anticheat.packets.server.ServerEntityPackets;
+import ac.boar.anticheat.packets.server.ServerDataPackets;
 import ac.boar.geyser.GeyserBoar;
 import ac.boar.mappings.BedrockMappings;
 import lombok.Getter;
@@ -41,9 +43,9 @@ public class Boar {
         this.alertManager = new AlertManager();
 
         PacketEvents.getApi().register(new NetworkLatencyPackets());
-        PacketEvents.getApi().register(new ChunkWorldPackets());
-        PacketEvents.getApi().register(new EntityWorldPackets());
-        PacketEvents.getApi().register(new PlayerDataPackets());
+        PacketEvents.getApi().register(new ServerChunkPackets());
+        PacketEvents.getApi().register(new ServerEntityPackets());
+        PacketEvents.getApi().register(new ServerDataPackets());
         PacketEvents.getApi().register(new PlayerEffectPackets());
         PacketEvents.getApi().register(new PlayerVelocityPackets());
         PacketEvents.getApi().register(new PlayerInventoryPackets());

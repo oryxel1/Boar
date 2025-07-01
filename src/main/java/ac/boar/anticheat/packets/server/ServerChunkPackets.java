@@ -1,13 +1,10 @@
-package ac.boar.anticheat.packets.world;
+package ac.boar.anticheat.packets.server;
 
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
-import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.geyser.BlockStorage;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
-import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import io.netty.buffer.ByteBuf;
@@ -26,7 +23,7 @@ import org.geysermc.geyser.level.chunk.bitarray.SingletonBitArray;
 
 import java.util.Objects;
 
-public class ChunkWorldPackets implements PacketListener {
+public class ServerChunkPackets implements PacketListener {
     @Override
     public void onPacketSend(CloudburstPacketEvent event, boolean immediate) {
         final BoarPlayer player = event.getPlayer();

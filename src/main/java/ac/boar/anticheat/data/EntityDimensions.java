@@ -24,6 +24,10 @@ public record EntityDimensions(float width, float height, float eyeHeight, boole
         return new Box(x - g, y, z - g, x + g, y + this.height, z + g);
 	}
 
+    public EntityDimensions hardScaled(float ratio) {
+        return new EntityDimensions(this.width * ratio, this.height * ratio, this.eyeHeight * ratio, false);
+    }
+
 	public EntityDimensions scaled(float ratio) {
 		return this.scaled(ratio, ratio);
 	}

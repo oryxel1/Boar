@@ -9,11 +9,11 @@ import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import com.google.common.collect.ImmutableList;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
-import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,12 +77,11 @@ public class CompensatedWorldImpl extends CompensatedWorld {
 
         aABB = aABB.expand(1.0E-7F);
         for (EntityCache cache : this.getEntities().values()) {
-            boolean canCollide = cache.getDefinition().identifier().equalsIgnoreCase("minecraft:boat") || cache.getDefinition().identifier().equalsIgnoreCase("minecraft:chest_boat") || cache.getType() == EntityType.SHULKER;
-
-            if (!canCollide || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
+            if (cache.getMetadata().getFlags() == null || !cache.getMetadata().getFlags().contains(EntityFlag.COLLIDABLE) || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
                 continue;
             }
 
+            // System.out.println("Collide able box: " + cache.getCurrent().getBoundingBox() + ", " + cache.getCurrent().getPos());
             boxes.add(cache.getCurrent().getBoundingBox());
         }
 

@@ -1,4 +1,4 @@
-package ac.boar.anticheat.packets.world;
+package ac.boar.anticheat.packets.server;
 
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -10,7 +10,7 @@ import org.cloudburstmc.protocol.bedrock.packet.*;
 
 import java.util.Set;
 
-public class EntityWorldPackets implements PacketListener {
+public class ServerEntityPackets implements PacketListener {
     @Override
     public void onPacketSend(final CloudburstPacketEvent event, final boolean immediate) {
         final BoarPlayer player = event.getPlayer();
@@ -29,6 +29,8 @@ public class EntityWorldPackets implements PacketListener {
             entity.setServerPosition(position);
             entity.init();
             entity.interpolate(position, false);
+
+            entity.setMetadata(packet.getMetadata());
         }
 
         if (event.getPacket() instanceof AddPlayerPacket packet) {
@@ -41,6 +43,8 @@ public class EntityWorldPackets implements PacketListener {
             entity.setServerPosition(position);
             entity.init();
             entity.interpolate(position, false);
+
+            entity.setMetadata(packet.getMetadata());
         }
 
         if (event.getPacket() instanceof MoveEntityDeltaPacket packet) {

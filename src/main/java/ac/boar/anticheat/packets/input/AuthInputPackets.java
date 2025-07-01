@@ -62,6 +62,8 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         LegacyAuthInputPackets.processAuthInput(player, packet, true);
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
+        // System.out.println("Unvalidated position: " + player.unvalidatedPosition);
+
         if (player.vehicleData != null) { // TODO: Vehicle prediction.
             return;
         }
