@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     compileOnly("org.cloudburstmc.protocol:bedrock-connection:3.0.0.Beta7-20250618.210427-9")
-    compileOnly("org.geysermc.geyser:core:2.7.2-SNAPSHOT") {
+    compileOnly("org.geysermc.geyser:core:2.8.2-SNAPSHOT") {
         exclude group: "com.google.code.gson", module: "gson"
     }
     compileOnly("it.unimi.dsi:fastutil:8.5.15")

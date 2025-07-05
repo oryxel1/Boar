@@ -44,7 +44,7 @@ public class BlockUtil {
         identifier = identifier.replace("west=true", "west=" + west);
         identifier = identifier.replace("waterlogged=true", "waterlogged=false");
 
-        return BlockState.of(BlockRegistries.JAVA_IDENTIFIER_TO_ID.getOrDefault(identifier, main.javaId()));
+        return BlockState.of(BlockRegistries.JAVA_BLOCK_STATE_IDENTIFIER_TO_ID.getOrDefault(identifier, main.javaId()));
         //return main.block().defaultBlockState().withValue(EAST, east).withValue(NORTH, north).withValue(SOUTH, south).withValue(WATERLOGGED,false).withValue(WEST, west); this is broken, geyser fault I think?
     }
 
@@ -67,7 +67,7 @@ public class BlockUtil {
         identifier = identifier.replace("west=true", "west=" + west);
         identifier = identifier.replace("waterlogged=true", "waterlogged=false");
 
-        return BlockState.of(BlockRegistries.JAVA_IDENTIFIER_TO_ID.getOrDefault(identifier, state.javaId()));
+        return BlockState.of(BlockRegistries.JAVA_BLOCK_STATE_IDENTIFIER_TO_ID.getOrDefault(identifier, state.javaId()));
     }
 
     private static boolean connectsTo(BoarPlayer player, BlockState blockState, BlockState neighbour, boolean bl, Direction direction) {
