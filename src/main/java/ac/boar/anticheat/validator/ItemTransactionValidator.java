@@ -413,6 +413,8 @@ public final class ItemTransactionValidator {
             return;
         }
 
+        player.doingInventoryAction = true;
+
         final List<ItemStackRequest> clone = new ArrayList<>(packet.getRequests());
         packet.getRequests().clear();
 

@@ -8,6 +8,13 @@ public class InputUtil {
     public static void processInput(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         Vec3 input = Vec3.ZERO.clone();
 
+        // We can only check if player is trying to for example, move an item...
+        // We can't really check for if openContainer != null since Bedrock send the container close packet late (as of 1.21.8x)
+        // so we won't know for sure if inventory is actually open.
+        if (player.doingInventoryAction) {
+            return;
+        }
+
         if (packet.getAnalogMoveVector().lengthSquared() <= 1.0E-7) {
             input.x = MathUtil.sign(packet.getMotion().getX());
             input.z = MathUtil.sign(packet.getMotion().getY());

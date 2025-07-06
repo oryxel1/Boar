@@ -78,6 +78,8 @@ public class PlayerData {
 
     public int glideBoostTicks;
 
+    public boolean doingInventoryAction;
+
     // Effect status related
     @Getter
     private final Map<Effect, StatusEffect> activeEffects = new ConcurrentHashMap<>();

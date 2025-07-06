@@ -41,8 +41,9 @@ public class PlayerInventoryPackets implements PacketListener {
                 return;
             }
 
+            // This is controlled by server as Geyser use server auth.
             if (packet.getAction() == InteractPacket.Action.OPEN_INVENTORY) {
-                player.compensatedInventory.openContainer = player.compensatedInventory.inventoryContainer;
+                // player.compensatedInventory.openContainer = player.compensatedInventory.inventoryContainer;
             }
         }
 
