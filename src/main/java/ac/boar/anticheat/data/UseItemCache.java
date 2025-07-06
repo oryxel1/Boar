@@ -5,7 +5,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.geysermc.geyser.item.Items;
@@ -15,8 +14,6 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class UseItemCache {
     private final BoarPlayer player;
-
-    private int previousUseItem;
 
     private int useItemJavaId = -1;
     private ItemData useItem = ItemData.AIR;
@@ -33,18 +30,12 @@ public class UseItemCache {
             this.goatHornCooldown--;
         }
 
-        if (useItemRemaining <= 0 || useItem == ItemData.AIR) {
+        if (this.useItem == ItemData.AIR) {
             return;
         }
 
-        if (player.compensatedInventory.inventoryContainer.getHeldItemData().equals(useItem, false, false, false)) {
-            if (--this.useItemRemaining == 0) {
-                if (player.getInputData().contains(PlayerAuthInputData.START_USING_ITEM)) {
-                    this.useItemRemaining = this.previousUseItem;
-                } else {
-                    this.release();
-                }
-            }
+        if (player.compensatedInventory.inventoryContainer.getHeldItemData().equals(this.useItem, false, false, false)) {
+            if (this.useItemRemaining > 0) --this.useItemRemaining;
         } else {
             this.release();
         }
@@ -78,7 +69,6 @@ public class UseItemCache {
             return;
         }
 
-        previousUseItem = useDuration;
         this.consumer = useItemCache -> {
             if (itemId == Items.GOAT_HORN.javaId()) {
                 if (goatHornCooldown > 0) {
@@ -91,7 +81,9 @@ public class UseItemCache {
             useItemCache.useItemJavaId = itemId;
 
             useItemCache.useItem = useItem;
-            useItemCache.useItemRemaining = useDuration;
+
+            // Need this for trident lol.
+            useItemCache.useItemRemaining = useDuration + 1;
 
             player.getFlagTracker().set(EntityFlag.USING_ITEM, true);
         };

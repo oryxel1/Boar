@@ -152,10 +152,11 @@ public final class BoarPlayer extends PlayerData {
                 cache.getCurrent().tick();
             }
         }
+
+        this.getUseItemCache().tick();
     }
 
     public void postTick() {
-        this.getUseItemCache().tick();
         this.glideBoostTicks--;
     }
 
