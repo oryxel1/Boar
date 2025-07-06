@@ -12,6 +12,7 @@ public class InputUtil {
         // We can't really check for if openContainer != null since Bedrock send the container close packet late (as of 1.21.8x)
         // so we won't know for sure if inventory is actually open.
         if (player.doingInventoryAction) {
+            player.input = input;
             return;
         }
 
