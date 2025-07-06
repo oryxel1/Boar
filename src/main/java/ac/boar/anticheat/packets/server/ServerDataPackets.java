@@ -85,7 +85,7 @@ public class ServerDataPackets implements PacketListener {
             player.sendLatencyStack(immediate);
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 if (flagsCopy != null) {
-                    flagsCopy.addAll(flags);
+                    player.getFlagTracker().set(flagsCopy);
                 }
 
                 // Dimension seems to be controlled server-side as far as I know (tested with clumsy).
