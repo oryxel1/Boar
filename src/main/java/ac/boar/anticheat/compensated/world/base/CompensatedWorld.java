@@ -65,7 +65,8 @@ public class CompensatedWorld {
         player.sendLatencyStack();
         final EntityCache cache = new EntityCache(player, definition.entityType(), definition, player.sentStackId.get(), runtimeId);
         cache.setAffectedByOffset(affectedByOffset);
-        cache.setDimensions(EntityDimensions.fixed(0, 0));
+        // Default back to default bounding box if there ain't anything.
+        cache.setDimensions(EntityDimensions.fixed(definition.width(), definition.height()));
 
         this.entities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
