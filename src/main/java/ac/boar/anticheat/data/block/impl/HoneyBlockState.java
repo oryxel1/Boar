@@ -24,7 +24,7 @@ public class HoneyBlockState extends BoarBlockState {
 
     @Override
     public void entityInside(BoarPlayer player, Mutable pos) {
-        if (pos.getY() == GenericMath.floor(player.position.y - 0.2F)) {
+        if (pos.getY() == GenericMath.floor(player.position.y - 0.2F) && pos.getX() == GenericMath.floor(player.position.x) && pos.getZ() == GenericMath.floor(player.position.z)) {
             return;
         }
 
