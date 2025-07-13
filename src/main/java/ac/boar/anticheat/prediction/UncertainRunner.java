@@ -34,6 +34,10 @@ public class UncertainRunner {
             }
         }
 
+        if (offset <= 8.0E-4 && player.glideBoostTicks >= 0 && player.getFlagTracker().has(EntityFlag.GLIDING)) {
+            extra = (float) offset;
+        }
+
         return extra;
     }
 }
