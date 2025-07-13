@@ -36,9 +36,12 @@ public class PlayerVelocityPackets implements PacketListener {
 
             player.sendLatencyStack(immediate);
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
-                // DO NOT ASK ME, I HAVE NO IDEA WHY TOO. I don't think this is the case for like ehmmmm, welp it's weird asf.
-                // This still boost for like duration / 2 last time I tested it back in idkkkk why tf it's always default to 1 now?
-                player.glideBoostTicks = 1;
+                if (player.glideBoostTicks == 0 && packet.getDuration() == 0 || packet.getDuration() == Integer.MAX_VALUE) {
+                    player.glideBoostTicks = 1;
+                    return;
+                }
+
+                player.glideBoostTicks = packet.getDuration() / 2;
             });
         }
     }
