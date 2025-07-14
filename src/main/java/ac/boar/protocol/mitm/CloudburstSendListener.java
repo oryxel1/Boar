@@ -1,6 +1,7 @@
 package ac.boar.protocol.mitm;
 
 import ac.boar.anticheat.Boar;
+import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
@@ -11,7 +12,6 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
-import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.session.UpstreamSession;
 
 public final class CloudburstSendListener extends UpstreamSession {
@@ -37,8 +37,7 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.runtimeEntityId = start.getRuntimeEntityId();
             player.javaEntityId = player.getSession().getPlayerEntity().getEntityId();
 
-            int dimensionId = start.getDimensionId();
-            player.compensatedWorld.setDimension(dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END);
+            player.compensatedWorld.setDimension(DimensionUtil.dimensionFromId(start.getDimensionId()));
             player.currentLoadingScreen = null;
             player.inLoadingScreen = true;
 

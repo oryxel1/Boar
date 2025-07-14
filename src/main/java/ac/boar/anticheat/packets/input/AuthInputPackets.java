@@ -9,10 +9,10 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.teleport.data.TeleportCache;
+import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
-import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -102,8 +102,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         if (event.getPacket() instanceof ChangeDimensionPacket packet) {
             int dimensionId = packet.getDimension();
-            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
-                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
+            final BedrockDimension dimension = DimensionUtil.dimensionFromId(dimensionId);
 
             player.sendLatencyStack(immediate);
             player.getTeleportUtil().getQueuedTeleports().add(new TeleportCache.DimensionSwitch(player.sentStackId.get(), new Vec3(packet.getPosition().up(EntityDefinitions.PLAYER.offset()))));

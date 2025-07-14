@@ -3,6 +3,7 @@ package ac.boar.anticheat.packets.server;
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.anticheat.util.geyser.BlockStorage;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.protocol.event.CloudburstPacketEvent;
@@ -51,8 +52,7 @@ public class ServerChunkPackets implements PacketListener {
 
             int yOffset = world.getMinY() >> 4, chunkSize = world.getHeightY() >> 4;
 
-            final BedrockDimension dimension = dimensionId == BedrockDimension.OVERWORLD_ID ? BedrockDimension.OVERWORLD
-                    : dimensionId == BedrockDimension.BEDROCK_NETHER_ID ? BedrockDimension.THE_NETHER : BedrockDimension.THE_END;
+            final BedrockDimension dimension = DimensionUtil.dimensionFromId(dimensionId);
 
             int dimensionOffset = dimension.minY() >> 4;
 
