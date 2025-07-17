@@ -20,6 +20,9 @@ public class PlayerVelocityPackets implements PacketListener {
                 return;
             }
 
+            // I think there is some rewind like behaviour when there is ehm the tick is not 0, so just default back to 0 till I figure it out.
+            packet.setTick(0);
+
             player.sendLatencyStack(immediate);
             player.queuedVelocities.put(player.sentStackId.get() + 1, new VelocityData(player.sentStackId.get() + 1, player.tick, new Vec3(packet.getMotion())));
             event.getPostTasks().add(player::sendLatencyStack);
