@@ -39,7 +39,7 @@ public class BoarBlockState {
     }
 
     public boolean isAir() {
-        return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR);
+        return state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR);
     }
 
     public void onSteppedOn(final BoarPlayer player, final Vector3i vector3i) {

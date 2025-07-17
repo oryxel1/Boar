@@ -34,6 +34,6 @@ public class Prediction extends OffsetHandlerCheck {
     }
 
     public boolean shouldDoFail() {
-        return player.tickSinceBlockResync <= 0;
+        return player.tickSinceBlockResync <= 0 && !player.getTeleportUtil().isTeleporting();
     }
 }

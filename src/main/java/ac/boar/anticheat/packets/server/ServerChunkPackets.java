@@ -132,7 +132,8 @@ public class ServerChunkPackets implements PacketListener {
             // Ugly hack.
             if (packet.getDataLayer() == 0 && Boar.getConfig().ignoreGhostBlock() && !player.inLoadingScreen && player.sinceLoadingScreen >= 2) {
                 BlockState state = BlockState.of(player.bedrockBlockToJava.getOrDefault(packet.getDefinition().getRuntimeId(), Blocks.AIR.javaId()));
-                if (state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR)) {
+                boolean newBlockIsAir = state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR);
+                if (newBlockIsAir && !player.compensatedWorld.getBlockState(packet.getBlockPosition(), packet.getDataLayer()).isAir()) {
                     int distance = Math.abs(packet.getBlockPosition().getY() - GenericMath.floor(player.position.y - 1));
                     if (distance <= 1) {
                         player.tickSinceBlockResync = 5;
