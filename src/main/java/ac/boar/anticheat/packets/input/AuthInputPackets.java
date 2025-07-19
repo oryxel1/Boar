@@ -65,6 +65,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         // System.out.println("Unvalidated position: " + player.unvalidatedPosition);
 
         if (player.vehicleData != null) { // TODO: Vehicle prediction.
+            player.position = player.unvalidatedPosition;
             return;
         }
 

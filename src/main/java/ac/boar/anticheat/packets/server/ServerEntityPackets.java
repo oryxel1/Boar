@@ -16,7 +16,13 @@ public class ServerEntityPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
             player.sendLatencyStack(immediate);
-            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> player.compensatedWorld.removeEntity(packet.getUniqueEntityId()));
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                if (player.vehicleData != null && player.vehicleData.vehicleRuntimeId == packet.getUniqueEntityId()) {
+                    player.vehicleData = null;
+                }
+
+                player.compensatedWorld.removeEntity(packet.getUniqueEntityId());
+            });
         }
 
         if (event.getPacket() instanceof AddEntityPacket packet) {

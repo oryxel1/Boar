@@ -30,6 +30,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Blocks;
@@ -158,6 +159,23 @@ public final class BoarPlayer extends PlayerData {
 
     public void postTick() {
         this.glideBoostTicks--;
+    }
+
+    public float getYOffset() {
+        if (this.vehicleData != null) {
+            final EntityCache cache = this.compensatedWorld.getEntity(this.vehicleData.vehicleRuntimeId);
+            if (cache != null) {
+                final String identifier = cache.getDefinition().identifier();
+
+                if (identifier.equals("minecraft:boat") || identifier.equals("minecraft:chest_boat")) {
+                    return EntityDefinitions.BIRCH_BOAT.offset(); // It's all the same anyway, I just like birch :)
+                }
+            }
+
+            return 0;
+        }
+
+        return EntityDefinitions.PLAYER.offset();
     }
 
     public float getFrictionInfluencedSpeed(float slipperiness) {

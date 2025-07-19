@@ -9,15 +9,12 @@ import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.data.vanilla.StatusEffect;
 import ac.boar.anticheat.player.data.tracker.FlagTracker;
 import ac.boar.anticheat.prediction.engine.data.Vector;
-import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
-import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.math.vector.Vector3f;
-import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.InputMode;
@@ -152,10 +149,6 @@ public class PlayerData {
     public VehicleData vehicleData = null;
 
     public int tickSinceBlockResync;
-
-    public float getYOffset() {
-        return this.vehicleData != null ? 0 : EntityDefinitions.PLAYER.offset();
-    }
 
     // Prediction related method
     public final double getMaxOffset() {
