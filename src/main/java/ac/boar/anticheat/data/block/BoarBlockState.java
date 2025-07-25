@@ -49,6 +49,16 @@ public class BoarBlockState {
         return !state.is(Blocks.COBWEB) && !state.is(Blocks.BAMBOO_SAPLING) && this.isSolid(player);
     }
 
+    public Vec3 pre12180RandomOffset() {
+        int v1 = (3129871 * this.position.getX()) ^ (116129781 * this.position.getZ());
+        long randomSeed = Integer.toUnsignedLong(v1 * (42317861 * v1 + 11));
+        long randomX = (randomSeed % 12 + 1);
+        long randomZ = ((randomSeed >> 8) % 12 + 1);
+        float offsetX = randomX * 0.0625f;
+        float offsetZ = randomZ * 0.0625f;
+        return new Vec3(offsetX, 0, offsetZ);
+    }
+
     public void entityInside(final BoarPlayer player, Mutable pos) {
         if (this.state.is(Blocks.POWDER_SNOW) && player.boundingBox.offset(0, 1.0E-3F, 0).contains(pos.getX(), pos.getY(), pos.getZ())) { // UHHHHHHHHHHHHH
             return;

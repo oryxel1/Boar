@@ -1,7 +1,7 @@
 package ac.boar.anticheat.collision;
 
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.math.Box;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -12,7 +12,7 @@ import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.*;
 import org.geysermc.geyser.level.physics.Axis;
 import org.geysermc.geyser.level.physics.Direction;
-import org.geysermc.geyser.session.cache.tags.BlockTag;
+import org.geysermc.geyser.network.GameProtocol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +89,16 @@ public class BedrockCollision {
     public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
         if (vector3i.getY() == player.compensatedWorld.getDimension().minY() - 41) {
             return SOLID_SHAPE;
+        }
+
+        if (state.is(Blocks.BAMBOO)) {
+            Box baseShape = state.getValue(Properties.BAMBOO_LEAVES).equalsIgnoreCase("small") ?
+                    new Box(0, 0, 0, 0.125F, 1, 0.125F) : new Box(0, 0, 0, 0.1875F, 1, 0.1875F);
+
+            // We can still support the offsetting pre 1.21.80, mojang changed this post 1.21.80, and it doesn't even match JE???
+            if (!GameProtocol.is1_21_80orHigher(player.getSession())) {
+                return List.of(baseShape.offset(new BoarBlockState(state, vector3i, 0).pre12180RandomOffset()));
+            }
         }
 
         if (state.is(Blocks.POWDER_SNOW)) {
