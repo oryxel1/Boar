@@ -71,6 +71,9 @@ processResources {
 
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
+    changelog = System.getenv("CHANGELOG")
+    versionName = System.getenv("BUILD_NUMBER")
+    versionNumber = version + System.getenv("BUILD_NUMBER")
     projectId = "boar"
     // versionNumber = "1.0.0"
     versionType = "alpha"
