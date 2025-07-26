@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 
@@ -66,4 +67,14 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "boar"
+    // versionNumber = "1.0.0"
+    versionType = "alpha"
+    uploadFile = shadowJar
+    gameVersions = ["1.21.8"]
+    loaders = ["bukkit", "paper", "spigot", "bungeecord", "velocity"]
 }
