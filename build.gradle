@@ -71,12 +71,34 @@ processResources {
 
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
-    changelog = System.getenv("CHANGELOG")
-    versionName = version + "-" + System.getenv("BUILD_NUMBER")
+    versionName = version + "-" + getCommitHash()
+    versionNumber = version + "-" + getCommitHash()
+    changelog = getGitHash()
     projectId = "boar"
-    // versionNumber = "1.0.0"
     versionType = "alpha"
     uploadFile = shadowJar
     gameVersions = ["1.21.8"]
     loaders = ["bukkit", "paper", "spigot", "bungeecord", "velocity"]
+}
+
+def getGitHash() {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'log', '-1', '--pretty=%B'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+// Thanks to https://gist.github.com/JonasGroeger/7620911 :tm:
+def getCommitHash() {
+    def gitFolder = "$projectDir/.git/"
+    def takeFromHash = 7
+    def head = new File(gitFolder + "HEAD").text.split(":")
+    def isCommit = head.length == 1
+
+    if(isCommit) return head[0].trim().take(takeFromHash)
+
+    def refHead = new File(gitFolder + head[1].trim())
+    refHead.text.trim().take takeFromHash
 }
