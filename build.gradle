@@ -73,7 +73,7 @@ modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     versionName = version + "-" + getCommitHash()
     versionNumber = version + "-" + getCommitHash()
-    changelog = getGitHash()
+    changelog = getCommitMessage()
     projectId = "boar"
     versionType = "alpha"
     uploadFile = shadowJar
@@ -81,7 +81,7 @@ modrinth {
     loaders = ["bukkit", "paper", "spigot", "bungeecord", "velocity"]
 }
 
-def getGitHash() {
+def getCommitMessage() {
     def stdout = new ByteArrayOutputStream()
     exec {
         commandLine 'git', 'log', '-1', '--pretty=%B'
