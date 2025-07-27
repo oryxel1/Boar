@@ -34,12 +34,11 @@ public class ConfigLoader {
         // Load the config file
         try {
             return new ObjectMapper(new YAMLFactory())
-                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .disable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
-                    .disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
+                    .enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
+                    .enable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
                     .readValue(configFile, configClass);
-        } catch (IOException e) {
-            extension.logger().error("Failed to load config", e);
+        } catch (Exception e) {
+            extension.logger().error("Failed to load config (possible update?), loading the default config...");
             return defaultConfig;
         }
     }

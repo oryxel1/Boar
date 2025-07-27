@@ -16,9 +16,9 @@ max-tolerance-compensated-reach: 3.005
 
 # This decides whether we force Bedrock reach to be close as java as much as possible...
 # Due to how ray casting is handle on Bedrock, it might give the player a slight advantage over java player
-# This make it so that Bedrock player only get the same reach as the player...
+# This make it so that Bedrock player only get the same reach as JE players...
 # There is 3 mode, "bedrock" will check normally like, just bedrock.
-# "java-1.8" mode will check like java edition but with the 0.1 hitbox expand that 1.8 have (should be use if your server is 1.8)
+# "java-1.8" mode will check like java edition but with the 0.1 hitbox expand that 1.8 have
 # "java-1.9" mode will check like java edition but without the 0.1 hitbox expand that 1.8 have.
 force-reach-java-parity: "bedrock"
 

@@ -16,6 +16,7 @@ import org.cloudburstmc.protocol.bedrock.data.InputMode;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Optional;
 
@@ -74,8 +75,9 @@ public final class Reach extends PacketCheck {
     public ReachResult calculateReach(final EntityCache entity) {
         double distance = Double.MAX_VALUE;
 
-        // Handle this like how JE handle it.
-        if (!Boar.getConfig().reachJavaParityMode().equalsIgnoreCase("bedrock")) {
+        // Handle this like how JE handle it, also only do it for player sinceeee https://github.com/GeyserMC/Geyser/issues/5034
+        // weird that it only happen for other entity and not player huh, in any case, this is fine.
+        if (!Boar.getConfig().reachJavaParityMode().equalsIgnoreCase("bedrock") && entity.getDefinition() == EntityDefinitions.PLAYER) {
             final Vec3 rotationVec = getRotationVector(player, 1);
             final Vec3 min = getEyePosition(player, 1);
             final Vec3 max = min.add(rotationVec.multiply(6F));
