@@ -8,7 +8,9 @@ import java.util.List;
 public record Config(@JsonProperty("player-rewind-history-size-ticks") int rewindHistory,
                      @JsonProperty("player-position-acceptance-threshold") float acceptanceThreshold,
                      @JsonProperty("max-tolerance-compensated-reach") float toleranceReach,
+                     @JsonProperty("force-reach-java-parity") String reachJavaParityMode,
                      @JsonProperty("differ-till-alert") float alertThreshold,
                      @JsonProperty("disabled-checks") List<String> disabledChecks,
-                     @JsonProperty("ignore-ghost-block") boolean ignoreGhostBlock) {
+                     @JsonProperty("ignore-ghost-block") boolean ignoreGhostBlock,
+                     @JsonProperty("debug-mode") boolean debugMode) {
 }

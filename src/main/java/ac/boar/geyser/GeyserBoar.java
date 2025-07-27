@@ -19,8 +19,6 @@ import org.geysermc.geyser.api.extension.ExtensionLogger;
 import org.geysermc.geyser.api.util.TriState;
 import org.geysermc.geyser.session.GeyserSession;
 
-import java.util.List;
-
 public class GeyserBoar implements Extension {
     @Getter
     private static ExtensionLogger logger;
@@ -28,7 +26,6 @@ public class GeyserBoar implements Extension {
     @Subscribe
     public void onSessionJoin(SessionLoginEvent event) {
         Boar.getInstance().getPlayerManager().add(event.connection());
-
     }
 
     @Subscribe
