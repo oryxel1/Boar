@@ -112,6 +112,14 @@ public class LegacyAuthInputPackets {
 
         if (processInputData) {
             processInputData(player);
+
+            // Player isn't moving forward but is sprinting and their flag sync, this shouldn't happen.
+            if (player.input.z <= 0 && player.getFlagTracker().has(EntityFlag.SPRINTING) && player.desyncedFlag.get() == -1) {
+                player.getFlagTracker().set(EntityFlag.SPRINTING, false);
+
+                // Tell geyser that the player "want" to stop sprinting.
+                packet.getInputData().add(PlayerAuthInputData.STOP_SPRINTING);
+            }
         }
     }
 
@@ -123,9 +131,6 @@ public class LegacyAuthInputPackets {
 
                     // Prevent player from spoofing elytra gliding.
                     player.getFlagTracker().set(EntityFlag.GLIDING, player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId());
-                    if (!player.getFlagTracker().has(EntityFlag.GLIDING)) {
-                        player.getTeleportUtil().rewind(player.tick - 1);
-                    }
                 }
                 case STOP_GLIDING -> {
                     player.getFlagTracker().set(EntityFlag.GLIDING, false);

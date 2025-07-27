@@ -39,7 +39,7 @@ public final class EntityCache {
         if (metadata.containsKey(EntityDataTypes.HEIGHT)) {
             this.dimensions = EntityDimensions.fixed(definition.height(), metadata.get(EntityDataTypes.HEIGHT));
         }
-
+        
         // This is a hacky workaround for boat since boat is real weird when it comes to collision, at least on GeyserMC.
         if (this.definition.identifier().equalsIgnoreCase("minecraft:boat") || this.definition.identifier().equalsIgnoreCase("minecraft:chest_boat")) {
             // This is from debugging which is... ehhhhh, I really don't get why it different from the collision box in behaviour json.

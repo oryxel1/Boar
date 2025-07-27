@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.server;
 
+import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
@@ -14,6 +15,7 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.*;
+import org.geysermc.geyser.item.Items;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -83,7 +85,10 @@ public class ServerDataPackets implements PacketListener {
             }
 
             player.sendLatencyStack(immediate);
-            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+
+            final long id = player.sentStackId.get();
+            player.desyncedFlag.set(flagsCopy != null ? id : -1);
+            player.getLatencyUtil().addTaskToQueue(id, () -> {
                 if (flagsCopy != null) {
                     player.getFlagTracker().set(flagsCopy);
                 }
@@ -109,6 +114,10 @@ public class ServerDataPackets implements PacketListener {
                     player.dimensions = EntityDimensions.fixed(player.dimensions.width(), height).withEyeHeight(eyeHeight);
                     player.boundingBox = player.dimensions.getBoxAt(player.position);
                     // System.out.println("Update height!");
+                }
+
+                if (player.desyncedFlag.get() == id) {
+                    player.desyncedFlag.set(-1);
                 }
             });
         }
@@ -140,6 +149,33 @@ public class ServerDataPackets implements PacketListener {
                     }
                 }
             });
+        }
+    }
+
+    @Override
+    public void onPacketReceived(final CloudburstPacketEvent event) {
+        final BoarPlayer player = event.getPlayer();
+        if (event.getPacket() instanceof MovementPredictionSyncPacket packet) {
+            System.out.println(packet);
+            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
+                return;
+            }
+
+            player.getFlagTracker().set(EntityFlag.SNEAKING, packet.getFlags().contains(EntityFlag.SNEAKING));
+            player.getFlagTracker().set(EntityFlag.SWIMMING, packet.getFlags().contains(EntityFlag.SWIMMING) && player.touchingWater);
+            player.setSprinting(packet.getFlags().contains(EntityFlag.SPRINTING));
+
+            boolean using = packet.getFlags().contains(EntityFlag.USING_ITEM);
+            if (!using) {
+                // This is a shit solution to prevent player to do no slow using this packet but ehhhh
+                // We wouldn't have to do this if we're handling eating properly but brah, I'm retarded.
+                player.getSession().releaseItem();
+            }
+
+            player.getFlagTracker().set(EntityFlag.USING_ITEM, using);
+
+            final ContainerCache cache = player.compensatedInventory.armorContainer;
+            player.getFlagTracker().set(EntityFlag.GLIDING, player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId() && packet.getFlags().contains(EntityFlag.GLIDING));
         }
     }
 }

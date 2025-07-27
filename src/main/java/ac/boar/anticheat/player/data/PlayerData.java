@@ -23,7 +23,6 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeOperation;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
-import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Fluid;
@@ -32,7 +31,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class PlayerData {
@@ -76,6 +74,7 @@ public class PlayerData {
     public int glideBoostTicks;
 
     public boolean doingInventoryAction;
+    public AtomicLong desyncedFlag = new AtomicLong(-1);
 
     // Effect status related
     @Getter
