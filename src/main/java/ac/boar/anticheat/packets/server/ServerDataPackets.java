@@ -156,7 +156,6 @@ public class ServerDataPackets implements PacketListener {
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof MovementPredictionSyncPacket packet) {
-            System.out.println(packet);
             if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
                 return;
             }
