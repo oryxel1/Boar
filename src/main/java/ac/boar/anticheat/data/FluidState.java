@@ -26,15 +26,17 @@ public record FluidState(Fluid fluid, float height, int level) {
         for (Direction direction : Direction.HORIZONTAL) {
             mutable.set(vector3i, direction.getUnitVector());
             final FluidState fluidState1 = player.compensatedWorld.getFluidState(mutable);
-            int j = fluidState1.getEffectiveFlowDecay();
+            int j = fluidState1.fluid() == this.fluid() ? fluidState1.getEffectiveFlowDecay() : -1;
 
             if (j < 0) {
                 if (!player.compensatedWorld.getBlockState(mutable, 0).blocksMotion(player)) {
-                    j = player.compensatedWorld.getFluidState(Vector3i.from(mutable.getX(), mutable.getY() - 1, mutable.getZ())).getEffectiveFlowDecay();
-
-                    if (j >= 0) {
-                        int k = j - (i - 8);
-                        vec3 = vec3.add((mutable.getX() - vector3i.getX()) * k, (mutable.getY() - vector3i.getY()) * k, (mutable.getZ() - vector3i.getZ()) * k);
+                    FluidState below = player.compensatedWorld.getFluidState(Vector3i.from(mutable.getX(), mutable.getY() - 1, mutable.getZ()));
+                    if (below.fluid() == this.fluid()) {
+                        j = below.getEffectiveFlowDecay();
+                        if (j >= 0) {
+                            int k = j - (i - 8);
+                            vec3 = vec3.add((mutable.getX() - vector3i.getX()) * k, (mutable.getY() - vector3i.getY()) * k, (mutable.getZ() - vector3i.getZ()) * k);
+                        }
                     }
                 }
             } else {
