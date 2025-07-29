@@ -16,6 +16,7 @@ import org.cloudburstmc.protocol.bedrock.data.InputMode;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
+import org.geysermc.geyser.entity.EntityDefinitions;
 
 import java.util.Optional;
 
@@ -51,16 +52,16 @@ public final class Reach extends PacketCheck {
 
         double distance = result.distance();
         if (distance > Boar.getConfig().toleranceReach()) {
+            // Don't actually alert since this could be "java-1.8" or "java-1.9" config.... or maybe just falses
+            // as long as it's not noticeable, it's fine, we can always handle the reach silently.
+
             if (distance != Double.MAX_VALUE) {
-                fail("d=" + distance);
+                Boar.debug("Cancelled hit by player " + player.getSession().getPlayerEntity().getDisplayName() + " with distance " + distance + ", mode=" + Boar.getConfig().reachJavaParityMode(), Boar.DebugMessage.WARNING);
             } else {
-                // This seems to be falsing from time to time and ehmmmm, this sucks lol.
-                // fail("hitboxes!" + ", deltaTicks=" + result.deltaTicks());
+                Boar.debug("Cancelled hit by player " + player.getSession().getPlayerEntity().getDisplayName() + " (failed to find entity in sight)" + ", mode=" + Boar.getConfig().reachJavaParityMode(), Boar.DebugMessage.WARNING);
             }
 
             event.setCancelled(true);
-        } else {
-            // Boar.getInstance().getAlertManager().alert("Distance=" + distance + "," + result.deltaTicks());
         }
 
         if (player.inputMode == InputMode.TOUCH) {
@@ -69,12 +70,32 @@ public final class Reach extends PacketCheck {
                 event.setCancelled(true);
             }
         }
-
-        // ChatUtil.alert(player,"d=" + distance);
     }
 
     public ReachResult calculateReach(final EntityCache entity) {
         double distance = Double.MAX_VALUE;
+
+        // Handle this like how JE handle it, also only do it for player sinceeee https://github.com/GeyserMC/Geyser/issues/5034
+        // weird that it only happen for other entity and not player huh, in any case, this is fine.
+        if (!Boar.getConfig().reachJavaParityMode().equalsIgnoreCase("bedrock") && entity.getDefinition() == EntityDefinitions.PLAYER) {
+            final Vec3 rotationVec = getRotationVector(player, 1);
+            final Vec3 min = getEyePosition(player, 1);
+            final Vec3 max = min.add(rotationVec.multiply(6F));
+
+            final Vec3 hitResult = getEntityHitResult(entity.getCurrent().getBoundingBox(1), min, max);
+            if (hitResult != null) {
+                distance = Math.min(distance, hitResult.squaredDistanceTo(min));
+            }
+
+            if (entity.getPast() != null) {
+                final Vec3 prevHitResult = getEntityHitResult(entity.getPast().getBoundingBox(1), min, max);
+                if (prevHitResult != null) {
+                    distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
+                }
+            }
+
+            return new ReachResult(1, distance == Double.MAX_VALUE ? distance : Math.sqrt(distance));
+        }
 
         float deltaTicks;
         for (deltaTicks = 0F; deltaTicks <= 1; deltaTicks += 0.1F) {
@@ -103,7 +124,7 @@ public final class Reach extends PacketCheck {
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {
-        Box lv5 = box.expand(0.1F);
+        Box lv5 = Boar.getConfig().reachJavaParityMode().equalsIgnoreCase("java-1.9") ? box.clone() : box.expand(0.1F);
         Optional<Vec3> vec3 = lv5.clip(min, max);
         if (lv5.contains(min)) {
             return min;
