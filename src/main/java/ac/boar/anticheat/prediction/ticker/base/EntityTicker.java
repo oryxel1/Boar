@@ -47,8 +47,7 @@ public class EntityTicker {
     private void updateWaterState() {
         player.fluidHeight.clear();
         this.checkWaterState();
-        this.updateFluidHeightAndDoFluidPushing(player.compensatedWorld.getDimension().bedrockId() ==
-                BedrockDimension.DEFAULT_NETHER_ID ? 0.007F : 0.0023333333333333335F, Fluid.LAVA);
+        this.updateFluidHeightAndDoFluidPushing(0.007F, Fluid.LAVA);
     }
 
     void checkWaterState() {
@@ -95,8 +94,12 @@ public class EntityTicker {
         }}}
 
         if (vec3.lengthSquared() > 0.0D) {
-            vec3 = vec3.normalize();
-            player.velocity = player.velocity.add(vec3.multiply(speed));
+            vec3 = vec3.normalize().multiply(speed);
+            player.velocity = player.velocity.add(vec3);
+        }
+
+        if (tag == Fluid.LAVA) {
+            player.beingPushByLava = vec3.horizontalLengthSquared() > 1.0E-6;
         }
 
         player.fluidHeight.put(tag, maxFluidHeight);

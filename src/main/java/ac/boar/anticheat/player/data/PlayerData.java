@@ -135,6 +135,8 @@ public class PlayerData {
     public boolean horizontalCollision, verticalCollision;
     public boolean soulSandBelow;
 
+    public boolean beingPushByLava;
+
     public Integer steppingOnHoneyY = null;
 
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();

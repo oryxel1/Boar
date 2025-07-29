@@ -23,13 +23,35 @@ public class UncertainRunner {
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
 
-        if (Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset() && player.soulSandBelow && actual.horizontalLengthSquared() < player.afterCollision.horizontalLengthSquared() && MathUtil.sameDirection(actual, predicted)) {
+        boolean validYOffset = Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset();
+        boolean sameDirection = MathUtil.sameDirection(actual, predicted);
+        boolean actualSpeedSmallerThanPredicted = actual.horizontalLengthSquared() < predicted.horizontalLengthSquared();
+
+        if (player.soulSandBelow && validYOffset && actualSpeedSmallerThanPredicted && sameDirection) {
             extra = (float) offset;
+        }
+
+        if (player.beingPushByLava && validYOffset) {
+            extra += 0.004F;
+
+            if (sameDirection) {
+                if (player.input.horizontalLengthSquared() > 0) {
+                    Vec3 subtractedSpeed = actual.subtract(MathUtil.sign(player.afterCollision.x) * 0.02F, 0, MathUtil.sign(player.afterCollision.z) * 0.02F);
+
+                    if (subtractedSpeed.horizontalLengthSquared() < predicted.horizontalLengthSquared()) {
+                        extra = (float) offset;
+                    }
+                } else {
+                    if (actual.horizontalLengthSquared() < predicted.horizontalLengthSquared()) {
+                        extra = (float) offset;
+                    }
+                }
+            }
         }
 
         // .... This is weird, no idea why.
         if (!player.getFlagTracker().has(EntityFlag.SWIMMING) && player.hasDepthStrider) {
-            if (actual.horizontalLengthSquared() < predicted.horizontalLengthSquared() && Math.abs(player.unvalidatedTickEnd.y - player.velocity.y) < player.getMaxOffset()) {
+            if (actualSpeedSmallerThanPredicted && validYOffset) {
                 extra = (float) offset;
             }
         }
