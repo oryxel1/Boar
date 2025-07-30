@@ -34,12 +34,11 @@ public class ConfigLoader {
         // Load the config file
         try {
             return new ObjectMapper(new YAMLFactory())
-                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .disable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
-                    .disable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
+                    .enable(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES)
+                    .enable(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES)
                     .readValue(configFile, configClass);
-        } catch (IOException e) {
-            extension.logger().error("Failed to load config", e);
+        } catch (Exception e) {
+            extension.logger().error("Failed to load config (possible update?), loading the default config...");
             return defaultConfig;
         }
     }
@@ -67,6 +66,8 @@ public class ConfigLoader {
                         s = s.replace("disabled-checks: []", "disabled-checks: " + Arrays.toString(config.disabledChecks().toArray(new String[0])));
                         s = s.replace("ignore-ghost-block: false", "ignore-ghost-block: " + config.ignoreGhostBlock());
                         s = s.replace("differ-till-alert: 0.0", "differ-till-alert: " + config.alertThreshold());
+                        s = s.replace("debug-mode: false", "debug-mode: " + config.debugMode());
+                        s = s.replace("force-reach-java-parity: \"bedrock\"", "force-reach-java-parity: \"" + config.reachJavaParityMode() + "\"");
                     }
 
                     writer.write(s.toCharArray());

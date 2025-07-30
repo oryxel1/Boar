@@ -34,7 +34,8 @@ public class Boar {
     private AlertManager alertManager;
 
     public void init(GeyserBoar instance) {
-        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, new Config(20, 1.0E-4F,  3.005F, 0F, List.of(), false));
+        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class,
+                new Config(20, 1.0E-4F,  3.005F, "bedrock", 0F, List.of(), false, false));
         // System.out.println("Load config: " + config);
 
         BedrockMappings.load();
@@ -51,7 +52,6 @@ public class Boar {
         PacketEvents.getApi().register(new PlayerInventoryPackets());
         PacketEvents.getApi().register(new VehiclePackets());
         PacketEvents.getApi().register(new PacketCheckRunner());
-        //PacketEvents.getApi().register(new TestAuthInputPackets());
         PacketEvents.getApi().register(new AuthInputPackets());
         PacketEvents.getApi().register(new PostAuthInputPackets());
     }
@@ -61,5 +61,17 @@ public class Boar {
         this.playerManager.clear();
 
         ConfigLoader.save(instance, GeyserBoar.class, config);
+    }
+
+    public static void debug(String message, DebugMessage type) {
+        switch (type) {
+            case INFO -> GeyserBoar.getLogger().info(message);
+            case WARNING -> GeyserBoar.getLogger().warning(message);
+            case SERVE -> GeyserBoar.getLogger().severe(message);
+        }
+    }
+
+    public enum DebugMessage {
+        INFO, WARNING, SERVE;
     }
 }
