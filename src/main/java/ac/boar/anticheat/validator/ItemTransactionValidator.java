@@ -8,7 +8,6 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
-import ac.boar.geyser.GeyserBoar;
 import ac.boar.mappings.BedrockMappings;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
@@ -16,6 +15,7 @@ import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
 import org.cloudburstmc.protocol.bedrock.data.definitions.SimpleItemDefinition;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
@@ -41,10 +41,9 @@ import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.session.cache.tags.ItemTag;
 import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransactionTranslator;
 import org.geysermc.geyser.util.BlockUtils;
+import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -99,33 +98,14 @@ public final class ItemTransactionValidator {
                 }
             }
 
-            case ITEM_USE_ON_ENTITY -> {
-//                final int slot = packet.getHotbarSlot();
-//                if (slot < 0 || slot > 8) {
-//                    return false;
-//                }
-//
-//                final ItemData SD1 = inventory.inventoryContainer.getItemFromSlot(slot).getData();
-//                final ItemData SD2 = inventory.inventoryContainer.getHeldItemData();
-//                if (!validate(SD1, packet.getItemInHand()) && !validate(SD2, packet.getItemInHand())) {
-//                    return false;
-//                }
-//
-//                final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-//                if (entity == null || entity.getTransactionId() > player.receivedStackId.get()) {
-//                    return false;
-//                }
-//
-//                final boolean tooFar = entity.getServerPosition().distanceTo(player.position) > 6;
-//                if (tooFar) {
-//                    return false;
-//                }
-            }
-
             case ITEM_RELEASE -> {
                 // Self-explanatory.
                 if (packet.getActionType() == 0) {
-                    player.getUseItemCache().release();
+                    if (player.compensatedInventory.inventoryContainer.getHeldItem().getJavaId() == Items.TRIDENT.javaId()) {
+                        player.setDirtyRiptide(player.sinceTridentUse, player.compensatedInventory.inventoryContainer.getHeldItemData());
+                    }
+
+                    player.getItemUseTracker().release();
                 }
             }
 
@@ -366,7 +346,6 @@ public final class ItemTransactionValidator {
                                 }
                             }
                         }
-                        // System.out.println(packet);
                     }
 
                     // This seems to for things that is not related to block interact and only for item interaction.
@@ -375,7 +354,12 @@ public final class ItemTransactionValidator {
                             return true;
                         }
 
-                        player.getUseItemCache().use(SD1);
+                        ItemStack item = player.compensatedInventory.translate(SD1);
+                        if (item.getId() == Items.FIREWORK_ROCKET.javaId() && player.getFlagTracker().has(EntityFlag.GLIDING)) {
+                            player.glideBoostTicks = 20;
+                        }
+
+                        player.getItemUseTracker().use(SD1, item.getId());
 
                         List<LegacySetItemSlotData> legacySlots = packet.getLegacySlots();
                         if (packet.getActions().size() == 1 && !legacySlots.isEmpty()) {

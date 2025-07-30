@@ -2,7 +2,6 @@ package ac.boar.geyser;
 
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.alert.AlertManager;
-import ac.boar.anticheat.data.cache.UseDurationCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import lombok.Getter;
 import org.geysermc.event.subscribe.Subscribe;
@@ -37,7 +36,6 @@ public class GeyserBoar implements Extension {
     public void onGeyserPostInitializeEvent(GeyserPostInitializeEvent event) {
         logger = this.logger();
 
-        UseDurationCache.init();
         Boar.getInstance().init(this);
     }
 

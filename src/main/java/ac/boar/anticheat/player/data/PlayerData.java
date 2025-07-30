@@ -97,7 +97,7 @@ public class PlayerData {
 
     // Riptide related
     public boolean dirtyRiptide, dirtySpinStop, thisTickSpinAttack, thisTickOnGroundSpinAttack;
-    public int autoSpinAttackTicks;
+    public int autoSpinAttackTicks, sinceTridentUse;
     public ItemData riptideItem = ItemData.AIR;
     public void setDirtyRiptide(int j, ItemData data) {
         if (j < 10 || !CompensatedInventory.getEnchantments(data).containsKey(BedrockEnchantment.RIPTIDE)) {

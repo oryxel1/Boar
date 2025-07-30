@@ -4,7 +4,7 @@ import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
-import ac.boar.anticheat.data.UseItemCache;
+import ac.boar.anticheat.data.ItemUseTracker;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.LatencyUtil;
@@ -74,7 +74,7 @@ public final class BoarPlayer extends PlayerData {
     public final ItemTransactionValidator transactionValidator = new ItemTransactionValidator(this);
 
     @Getter
-    private final UseItemCache useItemCache = new UseItemCache(this);
+    private final ItemUseTracker itemUseTracker = new ItemUseTracker(this);
 
     @Getter
     @Setter
@@ -155,11 +155,12 @@ public final class BoarPlayer extends PlayerData {
             }
         }
 
-        this.getUseItemCache().tick();
+        this.getItemUseTracker().preTick();
     }
 
     public void postTick() {
         this.glideBoostTicks--;
+        this.getItemUseTracker().postTick();
     }
 
     public float getYOffset() {
