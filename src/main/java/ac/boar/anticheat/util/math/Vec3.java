@@ -32,6 +32,25 @@ public class Vec3 implements Cloneable {
         this.z = vector3i.getZ();
     }
 
+    public int compareTo(Vector3i vec3i) {
+        if (this.getY() == vec3i.getY()) {
+            return (int) (this.getZ() == vec3i.getZ() ? this.getX() - vec3i.getX() : this.getZ() - vec3i.getZ());
+        } else {
+            return (int) (this.getY() - vec3i.getY());
+        }
+    }
+
+    public float distToCenterSqr(Vec3 vec3) {
+        return distToCenterSqr(vec3.getX(), vec3.getY(), vec3.getZ());
+    }
+
+    public float distToCenterSqr(float d, float e, float f) {
+        float g = this.getX() + 0.5F - d;
+        float h = this.getY() + 0.5F - e;
+        float i = this.getZ() + 0.5F - f;
+        return g * g + h * h + i * i;
+    }
+
     public Vector3f toVector3f() {
         return Vector3f.from(this.x, this.y, this.z);
     }

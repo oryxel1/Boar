@@ -142,7 +142,7 @@ public class EntityTicker {
         }
 
         // TODO: What the actual value actually? Player still able to bounce on slime despite being .375 block higher.
-        Vector3i blockPos = player.position.down(0.378F).toVector3i();
+        Vector3i blockPos = player.getOnPos(0.378F);
         BoarBlockState blockState = player.compensatedWorld.getBlockState(blockPos, 0);
 
         if (player.verticalCollision) {
