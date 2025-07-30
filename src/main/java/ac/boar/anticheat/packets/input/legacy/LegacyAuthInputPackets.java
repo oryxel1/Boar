@@ -132,10 +132,7 @@ public class LegacyAuthInputPackets {
                     // Prevent player from spoofing elytra gliding.
                     player.getFlagTracker().set(EntityFlag.GLIDING, player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId());
                 }
-                case STOP_GLIDING -> {
-                    player.getFlagTracker().set(EntityFlag.GLIDING, false);
-                    player.glideBoostTicks = 0;
-                }
+                case STOP_GLIDING -> player.getFlagTracker().set(EntityFlag.GLIDING, false);
 
                 // Don't let player do backwards sprinting!
                 case START_SPRINTING -> player.setSprinting(player.input.getZ() > 0);
