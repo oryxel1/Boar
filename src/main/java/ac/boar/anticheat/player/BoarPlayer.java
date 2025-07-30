@@ -249,7 +249,7 @@ public final class BoarPlayer extends PlayerData {
                 continue;
             }
 
-            float e = this.position.distToCenterSqr(new Vec3(blockPos2));
+            float e = new Vec3(blockPos2).distToCenterSqr(this.position);
 
             if (e < d || e == d && (blockPos == null || new Vec3(blockPos).compareTo(blockPos2) < 0)) {
                 blockPos = blockPos2;
