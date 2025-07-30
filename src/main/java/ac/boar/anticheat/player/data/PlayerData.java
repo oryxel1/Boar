@@ -137,8 +137,6 @@ public class PlayerData {
 
     public boolean beingPushByLava;
 
-    public Integer steppingOnHoneyY = null;
-
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
     public float getFluidHeight(Fluid tagKey) {
         return this.fluidHeight.getOrDefault(tagKey, 0F);

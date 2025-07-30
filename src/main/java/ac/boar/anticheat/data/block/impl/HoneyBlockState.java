@@ -19,16 +19,10 @@ public class HoneyBlockState extends BoarBlockState {
             float e = 0.4F + d * 0.2F;
             player.velocity = player.velocity.multiply(e, 1, e);
         }
-
-        player.steppingOnHoneyY = vector3i.getY();
     }
 
     @Override
     public void entityInside(BoarPlayer player, Mutable pos) {
-        if (player.steppingOnHoneyY != null && player.steppingOnHoneyY == pos.getY()) { // Not entirely correct, but works.
-            return;
-        }
-
         player.velocity = player.velocity.multiply(0.40000001F, 1, 0.40000001F);
         player.velocity.y = Math.max(-0.12F, player.velocity.y);
     }
