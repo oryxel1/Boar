@@ -70,9 +70,10 @@ public class ServerDataPackets implements PacketListener {
 
             Float height = packet.getMetadata().get(EntityDataTypes.HEIGHT);
             Float width = packet.getMetadata().get(EntityDataTypes.WIDTH);
+            Float scale = packet.getMetadata().get(EntityDataTypes.SCALE);
 
             final EnumSet<EntityFlag> flags = packet.getMetadata().getFlags();
-            if (flags == null && height == null && width == null) {
+            if (flags == null && height == null && width == null && scale == null) {
                 return;
             }
 
@@ -114,6 +115,10 @@ public class ServerDataPackets implements PacketListener {
                     player.dimensions = EntityDimensions.fixed(player.dimensions.width(), height).withEyeHeight(eyeHeight);
                     player.boundingBox = player.dimensions.getBoxAt(player.position);
                     // System.out.println("Update height!");
+                }
+
+                if (scale != null) {
+                    player.dimensions = player.dimensions.hardScaled(scale);
                 }
 
                 if (player.desyncedFlag.get() == id) {

@@ -25,7 +25,8 @@ public record EntityDimensions(float width, float height, float eyeHeight, boole
 	}
 
     public EntityDimensions hardScaled(float ratio) {
-        return new EntityDimensions(this.width * ratio, this.height * ratio, this.eyeHeight * ratio, false);
+		// Also I find it pretty funny that this doesn't seem to affect camera (for the session player) therefore don't scale the eyeHeight.
+        return new EntityDimensions(this.width * ratio, this.height * ratio, this.eyeHeight, false);
     }
 
 	public EntityDimensions scaled(float ratio) {
