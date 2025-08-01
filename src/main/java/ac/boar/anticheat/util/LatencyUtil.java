@@ -1,7 +1,6 @@
 package ac.boar.anticheat.util;
 
 import ac.boar.anticheat.player.BoarPlayer;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
@@ -48,8 +47,8 @@ public final class LatencyUtil {
         }
 
         this.sentStackLatency.removeIf(l -> {
-            final StackLatencyData latencyData = this.map.remove(l);
-            if (latencyData != null && l <= id) {
+            if (this.map.containsKey(l) && l <= id) {
+                final StackLatencyData latencyData = this.map.remove(l);
                 latencyData.tasks.forEach(Runnable::run);
 
                 this.prevReceivedSentTime.set(Math.max(this.prevReceivedSentTime.get(), latencyData.sentTime));
