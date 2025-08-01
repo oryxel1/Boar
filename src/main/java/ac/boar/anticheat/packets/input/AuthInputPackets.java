@@ -13,7 +13,6 @@ import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
-import lombok.extern.slf4j.Slf4j;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.EntityDefinitions;
@@ -22,7 +21,6 @@ import org.geysermc.geyser.level.BedrockDimension;
 import java.util.Iterator;
 import java.util.Map;
 
-@Slf4j
 public class AuthInputPackets extends TeleportHandler implements PacketListener {
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
