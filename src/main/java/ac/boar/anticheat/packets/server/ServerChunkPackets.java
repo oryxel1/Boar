@@ -157,10 +157,6 @@ public class ServerChunkPackets implements PacketListener {
                 player.inLoadingScreen = false;
                 player.sinceLoadingScreen = 0;
             }
-
-            if (player.sinceAuthInput == -1) {
-                player.sinceAuthInput = System.currentTimeMillis();
-            }
         }
     }
 

@@ -1,6 +1,7 @@
 package ac.boar.anticheat.util;
 
 import ac.boar.anticheat.player.BoarPlayer;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 @RequiredArgsConstructor
 public final class LatencyUtil {
@@ -15,8 +17,14 @@ public final class LatencyUtil {
     private final List<Long> sentStackLatency = new CopyOnWriteArrayList<>();
     private final Map<Long, StackLatencyData> map = new ConcurrentHashMap<>();
 
+    private final AtomicLong prevReceivedSentTime = new AtomicLong(-1);
+    public long getLastSentTime() {
+        return this.prevReceivedSentTime.get();
+    }
+
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
+        this.map.put(id, new StackLatencyData(System.nanoTime()));
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
@@ -27,7 +35,7 @@ public final class LatencyUtil {
 
         synchronized (this) {
             if (!this.map.containsKey(id)) {
-                this.map.put(id, new StackLatencyData(id));
+                this.map.put(id, new StackLatencyData(System.nanoTime())); // Shouldn't happen but just in case.
             }
 
             this.map.get(id).tasks.add(runnable);
@@ -40,8 +48,11 @@ public final class LatencyUtil {
         }
 
         this.sentStackLatency.removeIf(l -> {
-            if (this.map.containsKey(l) && l <= id) {
-                this.map.remove(l).tasks.forEach(Runnable::run);
+            final StackLatencyData latencyData = this.map.remove(l);
+            if (latencyData != null && l <= id) {
+                latencyData.tasks.forEach(Runnable::run);
+
+                this.prevReceivedSentTime.set(Math.max(this.prevReceivedSentTime.get(), latencyData.sentTime));
             }
 
             return l <= id;
@@ -53,7 +64,7 @@ public final class LatencyUtil {
 
     @RequiredArgsConstructor
     private static class StackLatencyData {
-        private final long stackId;
+        private final long sentTime;
         private final List<Runnable> tasks = new ArrayList<>();
     }
 }

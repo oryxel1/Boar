@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.input;
 
+import ac.boar.anticheat.check.impl.timer.Timer;
 import ac.boar.anticheat.data.input.PredictionData;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
@@ -44,21 +45,29 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             return;
         }
 
-        // This is to prevent player skipping ticks after respawn, fucking up our rewind system.
+        // This is to prevent player skipping (more) ticks (than they're supposed to) after respawn to fuck up our rewind system.
         long distanceSincePrev = System.currentTimeMillis() - player.sinceAuthInput;
         if (distanceSincePrev < 50L) {
             player.tick++;
         } else {
-            player.tick = Math.min(claimedTick - player.tick, distanceSincePrev / 45L);
+            player.tick += Math.min(claimedTick - player.tick, distanceSincePrev / 45L);
         }
+
+        System.out.println(distanceSincePrev + "," + packet.getTick());
+
+        player.sinceAuthInput = System.currentTimeMillis();
 
         if (player.tick != packet.getTick()) {
             player.kick("Invalid tick id, predicted=" + player.tick + ", actual=" + packet.getTick());
             return;
         }
 
+        final Timer timer = (Timer) player.getCheckHolder().get(Timer.class);
+        if (timer != null && timer.isInvalid()) {
+            return;
+        }
 
-
+        // Timer check end here.
         // -------------------------------------------------------------------------
 
         player.breakingValidator.handle(packet);
@@ -73,6 +82,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             player.position = player.unvalidatedPosition;
             return;
         }
+
 
         if (player.isMovementExempted()) {
             player.setPos(player.unvalidatedPosition);
