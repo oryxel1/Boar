@@ -135,7 +135,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public void kick(String reason) {
-        this.session.disconnect(AlertManager.PREFIX + " " + reason);
+        this.session.disconnect(AlertManager.BEDROCK_PREFIX + " " + reason);
     }
 
     // Prediction related method

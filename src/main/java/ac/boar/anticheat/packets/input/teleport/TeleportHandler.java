@@ -28,6 +28,11 @@ public class TeleportHandler {
 
             queuedTeleports.poll();
 
+            TeleportCache peek = queuedTeleports.peek();
+            if (peek != null && player.receivedStackId.get() < peek.getStackId()) {
+                continue;
+            }
+
             // Bedrock don't reply to teleport individually using a separate tick packet instead it just simply set its position to
             // the teleported position and then let us know the *next tick*, so we do the same!
             if (cache instanceof TeleportCache.Normal normal) {
