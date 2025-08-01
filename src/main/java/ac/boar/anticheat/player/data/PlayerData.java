@@ -50,7 +50,8 @@ public class PlayerData {
     @Setter
     private Set<PlayerAuthInputData> inputData = new HashSet<>();
 
-    public long tick = Long.MIN_VALUE;
+    public long tick = 0;
+    public long sinceAuthInput = -1;
 
     public Integer currentLoadingScreen = null;
     public boolean inLoadingScreen;

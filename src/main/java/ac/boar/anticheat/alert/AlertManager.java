@@ -6,7 +6,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AlertManager {
-    public final static String PREFIX = "§3Boar §7>§r ";
+    public final static String PREFIX = "§sBoar §i>§r ";
+    public final static String BEDROCK_PREFIX = "§3Boar §7>§r ";
 
     private final Map<UUID, CommandSource> sources = new ConcurrentHashMap<>();
 
