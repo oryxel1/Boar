@@ -50,7 +50,7 @@ public class UncertainRunner {
         }
 
         // .... This is weird, no idea why.
-        if (!player.getFlagTracker().has(EntityFlag.SWIMMING) && player.hasDepthStrider) {
+        if (player.hasDepthStrider) {
             if (actualSpeedSmallerThanPredicted && validYOffset) {
                 extra = (float) offset;
             }
