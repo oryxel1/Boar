@@ -17,7 +17,7 @@ public class AlertManager {
     }
 
     public String getPrefix(CommandSource source) {
-        if (source instanceof GeyserConnection) {
+        if (source.connection() != null) {
             return BEDROCK_PREFIX;
         }
 
