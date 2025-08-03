@@ -73,6 +73,8 @@ public class LegacyAuthInputPackets {
                 }
             }
         }
+
+        player.prevPosition = player.position;
     }
 
     public static void correctInputData(final BoarPlayer player, final PlayerAuthInputPacket packet) {
