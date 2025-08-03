@@ -60,6 +60,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         final Timer timer = (Timer) player.getCheckHolder().get(Timer.class);
         if (timer != null && timer.isInvalid()) {
+            event.setCancelled(true);
             return;
         }
 
