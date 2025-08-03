@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class AuthInputPackets extends TeleportHandler implements PacketListener {
     @Override
-    public void onPacketReceived(CloudburstPacketEvent event) {
+    public void onPacketReceived(final CloudburstPacketEvent event) {
         if (event.isCancelled()) {
             return;
         }
@@ -35,25 +35,36 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         player.sinceLoadingScreen++;
 
-        // TODO: ugggggh, current timer logic is a bit broken.
         // -------------------------------------------------------------------------
-        Timer timer = (Timer) player.getCheckHolder().get(Timer.class);
-        if (player.tick == Long.MIN_VALUE) {
-            if (timer == null) {
-                player.tick = Math.max(0, packet.getTick()) - 1;
-            }
+        // Timer check start here.
+        final long claimedTick = packet.getTick();
+        if (claimedTick < 0 || claimedTick < player.tick) { // Impossible, no way this can happen.
+            player.kick("Impossible tick id=" + claimedTick);
+            return;
         }
-        if (timer != null) {
-            if (timer.tick(packet.getTick())) {
-                return;
-            }
-        } else {
+
+        // This is to prevent player skipping (more) ticks (than they're supposed to) after respawn to fuck up our rewind system.
+        long distanceSincePrev = System.currentTimeMillis() - player.sinceAuthInput;
+        if (distanceSincePrev < 50L) {
             player.tick++;
-            if (packet.getTick() != player.tick || packet.getTick() <= 0) {
-                player.kick("Invalid tick id=" + packet.getTick());
-                return;
-            }
+        } else {
+            player.tick += Math.min(claimedTick - player.tick, distanceSincePrev / 45L);
         }
+
+        player.sinceAuthInput = System.currentTimeMillis();
+
+        if (player.tick != packet.getTick()) {
+            player.kick("Invalid tick id, predicted=" + player.tick + ", actual=" + packet.getTick());
+            return;
+        }
+
+        final Timer timer = (Timer) player.getCheckHolder().get(Timer.class);
+        if (timer != null && timer.isInvalid()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Timer check end here.
         // -------------------------------------------------------------------------
 
         player.breakingValidator.handle(packet);
@@ -68,6 +79,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             player.position = player.unvalidatedPosition;
             return;
         }
+
 
         if (player.isMovementExempted()) {
             player.setPos(player.unvalidatedPosition);
@@ -119,19 +131,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
                 // We shouldn't do this, if we still are handling things correctly, we wouldn't have to clear teleport.
                 // player.getTeleportUtil().getQueuedTeleports().clear();
-
-                player.tick = Long.MIN_VALUE;
-            });
-        }
-
-        if (event.getPacket() instanceof RespawnPacket packet && packet.getState() == RespawnPacket.State.SERVER_READY) {
-            if (packet.getRuntimeEntityId() != 0) { // Vanilla behaviour according Geyser.
-                return;
-            }
-
-            player.sendLatencyStack(immediate);
-            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
-                player.tick = Long.MIN_VALUE; // I only need this.
             });
         }
 

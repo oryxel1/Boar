@@ -13,10 +13,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class LatencyUtil {
     private final BoarPlayer player;
     private final List<Long> sentStackLatency = new CopyOnWriteArrayList<>();
-    private final Map<Long, StackLatencyData> map = new ConcurrentHashMap<>();
+    private final Map<Long, Long> idToSentTime = new ConcurrentHashMap<>();
+    private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
+
+    private long prevReceivedSentTime = -1;
+    public long getLastSentTime() {
+        return this.prevReceivedSentTime;
+    }
 
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
+        this.idToSentTime.put(id, System.nanoTime());
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
@@ -26,11 +33,11 @@ public final class LatencyUtil {
         }
 
         synchronized (this) {
-            if (!this.map.containsKey(id)) {
-                this.map.put(id, new StackLatencyData(id));
+            if (!this.idToTasks.containsKey(id)) {
+                this.idToTasks.put(id, new ArrayList<>());
             }
 
-            this.map.get(id).tasks.add(runnable);
+            this.idToTasks.get(id).add(runnable);
         }
     }
 
@@ -39,21 +46,29 @@ public final class LatencyUtil {
             return false;
         }
 
-        this.sentStackLatency.removeIf(l -> {
-            if (this.map.containsKey(l) && l <= id) {
-                this.map.remove(l).tasks.forEach(Runnable::run);
+        final List<Long> removeIds = new ArrayList<>();
+
+        for (long next : this.sentStackLatency) {
+            if (next > id) {
+                break;
             }
 
-            return l <= id;
-        });
+            final List<Runnable> tasks = this.idToTasks.remove(next);
+            if (tasks != null) {
+                tasks.forEach(Runnable::run);
+            }
+
+            final Long sentTime = this.idToSentTime.remove(next);
+            if (sentTime != null) {
+                this.prevReceivedSentTime = Math.max(this.prevReceivedSentTime, sentTime);
+            }
+
+            removeIds.add(next);
+        }
+
+        this.sentStackLatency.removeAll(removeIds);
 
         player.receivedStackId.set(id);
         return true;
-    }
-
-    @RequiredArgsConstructor
-    private static class StackLatencyData {
-        private final long stackId;
-        private final List<Runnable> tasks = new ArrayList<>();
     }
 }

@@ -37,7 +37,7 @@ public final class EntityCache {
             this.dimensions = EntityDimensions.fixed(metadata.get(EntityDataTypes.WIDTH), definition.height());
         }
         if (metadata.containsKey(EntityDataTypes.HEIGHT)) {
-            this.dimensions = EntityDimensions.fixed(definition.height(), metadata.get(EntityDataTypes.HEIGHT));
+            this.dimensions = EntityDimensions.fixed(definition.width(), metadata.get(EntityDataTypes.HEIGHT));
         }
         
         // This is a hacky workaround for boat since boat is real weird when it comes to collision, at least on GeyserMC.
