@@ -116,9 +116,9 @@ public final class BoarPlayer extends PlayerData {
         latencyPacket.setFromServer(true);
 
         if (immediate) {
-            this.cloudburstDownstream.sendPacketImmediately(latencyPacket);
+            this.getSession().sendUpstreamPacketImmediately(latencyPacket);
         } else {
-            this.cloudburstDownstream.sendPacket(latencyPacket);
+            this.getSession().sendUpstreamPacket(latencyPacket);
         }
 
         this.latencyUtil.addLatencyToQueue(id);

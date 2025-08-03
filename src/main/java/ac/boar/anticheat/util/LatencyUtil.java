@@ -21,6 +21,10 @@ public final class LatencyUtil {
         return this.prevReceivedSentTime;
     }
 
+    public boolean hasId(long id) {
+        return this.sentStackLatency.contains(id);
+    }
+
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
         this.idToSentTime.put(id, System.nanoTime());
@@ -42,7 +46,7 @@ public final class LatencyUtil {
     }
 
     public boolean confirmStackId(long id) {
-        if (!this.sentStackLatency.contains(id) || id <= player.receivedStackId.get()) {
+        if (!hasId(id) || id <= player.receivedStackId.get()) {
             return false;
         }
 
