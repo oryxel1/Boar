@@ -115,13 +115,13 @@ public final class BoarPlayer extends PlayerData {
         latencyPacket.setTimestamp(-id);
         latencyPacket.setFromServer(true);
 
+        this.latencyUtil.addLatencyToQueue(id);
+
         if (immediate) {
             this.getSession().sendUpstreamPacketImmediately(latencyPacket);
         } else {
             this.getSession().sendUpstreamPacket(latencyPacket);
         }
-
-        this.latencyUtil.addLatencyToQueue(id);
     }
 
     public boolean isMovementExempted() {

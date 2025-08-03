@@ -17,7 +17,7 @@ public final class Timer extends PacketCheck {
     private long lastNS, balance, prevTick;
     private boolean sentBeforeInput = true;
 
-    private long cachedLatencyId = -1;
+    private long cachedLatencyId = -1, lastLatencyTime;
 
     public Timer(final BoarPlayer player) {
         super(player);
@@ -46,7 +46,7 @@ public final class Timer extends PacketCheck {
 
         long absTimestamp = Math.abs(packet.getTimestamp());
         // Make sure we're the one send this...
-        if (packet.getTimestamp() > 0 || !player.getLatencyUtil().hasId(absTimestamp) || !packet.isFromServer() || absTimestamp - player.sentStackId.get() > 1) {
+        if (packet.getTimestamp() > 0 || !player.getLatencyUtil().hasId(absTimestamp) || !packet.isFromServer()) {
             return;
         }
 
