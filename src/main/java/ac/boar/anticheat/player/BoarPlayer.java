@@ -1,6 +1,6 @@
 package ac.boar.anticheat.player;
 
-import ac.boar.anticheat.alert.AlertManager;
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
@@ -135,7 +135,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public void kick(String reason) {
-        this.session.disconnect(AlertManager.BEDROCK_PREFIX + " " + reason);
+        this.session.disconnect(Boar.getInstance().getAlertManager().getPrefix(getSession()) + " " + reason);
     }
 
     // Prediction related method

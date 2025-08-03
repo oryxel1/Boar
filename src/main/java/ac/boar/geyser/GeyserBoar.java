@@ -60,12 +60,14 @@ public class GeyserBoar implements Extension {
                 .permission("boar.alert")
                 .executor((source, cmd, args) -> {
                     AlertManager alertManager = Boar.getInstance().getAlertManager();
+
+                    String prefix = alertManager.getPrefix(source);
                     if (alertManager.hasAlert(source)) {
                         alertManager.removeAlert(source);
-                        source.sendMessage(AlertManager.PREFIX + "§fDisabled alerts.");
+                        source.sendMessage(prefix + "§fDisabled alerts.");
                     } else {
                         alertManager.addAlert(source);
-                        source.sendMessage(AlertManager.PREFIX + "§fEnabled alerts.");
+                        source.sendMessage(prefix + "§fEnabled alerts.");
                     }
                 })
                 .build());
