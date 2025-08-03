@@ -39,7 +39,7 @@ public final class Timer extends PacketCheck {
         long distance = System.nanoTime() - this.lastNS;
         long neededDistance = (player.tick - this.prevTick) * AVERAGE_DISTANCE;
 
-        if (this.balance > AVERAGE_DISTANCE + 1e+7) {
+        if (this.balance > AVERAGE_DISTANCE + 1e+7 + 3e+6) {
             this.fail("balance=" + this.balance + ", player is ahead!");
             player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             this.balance -= AVERAGE_DISTANCE;
