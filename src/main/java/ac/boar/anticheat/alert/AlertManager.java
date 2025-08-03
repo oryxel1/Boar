@@ -1,7 +1,7 @@
 package ac.boar.anticheat.alert;
 
 import org.geysermc.geyser.api.command.CommandSource;
-import org.geysermc.geyser.session.GeyserSession;
+import org.geysermc.geyser.api.connection.GeyserConnection;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,11 +13,11 @@ public class AlertManager {
     private final Map<UUID, CommandSource> sources = new ConcurrentHashMap<>();
 
     public void alert(String verbose) {
-        sources.values().forEach(source -> source.sendMessage(PREFIX + "§3" + verbose));
+        sources.values().forEach(source -> source.sendMessage(getPrefix(source) + "§3" + verbose));
     }
 
     public String getPrefix(CommandSource source) {
-        if (source instanceof GeyserSession) {
+        if (source instanceof GeyserConnection) {
             return BEDROCK_PREFIX;
         }
 
