@@ -11,10 +11,6 @@ version = '1.0.4'
 repositories {
     mavenCentral()
     maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
-    }
-    maven {
         name = "opencollab-dev"
         url = "https://repo.opencollab.dev/main/"
     }
