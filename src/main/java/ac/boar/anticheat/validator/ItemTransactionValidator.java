@@ -137,7 +137,7 @@ public final class ItemTransactionValidator {
                     return false;
                 }
 
-                double distance = player.position.toVector3f().distanceSquared(position.getX(), position.getY(), position.getZ());
+                float distance = player.position.toVector3f().distanceSquared(position.getX(), position.getY(), position.getZ());
                 if (!MathUtil.isValid(position) || distance > 12 * 12 && position.getX() + position.getY() + position.getZ() != 0) {
                     return false;
                 }
@@ -457,7 +457,7 @@ public final class ItemTransactionValidator {
         return predicted.getRuntimeId() == claimed.getRuntimeId();
     }
 
-    private static boolean isProperHit(BlockState blockState, Direction direction, double d) {
+    private static boolean isProperHit(BlockState blockState, Direction direction, float d) {
         if (direction.getAxis() == Axis.Y || d > 0.8124f) {
             return false;
         }

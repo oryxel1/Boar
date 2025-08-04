@@ -139,7 +139,7 @@ public class BoarBlockState {
         }
 
         final List<Box> list = new ArrayList<>();
-        final List<Box> collisions = BedrockCollision.getCollisionBox(player, pos, state);
+        final List<Box> collisions = BedrockCollision.getCollisionBox(player, playerAABB, pos, state);
         if (collisions != null) {
             for (Box aabb : collisions) {
                 aabb = aabb.offset(pos.getX(), pos.getY(), pos.getZ());

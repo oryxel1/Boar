@@ -14,7 +14,7 @@ public class Prediction extends OffsetHandlerCheck {
     }
 
     @Override
-    public void onPredictionComplete(double offset) {
+    public void onPredictionComplete(float offset) {
         if (player.tick < 10) {
             // System.out.println(player.tick);
             return;

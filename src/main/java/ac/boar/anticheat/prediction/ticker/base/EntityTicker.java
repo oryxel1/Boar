@@ -139,6 +139,13 @@ public class EntityTicker {
         player.verticalCollision = vec3.y != vec32.y;
         player.onGround = player.verticalCollision && vec3.y < 0.0;
 
+        // Player is near bamboo, we don't know what the offsetting is so we let player decide this...
+        if (player.nearBamboo && player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION)) {
+            player.horizontalCollision = true;
+            bl = player.unvalidatedTickEnd.x == 0;
+            bl2 = player.unvalidatedTickEnd.z == 0;
+        }
+
         if (player.horizontalCollision) {
             player.velocity = new Vec3(bl ? 0 : player.velocity.x, player.velocity.y, bl2 ? 0 : player.velocity.z);
         }

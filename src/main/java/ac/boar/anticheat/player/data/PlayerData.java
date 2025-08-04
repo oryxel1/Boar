@@ -136,6 +136,8 @@ public class PlayerData {
     public boolean horizontalCollision, verticalCollision;
     public boolean soulSandBelow;
 
+    public boolean nearBamboo;
+
     public boolean beingPushByLava;
 
     public final Map<Fluid, Float> fluidHeight = new HashMap<>();
@@ -151,7 +153,7 @@ public class PlayerData {
     public int tickSinceBlockResync;
 
     // Prediction related method
-    public final double getMaxOffset() {
+    public final float getMaxOffset() {
         return Boar.getConfig().acceptanceThreshold();
     }
 

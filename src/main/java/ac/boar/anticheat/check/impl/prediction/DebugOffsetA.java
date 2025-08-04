@@ -14,13 +14,13 @@ public class DebugOffsetA extends OffsetHandlerCheck {
     }
 
     @Override
-    public void onPredictionComplete(double offset) {
+    public void onPredictionComplete(float offset) {
         if (!player.isDebugMode()) {
             return;
         }
 
-        final double maxOffset = player.getMaxOffset();
-        double eotOffset = player.unvalidatedTickEnd.distanceTo(player.velocity);
+        final float maxOffset = player.getMaxOffset();
+        float eotOffset = player.unvalidatedTickEnd.distanceTo(player.velocity);
 
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);

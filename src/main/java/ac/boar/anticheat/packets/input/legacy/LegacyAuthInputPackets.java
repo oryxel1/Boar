@@ -35,11 +35,10 @@ public class LegacyAuthInputPackets {
         final UncertainRunner uncertainRunner = new UncertainRunner(player);
 
         // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.
-        double offset = player.position.distanceTo(player.unvalidatedPosition);
+        float offset = player.position.distanceTo(player.unvalidatedPosition);
         float extraOffset = uncertainRunner.extraOffset(offset);
         offset -= extraOffset;
-
-        uncertainRunner.doTickEndUncertain();
+        offset -= uncertainRunner.extraOffsetNonTickEnd(offset);
 
         for (Map.Entry<Class<?>, Check> entry : player.getCheckHolder().entrySet()) {
             Check v = entry.getValue();

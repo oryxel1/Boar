@@ -107,7 +107,7 @@ public class ServerEntityPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
         final Vec3 position = new Vec3(raw.sub(0, entity.getYOffset(), 0));
 
-        final double distance = entity.getServerPosition().squaredDistanceTo(position);
+        final float distance = entity.getServerPosition().squaredDistanceTo(position);
         if (distance < 1.0E-15) {
             return;
         }

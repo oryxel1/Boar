@@ -77,7 +77,7 @@ public class MathUtil {
     }
 
     public static Vec3 getInputVector(final Vec3 movementInput, float speed, float yaw) {
-        double d = movementInput.lengthSquared();
+        float d = movementInput.lengthSquared();
         if (d < 1.0E-7) {
             return Vec3.ZERO;
         } else {

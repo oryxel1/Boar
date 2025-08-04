@@ -230,7 +230,7 @@ public final class BoarPlayer extends PlayerData {
     public float getBlockJumpFactor() {
         float f = this.compensatedWorld.getBlockState(this.position.toVector3i(), 0).getJumpFactor();
         float g = this.compensatedWorld.getBlockState(this.getBlockPosBelowThatAffectsMyMovement(), 0).getJumpFactor();
-        return (double)f == 1.0 ? g : f;
+        return f == 1.0 ? g : f;
     }
 
     public Vector3i getBlockPosBelowThatAffectsMyMovement() {

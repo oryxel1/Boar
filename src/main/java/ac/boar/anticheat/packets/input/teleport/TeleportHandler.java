@@ -59,7 +59,7 @@ public class TeleportHandler {
     }
 
     private void processTeleport(final BoarPlayer player, final TeleportCache.Normal normal, final PlayerAuthInputPacket packet) {
-        double distance = packet.getPosition().distance(normal.getPosition().toVector3f());
+        float distance = packet.getPosition().distance(normal.getPosition().toVector3f());
         // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
         if (packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) && distance <= 1.0E-3F) {
             player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));

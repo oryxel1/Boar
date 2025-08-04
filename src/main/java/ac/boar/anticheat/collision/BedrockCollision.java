@@ -86,7 +86,7 @@ public class BedrockCollision {
         }
     }
     
-    public static List<Box> getCollisionBox(final BoarPlayer player, final Vector3i vector3i, final BlockState state) {
+    public static List<Box> getCollisionBox(final BoarPlayer player, final Box box, final Vector3i vector3i, final BlockState state) {
         if (vector3i.getY() == player.compensatedWorld.getDimension().minY() - 41) {
             return SOLID_SHAPE;
         }
@@ -98,6 +98,20 @@ public class BedrockCollision {
             // We can still support the offsetting pre 1.21.80, mojang changed this post 1.21.80, and it doesn't even match JE???
             if (!GameProtocol.is1_21_80orHigher(player.getSession())) {
                 return List.of(baseShape.offset(new BoarBlockState(state, vector3i, 0).pre12180RandomOffset()));
+            } else {
+                // Damn it mojang ;/ why does bamboo offsetting is different on Bedrock, if player is not colliding or only colliding horizontally then look at
+                // UncertainRunner#extraOffsetNonTickEnd and EntityTicker#doSelfMove, for VERTICAL_COLLISION we can do a bit tricky hack to ensure accurate motion.
+                if (!player.getInputData().contains(PlayerAuthInputData.VERTICAL_COLLISION) || box == null) {
+                    return EMPTY_SHAPE;
+                }
+
+                // Workaround.... we can still ensure player won't be having weird y motion on bamboo using the VERTICAL_COLLISION input.
+                Box solidOffset = SOLID_SHAPE.get(0).offset(vector3i.getX(), vector3i.getY(), vector3i.getZ());
+
+                // If player claimed to have y collision and their feet/head does hit something then we can be sure it's correct.
+                // Also, this bamboo should not collide with player horizontal collision, only vertical so we can handle it properly.
+                boolean likelyYCollision = solidOffset.calculateMaxDistance(Axis.Y, player.boundingBox, player.velocity.y) != player.velocity.y;
+                return likelyYCollision && solidOffset.intersects(box) ? SOLID_SHAPE : EMPTY_SHAPE;
             }
         }
 

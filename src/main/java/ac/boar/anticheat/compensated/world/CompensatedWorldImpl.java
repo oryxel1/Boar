@@ -4,6 +4,7 @@ import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.data.FluidState;
+import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
@@ -14,6 +15,7 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.BlockState;
+import org.geysermc.geyser.network.GameProtocol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +64,18 @@ public class CompensatedWorldImpl extends CompensatedWorld {
             builder.addAll(list);
         }
 
+        boolean needToDoBambooHacks = GameProtocol.is1_21_80orHigher(getPlayer().getSession());
+
         final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(aABB);
         while (iterator.step()) {
             int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
             if (this.isChunkLoaded(x, z)) {
-                builder.addAll(this.getBlockState(x, y, z, 0).findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB, true));
+                BoarBlockState state = this.getBlockState(x, y, z, 0);
+                if (state.getState().is(Blocks.BAMBOO) && new Box(x, y, z, x + 1, y + 1, z + 1).intersects(aABB)) {
+                    getPlayer().nearBamboo = needToDoBambooHacks;
+                }
+
+                builder.addAll(state.findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB, true));
             }
         }
         return builder.build();

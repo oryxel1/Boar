@@ -8,6 +8,6 @@ public class OffsetHandlerCheck extends Check {
         super(player);
     }
 
-    public void onPredictionComplete(double offset) {
+    public void onPredictionComplete(float offset) {
     }
 }

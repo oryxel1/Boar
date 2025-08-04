@@ -329,11 +329,9 @@ public class Box implements Cloneable {
     public float getLengthZ() {
         return this.maxZ - this.minZ;
     }
-
-
-
+    
     public boolean isNaN() {
-        return Double.isNaN(this.minX) || Double.isNaN(this.minY) || Double.isNaN(this.minZ) || Double.isNaN(this.maxX) || Double.isNaN(this.maxY) || Double.isNaN(this.maxZ);
+        return Float.isNaN(this.minX) || Float.isNaN(this.minY) || Float.isNaN(this.minZ) || Float.isNaN(this.maxX) || Float.isNaN(this.maxY) || Float.isNaN(this.maxZ);
     }
 
     public String toString() {

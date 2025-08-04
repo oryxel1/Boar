@@ -11,10 +11,24 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 public class UncertainRunner {
     private final BoarPlayer player;
 
-    public void doTickEndUncertain() {
+    public float extraOffsetNonTickEnd(float offset) {
+        float extra = 0;
+
+        Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
+        Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
+        boolean validYOffset = Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset();
+        boolean actualSpeedSmallerThanPredicted = actual.horizontalLengthSquared() < predicted.horizontalLengthSquared();
+        boolean sameDirection = MathUtil.sameDirection(actual, predicted);
+        boolean sameDirectionOrZero = (MathUtil.sign(actual.x) == MathUtil.sign(predicted.x) || actual.x == 0)
+                && MathUtil.sign(actual.y) == MathUtil.sign(predicted.y) && (MathUtil.sign(actual.z) == MathUtil.sign(predicted.z) || actual.z == 0);
+        if (validYOffset && (sameDirection || sameDirectionOrZero) && actualSpeedSmallerThanPredicted && player.nearBamboo && player.horizontalCollision) {
+            extra = offset;
+        }
+
+        return extra;
     }
 
-    public float extraOffset(double offset) {
+    public float extraOffset(float offset) {
         float extra = 0;
         if (player.thisTickSpinAttack) {
             extra += player.thisTickOnGroundSpinAttack ? 0.08F : 0.008F;
@@ -28,7 +42,7 @@ public class UncertainRunner {
         boolean actualSpeedSmallerThanPredicted = actual.horizontalLengthSquared() < predicted.horizontalLengthSquared();
 
         if (player.soulSandBelow && validYOffset && actualSpeedSmallerThanPredicted && sameDirection) {
-            extra = (float) offset;
+            extra = offset;
         }
 
         if (player.beingPushByLava && validYOffset) {
@@ -39,11 +53,11 @@ public class UncertainRunner {
                     Vec3 subtractedSpeed = actual.subtract(MathUtil.sign(player.afterCollision.x) * 0.02F, 0, MathUtil.sign(player.afterCollision.z) * 0.02F);
 
                     if (subtractedSpeed.horizontalLengthSquared() < predicted.horizontalLengthSquared()) {
-                        extra = (float) offset;
+                        extra = offset;
                     }
                 } else {
                     if (actual.horizontalLengthSquared() < predicted.horizontalLengthSquared()) {
-                        extra = (float) offset;
+                        extra = offset;
                     }
                 }
             }
@@ -52,12 +66,12 @@ public class UncertainRunner {
         // .... This is weird, no idea why.
         if (player.hasDepthStrider) {
             if (actualSpeedSmallerThanPredicted && validYOffset) {
-                extra = (float) offset;
+                extra = offset;
             }
         }
 
         if (offset <= 8.0E-4 && player.glideBoostTicks >= 0 && player.getFlagTracker().has(EntityFlag.GLIDING)) {
-            extra = (float) offset;
+            extra = offset;
         }
 
         return extra;

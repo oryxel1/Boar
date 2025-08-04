@@ -50,12 +50,12 @@ public final class Reach extends PacketCheck {
 
         final ReachResult result = calculateReach(entity);
 
-        double distance = result.distance();
+        float distance = result.distance();
         if (distance > Boar.getConfig().toleranceReach()) {
             // Don't actually alert since this could be "java-1.8" or "java-1.9" config.... or maybe just falses
             // as long as it's not noticeable, it's fine, we can always handle the reach silently.
 
-            if (distance != Double.MAX_VALUE) {
+            if (distance != Float.MAX_VALUE) {
                 Boar.debug("Cancelled hit by player " + player.getSession().getPlayerEntity().getDisplayName() + " with distance " + distance + ", mode=" + Boar.getConfig().reachJavaParityMode(), Boar.DebugMessage.WARNING);
             } else {
                 Boar.debug("Cancelled hit by player " + player.getSession().getPlayerEntity().getDisplayName() + " (failed to find entity in sight)" + ", mode=" + Boar.getConfig().reachJavaParityMode(), Boar.DebugMessage.WARNING);
@@ -73,7 +73,7 @@ public final class Reach extends PacketCheck {
     }
 
     public ReachResult calculateReach(final EntityCache entity) {
-        double distance = Double.MAX_VALUE;
+        float distance = Float.MAX_VALUE;
 
         // Handle this like how JE handle it, also only do it for player sinceeee https://github.com/GeyserMC/Geyser/issues/5034
         // weird that it only happen for other entity and not player huh, in any case, this is fine.
@@ -94,7 +94,7 @@ public final class Reach extends PacketCheck {
                 }
             }
 
-            return new ReachResult(1, distance == Double.MAX_VALUE ? distance : Math.sqrt(distance));
+            return new ReachResult(1F, distance == Float.MAX_VALUE ? distance : (float) Math.sqrt(distance));
         }
 
         float deltaTicks;
@@ -120,7 +120,7 @@ public final class Reach extends PacketCheck {
             }
         }
 
-        return new ReachResult(deltaTicks, distance == Double.MAX_VALUE ? distance : Math.sqrt(distance));
+        return new ReachResult(deltaTicks, distance == Float.MAX_VALUE ? distance : (float) Math.sqrt(distance));
     }
 
     private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {
@@ -147,5 +147,5 @@ public final class Reach extends PacketCheck {
         return new Vec3(d, e, g);
     }
 
-    public record ReachResult(float deltaTicks, double distance) {}
+    public record ReachResult(float deltaTicks, float distance) {}
 }
