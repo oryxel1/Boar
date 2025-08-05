@@ -4,6 +4,7 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.engine.base.PredictionEngine;
 import ac.boar.anticheat.util.math.Vec3;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
@@ -49,7 +50,7 @@ public class WaterPredictionEngine extends PredictionEngine {
 
         // Look at https://bugs.mojang.com/browse/MCPE/issues/MCPE-201832, even though player is swimming, they can't move fast
         // which means that the 0.9 tick end doesn't depend on swimming status but also sprinting status, or else they won't move fast.
-        boolean fastTickEnd = player.getFlagTracker().has(EntityFlag.SWIMMING) && sprinting;
+        boolean fastTickEnd = player.getFlagTracker().has(EntityFlag.SWIMMING) && sprinting || player.getInputData().contains(PlayerAuthInputData.STOP_SWIMMING);
 
         // On versions below 1.21.80 player can move fast in water by sprinting without swimming but on 1.21.80 this is fixed.
         // HOWEVER, this bugs one again reintroduce itself on 1.21.81+ for certain reason.
