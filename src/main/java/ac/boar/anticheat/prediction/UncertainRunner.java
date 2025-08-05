@@ -1,10 +1,12 @@
 package ac.boar.anticheat.prediction;
 
+import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 
 // Things that I don't even bother account for...
 @RequiredArgsConstructor
@@ -41,7 +43,8 @@ public class UncertainRunner {
         boolean sameDirection = MathUtil.sameDirection(actual, predicted);
         boolean actualSpeedSmallerThanPredicted = actual.horizontalLengthSquared() < predicted.horizontalLengthSquared();
 
-        if (player.soulSandBelow && validYOffset && actualSpeedSmallerThanPredicted && sameDirection) {
+        boolean haveSoulSpeed = CompensatedInventory.getEnchantments(player.compensatedInventory.armorContainer.get(3).getData()).containsKey(BedrockEnchantment.SOUL_SPEED);
+        if (player.soulSandBelow && !haveSoulSpeed && validYOffset && actualSpeedSmallerThanPredicted && sameDirection) {
             extra = offset;
         }
 
