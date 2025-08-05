@@ -38,10 +38,17 @@ public class PlayerTicker extends LivingTicker {
     protected void travel() {
         if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
             float d = MathUtil.getRotationVector(player.pitch, player.yaw).y;
-            float e = d < -0.2 ? 0.085F : 0.06F;
-            final FluidState state = player.compensatedWorld.getFluidState(player.position.toVector3i());
-            if ((d <= 0.0 || state.fluid() != Fluid.EMPTY) && !player.getInputData().contains(PlayerAuthInputData.JUMPING)) {
-                player.velocity = player.velocity.add(0, (d - player.velocity.y) * e, 0);
+
+            // Seems to be the case, on JE they check for fluid state 0.9 blocks up to prevent player from resurfacing when swimming
+            // But on BE they seem to be setting the y motion to 0 instead (you can press space to swim up on JE but not on BE when near water surface)
+            if (player.compensatedWorld.getFluidState(player.position.up(0.4F).toVector3i()).fluid() == Fluid.EMPTY && d > 0 && d < 0.55) {
+                player.velocity.y = 0;
+            } else {
+                float e = d < -0.2 ? 0.085F : 0.06F;
+                final FluidState state = player.compensatedWorld.getFluidState(player.position.toVector3i());
+                if ((d <= 0.0 || state.fluid() != Fluid.EMPTY) && !player.getInputData().contains(PlayerAuthInputData.JUMPING)) {
+                    player.velocity = player.velocity.add(0, (d - player.velocity.y) * e, 0);
+                }
             }
         }
         super.travel();
