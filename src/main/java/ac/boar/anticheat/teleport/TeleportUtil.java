@@ -9,6 +9,7 @@ import ac.boar.anticheat.teleport.data.rewind.RewindData;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.PredictionType;
 import org.cloudburstmc.protocol.bedrock.packet.CorrectPlayerMovePredictionPacket;
@@ -88,6 +89,7 @@ public class TeleportUtil {
         packet.setOnGround(onGround);
         packet.setTick(tick);
         packet.setDelta(data.tickEnd().toVector3f());
+        packet.setVehicleRotation(Vector2f.ZERO);
         packet.setPredictionType(player.vehicleData != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
 
         player.sendLatencyStack();
