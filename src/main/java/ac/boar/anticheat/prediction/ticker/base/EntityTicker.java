@@ -130,6 +130,7 @@ public class EntityTicker {
             player.velocity = Vec3.ZERO.clone();
         }
 
+        Vec3 oldVec3 = vec3.clone();
         Vec3 vec32 = Collider.collide(player, vec3 = Collider.maybeBackOffFromEdge(player, vec3));
         player.setPos(player.position.add(vec32));
 
@@ -144,6 +145,12 @@ public class EntityTicker {
             player.horizontalCollision = true;
             bl = player.unvalidatedTickEnd.x == 0;
             bl2 = player.unvalidatedTickEnd.z == 0;
+        }
+
+        // Hacks, but works.
+        if (oldVec3.x != vec3.x || oldVec3.z != vec3.z) {
+            player.velocity = new Vec3(player.unvalidatedTickEnd.x == 0 ? 0 : player.velocity.x,
+                    player.velocity.y, player.unvalidatedTickEnd.z == 0 ? 0 : player.velocity.z);
         }
 
         if (player.horizontalCollision) {
