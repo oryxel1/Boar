@@ -65,6 +65,9 @@ public class EntityTicker {
         }
 
         Box box = player.boundingBox.expand(0, -0.4F, 0).contract(0.001F);
+        if (tag == Fluid.LAVA) {
+            box = box.contract(0.1F, 0, 0.1F);
+        }
 
         int i = GenericMath.floor(box.minX);
         int j = GenericMath.floor(box.maxX + 1.0D);
