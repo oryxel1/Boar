@@ -10,10 +10,7 @@ import org.geysermc.geyser.api.command.Command;
 import org.geysermc.geyser.api.command.CommandSource;
 import org.geysermc.geyser.api.event.bedrock.SessionDisconnectEvent;
 import org.geysermc.geyser.api.event.bedrock.SessionLoginEvent;
-import org.geysermc.geyser.api.event.lifecycle.GeyserDefineCommandsEvent;
-import org.geysermc.geyser.api.event.lifecycle.GeyserPostInitializeEvent;
-import org.geysermc.geyser.api.event.lifecycle.GeyserRegisterPermissionsEvent;
-import org.geysermc.geyser.api.event.lifecycle.GeyserShutdownEvent;
+import org.geysermc.geyser.api.event.lifecycle.*;
 import org.geysermc.geyser.api.extension.Extension;
 import org.geysermc.geyser.api.extension.ExtensionLogger;
 import org.geysermc.geyser.api.util.TriState;
@@ -34,11 +31,15 @@ public class GeyserBoar implements Extension {
     }
 
     @Subscribe
+    public void onGeyserPreInitializeEvent(GeyserPreInitializeEvent event) {
+        BoarInjector.injectToRak();
+    }
+
+    @Subscribe
     public void onGeyserPostInitializeEvent(GeyserPostInitializeEvent event) {
         logger = this.logger();
 
         Boar.getInstance().init(this);
-        BoarInjector.injectToRak();
     }
 
     @Subscribe

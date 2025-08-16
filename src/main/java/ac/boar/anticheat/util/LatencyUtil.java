@@ -27,7 +27,7 @@ public final class LatencyUtil {
 
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
-        this.idToSentTime.put(id, System.nanoTime());
+        this.idToSentTime.put(id, System.currentTimeMillis());
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
