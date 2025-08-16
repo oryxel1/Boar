@@ -1,10 +1,13 @@
 package ac.boar.geyser;
 
 import ac.boar.anticheat.Boar;
+import ac.boar.anticheat.acks.BoarAcknowledgement;
 import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.injector.BoarInjector;
 import lombok.Getter;
+import org.cloudburstmc.netty.channel.raknet.RakChildChannel;
+import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.api.command.Command;
 import org.geysermc.geyser.api.command.CommandSource;
@@ -22,12 +25,24 @@ public class GeyserBoar implements Extension {
 
     @Subscribe
     public void onSessionJoin(SessionLoginEvent event) {
-        Boar.getInstance().getPlayerManager().add(event.connection());
+        BoarPlayer player = Boar.getInstance().getPlayerManager().add(event.connection());
+        if (player == null) {
+            return;
+        }
+
+        RakSessionCodec rakSessionCodec = ((RakChildChannel) player.getSession().getUpstream().getSession().getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
+        BoarAcknowledgement.getRakSessionToPlayer().put(rakSessionCodec, player);
     }
 
     @Subscribe
     public void onSessionLeave(SessionDisconnectEvent event) {
-        Boar.getInstance().getPlayerManager().remove(event.connection());
+        BoarPlayer player = Boar.getInstance().getPlayerManager().remove(event.connection());
+        if (player == null) {
+            return;
+        }
+
+        RakSessionCodec rakSessionCodec = ((RakChildChannel) player.getSession().getUpstream().getSession().getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
+        BoarAcknowledgement.getRakSessionToPlayer().remove(rakSessionCodec);
     }
 
     @Subscribe

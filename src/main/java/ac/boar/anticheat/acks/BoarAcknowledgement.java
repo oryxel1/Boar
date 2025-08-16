@@ -1,22 +1,19 @@
 package ac.boar.anticheat.acks;
 
-import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.player.BoarPlayer;
-import org.cloudburstmc.netty.channel.raknet.RakChildChannel;
+import lombok.Getter;
 import org.cloudburstmc.netty.channel.raknet.packet.RakDatagramPacket;
 import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
 
-public class BoarAcknowledgement {
-    public static void handle(final RakSessionCodec codec, final RakDatagramPacket datagram) {
-        BoarPlayer player = null;
-        for (BoarPlayer bPlayer : Boar.getInstance().getPlayerManager().values()) {
-            RakSessionCodec rakSessionCodec = ((RakChildChannel) bPlayer.getSession().getUpstream().getSession().
-                    getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
-            if (rakSessionCodec == codec) {
-                player = bPlayer;
-            }
-        }
+import java.util.HashMap;
+import java.util.Map;
 
+public class BoarAcknowledgement {
+    @Getter
+    private static final Map<RakSessionCodec, BoarPlayer> rakSessionToPlayer = new HashMap<>();
+
+    public static void handle(final RakSessionCodec codec, final RakDatagramPacket datagram) {
+        BoarPlayer player = rakSessionToPlayer.get(codec);
         if (player == null) {
             return;
         }
@@ -26,7 +23,6 @@ public class BoarAcknowledgement {
         }
 
         long lastLatency = player.getLatencyUtil().getLastSentTime();
-        // System.out.println("acks=" + datagram.getSendTime() + ", lastLatency=" + lastLatency);
 
         long distance = datagram.getSendTime() - lastLatency;
         if (distance <= 1000L || lastLatency == -1 || player.inLoadingScreen || player.sinceLoadingScreen < 5) {
