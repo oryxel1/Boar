@@ -3,6 +3,7 @@ package ac.boar.geyser;
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.alert.AlertManager;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.injector.BoarInjector;
 import lombok.Getter;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.api.command.Command;
@@ -37,6 +38,7 @@ public class GeyserBoar implements Extension {
         logger = this.logger();
 
         Boar.getInstance().init(this);
+        BoarInjector.injectToRak();
     }
 
     @Subscribe
