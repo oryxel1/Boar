@@ -45,6 +45,40 @@ public final class LatencyUtil {
         }
     }
 
+    public void confirmByTime(long time) {
+        if (time < this.prevReceivedSentTime) {
+            return;
+        }
+
+        final List<Long> removeIds = new ArrayList<>();
+
+        long lastId = -1;
+        for (long next : this.sentStackLatency) {
+            final Long sentTime = this.idToSentTime.get(next);
+            if (sentTime > time) {
+                break;
+            }
+            this.idToSentTime.remove(next);
+            this.prevReceivedSentTime = Math.max(this.prevReceivedSentTime, sentTime);
+
+            final List<Runnable> tasks = this.idToTasks.remove(next);
+            if (tasks != null) {
+                tasks.forEach(Runnable::run);
+            }
+
+            removeIds.add(next);
+            lastId = next;
+        }
+
+        this.sentStackLatency.removeAll(removeIds);
+
+        if (lastId == -1 || lastId < player.receivedStackId.get()) {
+            return;
+        }
+
+        player.receivedStackId.set(lastId);
+    }
+
     public boolean confirmStackId(long id) {
         if (!hasId(id) || id <= player.receivedStackId.get()) {
             return false;

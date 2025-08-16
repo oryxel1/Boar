@@ -26,6 +26,13 @@ public class BoarAcknowledgement {
         }
 
         long lastLatency = player.getLatencyUtil().getLastSentTime();
-        System.out.println("acks=" + datagram.getSendTime() + ", lastLatency=" + lastLatency);
+        // System.out.println("acks=" + datagram.getSendTime() + ", lastLatency=" + lastLatency);
+
+        long distance = datagram.getSendTime() - lastLatency;
+        if (distance <= 1000L || lastLatency == -1 || player.inLoadingScreen || player.sinceLoadingScreen < 5) {
+            return;
+        }
+
+        player.getLatencyUtil().confirmByTime(datagram.getSendTime());
     }
 }
