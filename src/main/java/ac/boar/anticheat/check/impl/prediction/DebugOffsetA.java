@@ -27,7 +27,7 @@ public class DebugOffsetA extends OffsetHandlerCheck {
         if (actual.length() > 1e-5 || offset > maxOffset || eotOffset > maxOffset) {
             String colorOffset = offset > maxOffset ? "§c" : offset > 1.0E-5 ? "§6" : "§a";
 
-            String predDebug = colorOffset + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", MO=" + maxOffset;
+            String predDebug = colorOffset + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", pos=" + player.position;
             if (offset > 1.0E-5) {
                 if (offset > 1.0E-4) {
                     GeyserBoar.getLogger().severe(predDebug);

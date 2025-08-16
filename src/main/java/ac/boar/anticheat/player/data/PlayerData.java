@@ -189,7 +189,14 @@ public class PlayerData {
 
     // Others (methods)
     public final void setPos(Vec3 vec3) {
-        this.prevPosition = this.position;
+        this.setPos(vec3, true);
+    }
+
+    public final void setPos(Vec3 vec3, boolean prev) {
+        if (prev) {
+            this.prevPosition = this.position;
+        }
+
         this.position = vec3;
         if (this.vehicleData != null) {
             return;

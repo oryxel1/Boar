@@ -2,6 +2,7 @@ package ac.boar.anticheat.packets.input.legacy;
 
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
+import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -9,6 +10,8 @@ import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.InputUtil;
 
+import ac.boar.anticheat.util.MathUtil;
+import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -18,7 +21,9 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.item.Items;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class LegacyAuthInputPackets {
@@ -54,9 +59,21 @@ public class LegacyAuthInputPackets {
         correctInputData(player, packet);
 
         if (offset < player.getMaxOffset()) {
-            Vec3 oldPrevPos = player.prevPosition;
-            player.setPos(player.unvalidatedPosition.clone());
-            player.prevPosition = oldPrevPos;
+            player.setPos(player.unvalidatedPosition.clone(), false);
+        }
+
+        final List<Box> collisions = player.compensatedWorld.collectColliders(new ArrayList<>(), player.boundingBox);
+        if (!collisions.isEmpty()) {
+            Vec3 offsetVec = Collider.moveOutOfBlocks(player.boundingBox.clone(), collisions);
+
+            // Bedrock behaviour, push player out of blocks if they're get clipped in it....
+            // and uhhhh if PUSH_TOWARDS_CLOSEST_SPACE flag is not present I think the max offset is around
+            // 0.08 -> 0.081 instead of 0.01F?
+            float offsetX = Math.min(0.01F, Math.abs(offsetVec.x)) * MathUtil.sign(offsetVec.x);
+            float offsetY = Math.min(0.01F, Math.abs(offsetVec.y)) * MathUtil.sign(offsetVec.y);
+            float offsetZ = Math.min(0.01F, Math.abs(offsetVec.z)) * MathUtil.sign(offsetVec.z);
+
+            player.setPos(player.position.add(offsetX, offsetY, offsetZ), false);
         }
 
         // Also clear out old velocity.

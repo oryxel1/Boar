@@ -1,11 +1,9 @@
 package ac.boar.anticheat.prediction.ticker.base;
 
 import ac.boar.anticheat.collision.Collider;
-import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
@@ -15,8 +13,6 @@ import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
-import org.geysermc.erosion.util.BlockPositionIterator;
-import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 
