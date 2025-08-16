@@ -1,5 +1,6 @@
 package ac.boar.anticheat.acks;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.player.BoarPlayer;
 import lombok.Getter;
 import org.cloudburstmc.netty.channel.raknet.packet.RakDatagramPacket;
@@ -25,7 +26,7 @@ public class BoarAcknowledgement {
         long lastLatency = player.getLatencyUtil().getLastSentTime();
 
         long distance = datagram.getSendTime() - lastLatency;
-        if (distance <= 1000L || lastLatency == -1 || player.inLoadingScreen || player.sinceLoadingScreen < 5) {
+        if (distance <= Boar.getConfig().maxAcknowledgementTime() || lastLatency == -1 || player.inLoadingScreen || player.sinceLoadingScreen < 5) {
             return;
         }
 

@@ -12,5 +12,6 @@ public record Config(@JsonProperty("player-rewind-history-size-ticks") int rewin
                      @JsonProperty("differ-till-alert") float alertThreshold,
                      @JsonProperty("disabled-checks") List<String> disabledChecks,
                      @JsonProperty("ignore-ghost-block") boolean ignoreGhostBlock,
+                     @JsonProperty("max-acknowledgement-time") long maxAcknowledgementTime,
                      @JsonProperty("debug-mode") boolean debugMode) {
 }

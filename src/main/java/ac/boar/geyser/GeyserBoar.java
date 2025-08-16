@@ -46,15 +46,14 @@ public class GeyserBoar implements Extension {
     }
 
     @Subscribe
-    public void onGeyserPreInitializeEvent(GeyserPreInitializeEvent event) {
-        BoarInjector.injectToRak();
-    }
-
-    @Subscribe
     public void onGeyserPostInitializeEvent(GeyserPostInitializeEvent event) {
         logger = this.logger();
 
         Boar.getInstance().init(this);
+
+        if (Boar.getConfig().maxAcknowledgementTime() != -1) {
+            BoarInjector.injectToRak();
+        }
     }
 
     @Subscribe

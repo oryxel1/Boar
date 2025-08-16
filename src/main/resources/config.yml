@@ -40,5 +40,9 @@ disabled-checks: []
 # NOTE: This will only take effect if player is STANDING on the block.
 ignore-ghost-block: false
 
+# How long player can accept acknowledgements but not latency packet before we try to correct them. Shall this be disabled, set this to -1.
+# Recommends to turn this on and have the value around 200ms-500ms.
+max-acknowledgement-time: 500
+
 # Should debug mode be enabled or not?
 debug-mode: false
