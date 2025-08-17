@@ -16,10 +16,17 @@ import org.geysermc.geyser.session.UpstreamSession;
 
 public final class CloudburstSendListener extends UpstreamSession {
     private final BoarPlayer player;
+    private final UpstreamSession oldSession;
 
-    public CloudburstSendListener(BoarPlayer player, BedrockServerSession session) {
+    public CloudburstSendListener(BoarPlayer player, BedrockServerSession session, UpstreamSession oldSession) {
         super(session);
         this.player = player;
+        this.oldSession = oldSession;
+    }
+
+    @Override
+    public void disconnect(String reason) {
+        oldSession.disconnect(reason);
     }
 
     @Override
@@ -49,7 +56,7 @@ public final class CloudburstSendListener extends UpstreamSession {
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());
         }
 
-        super.sendPacket(event.getPacket());
+        oldSession.sendPacket(event.getPacket());
         event.getPostTasks().forEach(Runnable::run);
         event.getPostTasks().clear();
     }
@@ -65,7 +72,7 @@ public final class CloudburstSendListener extends UpstreamSession {
             return;
         }
 
-        super.sendPacketImmediately(event.getPacket());
+        oldSession.sendPacketImmediately(event.getPacket());
         event.getPostTasks().forEach(Runnable::run);
         event.getPostTasks().clear();
     }

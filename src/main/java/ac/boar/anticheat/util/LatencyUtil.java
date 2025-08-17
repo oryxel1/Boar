@@ -1,5 +1,7 @@
 package ac.boar.anticheat.util;
 
+import ac.boar.anticheat.check.api.Check;
+import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +29,8 @@ public final class LatencyUtil {
 
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
-        this.idToSentTime.put(id, System.nanoTime());
+        this.idToSentTime.put(id, System.currentTimeMillis());
+        onLatencySend();
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
@@ -43,6 +46,41 @@ public final class LatencyUtil {
 
             this.idToTasks.get(id).add(runnable);
         }
+    }
+
+    public void confirmByTime(long time) {
+        if (time < this.prevReceivedSentTime) {
+            return;
+        }
+
+        final List<Long> removeIds = new ArrayList<>();
+
+        long lastId = -1;
+        for (long next : this.sentStackLatency) {
+            final Long sentTime = this.idToSentTime.get(next);
+            if (sentTime > time) {
+                break;
+            }
+            this.idToSentTime.remove(next);
+            this.prevReceivedSentTime = Math.max(this.prevReceivedSentTime, sentTime);
+
+            final List<Runnable> tasks = this.idToTasks.remove(next);
+            if (tasks != null) {
+                tasks.forEach(Runnable::run);
+            }
+
+            removeIds.add(next);
+            lastId = next;
+        }
+
+        this.sentStackLatency.removeAll(removeIds);
+
+        if (lastId == -1 || lastId < player.receivedStackId.get()) {
+            return;
+        }
+
+        player.receivedStackId.set(lastId);
+        onLatencyAccepted();
     }
 
     public boolean confirmStackId(long id) {
@@ -73,6 +111,27 @@ public final class LatencyUtil {
         this.sentStackLatency.removeAll(removeIds);
 
         player.receivedStackId.set(id);
+        onLatencyAccepted();
         return true;
+    }
+
+    private void onLatencySend() {
+        for (final Check check : this.player.getCheckHolder().values()) {
+            if (!(check instanceof PingBasedCheck pingBasedCheck)) {
+                continue;
+            }
+
+            pingBasedCheck.onLatencySend(player.sentStackId.get());
+        }
+    }
+
+    private void onLatencyAccepted() {
+        for (final Check check : this.player.getCheckHolder().values()) {
+            if (!(check instanceof PingBasedCheck pingBasedCheck)) {
+                continue;
+            }
+
+            pingBasedCheck.onLatencyAccepted(player.receivedStackId.get(), this.prevReceivedSentTime);
+        }
     }
 }

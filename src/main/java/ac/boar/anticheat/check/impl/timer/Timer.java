@@ -2,14 +2,12 @@ package ac.boar.anticheat.check.impl.timer;
 
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
-import ac.boar.anticheat.check.api.impl.PacketCheck;
+import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.protocol.event.CloudburstPacketEvent;
-import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 
 @Experimental
 @CheckInfo(name = "Timer")
-public final class Timer extends PacketCheck {
+public final class Timer extends PingBasedCheck {
     private static final long AVERAGE_DISTANCE = (long) 5e+7;
 
     private long lastNS, balance, prevTick;
@@ -19,11 +17,7 @@ public final class Timer extends PacketCheck {
     }
 
     @Override
-    public void onPacketReceived(CloudburstPacketEvent event) {
-        if (event.getPacket() instanceof NetworkStackLatencyPacket) {
-            // TODO: Fix this...
-            // this.lastNS = Math.max(this.lastNS, player.getLatencyUtil().getLastSentTime());
-        }
+    public void onLatencyAccepted(long id, long time) {
     }
 
     public boolean isInvalid() {

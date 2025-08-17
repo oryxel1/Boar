@@ -4,7 +4,9 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.protocol.mitm.CloudburstReceiveListener;
 import ac.boar.protocol.mitm.CloudburstSendListener;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
 import org.geysermc.geyser.session.GeyserSession;
+import org.geysermc.geyser.session.UpstreamSession;
 
 import java.lang.reflect.Field;
 
@@ -25,21 +27,22 @@ public class GeyserUtil {
 
     private static void injectCloudburstDownstream(final BoarPlayer player) {
         final BedrockServerSession session = player.getCloudburstDownstream();
-        session.setPacketHandler(player.downstreamPacketHandler = new CloudburstReceiveListener(player));
+        final BedrockPacketHandler handler = session.getPacketHandler();
+        session.setPacketHandler(player.downstreamPacketHandler = new CloudburstReceiveListener(player, handler));
     }
 
     private static void injectCloudburstUpstream(final BoarPlayer player) throws Exception {
         final BedrockServerSession session = player.getCloudburstDownstream();
         final Field upstream = GeyserSession.class.getDeclaredField("upstream");
         upstream.setAccessible(true);
-        upstream.set(player.getSession(), player.cloudburstUpstream = new CloudburstSendListener(player, session));
+        upstream.set(player.getSession(), player.cloudburstUpstream = new CloudburstSendListener(player, session, (UpstreamSession) upstream.get(player.getSession())));
     }
 
     private static BedrockServerSession findCloudburstSession(final GeyserSession connection) throws Exception {
         final Field upstream = GeyserSession.class.getDeclaredField("upstream");
         upstream.setAccessible(true);
         final Object session = upstream.get(connection);
-        final Field field = session.getClass().getDeclaredField("session");
+        final Field field = UpstreamSession.class.getDeclaredField("session");
         field.setAccessible(true);
         return (BedrockServerSession) field.get(session);
     }
