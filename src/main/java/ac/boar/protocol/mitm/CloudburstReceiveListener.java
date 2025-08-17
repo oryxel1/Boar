@@ -6,19 +6,16 @@ import ac.boar.protocol.listener.PacketListener;
 import lombok.Getter;
 
 import ac.boar.anticheat.player.BoarPlayer;
+import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacketHandler;
 import org.cloudburstmc.protocol.common.PacketSignal;
-import org.geysermc.geyser.GeyserImpl;
-import org.geysermc.geyser.network.UpstreamPacketHandler;
 
+@RequiredArgsConstructor
 @Getter
-public final class CloudburstReceiveListener extends UpstreamPacketHandler {
+public final class CloudburstReceiveListener implements BedrockPacketHandler {
     private final BoarPlayer player;
-
-    public CloudburstReceiveListener(BoarPlayer player) {
-        super(GeyserImpl.getInstance(), player.getSession());
-        this.player = player;
-    }
+    private final BedrockPacketHandler oldHandler;
 
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {
@@ -31,6 +28,11 @@ public final class CloudburstReceiveListener extends UpstreamPacketHandler {
             return PacketSignal.HANDLED;
         }
 
-        return super.handlePacket(event.getPacket());
+        return oldHandler.handlePacket(event.getPacket());
+    }
+
+    @Override
+    public void onDisconnect(String reason) {
+        this.oldHandler.onDisconnect(reason);
     }
 }
