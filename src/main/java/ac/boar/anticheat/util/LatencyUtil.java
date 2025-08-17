@@ -1,5 +1,7 @@
 package ac.boar.anticheat.util;
 
+import ac.boar.anticheat.check.api.Check;
+import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +30,7 @@ public final class LatencyUtil {
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
         this.idToSentTime.put(id, System.currentTimeMillis());
+        onLatencySend();
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
@@ -77,6 +80,7 @@ public final class LatencyUtil {
         }
 
         player.receivedStackId.set(lastId);
+        onLatencyAccepted();
     }
 
     public boolean confirmStackId(long id) {
@@ -107,6 +111,27 @@ public final class LatencyUtil {
         this.sentStackLatency.removeAll(removeIds);
 
         player.receivedStackId.set(id);
+        onLatencyAccepted();
         return true;
+    }
+
+    private void onLatencySend() {
+        for (final Check check : this.player.getCheckHolder().values()) {
+            if (!(check instanceof PingBasedCheck pingBasedCheck)) {
+                continue;
+            }
+
+            pingBasedCheck.onLatencySend(player.sentStackId.get());
+        }
+    }
+
+    private void onLatencyAccepted() {
+        for (final Check check : this.player.getCheckHolder().values()) {
+            if (!(check instanceof PingBasedCheck pingBasedCheck)) {
+                continue;
+            }
+
+            pingBasedCheck.onLatencyAccepted(player.receivedStackId.get(), this.prevReceivedSentTime);
+        }
     }
 }
