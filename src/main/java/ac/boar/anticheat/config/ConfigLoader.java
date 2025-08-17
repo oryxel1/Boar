@@ -68,7 +68,6 @@ public class ConfigLoader {
                         s = s.replace("differ-till-alert: 0.0", "differ-till-alert: " + config.alertThreshold());
                         s = s.replace("debug-mode: false", "debug-mode: " + config.debugMode());
                         s = s.replace("force-reach-java-parity: \"bedrock\"", "force-reach-java-parity: \"" + config.reachJavaParityMode() + "\"");
-                        s = s.replace("debug-mode: false", "debug-mode: " + config.debugMode());
                         s = s.replace("max-acknowledgement-time: 500", "max-acknowledgement-time: " + config.maxAcknowledgementTime());
                     }
 
