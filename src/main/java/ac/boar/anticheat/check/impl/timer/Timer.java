@@ -35,11 +35,7 @@ public final class Timer extends PingBasedCheck {
 
         if (this.balance > AVERAGE_DISTANCE + 1e+7 + 3e+6) {
             this.fail("balance=" + this.balance + ", player is ahead!");
-            // Send a teleport that we won't cache just so the player know they're getting flagged (assuming they also get flagged next tick).
-            // Assume that they don't get flagged next tick however, rewind handle this. The flag will be way more violent this way...
-            // Side note: Due to how rewind works, it might *look* like they're gaining advantage but the *should* still be moving at the same speed as legit
-            // maybe even slower due to the violent setback.
-            player.getTeleportUtil().hardResyncWithoutAcknowledgement();
+            player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             this.balance -= AVERAGE_DISTANCE;
             valid = false;
         }

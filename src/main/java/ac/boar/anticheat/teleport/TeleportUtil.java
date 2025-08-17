@@ -34,19 +34,6 @@ public class TeleportUtil {
         return !this.queuedTeleports.isEmpty();
     }
 
-    // Teleport without the anticheat itself knowing about this or the server knowing about it.
-    public void hardResyncWithoutAcknowledgement() {
-        final MovePlayerPacket packet = new MovePlayerPacket();
-        packet.setRuntimeEntityId(player.runtimeEntityId);
-        packet.setPosition(this.lastKnowValid);
-        packet.setRotation(player.rotation);
-        packet.setOnGround(false);
-        packet.setMode(MovePlayerPacket.Mode.TELEPORT);
-        packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
-
-        this.player.getCloudburstDownstream().sendPacket(packet);
-    }
-
     public void teleportTo(final Vector3f position) {
         this.teleportTo(new TeleportCache.Normal(0, new Vec3(position)));
     }
