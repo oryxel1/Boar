@@ -44,5 +44,10 @@ ignore-ghost-block: false
 # Recommends to turn this on and have the value around 200ms-500ms.
 max-acknowledgement-time: 500
 
+# How much balance advantage (in milliseconds) player can gain before the anticheat forcefully set player back (regardless if the player is lagging or not)
+# This is to prevent lagging player (or cheaters pretend to be one) gain too much advantage by.... lagging.
+# To disable (which you probably shouldn't), set this to any value smaller or equals to 0.
+max-balance-advantage: 1500
+
 # Should debug mode be enabled or not?
 debug-mode: false

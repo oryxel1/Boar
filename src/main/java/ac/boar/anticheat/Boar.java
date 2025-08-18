@@ -34,8 +34,7 @@ public class Boar {
     private AlertManager alertManager;
 
     public void init(GeyserBoar instance) {
-        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class,
-                new Config(20, 1.0E-4F,  3.005F, "bedrock", 0F, List.of(), false,  500L, false));
+        config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, Config.DEFAULT_CONFIG);
         // System.out.println("Load config: " + config);
 
         BedrockMappings.load();

@@ -1,5 +1,6 @@
 package ac.boar.anticheat.check.impl.timer;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.check.api.impl.PingBasedCheck;
@@ -38,6 +39,11 @@ public final class Timer extends PingBasedCheck {
             player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             this.balance -= AVERAGE_DISTANCE;
             valid = false;
+        } else {
+            long maxBalanceAdvantage = (long) Math.max(0, Boar.getConfig().maxBalanceAdvantage() * 1e+6);
+            if (this.balance <= -Math.abs(maxBalanceAdvantage + AVERAGE_DISTANCE)) {
+                this.balance = -AVERAGE_DISTANCE;
+            }
         }
 
         this.balance -= distance - neededDistance;

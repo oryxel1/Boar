@@ -69,6 +69,8 @@ public final class LatencyUtil {
                 tasks.forEach(Runnable::run);
             }
 
+            onLatencyAccepted(next, sentTime);
+
             removeIds.add(next);
             lastId = next;
         }
@@ -80,7 +82,6 @@ public final class LatencyUtil {
         }
 
         player.receivedStackId.set(lastId);
-        onLatencyAccepted();
     }
 
     public boolean confirmStackId(long id) {
@@ -103,6 +104,7 @@ public final class LatencyUtil {
             final Long sentTime = this.idToSentTime.remove(next);
             if (sentTime != null) {
                 this.prevReceivedSentTime = Math.max(this.prevReceivedSentTime, sentTime);
+                onLatencyAccepted(next, sentTime);
             }
 
             removeIds.add(next);
@@ -111,7 +113,6 @@ public final class LatencyUtil {
         this.sentStackLatency.removeAll(removeIds);
 
         player.receivedStackId.set(id);
-        onLatencyAccepted();
         return true;
     }
 
@@ -125,13 +126,13 @@ public final class LatencyUtil {
         }
     }
 
-    private void onLatencyAccepted() {
+    private void onLatencyAccepted(long id, long time) {
         for (final Check check : this.player.getCheckHolder().values()) {
             if (!(check instanceof PingBasedCheck pingBasedCheck)) {
                 continue;
             }
 
-            pingBasedCheck.onLatencyAccepted(player.receivedStackId.get(), this.prevReceivedSentTime);
+            pingBasedCheck.onLatencyAccepted(id, time);
         }
     }
 }
