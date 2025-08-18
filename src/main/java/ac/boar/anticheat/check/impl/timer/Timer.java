@@ -41,7 +41,7 @@ public final class Timer extends PingBasedCheck {
             valid = false;
         } else {
             long maxBalanceAdvantage = (long) Math.max(0, Boar.getConfig().maxBalanceAdvantage() * 1e+6);
-            if (this.balance <= -Math.abs(maxBalanceAdvantage + AVERAGE_DISTANCE)) {
+            if (this.balance <= -Math.abs(maxBalanceAdvantage + AVERAGE_DISTANCE) && Boar.getConfig().maxBalanceAdvantage() > 0) {
                 this.balance = -AVERAGE_DISTANCE;
             }
         }
