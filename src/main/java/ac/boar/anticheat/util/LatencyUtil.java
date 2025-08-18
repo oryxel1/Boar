@@ -70,6 +70,7 @@ public final class LatencyUtil {
             }
 
             onLatencyAccepted(next, sentTime);
+
             removeIds.add(next);
             lastId = next;
         }
@@ -112,7 +113,6 @@ public final class LatencyUtil {
         this.sentStackLatency.removeAll(removeIds);
 
         player.receivedStackId.set(id);
-        onLatencyAccepted();
         return true;
     }
 
