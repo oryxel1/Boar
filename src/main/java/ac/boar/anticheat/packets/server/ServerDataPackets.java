@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.server;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
@@ -15,6 +16,7 @@ import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.*;
+import org.geysermc.geyser.entity.type.player.SessionPlayerEntity;
 import org.geysermc.geyser.item.Items;
 
 import java.util.EnumSet;
@@ -168,6 +170,17 @@ public class ServerDataPackets implements PacketListener {
         if (event.getPacket() instanceof MovementPredictionSyncPacket packet) {
             if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
                 return;
+            }
+
+            if (packet.getSpeed() != player.getSpeed()) {
+                final SessionPlayerEntity entity = player.getSession().getPlayerEntity();
+
+                UpdateAttributesPacket attributesPacket = new UpdateAttributesPacket();
+                attributesPacket.setRuntimeEntityId(entity.getGeyserId());
+                attributesPacket.getAttributes().addAll(entity.getAttributes().values());
+                player.getSession().sendUpstreamPacket(attributesPacket);
+
+                // Boar.getInstance().getAlertManager().alert("Speed doesn't match!");
             }
 
             player.getFlagTracker().set(EntityFlag.SNEAKING, packet.getFlags().contains(EntityFlag.SNEAKING));
