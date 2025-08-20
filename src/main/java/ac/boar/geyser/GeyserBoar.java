@@ -72,7 +72,6 @@ public class GeyserBoar implements Extension {
     public void onDefineCommands(GeyserDefineCommandsEvent event) {
         event.register(Command.builder(this).source(CommandSource.class)
                 .name("alert")
-                .playerOnly(true)
                 .description("Enable alert messages.")
                 .permission("boar.alert")
                 .executor((source, cmd, args) -> {

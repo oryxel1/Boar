@@ -1,12 +1,13 @@
 package ac.boar.anticheat.alert;
 
 import org.geysermc.geyser.api.command.CommandSource;
-import org.geysermc.geyser.api.connection.GeyserConnection;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AlertManager {
+    private final static UUID CONSOLE_UUID = new UUID(0,0);
+
     private final static String PREFIX = "§3Boar §7>§r ";
     private final static String BEDROCK_PREFIX = "§sBoar §i>§r ";
 
@@ -25,14 +26,14 @@ public class AlertManager {
     }
 
     public boolean hasAlert(CommandSource source) {
-        return this.sources.containsKey(source.playerUuid());
+        return this.sources.containsKey(source.isConsole() ? CONSOLE_UUID : source.playerUuid());
     }
 
     public void addAlert(CommandSource source) {
-        this.sources.put(source.playerUuid(), source);
+        this.sources.put(source.isConsole() ? CONSOLE_UUID : source.playerUuid(), source);
     }
 
     public void removeAlert(CommandSource source) {
-        this.sources.remove(source.playerUuid());
+        this.sources.remove(source.isConsole() ? CONSOLE_UUID : source.playerUuid());
     }
 }
