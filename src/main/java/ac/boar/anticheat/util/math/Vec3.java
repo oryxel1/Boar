@@ -163,6 +163,10 @@ public class Vec3 implements Cloneable {
         }
     }
 
+    public String horizontalToString() {
+        return "(" + this.x + ", " + this.z + ")";
+    }
+
     public Vec3 clone() {
         return new Vec3(this.x, this.y, this.z);
     }

@@ -4,16 +4,27 @@ import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.player.BoarPlayer;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class Check {
     protected final BoarPlayer player;
 
-    private final String name = getClass().getDeclaredAnnotation(CheckInfo.class).name(),
-            type = getClass().getDeclaredAnnotation(CheckInfo.class).type();
-    private final boolean experimental = getClass().getDeclaredAnnotation(Experimental.class) != null;
+    private final String name, type;
+    private final boolean experimental;
     private int vl = 0;
+
+    public Check(BoarPlayer player) {
+        this.player = player;
+        this.name = getClass().getDeclaredAnnotation(CheckInfo.class).name();
+        this.type = getClass().getDeclaredAnnotation(CheckInfo.class).type();
+        this.experimental = getClass().getDeclaredAnnotation(Experimental.class) != null;
+    }
+
+    public Check(BoarPlayer player, String name, String type, boolean experimental) {
+        this.player = player;
+        this.name = name;
+        this.type = type;
+        this.experimental = experimental;
+    }
 
     public void fail() {
         fail("");

@@ -13,6 +13,10 @@ public class MathUtil {
         return sign(vec3.x) == sign(vec32.x) && sign(vec3.y) == sign(vec32.y) && sign(vec3.z) == sign(vec32.z);
     }
 
+    public static Vec3 signAll(Vec3 vec3) {
+        return new Vec3(sign(vec3.x), sign(vec3.y), sign(vec3.z));
+    }
+
     public static float sign(final float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
             return 0;
