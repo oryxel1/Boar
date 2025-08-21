@@ -336,7 +336,7 @@ public final class ItemTransactionValidator {
                             Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
                             if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
                                 // System.out.println(player.getSession().getBlockMappings().getBedrockBlock(mappedBlock.defaultBlockState().javaId()));
-                                BlockState state1 = BlockUtil.getPlacementState(player, block, packet.getBlockPosition());
+                                BlockState state1 = BlockUtil.getPlacementState(player, mappedBlock, packet.getBlockPosition());
                                 player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(state1.javaId()));
                             } else {
                                 // System.out.println("What? item=" + blockItem.javaIdentifier());
