@@ -114,7 +114,8 @@ public class TeleportHandler {
                 // Reverted back to the old flags.
                 player.getFlagTracker().set(data.flags(), false);
             } else {
-                throw new RuntimeException("Failed find auth input history for rewind.");
+                // Oops, don't let cheaters spamming logs by skipping ticks. This could also happen post respawn.
+                // throw new RuntimeException("Failed find auth input history for rewind.");
             }
 
             new PredictionRunner(player).run();
