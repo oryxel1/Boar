@@ -5,6 +5,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.geysermc.geyser.level.block.Blocks;
+import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.registry.BlockRegistries;
@@ -16,6 +17,10 @@ import java.util.Locale;
 import static org.geysermc.geyser.level.block.property.Properties.*;
 
 public class BlockUtil {
+    public static BlockState getPlacementState(BoarPlayer player, Block block, Vector3i position) {
+        return block.defaultBlockState();
+    }
+
     public static boolean determineCanBreak(final BoarPlayer player, final BlockState state) {
         if (state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR) || state.is(Blocks.LAVA) || state.is(Blocks.WATER)) {
             return false;

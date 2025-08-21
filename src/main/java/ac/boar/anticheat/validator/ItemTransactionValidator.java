@@ -5,6 +5,7 @@ import ac.boar.anticheat.data.InteractionResult;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
@@ -335,7 +336,8 @@ public final class ItemTransactionValidator {
                             Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
                             if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
                                 // System.out.println(player.getSession().getBlockMappings().getBedrockBlock(mappedBlock.defaultBlockState().javaId()));
-                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(mappedBlock.defaultBlockState().javaId()));
+                                BlockState state1 = BlockUtil.getPlacementState(player, block, packet.getBlockPosition());
+                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(state1.javaId()));
                             } else {
                                 // System.out.println("What? item=" + blockItem.javaIdentifier());
                             }
