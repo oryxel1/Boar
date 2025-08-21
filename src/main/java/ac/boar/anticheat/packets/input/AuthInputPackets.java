@@ -80,6 +80,9 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             return;
         }
 
+        if (player.getSession().getPlayerEntity().getBedPosition() != null) {
+            return;
+        }
 
         if (player.isMovementExempted()) {
             player.setPos(player.unvalidatedPosition);
