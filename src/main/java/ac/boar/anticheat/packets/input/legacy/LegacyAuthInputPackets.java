@@ -62,21 +62,22 @@ public class LegacyAuthInputPackets {
             player.setPos(player.unvalidatedPosition.clone(), false);
         }
 
-        final List<Box> collisions = player.compensatedWorld.collectColliders(new ArrayList<>(), player.boundingBox.contract(1.0E-3F));
-        if (!collisions.isEmpty()) {
-            Vec3 offsetVec = Collider.moveOutOfBlocks(player.boundingBox.clone(), collisions);
-
-            // Bedrock behaviour, push player out of blocks if they're get clipped in it....
-            // and uhhhh if PUSH_TOWARDS_CLOSEST_SPACE flag is not present I think the max offset is around
-            // 0.08 -> 0.081 instead of 0.01F?
-            if (offsetVec.length() <= 0.01F) {
-                float offsetX = Math.min(0.01F, Math.abs(offsetVec.x)) * MathUtil.sign(offsetVec.x);
-                float offsetY = Math.min(0.01F, Math.abs(offsetVec.y)) * MathUtil.sign(offsetVec.y);
-                float offsetZ = Math.min(0.01F, Math.abs(offsetVec.z)) * MathUtil.sign(offsetVec.z);
-
-                player.setPos(player.position.add(offsetX, offsetY, offsetZ), false);
-            }
-        }
+        // This is broken.
+//        final List<Box> collisions = player.compensatedWorld.collectColliders(new ArrayList<>(), player.boundingBox.contract(1.0E-3F));
+//        if (!collisions.isEmpty()) {
+//            Vec3 offsetVec = Collider.moveOutOfBlocks(player.boundingBox.clone(), collisions);
+//
+//            // Bedrock behaviour, push player out of blocks if they're get clipped in it....
+//            // and uhhhh if PUSH_TOWARDS_CLOSEST_SPACE flag is not present I think the max offset is around
+//            // 0.08 -> 0.081 instead of 0.01F?
+//            if (offsetVec.length() <= 0.01F) {
+//                float offsetX = Math.min(0.01F, Math.abs(offsetVec.x)) * MathUtil.sign(offsetVec.x);
+//                float offsetY = Math.min(0.01F, Math.abs(offsetVec.y)) * MathUtil.sign(offsetVec.y);
+//                float offsetZ = Math.min(0.01F, Math.abs(offsetVec.z)) * MathUtil.sign(offsetVec.z);
+//
+//                player.setPos(player.position.add(offsetX, offsetY, offsetZ), false);
+//            }
+//        }
 
         // Also clear out old velocity.
         if (player.bestPossibility.getType() == VectorType.VELOCITY) {
