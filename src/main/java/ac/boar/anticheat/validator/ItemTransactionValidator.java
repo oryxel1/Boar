@@ -334,7 +334,8 @@ public final class ItemTransactionValidator {
                         } if (item instanceof BlockItem blockItem) { // Handle block item after bucket.
                             Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
                             if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
-                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(mappedBlock.javaId()));
+                                // System.out.println(player.getSession().getBlockMappings().getBedrockBlock(mappedBlock.defaultBlockState().javaId()));
+                                player.compensatedWorld.updateBlock(newBlockPos, 0, player.getSession().getBlockMappings().getBedrockBlockId(mappedBlock.defaultBlockState().javaId()));
                             } else {
                                 // System.out.println("What? item=" + blockItem.javaIdentifier());
                             }
