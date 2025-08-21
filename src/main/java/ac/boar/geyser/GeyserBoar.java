@@ -9,6 +9,7 @@ import lombok.Getter;
 import org.cloudburstmc.netty.channel.raknet.RakChildChannel;
 import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
 import org.geysermc.event.subscribe.Subscribe;
+import org.geysermc.geyser.GeyserImpl;
 import org.geysermc.geyser.api.command.Command;
 import org.geysermc.geyser.api.command.CommandSource;
 import org.geysermc.geyser.api.event.bedrock.SessionDisconnectEvent;
@@ -19,9 +20,14 @@ import org.geysermc.geyser.api.extension.ExtensionLogger;
 import org.geysermc.geyser.api.util.TriState;
 import org.geysermc.geyser.session.GeyserSession;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class GeyserBoar implements Extension {
     @Getter
     private static ExtensionLogger logger;
+    private static final Map<String, GeyserSession> nameToSessions = new HashMap<>();
 
     @Subscribe
     public void onSessionJoin(SessionLoginEvent event) {
@@ -32,6 +38,7 @@ public class GeyserBoar implements Extension {
 
         RakSessionCodec rakSessionCodec = ((RakChildChannel) player.getSession().getUpstream().getSession().getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
         BoarAcknowledgement.getRakSessionToPlayer().put(rakSessionCodec, player);
+        nameToSessions.put(event.connection().bedrockUsername(), (GeyserSession) event.connection());
     }
 
     @Subscribe
@@ -43,6 +50,7 @@ public class GeyserBoar implements Extension {
 
         RakSessionCodec rakSessionCodec = ((RakChildChannel) player.getSession().getUpstream().getSession().getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
         BoarAcknowledgement.getRakSessionToPlayer().remove(rakSessionCodec);
+        nameToSessions.remove(event.connection().bedrockUsername());
     }
 
     @Subscribe
@@ -65,7 +73,7 @@ public class GeyserBoar implements Extension {
     public void onRegisterPermissions(GeyserRegisterPermissionsEvent event) {
         event.register("boar.exempt", TriState.FALSE);
         event.register("boar.alert", TriState.NOT_SET);
-        event.register("boar.preddebug", TriState.NOT_SET);
+        event.register("boar.debug", TriState.NOT_SET);
     }
 
     @Subscribe
@@ -89,23 +97,28 @@ public class GeyserBoar implements Extension {
                 .build());
 
         event.register(Command.builder(this).source(CommandSource.class)
-                .name("preddebug").playerOnly(true).bedrockOnly(true)
+                .name("debug")
                 .description("Enable prediction debug message.")
-                .permission("boar.preddebug")
+                .permission("boar.debug")
                 .executor((source, cmd, args) -> {
-                    if (!(source.connection() instanceof GeyserSession session)) {
-                        source.sendMessage("Failed, not GeyserSession!");
+                    if (args.length < 1) {
                         return;
                     }
 
+                    final String prefix = Boar.getInstance().getAlertManager().getPrefix(source);
+                    GeyserSession session = nameToSessions.get(args[0]);
                     BoarPlayer player = Boar.getInstance().getPlayerManager().get(session);
-                    if (player == null) {
-                        source.sendMessage("Failed, can't find player session!");
+                    if (session == null || player == null) {
+                        source.sendMessage(prefix + "§cFailed to find player session.");
                         return;
                     }
 
-                    player.setDebugMode(!player.isDebugMode());
-                    source.sendMessage("Done! Current debug state: " + player.isDebugMode());
+                    UUID uuid = source.isConsole() ? AlertManager.CONSOLE_UUID : source.playerUuid();
+                    if (player.getTrackedDebugPlayers().containsKey(uuid)) {
+                        player.getTrackedDebugPlayers().remove(uuid);
+                    } else {
+                        player.getTrackedDebugPlayers().put(uuid, source);
+                    }
                 })
                 .build());
     }

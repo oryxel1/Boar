@@ -31,6 +31,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
+import org.geysermc.geyser.api.command.CommandSource;
 import org.geysermc.geyser.entity.EntityDefinitions;
 import org.geysermc.geyser.entity.attribute.GeyserAttributeType;
 import org.geysermc.geyser.inventory.item.BedrockEnchantment;
@@ -42,6 +43,12 @@ import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class BoarPlayer extends PlayerData {
@@ -77,8 +84,7 @@ public final class BoarPlayer extends PlayerData {
     private final ItemUseTracker itemUseTracker = new ItemUseTracker(this);
 
     @Getter
-    @Setter
-    private boolean debugMode;
+    private final Map<UUID, CommandSource> trackedDebugPlayers = new ConcurrentHashMap<>();
 
     public BoarPlayer(GeyserSession session) {
         this.session = session;

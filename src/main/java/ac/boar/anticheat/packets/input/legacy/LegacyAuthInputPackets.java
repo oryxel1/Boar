@@ -10,8 +10,6 @@ import ac.boar.anticheat.prediction.UncertainRunner;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.InputUtil;
 
-import ac.boar.anticheat.util.MathUtil;
-import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -21,9 +19,7 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.item.Items;
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class LegacyAuthInputPackets {

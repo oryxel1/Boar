@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AlertManager {
-    private final static UUID CONSOLE_UUID = new UUID(0,0);
+    public final static UUID CONSOLE_UUID = new UUID(0, 0);
 
     private final static String PREFIX = "§3Boar §7>§r ";
     private final static String BEDROCK_PREFIX = "§sBoar §i>§r ";
@@ -15,6 +15,10 @@ public class AlertManager {
 
     public void alert(String verbose) {
         sources.values().forEach(source -> source.sendMessage(getPrefix(source) + "§3" + verbose));
+    }
+
+    public void alertToPlayers(final List<CommandSource> sources, String verbose) {
+        sources.forEach(source -> source.sendMessage(getPrefix(source) + "§3" + verbose));
     }
 
     public String getPrefix(CommandSource source) {
