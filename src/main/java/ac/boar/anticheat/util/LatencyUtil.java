@@ -15,11 +15,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class LatencyUtil {
     private final BoarPlayer player;
     private final List<Long> sentStackLatency = new CopyOnWriteArrayList<>();
-    private final Map<Long, Long> idToSentTime = new ConcurrentHashMap<>();
+    private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
 
-    private long prevReceivedSentTime = -1;
-    public long getLastSentTime() {
+    private Time prevReceivedSentTime = new Time(-1, -1);
+    public Time getLastSentTime() {
         return this.prevReceivedSentTime;
     }
 
@@ -29,7 +29,7 @@ public final class LatencyUtil {
 
     public void addLatencyToQueue(long id) {
         this.sentStackLatency.add(id);
-        this.idToSentTime.put(id, System.currentTimeMillis());
+        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
         onLatencySend();
     }
 
@@ -49,7 +49,7 @@ public final class LatencyUtil {
     }
 
     public void confirmByTime(long time) {
-        if (time < this.prevReceivedSentTime) {
+        if (time < this.prevReceivedSentTime.ms()) {
             return;
         }
 
@@ -57,12 +57,14 @@ public final class LatencyUtil {
 
         long lastId = -1;
         for (long next : this.sentStackLatency) {
-            final Long sentTime = this.idToSentTime.get(next);
-            if (sentTime > time) {
+            final Time sentTime = this.idToSentTime.get(next);
+            if (sentTime.ms() > time) {
                 break;
             }
             this.idToSentTime.remove(next);
-            this.prevReceivedSentTime = Math.max(this.prevReceivedSentTime, sentTime);
+            if (sentTime.ms() > this.prevReceivedSentTime.ms()) {
+                this.prevReceivedSentTime = sentTime;
+            }
 
             final List<Runnable> tasks = this.idToTasks.remove(next);
             if (tasks != null) {
@@ -101,9 +103,12 @@ public final class LatencyUtil {
                 tasks.forEach(Runnable::run);
             }
 
-            final Long sentTime = this.idToSentTime.remove(next);
+            final Time sentTime = this.idToSentTime.remove(next);
             if (sentTime != null) {
-                this.prevReceivedSentTime = Math.max(this.prevReceivedSentTime, sentTime);
+                if (sentTime.ms() > this.prevReceivedSentTime.ms()) {
+                    this.prevReceivedSentTime = sentTime;
+                }
+
                 onLatencyAccepted(next, sentTime);
             }
 
@@ -126,7 +131,7 @@ public final class LatencyUtil {
         }
     }
 
-    private void onLatencyAccepted(long id, long time) {
+    private void onLatencyAccepted(long id, Time time) {
         for (final Check check : this.player.getCheckHolder().values()) {
             if (!(check instanceof PingBasedCheck pingBasedCheck)) {
                 continue;
@@ -135,4 +140,6 @@ public final class LatencyUtil {
             pingBasedCheck.onLatencyAccepted(id, time);
         }
     }
+
+    public record Time(long ms, long ns) {}
 }

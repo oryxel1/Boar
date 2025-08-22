@@ -5,6 +5,7 @@ import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.annotations.Experimental;
 import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.LatencyUtil;
 
 @Experimental
 @CheckInfo(name = "Timer")
@@ -12,13 +13,14 @@ public final class Timer extends PingBasedCheck {
     private static final long AVERAGE_DISTANCE = (long) 5e+7;
 
     private long lastNS, balance, prevTick;
+    private long loseBalance;
 
     public Timer(final BoarPlayer player) {
         super(player);
     }
 
     @Override
-    public void onLatencyAccepted(long id, long time) {
+    public void onLatencyAccepted(long id, LatencyUtil.Time time) {
     }
 
     public boolean isInvalid() {
@@ -34,14 +36,22 @@ public final class Timer extends PingBasedCheck {
         long distance = System.nanoTime() - this.lastNS;
         long neededDistance = (player.tick - this.prevTick) * AVERAGE_DISTANCE;
 
-        if (this.balance > AVERAGE_DISTANCE + 1e+7 + 3e+6) {
-            this.fail("balance=" + this.balance + ", player is ahead!");
+        final long limit = (long) (AVERAGE_DISTANCE + 1e+7 + 3e+6);
+        if (this.balance > limit) {
+            if (this.balance - this.loseBalance <= limit) {
+                this.loseBalance -= AVERAGE_DISTANCE;
+                Boar.debug("Player failed timer check due to balance limiter, but won't flag since player could actually be lagging.", Boar.DebugMessage.INFO);
+            } else {
+                this.fail("balance=" + this.balance + ", player is ahead!");
+            }
+
             player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
             this.balance -= AVERAGE_DISTANCE;
             valid = false;
         } else {
             long maxBalanceAdvantage = (long) Math.max(0, Boar.getConfig().maxBalanceAdvantage() * 1e+6);
             if (this.balance <= -Math.abs(maxBalanceAdvantage + AVERAGE_DISTANCE) && Boar.getConfig().maxBalanceAdvantage() > 0) {
+                this.loseBalance = Math.abs(this.balance);
                 this.balance = -AVERAGE_DISTANCE;
             }
         }

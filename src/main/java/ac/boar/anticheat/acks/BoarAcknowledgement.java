@@ -23,7 +23,7 @@ public class BoarAcknowledgement {
             return;
         }
 
-        long lastLatency = player.getLatencyUtil().getLastSentTime();
+        long lastLatency = player.getLatencyUtil().getLastSentTime().ms();
 
         long distance = datagram.getSendTime() - lastLatency;
         if (distance <= Boar.getConfig().maxAcknowledgementTime() || lastLatency == -1 || player.inLoadingScreen || player.sinceLoadingScreen < 5) {
