@@ -21,8 +21,11 @@ public class ContainerCache {
     @Getter
     private final long uniqueEntityId;
 
-    private final int containerSize, offset;
+    private final int containerSize;
+    @Getter
+    private final int offset;
 
+    @Getter
     private final ItemCache[] contents;
 
     public ContainerCache(CompensatedInventory inventory, byte id, ContainerType type, Vector3i blockPosition, long uniqueEntityId) {

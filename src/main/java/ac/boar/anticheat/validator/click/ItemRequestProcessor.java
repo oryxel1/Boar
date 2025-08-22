@@ -33,8 +33,14 @@ public class ItemRequestProcessor {
     public boolean processAll(final ItemStackRequest request) {
         for (final ItemStackRequestAction action : request.getActions()) {
             // System.out.println(action);
-            if (!this.handle(action)) {
-                // We ignore this... for now!
+            try {
+                if (!this.handle(action)) {
+                    // We ignore this... for now!
+                }
+            } catch (Exception ignored) {
+                // Honestly, this inventory handling system is actually just half-baked system and I never actually
+                // got the motivation to finish it, if you want to, feel free to PR. But for now
+                // I'm just going to leave it as it is, it's good enough *for now*.
             }
         }
 
@@ -182,7 +188,17 @@ public class ItemRequestProcessor {
                 // From creative menu, crafting or other actions.
                 final boolean create = !this.queuedItems.isEmpty() && sourceSlot == 50 && source.getContainer() == ContainerSlotType.CREATED_OUTPUT;
 
-                if (sourceSlot < 0 || destinationSlot < 0 || (sourceSlot >= sourceContainer.getContainerSize() && !create) || destinationSlot >= destinationContainer.getContainerSize()) {
+                if (sourceSlot < 0 || destinationSlot < 0 || (sourceSlot >= sourceContainer.getContainerSize() && !create) ||
+                        destinationSlot >= destinationContainer.getContainerSize()) {
+                    return false;
+                }
+
+                int sourceSlotWithoutOffset = sourceSlot - sourceContainer.getOffset();
+                int destinationSlotWithoutOffset = destinationSlot - destinationContainer.getOffset();
+                if (sourceSlotWithoutOffset < 0 || !create && sourceSlotWithoutOffset >= sourceContainer.getContents().length) {
+                    return false;
+                }
+                if (destinationSlotWithoutOffset < 0 || !create && destinationSlotWithoutOffset >= sourceContainer.getContents().length) {
                     return false;
                 }
 
@@ -240,6 +256,15 @@ public class ItemRequestProcessor {
                 final int destinationSlot = destination.getSlot();
 
                 if (sourceSlot < 0 || destinationSlot < 0 || sourceSlot >= sourceContainer.getContainerSize() || destinationSlot >= destinationContainer.getContainerSize()) {
+                    return false;
+                }
+
+                int sourceSlotWithoutOffset = sourceSlot - sourceContainer.getOffset();
+                int destinationSlotWithoutOffset = destinationSlot - destinationContainer.getOffset();
+                if (sourceSlotWithoutOffset < 0 || sourceSlotWithoutOffset >= sourceContainer.getContents().length) {
+                    return false;
+                }
+                if (destinationSlotWithoutOffset < 0 || destinationSlotWithoutOffset >= sourceContainer.getContents().length) {
                     return false;
                 }
 
