@@ -29,10 +29,13 @@ public class DebugOffsetA extends OffsetHandlerCheck {
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         if (actual.length() > 1e-5 || offset > maxOffset || eotOffset > maxOffset) {
             String colorOffset = offset > maxOffset ? "§c" : offset > 1.0E-5 ? "§6" : "§a";
+            if (player.position.distanceTo(player.unvalidatedPosition) > maxOffset && offset < maxOffset) {
+                colorOffset = "§7";
+            }
 
             String predDebug = colorOffset + "O:" + offset + ", T: " + player.bestPossibility.getType() + ", P: " + predicted.x + "," + predicted.y + "," + predicted.z + ", pos=" + player.position;
             alertManager.alertToPlayers(player.getTrackedDebugPlayers().values().stream().toList(), predDebug);
-            alertManager.alertToPlayers(player.getTrackedDebugPlayers().values().stream().toList(), "§7A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.getFlagTracker().has(EntityFlag.SPRINTING) + ", SNEAKING=" + player.getFlagTracker().has(EntityFlag.SNEAKING) + ", water=" + player.touchingWater);
+            alertManager.alertToPlayers(player.getTrackedDebugPlayers().values().stream().toList(), colorOffset + "A: " + actual.x + "," + actual.y + "," + actual.z + ", " + "SPRINTING=" + player.getFlagTracker().has(EntityFlag.SPRINTING) + ", SNEAKING=" + player.getFlagTracker().has(EntityFlag.SNEAKING) + ", water=" + player.touchingWater);
             alertManager.alertToPlayers(player.getTrackedDebugPlayers().values().stream().toList(), "A EOT: " + player.velocity.toVector3f().toString());
             alertManager.alertToPlayers(player.getTrackedDebugPlayers().values().stream().toList(), "EOT O: " + (eotOffset > 1e-4 ? "§b" : "§a") + eotOffset + "," + player.unvalidatedTickEnd.toVector3f().toString());
         }
