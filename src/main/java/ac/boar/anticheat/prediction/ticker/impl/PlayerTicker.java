@@ -50,6 +50,11 @@ public class PlayerTicker extends LivingTicker {
                     player.velocity = player.velocity.add(0, (d - player.velocity.y) * e, 0);
                 }
             }
+
+            // No fucking idea why, but if it's the case then it's the case, hacks but works.
+            if (player.unvalidatedTickEnd.y == 0 && player.ticksSinceSwimming > 0 && player.ticksSinceSwimming < 10 && player.getInputData().contains(PlayerAuthInputData.JUMPING)) {
+                player.velocity.y = 0;
+            }
         }
         super.travel();
     }

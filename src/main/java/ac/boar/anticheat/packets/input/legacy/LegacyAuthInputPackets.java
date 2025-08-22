@@ -147,6 +147,12 @@ public class LegacyAuthInputPackets {
             player.sinceTridentUse = 0;
         }
 
+        if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
+            player.ticksSinceSwimming++;
+        } else {
+            player.ticksSinceSwimming = 0;
+        }
+
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
                 case START_GLIDING -> {
