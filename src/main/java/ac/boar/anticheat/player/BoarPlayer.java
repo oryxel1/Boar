@@ -43,12 +43,9 @@ import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class BoarPlayer extends PlayerData {
@@ -248,11 +245,11 @@ public final class BoarPlayer extends PlayerData {
         Vector3i blockPos = null;
         float d = Float.MAX_VALUE;
 
-        final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(boundingBox);
+        final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(boundingBox.expand(1.0E-3F));
         while (iterator.step()) {
             int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
             Vector3i blockPos2 = Vector3i.from(x, y, z);
-            if (compensatedWorld.getBlockState(x, y, z, 0).findCollision(this, Vector3i.from(x, y, z), boundingBox.expand(1.0E-3F), true).isEmpty()) {
+            if (compensatedWorld.getBlockState(x, y, z, 0).findCollision(this, Vector3i.from(x, y, z), null, false).isEmpty()) {
                 continue;
             }
 
