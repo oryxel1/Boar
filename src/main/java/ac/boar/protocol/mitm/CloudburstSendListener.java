@@ -12,6 +12,7 @@ import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.AuthoritativeMovementMode;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 import org.cloudburstmc.protocol.bedrock.packet.StartGamePacket;
+import org.cloudburstmc.protocol.bedrock.packet.UpdateClientInputLocksPacket;
 import org.geysermc.geyser.session.UpstreamSession;
 
 public final class CloudburstSendListener extends UpstreamSession {
@@ -31,6 +32,11 @@ public final class CloudburstSendListener extends UpstreamSession {
 
     @Override
     public void sendPacket(@NonNull BedrockPacket packet) {
+        if (packet instanceof UpdateClientInputLocksPacket) {
+            // Nope, don't, pain in the ass to support this.
+            return;
+        }
+
         final CloudburstPacketEvent event = new CloudburstPacketEvent(this.player, packet);
         for (final PacketListener listener : PacketEvents.getApi().getListeners()) {
             listener.onPacketSend(event, false);
