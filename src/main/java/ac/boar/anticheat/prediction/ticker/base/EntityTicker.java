@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.geysermc.geyser.level.block.Blocks;
@@ -123,6 +124,11 @@ public class EntityTicker {
     }
 
     public final void doSelfMove(Vec3 vec3) {
+        if (player.abilities.contains(Ability.NO_CLIP)) {
+            player.setPos(player.position.add(vec3));
+            return;
+        }
+
         if (player.stuckSpeedMultiplier.lengthSquared() > 1.0E-7) {
             vec3 = vec3.multiply(player.stuckSpeedMultiplier);
             player.stuckSpeedMultiplier = Vec3.ZERO;
@@ -148,8 +154,7 @@ public class EntityTicker {
 
         // Hacks, but works.
         if (oldVec3.x != vec3.x || oldVec3.z != vec3.z) {
-            player.velocity = new Vec3(player.unvalidatedTickEnd.x == 0 ? 0 : player.velocity.x,
-                    player.velocity.y, player.unvalidatedTickEnd.z == 0 ? 0 : player.velocity.z);
+            player.velocity = new Vec3(player.unvalidatedTickEnd.x == 0 ? 0 : player.velocity.x, player.velocity.y, player.unvalidatedTickEnd.z == 0 ? 0 : player.velocity.z);
         }
 
         if (player.horizontalCollision) {

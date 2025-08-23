@@ -60,7 +60,7 @@ public class Prediction extends OffsetHandlerCheck {
 
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
-        if (!MathUtil.sameDirection(actual, predicted)) {
+        if (!MathUtil.sameDirectionHorizontal(actual, predicted)) {
             this.checks.get("Strafe").fail("o: " + offset + ", expected direction: " +
                     MathUtil.signAll(predicted).horizontalToString() + ", actual direction: " + MathUtil.signAll(actual).horizontalToString());
         }

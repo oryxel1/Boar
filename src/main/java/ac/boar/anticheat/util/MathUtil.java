@@ -13,6 +13,10 @@ public class MathUtil {
         return sign(vec3.x) == sign(vec32.x) && sign(vec3.y) == sign(vec32.y) && sign(vec3.z) == sign(vec32.z);
     }
 
+    public static boolean sameDirectionHorizontal(Vec3 vec3, Vec3 vec32) {
+        return sign(vec3.x) == sign(vec32.x) && sign(vec3.z) == sign(vec32.z);
+    }
+
     public static Vec3 signAll(Vec3 vec3) {
         return new Vec3(sign(vec3.x), sign(vec3.y), sign(vec3.z));
     }
