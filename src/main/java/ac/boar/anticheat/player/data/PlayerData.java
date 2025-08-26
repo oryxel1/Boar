@@ -44,6 +44,7 @@ public class PlayerData {
 
     // Geyser Mappings related
     public int BEDROCK_AIR = -1;
+    public List<Integer> AIR_IDS = new ArrayList<>();
     public final Map<Integer, Integer> bedrockBlockToJava = new HashMap<>();
 
     @Getter

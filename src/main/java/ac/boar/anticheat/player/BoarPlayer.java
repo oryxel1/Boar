@@ -92,6 +92,9 @@ public final class BoarPlayer extends PlayerData {
         }
 
         BEDROCK_AIR = mappings.getBedrockAir().getRuntimeId();
+        AIR_IDS.add(BEDROCK_AIR);
+        AIR_IDS.add(mappings.getBedrockBlockId(Blocks.CAVE_AIR.defaultBlockState().javaId()));
+        AIR_IDS.add(mappings.getBedrockBlockId(Blocks.VOID_AIR.defaultBlockState().javaId()));
 //
         for (GeyserAttributeType type : GeyserAttributeType.values()) {
             final String identifier = type.getBedrockIdentifier();

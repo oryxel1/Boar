@@ -88,7 +88,7 @@ public class ServerChunkPackets implements PacketListener {
                 // Just ignore the rest, I don't need those.
             } catch (Exception ignored) {
                 // Ignore and just use whatever we were able to read, bedrock client do the same thing I think?
-                /// ignored.printStackTrace();
+                // ignored.printStackTrace();
             } finally {
                 buffer.release();
             }
@@ -107,9 +107,10 @@ public class ServerChunkPackets implements PacketListener {
         if (event.getPacket() instanceof UpdateBlockPacket packet) {
             // Ugly hack.
             if (packet.getDataLayer() == 0 && Boar.getConfig().ignoreGhostBlock() && !player.inLoadingScreen && player.sinceLoadingScreen >= 2) {
-                BlockState state = BlockState.of(player.bedrockBlockToJava.getOrDefault(packet.getDefinition().getRuntimeId(), Blocks.AIR.javaId()));
-                boolean newBlockIsAir = state.is(Blocks.AIR) || state.is(Blocks.CAVE_AIR) || state.is(Blocks.VOID_AIR);
-                if (newBlockIsAir && !player.compensatedWorld.getBlockState(packet.getBlockPosition(), packet.getDataLayer()).isAir()) {
+                boolean newBlockIsAir = player.AIR_IDS.contains(packet.getDefinition().getRuntimeId());
+                boolean oldBlockIsAir = player.AIR_IDS.contains(player.compensatedWorld.getRawBlockAt(packet.getBlockPosition().getX(), packet.getBlockPosition().getY(), packet.getBlockPosition().getZ(), 0));
+
+                if (newBlockIsAir && !oldBlockIsAir) {
                     int distance = Math.abs(packet.getBlockPosition().getY() - GenericMath.floor(player.position.y - 1));
                     if (distance <= 1) {
                         player.tickSinceBlockResync = 5;

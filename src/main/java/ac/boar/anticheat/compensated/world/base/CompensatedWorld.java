@@ -133,27 +133,31 @@ public class CompensatedWorld {
         return new BoarBlockState(state, Vector3i.from(x, y, z), layer);
     }
 
-    public int getBlockAt(int x, int y, int z, int layer) {
+    public int getRawBlockAt(int x, int y, int z, int layer) {
         BoarChunkSection[] column = this.getChunk(x >> 4, z >> 4);
         if (column == null) {
-            return 0;
+            return player.BEDROCK_AIR;
         }
 
         if (y < getMinY() || ((y - getMinY()) >> 4) > column.length - 1) {
             // Y likely goes above or below the height limit of this world
-            return 0;
+            return player.BEDROCK_AIR;
         }
 
         BoarChunkSection chunk = column[(y - getMinY()) >> 4];
         if (chunk != null) {
             try {
-                return player.bedrockBlockToJava.getOrDefault(chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer), 0);
+                return chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer);
             } catch (Exception e) {
-                return 0;
+                return player.BEDROCK_AIR;
             }
         }
 
-        return 0;
+        return player.BEDROCK_AIR;
+    }
+
+    public int getBlockAt(int x, int y, int z, int layer) {
+        return player.bedrockBlockToJava.getOrDefault(this.getRawBlockAt(x, y, z, layer), 0);
     }
 
     private BoarChunkSection[] getChunk(int chunkX, int chunkZ) {
