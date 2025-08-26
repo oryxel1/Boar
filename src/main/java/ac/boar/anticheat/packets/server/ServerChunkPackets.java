@@ -50,15 +50,11 @@ public class ServerChunkPackets implements PacketListener {
                 return;
             }
 
-            int yOffset = world.getMinY() >> 4, chunkSize = world.getHeightY() >> 4;
-
             final BedrockDimension dimension = DimensionUtil.dimensionFromId(dimensionId);
-
-            int dimensionOffset = dimension.minY() >> 4;
 
             final BoarChunkSection[] sections = new BoarChunkSection[dimension.height() >> 4];
 
-            final ByteBuf buffer = packet.getData().copy();
+            final ByteBuf buffer = packet.getData().retainedDuplicate();
             try {
                 // Read chunk sections.
                 for (int i = 0; i < sectionCount; i++) {
@@ -89,30 +85,10 @@ public class ServerChunkPackets implements PacketListener {
                     sections[i] = new BoarChunkSection(storages, subChunkIndex);
                 }
 
-                // As of 1.18.30, the amount of biomes read is dependent on how high Bedrock thinks the dimension is
-                int biomeCount = dimension.height() >> 4;
-                // I don't really care about biomes, just ignore whatever we were able to read.
-                for (int i = 0; i < biomeCount; i++) {
-                    int biomeYOffset = dimensionOffset + i;
-                    if (biomeYOffset < yOffset) {
-                        buffer.skipBytes(1);
-                        continue;
-                    }
-                    if (biomeYOffset >= (chunkSize + yOffset)) {
-                        buffer.skipBytes(1);
-                        continue;
-                    }
-
-                    readStorage(buffer, player.BEDROCK_AIR);
-                }
-
-                // Border blocks.
-                buffer.skipBytes(1);
-
                 // Just ignore the rest, I don't need those.
             } catch (Exception ignored) {
-                // Ignore and just use whatever we were able to read.
-                // ignored.printStackTrace();
+                // Ignore and just use whatever we were able to read, bedrock client do the same thing I think?
+                /// ignored.printStackTrace();
             } finally {
                 buffer.release();
             }
