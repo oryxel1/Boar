@@ -9,7 +9,7 @@ import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.validator.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
-import ac.boar.mappings.BedrockMappings;
+import ac.boar.mappings.BlockMappings;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
@@ -333,7 +333,7 @@ public final class ItemTransactionValidator {
                             GeyserItemStack stack = GeyserItemStack.of(javaId, 1);
                             inventory.inventoryContainer.set(inventory.heldItemSlot, inventory.translate(stack.getItemStack()));
                         } if (item instanceof BlockItem blockItem) { // Handle block item after bucket.
-                            Block mappedBlock = BedrockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
+                            Block mappedBlock = BlockMappings.getItemToBlock().getOrDefault(blockItem, Blocks.AIR);
                             if (mappedBlock.javaId() != Blocks.AIR.javaId()) {
                                 // System.out.println(player.getSession().getBlockMappings().getBedrockBlock(mappedBlock.defaultBlockState().javaId()));
                                 BlockState state1 = BlockUtil.getPlacementState(player, mappedBlock, packet.getBlockPosition());

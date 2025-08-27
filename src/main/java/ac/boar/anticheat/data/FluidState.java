@@ -5,7 +5,9 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
+import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.session.cache.tags.BlockTag;
 
@@ -72,7 +74,8 @@ public record FluidState(Fluid fluid, float height, int level) {
         if (direction == Direction.UP) {
             return true;
         }
-        if (player.getSession().getTagCache().is(BlockTag.ICE, blockState.getState().block())) {
+        final BlockState geyserState = blockState.getState();
+        if (geyserState.is(Blocks.ICE) || geyserState.is(Blocks.FROSTED_ICE) || geyserState.is(Blocks.BLUE_ICE) || geyserState.is(Blocks.PACKED_ICE)) {
             return false;
         }
         return blockState.isFaceSturdy(player);

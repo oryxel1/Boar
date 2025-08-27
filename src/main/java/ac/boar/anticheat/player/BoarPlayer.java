@@ -11,6 +11,7 @@ import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.geyser.util.GeyserUtil;
+import ac.boar.mappings.BlockMappings;
 import ac.boar.protocol.mitm.CloudburstReceiveListener;
 import lombok.Getter;
 
@@ -39,9 +40,7 @@ import org.geysermc.geyser.inventory.item.BedrockEnchantment;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.Fluid;
 import org.geysermc.geyser.level.block.type.BlockState;
-import org.geysermc.geyser.registry.type.BlockMappings;
 import org.geysermc.geyser.session.GeyserSession;
-import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.Effect;
 
 import java.util.Map;
@@ -88,7 +87,7 @@ public final class BoarPlayer extends PlayerData {
     public BoarPlayer(GeyserSession session) {
         this.session = session;
 
-        BlockMappings mappings = session.getBlockMappings();
+        org.geysermc.geyser.registry.type.BlockMappings mappings = session.getBlockMappings();
         for (int i = 0; i < mappings.getJavaToBedrockBlocks().length; i++) {
             this.bedrockBlockToJava.put(mappings.getJavaToBedrockBlocks()[i].getRuntimeId(), i);
         }
@@ -210,7 +209,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public boolean onClimbable() {
-        return this.getSession().getTagCache().is(BlockTag.CLIMBABLE, this.getInBlockState().block()) && !this.getInBlockState().is(Blocks.SCAFFOLDING);
+        return BlockMappings.getClimbableBlocks().contains(this.getInBlockState().block());
     }
 
     public float getJumpPower() {

@@ -2,6 +2,7 @@ package ac.boar.anticheat.util.block;
 
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.mappings.BlockMappings;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.geysermc.geyser.level.block.Blocks;
@@ -9,8 +10,6 @@ import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.registry.BlockRegistries;
-import org.geysermc.geyser.session.cache.TagCache;
-import org.geysermc.geyser.session.cache.tags.BlockTag;
 
 import java.util.Locale;
 
@@ -36,10 +35,10 @@ public class BlockUtil {
         BoarBlockState blockState3 = player.compensatedWorld.getBlockState(position.south(), 0);
         BoarBlockState blockState4 = player.compensatedWorld.getBlockState(position.west(), 0);
 
-        boolean north = connectsTo(player, main, blockState.getState(), blockState.isFaceSturdy(player), Direction.SOUTH);
-        boolean east = connectsTo(player, main, blockState2.getState(), blockState2.isFaceSturdy(player), Direction.WEST);
-        boolean south = connectsTo(player, main, blockState3.getState(), blockState3.isFaceSturdy(player), Direction.NORTH);
-        boolean west = connectsTo(player, main, blockState4.getState(), blockState4.isFaceSturdy(player), Direction.EAST);
+        boolean north = connectsTo(main, blockState.getState(), blockState.isFaceSturdy(player), Direction.SOUTH);
+        boolean east = connectsTo(main, blockState2.getState(), blockState2.isFaceSturdy(player), Direction.WEST);
+        boolean south = connectsTo(main, blockState3.getState(), blockState3.isFaceSturdy(player), Direction.NORTH);
+        boolean west = connectsTo(main, blockState4.getState(), blockState4.isFaceSturdy(player), Direction.EAST);
 
         // A bit hacky but works, Geyser withValue implementation seems to be broken.
         String identifier = main.block().defaultBlockState().toString().intern();
@@ -59,10 +58,10 @@ public class BlockUtil {
         BoarBlockState blockState3 = player.compensatedWorld.getBlockState(position.west(), 0);
         BoarBlockState blockState4 = player.compensatedWorld.getBlockState(position.east(), 0);
 
-        boolean north = attachsTo(player, blockState.getState(), blockState.isFaceSturdy(player));
-        boolean south = attachsTo(player, blockState2.getState(), blockState2.isFaceSturdy(player));
-        boolean west = attachsTo(player, blockState3.getState(), blockState3.isFaceSturdy(player));
-        boolean east = attachsTo(player, blockState4.getState(), blockState4.isFaceSturdy(player));
+        boolean north = attachsTo(blockState.getState(), blockState.isFaceSturdy(player));
+        boolean south = attachsTo(blockState2.getState(), blockState2.isFaceSturdy(player));
+        boolean west = attachsTo(blockState3.getState(), blockState3.isFaceSturdy(player));
+        boolean east = attachsTo(blockState4.getState(), blockState4.isFaceSturdy(player));
 
         // A bit hacky but works, Geyser withValue implementation seems to be broken.
         String identifier = state.block().defaultBlockState().toString().intern();
@@ -75,33 +74,31 @@ public class BlockUtil {
         return BlockState.of(BlockRegistries.JAVA_BLOCK_STATE_IDENTIFIER_TO_ID.getOrDefault(identifier, state.javaId()));
     }
 
-    private static boolean connectsTo(BoarPlayer player, BlockState blockState, BlockState neighbour, boolean bl, Direction direction) {
-        final TagCache tagCache = player.getSession().getTagCache();
-
-        return !isExceptionForConnection(tagCache, neighbour) && bl || isSameFence(tagCache, neighbour, blockState) || connectsToDirection(tagCache, neighbour, direction);
+    private static boolean connectsTo(BlockState blockState, BlockState neighbour, boolean bl, Direction direction) {
+        return !isExceptionForConnection(neighbour) && bl || isSameFence(neighbour, blockState) || connectsToDirection(neighbour, direction);
     }
 
-    private static boolean attachsTo(BoarPlayer player, BlockState blockState, boolean bl) {
-        final TagCache tagCache = player.getSession().getTagCache();
-        return !isExceptionForConnection(tagCache, blockState) && bl || blockState.is(Blocks.IRON_BARS) || blockState.toString().toLowerCase(Locale.ROOT).contains("glass_pane") || tagCache.is(BlockTag.WALLS, blockState.block());
+    private static boolean attachsTo(BlockState blockState, boolean bl) {
+        boolean walls = BlockMappings.getWallBlocks().contains(blockState.block());
+        return !isExceptionForConnection(blockState) && bl || blockState.is(Blocks.IRON_BARS) || blockState.toString().toLowerCase(Locale.ROOT).contains("glass_pane") || walls;
     }
 
-    private static boolean isSameFence(TagCache tagCache, BlockState blockState, BlockState currentBlockState) {
-        return tagCache.is(BlockTag.FENCES, blockState.block()) && tagCache.is(BlockTag.WOODEN_FENCES, blockState.block()) ==
-                tagCache.is(BlockTag.WOODEN_FENCES, currentBlockState.block());
+    private static boolean isSameFence(BlockState blockState, BlockState currentBlockState) {
+        return BlockMappings.getFenceBlocks().contains(blockState.block()) && blockState.is(Blocks.NETHER_BRICK_FENCE) == currentBlockState.is(Blocks.NETHER_BRICK_FENCE);
     }
 
-    public static boolean connectsToDirection(TagCache cache, BlockState blockState, Direction direction) {
-        if (!cache.is(BlockTag.FENCE_GATES, blockState.block())) {
+    public static boolean connectsToDirection(BlockState blockState, Direction direction) {
+        if (!BlockMappings.getFenceGateBlocks().contains(blockState.block())) {
             return false;
         }
 
         return blockState.getValue(HORIZONTAL_FACING).getAxis() == getClockWise(direction).getAxis();
     }
 
-    public static boolean isExceptionForConnection(TagCache cache, BlockState blockState) {
-        return cache.is(BlockTag.LEAVES, blockState.block()) || blockState.is(Blocks.BARRIER) || blockState.is(Blocks.CARVED_PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN) || blockState.is(Blocks.MELON) || blockState.is(Blocks.PUMPKIN)
-                || cache.is(BlockTag.SHULKER_BOXES, blockState.block());
+    public static boolean isExceptionForConnection(BlockState blockState) {
+        return BlockMappings.getLeavesBlocks().contains(blockState.block()) || blockState.is(Blocks.BARRIER) ||
+                blockState.is(Blocks.CARVED_PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN) || blockState.is(Blocks.MELON) || blockState.is(Blocks.PUMPKIN)
+                || BlockMappings.getShulkerBlocks().contains(blockState.block());
     }
 
     private static Direction getClockWise(Direction direction) {

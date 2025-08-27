@@ -12,15 +12,13 @@ import ac.boar.anticheat.packets.server.ServerChunkPackets;
 import ac.boar.anticheat.packets.server.ServerEntityPackets;
 import ac.boar.anticheat.packets.server.ServerDataPackets;
 import ac.boar.geyser.GeyserBoar;
-import ac.boar.mappings.BedrockMappings;
+import ac.boar.mappings.BlockMappings;
 import lombok.Getter;
 
 import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
 
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
 import ac.boar.protocol.PacketEvents;
-
-import java.util.List;
 
 @Getter
 public class Boar {
@@ -37,7 +35,7 @@ public class Boar {
         config = ConfigLoader.load(instance, GeyserBoar.class, Config.class, Config.DEFAULT_CONFIG);
         // System.out.println("Load config: " + config);
 
-        BedrockMappings.load();
+        BlockMappings.load();
 
         this.playerManager = new BoarPlayerManager();
         this.alertManager = new AlertManager();

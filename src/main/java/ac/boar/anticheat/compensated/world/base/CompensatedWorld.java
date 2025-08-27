@@ -7,10 +7,8 @@ import ac.boar.anticheat.data.block.impl.BedBlockState;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.util.block.BlockUtil;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Mutable;
-import ac.boar.mappings.BedrockMappings;
 import it.unimi.dsi.fastutil.longs.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,6 @@ import org.geysermc.geyser.entity.type.Entity;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
-import org.geysermc.geyser.session.cache.tags.BlockTag;
 import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
@@ -126,7 +123,7 @@ public class CompensatedWorld {
             return new HoneyBlockState(state, Vector3i.from(x, y, z), layer);
         } else if (state.is(Blocks.SLIME_BLOCK)) {
             return new SlimeBlockState(state, Vector3i.from(x, y, z), layer);
-        } else if (player.getSession().getTagCache().is(BlockTag.BEDS, state.block())) {
+        } else if (state.block().toString().contains("_bed")) { // nasty hack, but works!
             return new BedBlockState(state, Vector3i.from(x, y, z), layer);
         }
 
