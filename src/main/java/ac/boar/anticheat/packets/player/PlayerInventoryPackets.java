@@ -79,7 +79,6 @@ public class PlayerInventoryPackets implements PacketListener {
         final CompensatedInventory inventory = player.compensatedInventory;
 
         if (event.getPacket() instanceof CreativeContentPacket packet) {
-            player.sendLatencyStack(immediate);
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 inventory.getCreativeData().clear();
 
@@ -90,7 +89,6 @@ public class PlayerInventoryPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof CraftingDataPacket packet) {
-            player.sendLatencyStack(immediate);
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 inventory.getCraftingData().clear();
 

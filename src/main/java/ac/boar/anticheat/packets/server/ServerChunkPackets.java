@@ -6,6 +6,7 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.anticheat.util.geyser.BlockStorage;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
+import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import io.netty.buffer.ByteBuf;
@@ -16,8 +17,6 @@ import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.util.VarInts;
 import org.geysermc.geyser.level.BedrockDimension;
-import org.geysermc.geyser.level.block.Blocks;
-import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.chunk.bitarray.BitArray;
 import org.geysermc.geyser.level.chunk.bitarray.BitArrayVersion;
 import org.geysermc.geyser.level.chunk.bitarray.SingletonBitArray;
@@ -93,8 +92,13 @@ public class ServerChunkPackets implements PacketListener {
                 buffer.release();
             }
 
-            // TODO: Should we send stack id all the time?
-            player.sendLatencyStack(immediate);
+            // Unless the player is seriously lagging then this shouldn't false, we should only perfectly compensate if the chunk is close enough and can actually affect player.
+            int chunkX = packet.getChunkX() << 4, chunkZ = packet.getChunkZ() << 4;
+            boolean send = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
+            if (send) {
+                player.sendLatencyStack(immediate);
+            }
+
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
                 if (dimension != world.getDimension()) {
                     return;
@@ -119,7 +123,12 @@ public class ServerChunkPackets implements PacketListener {
                 }
             }
 
-            player.sendLatencyStack(immediate);
+            // Unless the player is seriously lagging then this shouldn't false, we should only perfectly compensate if the block is close enough and can actually affect player.
+            boolean send = player.position.distanceTo(new Vec3(packet.getBlockPosition())) <= 16;
+            if (send) {
+                player.sendLatencyStack(immediate);
+            }
+
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
         }
     }

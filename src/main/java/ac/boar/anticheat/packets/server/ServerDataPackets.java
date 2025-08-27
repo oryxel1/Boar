@@ -41,12 +41,6 @@ public class ServerDataPackets implements PacketListener {
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get() + 1, () -> {
                 player.abilities.clear();
                 for (AbilityLayer layer : packet.getAbilityLayers()) {
-                    // TODO: Figure this out? also "fly" speed doesn't seems to even be fly speed. too lazy to look at vanilla code brah
-                    // also how can we be sure it's the same as java? well ignore this for now, attribute will handle this.
-//                    if (layer.getLayerType() == AbilityLayer.Type.BASE) {
-//                        player.attributes.get(GeyserAttributeType.MOVEMENT_SPEED.getBedrockIdentifier()).setBaseValue(layer.getWalkSpeed());
-//                    }
-
                     player.abilities.addAll(layer.getAbilityValues());
                 }
 
@@ -61,7 +55,8 @@ public class ServerDataPackets implements PacketListener {
                     return;
                 }
 
-                player.sendLatencyStack(immediate);
+                // No need to send latency, we only use a few's metadata values from them and most of them almost never actually changed so we should be good,
+                // for eg: (COLLIDEABLE flag is always true for certain entity regardless of what).
                 player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> cache.setMetadata(packet.getMetadata()));
                 return;
             }
