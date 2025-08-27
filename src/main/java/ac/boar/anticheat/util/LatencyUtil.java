@@ -8,27 +8,29 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @RequiredArgsConstructor
 public final class LatencyUtil {
     private final BoarPlayer player;
-    private final List<Long> sentStackLatency = new CopyOnWriteArrayList<>();
+    private final Queue<Long> sentQueue = new ConcurrentLinkedQueue<>();
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
 
     private Time prevReceivedSentTime = new Time(-1, -1);
+
     public Time getLastSentTime() {
         return this.prevReceivedSentTime;
     }
 
     public boolean hasId(long id) {
-        return this.sentStackLatency.contains(id);
+        return this.sentQueue.contains(id);
     }
 
     public void addLatencyToQueue(long id) {
-        this.sentStackLatency.add(id);
+        this.sentQueue.add(id);
         this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
         onLatencySend();
     }
@@ -39,13 +41,7 @@ public final class LatencyUtil {
             return;
         }
 
-        synchronized (this) {
-            if (!this.idToTasks.containsKey(id)) {
-                this.idToTasks.put(id, new ArrayList<>());
-            }
-
-            this.idToTasks.get(id).add(runnable);
-        }
+        this.idToTasks.computeIfAbsent(id, k -> new ArrayList<>()).add(runnable);
     }
 
     public void confirmByTime(long time) {
@@ -53,14 +49,18 @@ public final class LatencyUtil {
             return;
         }
 
-        final List<Long> removeIds = new ArrayList<>();
-
         long lastId = -1;
-        for (long next : this.sentStackLatency) {
+        while (true) {
+            Long next = this.sentQueue.peek();
+            if (next == null) {
+                break;
+            }
+
             final Time sentTime = this.idToSentTime.get(next);
             if (sentTime.ms() > time) {
                 break;
             }
+
             this.idToSentTime.remove(next);
             if (sentTime.ms() > this.prevReceivedSentTime.ms()) {
                 this.prevReceivedSentTime = sentTime;
@@ -73,11 +73,9 @@ public final class LatencyUtil {
 
             onLatencyAccepted(next, sentTime);
 
-            removeIds.add(next);
+            this.sentQueue.poll();
             lastId = next;
         }
-
-        this.sentStackLatency.removeAll(removeIds);
 
         if (lastId == -1 || lastId < player.receivedStackId.get()) {
             return;
@@ -91,10 +89,9 @@ public final class LatencyUtil {
             return false;
         }
 
-        final List<Long> removeIds = new ArrayList<>();
-
-        for (long next : this.sentStackLatency) {
-            if (next > id) {
+        while (true) {
+            Long next = this.sentQueue.peek();
+            if (next == null || next > id) {
                 break;
             }
 
@@ -112,10 +109,8 @@ public final class LatencyUtil {
                 onLatencyAccepted(next, sentTime);
             }
 
-            removeIds.add(next);
+            this.sentQueue.poll();
         }
-
-        this.sentStackLatency.removeAll(removeIds);
 
         player.receivedStackId.set(id);
         return true;
@@ -141,5 +136,6 @@ public final class LatencyUtil {
         }
     }
 
-    public record Time(long ms, long ns) {}
+    public record Time(long ms, long ns) {
+    }
 }
