@@ -129,6 +129,8 @@ public class LivingTicker extends EntityTicker {
             player.getFlagTracker().set(EntityFlag.GLIDING, false);
         }
 
+        player.cachedOnPos = null;
+
         Box oldBox = player.boundingBox.clone();
 
         this.travelRidden();

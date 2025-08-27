@@ -246,31 +246,36 @@ public final class BoarPlayer extends PlayerData {
         return position.down(0.1F).toVector3i();
     }
 
+    public Vector3i cachedOnPos;
     public Vector3i getOnPos(final float offset) {
-        Vector3i blockPos = null;
-        float d = Float.MAX_VALUE;
+        if (this.cachedOnPos == null) {
+            Vector3i blockPos = null;
+            float d = Float.MAX_VALUE;
 
-        final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(boundingBox.expand(1.0E-3F));
-        while (iterator.step()) {
-            int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
-            Vector3i blockPos2 = Vector3i.from(x, y, z);
-            if (compensatedWorld.getBlockState(x, y, z, 0).findCollision(this, Vector3i.from(x, y, z), null, false).isEmpty()) {
-                continue;
+            final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(boundingBox.expand(1.0E-3F));
+            while (iterator.step()) {
+                int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
+                Vector3i blockPos2 = Vector3i.from(x, y, z);
+                if (compensatedWorld.getBlockState(x, y, z, 0).findCollision(this, Vector3i.from(x, y, z), null, false).isEmpty()) {
+                    continue;
+                }
+
+                float e = new Vec3(blockPos2).distToCenterSqr(this.position);
+
+                if (e < d || e == d && (blockPos == null || new Vec3(blockPos).compareTo(blockPos2) < 0)) {
+                    blockPos = blockPos2;
+                    d = e;
+                }
             }
 
-            float e = new Vec3(blockPos2).distToCenterSqr(this.position);
-
-            if (e < d || e == d && (blockPos == null || new Vec3(blockPos).compareTo(blockPos2) < 0)) {
-                blockPos = blockPos2;
-                d = e;
+            if (blockPos != null) {
+                this.cachedOnPos = blockPos;
+            } else {
+                this.cachedOnPos = this.position.toVector3i();
             }
         }
 
-        if (blockPos != null) {
-            return Vector3i.from(blockPos.getX(), GenericMath.floor(this.position.y - offset), blockPos.getZ());
-        }
-
-        return this.position.subtract(0, offset, 0).toVector3i();
+        return Vector3i.from(this.cachedOnPos.getX(), GenericMath.floor(this.position.y - offset), this.cachedOnPos.getZ());
     }
 
     public boolean isRegionUnloaded() {
