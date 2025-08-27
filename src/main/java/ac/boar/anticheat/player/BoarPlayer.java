@@ -27,6 +27,7 @@ import lombok.Setter;
 import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.TrigMath;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
@@ -56,6 +57,7 @@ public final class BoarPlayer extends PlayerData {
     private BedrockServerSession cloudburstDownstream;
     public CloudburstSendListener cloudburstUpstream;
     public CloudburstReceiveListener downstreamPacketHandler;
+    public RakSessionCodec rakSessionCodec;
 
     public long runtimeEntityId, javaEntityId;
 

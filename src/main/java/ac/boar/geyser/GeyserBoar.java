@@ -9,7 +9,6 @@ import lombok.Getter;
 import org.cloudburstmc.netty.channel.raknet.RakChildChannel;
 import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
 import org.geysermc.event.subscribe.Subscribe;
-import org.geysermc.geyser.GeyserImpl;
 import org.geysermc.geyser.api.command.Command;
 import org.geysermc.geyser.api.command.CommandSource;
 import org.geysermc.geyser.api.event.bedrock.SessionDisconnectEvent;
@@ -37,7 +36,7 @@ public class GeyserBoar implements Extension {
         }
 
         RakSessionCodec rakSessionCodec = ((RakChildChannel) player.getSession().getUpstream().getSession().getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
-        BoarAcknowledgement.getRakSessionToPlayer().put(rakSessionCodec, player);
+        BoarAcknowledgement.getRakSessionToPlayer().put(player.rakSessionCodec = rakSessionCodec, player);
         nameToSessions.put(event.connection().bedrockUsername(), (GeyserSession) event.connection());
     }
 
@@ -48,8 +47,7 @@ public class GeyserBoar implements Extension {
             return;
         }
 
-        RakSessionCodec rakSessionCodec = ((RakChildChannel) player.getSession().getUpstream().getSession().getPeer().getChannel()).rakPipeline().get(RakSessionCodec.class);
-        BoarAcknowledgement.getRakSessionToPlayer().remove(rakSessionCodec);
+        BoarAcknowledgement.getRakSessionToPlayer().remove(player.rakSessionCodec);
         nameToSessions.remove(event.connection().bedrockUsername());
     }
 
