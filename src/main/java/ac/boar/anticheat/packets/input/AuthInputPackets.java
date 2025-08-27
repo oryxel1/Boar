@@ -48,7 +48,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         if (distanceSincePrev < 50L) {
             player.tick++;
         } else {
-            player.tick += Math.min(claimedTick - player.tick, distanceSincePrev / 45L);
+            player.tick += Math.min(claimedTick - player.tick, distanceSincePrev / 30L);
         }
 
         player.sinceAuthInput = System.currentTimeMillis();
