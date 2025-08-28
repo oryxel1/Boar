@@ -31,6 +31,7 @@ import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.netty.handler.codec.raknet.common.RakSessionCodec;
 import org.cloudburstmc.protocol.bedrock.BedrockServerSession;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.packet.NetworkStackLatencyPacket;
 import org.geysermc.geyser.api.command.CommandSource;
@@ -220,7 +221,25 @@ public final class BoarPlayer extends PlayerData {
         return this.hasEffect(Effect.JUMP_BOOST) ? 0.1F * (this.getActiveEffects().get(Effect.JUMP_BOOST).getAmplifier() + 1.0F) : 0.0F;
     }
 
-    public Vec3 jumpFromGround(Vec3 vec3) {
+    public Vec3 jump(Vec3 vec3) {
+        // (https://mojang.github.io/bedrock-protocol-docs/html/enums.html)
+        // AutoJumpingInWater - "If an auto jump is currently triggering while touching water. Can be ignored if handling Jumping properly"
+        // But they don't even send JUMPING input data if the player is auto jumping, nice job there mojang.
+        // Matter of fact, this does not only apply to water, but lava as well! really misleading docs lol.
+        boolean autoJumping = this.getInputData().contains(PlayerAuthInputData.AUTO_JUMPING_IN_WATER);
+        boolean jumping = this.getInputData().contains(PlayerAuthInputData.JUMPING);
+
+        boolean canJumpInWater = this.getFluidHeight(Fluid.WATER) != 0, canJumpInLava = this.isInLava();
+        if ((jumping || autoJumping) && (canJumpInWater || canJumpInLava)) {
+            vec3 = vec3.add(0, 0.04F, 0);
+        } else if (this.onGround && this.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
+            vec3 = this.jumpFromGround(vec3);
+        }
+
+        return vec3;
+    }
+
+    private Vec3 jumpFromGround(Vec3 vec3) {
         float f = this.getJumpPower();
         if (f <= 1.0E-5f) {
             return vec3;

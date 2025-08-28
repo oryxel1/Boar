@@ -174,7 +174,7 @@ public class PlayerData {
     }
 
     public boolean isInLava() {
-        return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) > 0.0;
+        return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) != 0.0;
     }
 
     public final float getEffectiveGravity(final Vec3 vec3) {

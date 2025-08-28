@@ -98,16 +98,7 @@ public class LivingTicker extends EntityTicker {
                 player.velocity.y = 0.15F;
             }
         } else {
-            boolean jumping = player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.WANT_UP) ||
-                    player.getInputData().contains(PlayerAuthInputData.START_JUMPING);
-            if (jumping) {
-                float g = player.isInLava() ? player.getFluidHeight(Fluid.LAVA) : player.getFluidHeight(Fluid.WATER);
-                if (g != 0) {
-                    player.velocity = player.velocity.add(0, 0.04F, 0);
-                } else if (player.onGround && player.getInputData().contains(PlayerAuthInputData.START_JUMPING)) {
-                    player.velocity = player.jumpFromGround(player.velocity);
-                }
-            }
+            player.velocity = player.jump(player.velocity);
         }
 
         boolean descending = player.getInputData().contains(PlayerAuthInputData.SNEAKING) || player.getInputData().contains(PlayerAuthInputData.DESCEND_BLOCK);
