@@ -61,6 +61,10 @@ public class Boar {
     }
 
     public static void debug(String message, DebugMessage type) {
+        if (!config.debugMode()) {
+            return;
+        }
+
         switch (type) {
             case INFO -> GeyserBoar.getLogger().info(message);
             case WARNING -> GeyserBoar.getLogger().warning(message);
