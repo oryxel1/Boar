@@ -21,7 +21,8 @@ public final class LatencyUtil {
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
     @Getter
-    private long lastRespondTime = System.currentTimeMillis();
+    // Give the player a bit of a leniency for their first latency.
+    private long lastRespondTime = System.currentTimeMillis() + Boar.getConfig().maxLatencyWait();
 
     private Time prevReceivedSentTime = new Time(-1, -1);
 
