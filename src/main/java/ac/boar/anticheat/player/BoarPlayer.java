@@ -123,7 +123,10 @@ public final class BoarPlayer extends PlayerData {
         latencyPacket.setTimestamp(-id);
         latencyPacket.setFromServer(true);
 
-        this.latencyUtil.addLatencyToQueue(id);
+        if (!this.latencyUtil.addLatencyToQueue(id)) {
+            kick("Failed to respond to transactions for too long");
+            return;
+        }
 
         if (immediate) {
             this.getSession().sendUpstreamPacketImmediately(latencyPacket);

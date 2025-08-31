@@ -1,5 +1,6 @@
 package ac.boar.anticheat.util;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -18,6 +19,7 @@ public final class LatencyUtil {
     private final Queue<Long> sentQueue = new ConcurrentLinkedQueue<>();
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
+    private long lastReceivedTime = System.currentTimeMillis();
 
     private Time prevReceivedSentTime = new Time(-1, -1);
 
@@ -29,10 +31,14 @@ public final class LatencyUtil {
         return this.sentQueue.contains(id);
     }
 
-    public void addLatencyToQueue(long id) {
+    public boolean addLatencyToQueue(long id) {
+        if(System.currentTimeMillis() - lastReceivedTime >= (Boar.getConfig().maxAcknowledgementTime())) {
+            return false;
+        }
         this.sentQueue.add(id);
         this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
         onLatencySend();
+        return true;
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
@@ -45,6 +51,7 @@ public final class LatencyUtil {
     }
 
     public void confirmByTime(long time) {
+        this.lastReceivedTime = System.currentTimeMillis();
         if (time < this.prevReceivedSentTime.ms()) {
             return;
         }
@@ -88,7 +95,7 @@ public final class LatencyUtil {
         if (!hasId(id) || id <= player.receivedStackId.get()) {
             return false;
         }
-
+        this.lastReceivedTime = System.currentTimeMillis();
         while (true) {
             Long next = this.sentQueue.peek();
             if (next == null || next > id) {
