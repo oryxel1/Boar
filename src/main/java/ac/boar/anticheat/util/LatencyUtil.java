@@ -1,8 +1,10 @@
 package ac.boar.anticheat.util;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ public final class LatencyUtil {
     private final Queue<Long> sentQueue = new ConcurrentLinkedQueue<>();
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
+    @Getter
+    private long lastRespondTime = -1;
 
     private Time prevReceivedSentTime = new Time(-1, -1);
 
@@ -81,6 +85,12 @@ public final class LatencyUtil {
             return;
         }
 
+        if (System.currentTimeMillis() - this.prevReceivedSentTime.ms() >= Boar.getConfig().maxLatencyWait()) {
+            player.kick("Timed out.");
+            return;
+        }
+
+        this.lastRespondTime = System.currentTimeMillis();
         player.receivedStackId.set(lastId);
     }
 
@@ -112,6 +122,14 @@ public final class LatencyUtil {
             this.sentQueue.poll();
         }
 
+        if (System.currentTimeMillis() - this.prevReceivedSentTime.ms() >= Boar.getConfig().maxLatencyWait()) {
+            player.kick("Timed out.");
+            return true;
+        }
+
+//        System.out.println("Receive: " + (System.currentTimeMillis() - this.prevReceivedSentTime.ms()));
+
+        this.lastRespondTime = System.currentTimeMillis();
         player.receivedStackId.set(id);
         return true;
     }

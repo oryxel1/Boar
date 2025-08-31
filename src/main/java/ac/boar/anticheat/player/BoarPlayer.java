@@ -113,6 +113,15 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public void sendLatencyStack(boolean immediate) {
+        boolean laggingBehind = this.sentStackId.get() - this.receivedStackId.get() >= 5;
+        long lastTime = this.latencyUtil.getLastRespondTime();
+        if (laggingBehind && lastTime != -1 && System.currentTimeMillis() - lastTime >= Boar.getConfig().maxLatencyWait()) {
+            this.kick("Timed out.");
+            return;
+        }
+
+//        System.out.println("Send: " + (System.currentTimeMillis() - lastTime));
+
         long id = this.sentStackId.incrementAndGet();
         if (id == -GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP || id == -GeyserUtil.MAGIC_VIRTUAL_INVENTORY_HACK) {
             id = this.sentStackId.incrementAndGet();

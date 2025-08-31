@@ -44,6 +44,10 @@ ignore-ghost-block: false
 # Recommends to turn this on and have the value around 200ms-500ms.
 max-acknowledgement-time: 500
 
+# How long do we wait for player to respond to latency confirmation/acknowledgements till we kicked the player for timed out.
+# This value shouldn't be too low to account for lagging player and shouldn't be too high so cheaters won't be able to stop responding to latency for too long.
+max-latency-wait: 15000
+
 # How much balance advantage (in milliseconds) player can gain before the anticheat forcefully set player back (regardless if the player is lagging or not)
 # This is to prevent lagging player (or cheaters pretend to be one) gain too much advantage by.... lagging.
 # To disable (which you probably shouldn't), set this to any value smaller or equals to 0.
