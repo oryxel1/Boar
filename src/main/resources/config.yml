@@ -49,10 +49,10 @@ max-acknowledgement-time: -1
 # To disable (which you probably shouldn't), set this to any value smaller or equals to 0.
 max-balance-advantage: 8500
 
-# How much in milliseconds should we wait for a response to transactions before disconnecting the user
+# How much in milliseconds should we wait for a latency packet from the player before disconnecting the.
 # This can't be too low because bedrock clients often take their time to answer when loading the world, but it also can't be too high because
-# custom clients can often avoid responding to transactions which end up creating a memory leak
-latency-compensation-timeout: 30000
+# custom clients can often avoid responding to latency which end up creating a memory leak
+latency-compensation-timeout: 15000
 
 # Should debug mode be enabled or not?
 debug-mode: false

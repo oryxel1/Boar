@@ -39,7 +39,7 @@ public final class Config {
     private long maxAcknowledgementTime = 500;
     @JsonProperty("latency-compensation-timeout")
     @JsonSetter(nulls = Nulls.SKIP)
-    private long latencyCompensationTimeout = 30_000;
+    private long latencyCompensationTimeout = 15000;
     @JsonProperty("max-balance-advantage")
     @JsonSetter(nulls = Nulls.SKIP)
     private long maxBalanceAdvantage = 2000L;
@@ -77,6 +77,10 @@ public final class Config {
 
     public long maxAcknowledgementTime() {
         return maxAcknowledgementTime;
+    }
+
+    public long latencyCompensationTimeout() {
+        return latencyCompensationTimeout;
     }
 
     public long maxBalanceAdvantage() {

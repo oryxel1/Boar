@@ -70,6 +70,7 @@ public class ConfigLoader {
                         s = s.replace("debug-mode: false", "debug-mode: " + config.debugMode());
                         s = s.replace("force-reach-java-parity: \"bedrock\"", "force-reach-java-parity: \"" + config.reachJavaParityMode() + "\"");
                         s = s.replace("max-acknowledgement-time: 500", "max-acknowledgement-time: " + config.maxAcknowledgementTime());
+                        s = s.replace("latency-compensation-timeout: 15000", "latency-compensation-timeout: " + config.latencyCompensationTimeout());
                     }
 
                     writer.write(s.toCharArray());

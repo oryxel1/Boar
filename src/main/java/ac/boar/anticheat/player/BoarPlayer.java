@@ -124,7 +124,7 @@ public final class BoarPlayer extends PlayerData {
         latencyPacket.setFromServer(true);
 
         if (!this.latencyUtil.addLatencyToQueue(id)) {
-            kick("Failed to respond to transactions for too long");
+            kick("Timed out.");
             return;
         }
 
