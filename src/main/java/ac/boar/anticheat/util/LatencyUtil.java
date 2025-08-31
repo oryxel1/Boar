@@ -32,7 +32,7 @@ public final class LatencyUtil {
     }
 
     public boolean addLatencyToQueue(long id) {
-        if(System.currentTimeMillis() - lastReceivedTime >= (Boar.getConfig().maxAcknowledgementTime())) {
+        if (System.currentTimeMillis() - lastReceivedTime >= (Boar.getConfig().maxAcknowledgementTime())) {
             return false;
         }
         this.sentQueue.add(id);
