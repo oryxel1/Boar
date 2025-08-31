@@ -33,13 +33,13 @@ public class ServerChunkPackets implements PacketListener {
         if (event.getPacket() instanceof LevelChunkPacket packet) {
             int sectionCount = packet.getSubChunksLength();
 
-            // Bedrock ignores this.
+            // Bedrock ignores this. TODO: Should we remove this chunk then? maybe I will test this later.
             if (sectionCount == -2) {
                 return;
             }
 
-            // Sub chunk?
             if (sectionCount == 0) {
+                world.removeFromCache(packet.getChunkX(), packet.getChunkZ());
                 return;
             }
 

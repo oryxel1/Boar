@@ -76,6 +76,10 @@ public class CompensatedWorld {
         this.chunks.put(chunkPosition, chunks);
     }
 
+    public void removeFromCache(int x, int z) {
+        this.chunks.remove(MathUtils.chunkPositionToLong(x, z));
+    }
+
     public boolean isChunkLoaded(int chunkX, int chunkZ) {
         return this.getChunk(chunkX >> 4, chunkZ >> 4) != null;
     }
