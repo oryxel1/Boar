@@ -37,6 +37,7 @@ dependencies {
 
 shadowJar {
     relocate 'net.lenni0451.classtransform', 'ac.boar.shaded.classtransform'
+    relocate 'org.objectweb.asm', 'ac.boar.shaded.asm'
     relocate 'net.lenni0451.reflect', 'ac.boar.shaded.reflect'
     relocate 'it.unimi.dsi.fastutil', 'ac.boar.shaded.fastutil'
     relocate 'com.fasterxml.jackson', 'ac.boar.shaded.jackson'

@@ -42,7 +42,7 @@ ignore-ghost-block: false
 
 # How long player can accept acknowledgements but not latency packet before we try to correct them. Shall this be disabled, set this to -1.
 # Recommends to turn this on and have the value around 200ms-500ms.
-max-acknowledgement-time: -1
+max-acknowledgement-time: 500
 
 # How much balance advantage (in milliseconds) player can gain before the anticheat forcefully set player back (regardless if the player is lagging or not)
 # This is to prevent lagging player (or cheaters pretend to be one) gain too much advantage by.... lagging.
