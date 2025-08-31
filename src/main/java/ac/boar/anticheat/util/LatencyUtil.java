@@ -1,9 +1,9 @@
 package ac.boar.anticheat.util;
 
-import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.PingBasedCheck;
 import ac.boar.anticheat.player.BoarPlayer;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ public final class LatencyUtil {
     private final Queue<Long> sentQueue = new ConcurrentLinkedQueue<>();
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
+    @Getter
     private long lastReceivedTime = System.currentTimeMillis();
 
     private Time prevReceivedSentTime = new Time(-1, -1);
@@ -31,14 +32,10 @@ public final class LatencyUtil {
         return this.sentQueue.contains(id);
     }
 
-    public boolean addLatencyToQueue(long id) {
-        if (System.currentTimeMillis() - this.lastReceivedTime >= Boar.getConfig().latencyCompensationTimeout()) {
-            return false;
-        }
+    public void addLatencyToQueue(long id) {
         this.sentQueue.add(id);
         this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
         onLatencySend();
-        return true;
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
