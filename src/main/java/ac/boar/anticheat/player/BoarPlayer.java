@@ -115,7 +115,7 @@ public final class BoarPlayer extends PlayerData {
     public void sendLatencyStack(boolean immediate) {
         boolean laggingBehind = this.sentStackId.get() - this.receivedStackId.get() >= 5;
         long lastTime = this.latencyUtil.getLastRespondTime();
-        if (laggingBehind && lastTime != -1 && System.currentTimeMillis() - lastTime >= Boar.getConfig().maxLatencyWait()) {
+        if (laggingBehind && System.currentTimeMillis() - lastTime >= Boar.getConfig().maxLatencyWait()) {
             this.kick("Timed out.");
             return;
         }

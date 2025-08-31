@@ -21,7 +21,7 @@ public final class LatencyUtil {
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
     @Getter
-    private long lastRespondTime = -1;
+    private long lastRespondTime = System.currentTimeMillis();
 
     private Time prevReceivedSentTime = new Time(-1, -1);
 
