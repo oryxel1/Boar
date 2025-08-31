@@ -38,12 +38,12 @@ public class CompensatedWorld {
     private final Map<Long, Long> uniqueIdToRuntimeId = new HashMap<>();
 
     public void removeEntity(final long uniqueId) {
-        final long key = this.uniqueIdToRuntimeId.getOrDefault(uniqueId, -1L);
-        if (key == -1L) {
+        final Long key = this.uniqueIdToRuntimeId.remove(uniqueId);
+        if (key == null) {
             return;
         }
 
-        this.entities.remove(key);
+        this.entities.remove((long) key);
     }
 
     public EntityCache getEntity(long id) {
