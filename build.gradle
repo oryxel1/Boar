@@ -42,6 +42,7 @@ shadowJar {
     relocate 'it.unimi.dsi.fastutil', 'ac.boar.shaded.fastutil'
     relocate 'com.fasterxml.jackson', 'ac.boar.shaded.jackson'
     relocate 'org.yaml.snakeyaml', 'ac.boar.shaded.snakeyaml'
+    relocate "org.cloudburstmc", "org.geysermc.geyser.shaded.org.cloudburstmc"
 }
 
 def targetJavaVersion = 17
