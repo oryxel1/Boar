@@ -17,7 +17,8 @@ public class BadPacketA extends PacketCheck {
     public void onPacketReceived(CloudburstPacketEvent event) {
         if (event.getPacket() instanceof PlayerAuthInputPacket packet) {
             if (!MathUtil.isValid(packet.getPosition()) || !MathUtil.isValid(packet.getRotation()) || !MathUtil.isValid(packet.getDelta())) {
-                event.setCancelled(true);
+                fail("pos=" + packet.getPosition() + ", rot=" + packet.getRotation() + ", delta=" + packet.getDelta());
+                player.kick("Invalid auth input packet!");
             }
         }
     }

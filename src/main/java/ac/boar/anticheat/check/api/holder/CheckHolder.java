@@ -4,6 +4,7 @@ import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.annotations.CheckInfo;
 import ac.boar.anticheat.check.impl.badpackets.BadPacketA;
+import ac.boar.anticheat.check.impl.badpackets.BadPacketB;
 import ac.boar.anticheat.check.impl.prediction.DebugOffsetA;
 import ac.boar.anticheat.check.impl.prediction.Prediction;
 import ac.boar.anticheat.check.impl.reach.Reach;
@@ -23,6 +24,7 @@ public class CheckHolder extends HashMap<Class<?>, Check> {
         this.put(Prediction.class, new Prediction(player));
 
         this.put(BadPacketA.class, new BadPacketA(player));
+        this.put(BadPacketB.class, new BadPacketB(player));
     }
 
     public void manuallyFail(Class<?> klass) {

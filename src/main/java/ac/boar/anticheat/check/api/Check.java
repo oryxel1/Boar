@@ -35,7 +35,7 @@ public class Check {
 
         final StringBuilder builder = new StringBuilder("§3" + player.getSession().getPlayerEntity().getDisplayName() + "§7 failed§6 " + name);
         if (!this.type.isBlank()) {
-            builder.append("(").append(type).append(")");
+            builder.append(" (").append(type).append(")");
         }
 
         if (this.experimental) {
