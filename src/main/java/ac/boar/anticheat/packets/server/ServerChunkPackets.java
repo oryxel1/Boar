@@ -38,8 +38,16 @@ public class ServerChunkPackets implements PacketListener {
                 return;
             }
 
+            // Unless the player is seriously lagging then this shouldn't false, we should only perfectly compensate if the chunk is close enough and can actually affect player.
+            int chunkX = packet.getChunkX() << 4, chunkZ = packet.getChunkZ() << 4;
+            boolean send = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
+
+            if (send) {
+                player.sendLatencyStack(immediate);
+            }
+
             if (sectionCount == 0) {
-                world.removeFromCache(packet.getChunkX(), packet.getChunkZ());
+                player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> world.removeFromCache(packet.getChunkX(), packet.getChunkZ()));
                 return;
             }
 
@@ -90,13 +98,6 @@ public class ServerChunkPackets implements PacketListener {
                 // ignored.printStackTrace();
             } finally {
                 buffer.release();
-            }
-
-            // Unless the player is seriously lagging then this shouldn't false, we should only perfectly compensate if the chunk is close enough and can actually affect player.
-            int chunkX = packet.getChunkX() << 4, chunkZ = packet.getChunkZ() << 4;
-            boolean send = Math.abs(player.position.x - chunkX) <= 16 || Math.abs(player.position.z - chunkZ) <= 16;
-            if (send) {
-                player.sendLatencyStack(immediate);
             }
 
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
