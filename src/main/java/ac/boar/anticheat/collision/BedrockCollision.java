@@ -62,6 +62,8 @@ public class BedrockCollision {
 
     private final static List<Box> FALLING_POWDER_SNOW_SNOW = List.of(new Box(0.0F, 0.0F, 0.0F, 0.0625F, 0.05625F, 0.0625F));
 
+    private final static List<Box> END_PORTAL_FRAME_SHAPE = List.of(new Box(0, 0, 0, 1, 0.8125F, 1));
+
     static {
         // Scaffolding
         {
@@ -113,6 +115,10 @@ public class BedrockCollision {
                 boolean likelyYCollision = solidOffset.calculateMaxDistance(Axis.Y, player.boundingBox, player.velocity.y) != player.velocity.y;
                 return likelyYCollision && solidOffset.intersects(box) ? SOLID_SHAPE : EMPTY_SHAPE;
             }
+        }
+
+        if (state.is(Blocks.END_PORTAL_FRAME)) {
+            return END_PORTAL_FRAME_SHAPE;
         }
 
         if (state.is(Blocks.POWDER_SNOW)) {
