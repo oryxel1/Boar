@@ -14,6 +14,7 @@ public final class Timer extends PingBasedCheck {
 
     private long lastNS, balance, prevTick;
     private long loseBalance;
+    private boolean beforeAuthInput;
 
     public Timer(final BoarPlayer player) {
         super(player);
@@ -21,6 +22,18 @@ public final class Timer extends PingBasedCheck {
 
     @Override
     public void onLatencyAccepted(long id, LatencyUtil.Time time) {
+        if (!this.beforeAuthInput) {
+            return;
+        }
+
+        this.beforeAuthInput = false;
+        if (time.ns() > System.nanoTime() + this.balance) {
+            long distance = (time.ns() - (System.nanoTime() + this.balance)) - (AVERAGE_DISTANCE / 2);
+            this.balance += distance;
+            this.loseBalance = Math.max(0, this.loseBalance - distance);
+
+            Boar.debug(getDisplayName() + " is behind, likely fake lagging, distance=" + distance, Boar.DebugMessage.INFO);
+        }
     }
 
     public boolean isInvalid() {
@@ -40,7 +53,7 @@ public final class Timer extends PingBasedCheck {
         if (this.balance > limit) {
             if (this.balance - this.loseBalance <= limit) {
                 this.loseBalance -= AVERAGE_DISTANCE;
-                Boar.debug("Player failed timer check due to balance limiter, but won't flag since player could actually be lagging.", Boar.DebugMessage.INFO);
+                Boar.debug(getDisplayName() + " failed timer check due to balance limiter, but won't flag since player could actually be lagging.", Boar.DebugMessage.INFO);
             } else {
                 this.fail("balance=" + this.balance + ", player is ahead!");
             }
@@ -59,6 +72,8 @@ public final class Timer extends PingBasedCheck {
         this.balance -= distance - neededDistance;
         this.lastNS = Math.max(this.lastNS, System.nanoTime());
         this.prevTick = player.tick;
+
+        this.beforeAuthInput = true;
         return !valid;
     }
 }
