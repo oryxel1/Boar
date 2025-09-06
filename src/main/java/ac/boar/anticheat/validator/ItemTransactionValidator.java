@@ -2,6 +2,7 @@ package ac.boar.anticheat.validator;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.InteractionResult;
+import ac.boar.anticheat.data.ItemUseTracker;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -107,6 +108,8 @@ public final class ItemTransactionValidator {
                     }
 
                     player.getItemUseTracker().release();
+                    player.getItemUseTracker().setDirtyUsing(ItemUseTracker.DirtyUsing.NONE);
+//                    System.out.println("Release using item.");
                 }
             }
 
@@ -362,7 +365,8 @@ public final class ItemTransactionValidator {
                             player.glideBoostTicks = 20;
                         }
 
-                        player.getItemUseTracker().use(SD1, item.getId());
+                        player.getItemUseTracker().use(SD1, item.getId(), false);
+//                        System.out.println("Dirty using use: " + packet.getItemInHand());
 
                         List<LegacySetItemSlotData> legacySlots = packet.getLegacySlots();
                         if (packet.getActions().size() == 1 && !legacySlots.isEmpty()) {

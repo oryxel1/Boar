@@ -88,12 +88,7 @@ public class ServerDataPackets implements PacketListener {
             player.desyncedFlag.set(flagsCopy != null ? id : -1);
             player.getLatencyUtil().addTaskToQueue(id, () -> {
                 if (flagsCopy != null) {
-                    player.getFlagTracker().set(flagsCopy);
-
-                    boolean usingItem = player.getFlagTracker().has(EntityFlag.USING_ITEM);
-                    if (usingItem && player.getItemUseTracker().getJavaItemId() == -1) {
-                        player.getFlagTracker().set(EntityFlag.USING_ITEM, false);
-                    }
+                    player.getFlagTracker().set(player, flagsCopy);
                 }
 
                 // Dimension seems to be controlled server-side as far as I know (tested with clumsy).

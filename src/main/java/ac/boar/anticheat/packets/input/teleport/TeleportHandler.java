@@ -112,7 +112,7 @@ public class TeleportHandler {
                 LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
                 // Reverted back to the old flags.
-                player.getFlagTracker().set(data.flags(), false);
+                player.getFlagTracker().set(player, data.flags(), false);
             } else {
                 // Oops, don't let cheaters spamming logs by skipping ticks. This could also happen post respawn.
                 // throw new RuntimeException("Failed find auth input history for rewind.");

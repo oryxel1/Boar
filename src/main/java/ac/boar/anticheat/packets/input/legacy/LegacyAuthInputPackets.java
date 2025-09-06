@@ -4,6 +4,7 @@ import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.data.ItemUseTracker;
 import ac.boar.anticheat.data.input.VelocityData;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.UncertainRunner;
@@ -183,12 +184,25 @@ public class LegacyAuthInputPackets {
                 }
 
                 case START_USING_ITEM -> {
+                    // Seems to be the case, this should only be taken seriously when it's trigger by sever metadata
+                    // or actual item use from inventory transaction packet.
+                    if (player.getItemUseTracker().getDirtyUsing() == ItemUseTracker.DirtyUsing.NONE) {
+                        return;
+                    }
+
                     final ItemData itemData = player.compensatedInventory.inventoryContainer.getHeldItemData();
                     ItemStack item = player.compensatedInventory.translate(itemData);
 
+                    // The player in fact CAN use an item that is not air even if that item is eg: dirt for 1 tick.
+                    // However, this likely will only happen when flag de-sync.
+                    if (item.getId() == Items.AIR_ID) {
+                        return;
+                    }
+
+//                    System.out.println("Start using item: " + itemData);
                     player.getFlagTracker().set(EntityFlag.USING_ITEM, true);
-                    player.getItemUseTracker().use(itemData, item.getId());
-                    player.getItemUseTracker().setDirtyUsing(false);
+                    player.getItemUseTracker().use(itemData, item.getId(), true);
+                    player.getItemUseTracker().setDirtyUsing(ItemUseTracker.DirtyUsing.NONE);
                 }
 
                 case START_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, true);
@@ -196,11 +210,16 @@ public class LegacyAuthInputPackets {
             }
         }
 
-        if (player.getItemUseTracker().isDirtyUsing()) {
-            player.getItemUseTracker().setDirtyUsing(false);
-
+        final ItemUseTracker.DirtyUsing dirtyUsing = player.getItemUseTracker().getDirtyUsing();
+        if (dirtyUsing != ItemUseTracker.DirtyUsing.NONE) {
             // Shit hack TODO: Properly check for when the item CAN BE USE
-            player.getSession().releaseItem();
+            if (dirtyUsing == ItemUseTracker.DirtyUsing.INVENTORY_TRANSACTION) {
+                player.getSession().releaseItem();
+            }
+
+            player.getFlagTracker().set(EntityFlag.USING_ITEM, false);
+            player.getItemUseTracker().setDirtyUsing(ItemUseTracker.DirtyUsing.NONE);
+//            System.out.println("Reset dirty using!");
         }
         player.dirtySpinStop = false;
     }
