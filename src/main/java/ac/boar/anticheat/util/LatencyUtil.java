@@ -24,7 +24,8 @@ public final class LatencyUtil {
     // Give the player a bit of a leniency for their first latency.
     private long lastRespondTime = System.currentTimeMillis() + Boar.getConfig().maxLatencyWait();
 
-    private Time prevReceivedSentTime = new Time(-1, -1);
+    private long prevSentTime = System.currentTimeMillis();
+    private Time prevReceivedSentTime = new Time(-1, -1, 0);
 
     public Time getLastSentTime() {
         return this.prevReceivedSentTime;
@@ -36,8 +37,10 @@ public final class LatencyUtil {
 
     public void addLatencyToQueue(long id) {
         this.sentQueue.add(id);
-        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
+        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime(), Math.max(0, System.currentTimeMillis() - this.prevSentTime)));
         onLatencySend();
+
+        this.prevSentTime = System.currentTimeMillis();
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
@@ -86,7 +89,8 @@ public final class LatencyUtil {
             return;
         }
 
-        if (System.currentTimeMillis() - this.prevReceivedSentTime.ms() >= Boar.getConfig().maxLatencyWait()) {
+        long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms() - this.prevReceivedSentTime.minDistance();
+        if (distance >= Boar.getConfig().maxLatencyWait()) {
             player.kick("Timed out.");
             return;
         }
@@ -123,12 +127,11 @@ public final class LatencyUtil {
             this.sentQueue.poll();
         }
 
-        if (System.currentTimeMillis() - this.prevReceivedSentTime.ms() >= Boar.getConfig().maxLatencyWait()) {
+        long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms() - this.prevReceivedSentTime.minDistance();
+        if (distance >= Boar.getConfig().maxLatencyWait()) {
             player.kick("Timed out.");
             return true;
         }
-
-//        System.out.println("Receive: " + (System.currentTimeMillis() - this.prevReceivedSentTime.ms()));
 
         this.lastRespondTime = System.currentTimeMillis();
         player.receivedStackId.set(id);
@@ -155,6 +158,6 @@ public final class LatencyUtil {
         }
     }
 
-    public record Time(long ms, long ns) {
+    public record Time(long ms, long ns, long minDistance) {
     }
 }

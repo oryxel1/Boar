@@ -113,9 +113,7 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public void sendLatencyStack(boolean immediate) {
-        boolean laggingBehind = this.sentStackId.get() - this.receivedStackId.get() >= 5;
-        long lastTime = this.latencyUtil.getLastRespondTime();
-        if (laggingBehind && System.currentTimeMillis() - lastTime >= Boar.getConfig().maxLatencyWait()) {
+        if (doTimeOut()) {
             this.kick("Timed out.");
             return;
         }
@@ -139,6 +137,14 @@ public final class BoarPlayer extends PlayerData {
         } else {
             this.getSession().sendUpstreamPacket(latencyPacket);
         }
+    }
+
+    private boolean doTimeOut() {
+        if (this.sentStackId.get() - this.receivedStackId.get() < 5) {
+            return false;
+        }
+
+        return System.currentTimeMillis() - this.latencyUtil.getLastRespondTime() - this.latencyUtil.getLastSentTime().minDistance() >= Boar.getConfig().maxLatencyWait();
     }
 
     public boolean isMovementExempted() {

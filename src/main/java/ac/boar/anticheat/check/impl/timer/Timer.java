@@ -32,7 +32,7 @@ public final class Timer extends PingBasedCheck {
             this.balance += distance;
             this.loseBalance = Math.max(0, this.loseBalance - distance);
 
-            Boar.debug(getDisplayName() + " is behind, likely fake lagging, distance=" + distance, Boar.DebugMessage.INFO);
+//            Boar.debug(getDisplayName() + " is behind, likely fake lagging, distance=" + distance, Boar.DebugMessage.INFO);
         }
     }
 
