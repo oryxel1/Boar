@@ -117,8 +117,7 @@ public final class BoarPlayer extends PlayerData {
             this.kick("Timed out.");
             return;
         }
-
-//        System.out.println("Send: " + (System.currentTimeMillis() - lastTime));
+//        System.out.println("Send latency: " + System.currentTimeMillis());
 
         long id = this.sentStackId.incrementAndGet();
         if (id == -GeyserUtil.MAGIC_FORM_IMAGE_HACK_TIMESTAMP || id == -GeyserUtil.MAGIC_VIRTUAL_INVENTORY_HACK) {
@@ -144,7 +143,13 @@ public final class BoarPlayer extends PlayerData {
             return false;
         }
 
-        return System.currentTimeMillis() - this.latencyUtil.getLastRespondTime() - this.latencyUtil.getLastSentTime().minDistance() >= Boar.getConfig().maxLatencyWait();
+        this.latencyUtil.latencyFaultDistance = Math.max(System.currentTimeMillis() - this.latencyUtil.getPrevSentTime(), this.latencyUtil.latencyFaultDistance);
+
+        long distance = System.currentTimeMillis() - this.latencyUtil.getLastRespondTime();
+        distance -= this.latencyUtil.latencyFaultDistance;
+
+//        System.out.println("Dist=" + distance + ", sentDis=" + this.latencyUtil.latencyFaultDistance);
+        return distance >= Boar.getConfig().maxLatencyWait();
     }
 
     public boolean isMovementExempted() {

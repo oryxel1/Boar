@@ -20,12 +20,14 @@ public final class LatencyUtil {
     private final Queue<Long> sentQueue = new ConcurrentLinkedQueue<>();
     private final Map<Long, Time> idToSentTime = new ConcurrentHashMap<>();
     private final Map<Long, List<Runnable>> idToTasks = new ConcurrentHashMap<>();
-    @Getter
     // Give the player a bit of a leniency for their first latency.
+    @Getter
     private long lastRespondTime = System.currentTimeMillis() + Boar.getConfig().maxLatencyWait();
-
+    @Getter
     private long prevSentTime = System.currentTimeMillis();
     private Time prevReceivedSentTime = new Time(-1, -1, 0);
+    public long latencyFaultDistance;
+    private long latestLatencyFaultDistance;
 
     public Time getLastSentTime() {
         return this.prevReceivedSentTime;
@@ -36,8 +38,10 @@ public final class LatencyUtil {
     }
 
     public void addLatencyToQueue(long id) {
+        this.latestLatencyFaultDistance = System.currentTimeMillis() - this.prevSentTime;
+
         this.sentQueue.add(id);
-        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime(), Math.max(0, System.currentTimeMillis() - this.prevSentTime)));
+        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime(), Math.max(0, this.latestLatencyFaultDistance)));
         onLatencySend();
 
         this.prevSentTime = System.currentTimeMillis();
@@ -95,7 +99,9 @@ public final class LatencyUtil {
             return;
         }
 
+//        System.out.println("Accepted latency: " + System.currentTimeMillis());
         this.lastRespondTime = System.currentTimeMillis();
+        this.latencyFaultDistance = this.latestLatencyFaultDistance;
         player.receivedStackId.set(lastId);
     }
 
@@ -134,6 +140,8 @@ public final class LatencyUtil {
         }
 
         this.lastRespondTime = System.currentTimeMillis();
+        this.latencyFaultDistance = this.latestLatencyFaultDistance;
+//        System.out.println("Accepted latency: " + this.lastRespondTime + "," + id);
         player.receivedStackId.set(id);
         return true;
     }
