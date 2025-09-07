@@ -11,8 +11,10 @@ import org.geysermc.geyser.level.block.property.ChestType;
 import org.geysermc.geyser.level.block.property.Properties;
 import org.geysermc.geyser.level.block.type.*;
 import org.geysermc.geyser.level.physics.Axis;
+import org.geysermc.geyser.level.physics.BoundingBox;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.network.GameProtocol;
+import org.geysermc.geyser.util.BlockUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +93,21 @@ public class BedrockCollision {
     public static List<Box> getCollisionBox(final BoarPlayer player, final Box box, final Vector3i vector3i, final BlockState state) {
         if (vector3i.getY() == player.compensatedWorld.getDimension().minY() - 41) {
             return SOLID_SHAPE;
+        }
+
+        if (state.is(Blocks.BELL) && state.getValue(Properties.BELL_ATTACHMENT).equals("floor")) {
+            final List<Box> collisions = new ArrayList<>();
+            for (BoundingBox boundingBox : BlockUtils.getCollision(state.javaId()).getBoundingBoxes()) {
+                collisions.add(new Box(
+                        (float) boundingBox.getMin(Axis.X),
+                        (float) boundingBox.getMin(Axis.Y),
+                        (float) boundingBox.getMin(Axis.Z),
+                        (float) boundingBox.getMax(Axis.X),
+                        (float) boundingBox.getMax(Axis.Y) - 0.1875F,
+                        (float) boundingBox.getMax(Axis.Z)
+                ));
+            }
+            return collisions;
         }
 
         if (state.is(Blocks.BAMBOO)) {
