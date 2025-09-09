@@ -111,8 +111,7 @@ public class BedrockCollision {
         }
 
         if (state.is(Blocks.BAMBOO)) {
-            Box baseShape = state.getValue(Properties.BAMBOO_LEAVES).equalsIgnoreCase("small") ?
-                    new Box(0, 0, 0, 0.125F, 1, 0.125F) : new Box(0, 0, 0, 0.1875F, 1, 0.1875F);
+            Box baseShape = state.getValue(Properties.BAMBOO_LEAVES).equals("large") ? new Box(0, 0, 0, 0.1875F, 1, 0.1875F) : new Box(0, 0, 0, 0.125F, 1, 0.125F);
 
             // We can still support the offsetting pre 1.21.80, mojang changed this post 1.21.80, and it doesn't even match JE???
             if (!GameProtocol.is1_21_80orHigher(player.getSession())) {
