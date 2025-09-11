@@ -18,8 +18,10 @@ import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransacti
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Geyser is switching to server auth block breaking soon so yeah, support that.
+@Deprecated
 @RequiredArgsConstructor
-public final class BreakingBlockValidator {
+public final class ClientBreakBlockValidator {
     private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK, PlayerActionType.CONTINUE_BREAK, PlayerActionType.ABORT_BREAK);
 
     private final BoarPlayer player;
