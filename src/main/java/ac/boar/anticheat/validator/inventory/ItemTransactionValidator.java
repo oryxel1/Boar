@@ -1,4 +1,4 @@
-package ac.boar.anticheat.validator;
+package ac.boar.anticheat.validator.inventory;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.InteractionResult;
@@ -7,7 +7,7 @@ import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.block.BlockUtil;
-import ac.boar.anticheat.validator.click.ItemRequestProcessor;
+import ac.boar.anticheat.validator.inventory.click.ItemRequestProcessor;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.StringUtil;
 import ac.boar.mappings.BlockMappings;
@@ -290,8 +290,8 @@ public final class ItemTransactionValidator {
                         if (boarState.isAir()) {
                             // Player seems to be able to do this... on Vanilla, and even claimed "yeah the block definition for this is air".
                             // Well an advantage is an advantage... resync.
-                            BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), newBlockPos);
-                            BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), packet.getBlockPosition());
+                            BlockUtil.restoreCorrectBlock(player.getSession(), newBlockPos);
+                            BlockUtil.restoreCorrectBlock(player.getSession(), packet.getBlockPosition());
 
                             // GeyserBoar.getLogger().severe("AIR PLACEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                             player.tickSinceBlockResync = 5;

@@ -5,17 +5,55 @@ import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.mappings.BlockMappings;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
+import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
+import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
+import org.geysermc.geyser.level.block.type.SkullBlock;
 import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.registry.BlockRegistries;
+import org.geysermc.geyser.session.GeyserSession;
+import org.geysermc.geyser.session.cache.SkullCache;
 
 import java.util.Locale;
 
 import static org.geysermc.geyser.level.block.property.Properties.*;
 
 public class BlockUtil {
+    public static void restoreCorrectBlock(GeyserSession session, Vector3i vector, BlockState blockState) {
+        BlockDefinition bedrockBlock = session.getBlockMappings().getBedrockBlock(blockState);
+
+        if (blockState.block() instanceof SkullBlock skullBlock && skullBlock.skullType() == SkullBlock.Type.PLAYER) {
+            // The changed block was a player skull so check if a custom block was defined for this skull
+            SkullCache.Skull skull = session.getSkullCache().getSkulls().get(vector);
+            if (skull != null && skull.getBlockDefinition() != null) {
+                bedrockBlock = skull.getBlockDefinition();
+            }
+        }
+
+        UpdateBlockPacket updateBlockPacket = new UpdateBlockPacket();
+        updateBlockPacket.setDataLayer(0);
+        updateBlockPacket.setBlockPosition(vector);
+        updateBlockPacket.setDefinition(bedrockBlock);
+        updateBlockPacket.getFlags().addAll(UpdateBlockPacket.FLAG_ALL_PRIORITY);
+        session.sendUpstreamPacket(updateBlockPacket);
+
+        UpdateBlockPacket updateWaterPacket = new UpdateBlockPacket();
+        updateWaterPacket.setDataLayer(1);
+        updateWaterPacket.setBlockPosition(vector);
+        updateWaterPacket.setDefinition(BlockRegistries.WATERLOGGED.get().get(blockState.javaId()) ? session.getBlockMappings().getBedrockWater() : session.getBlockMappings().getBedrockAir());
+        updateWaterPacket.getFlags().addAll(UpdateBlockPacket.FLAG_ALL_PRIORITY);
+        session.sendUpstreamPacket(updateWaterPacket);
+
+        // Reset the item in hand to prevent "missing" blocks
+        session.getPlayerInventoryHolder().updateSlot(session.getPlayerInventory().getHeldItemSlot()); // TODO test
+    }
+
+    public static void restoreCorrectBlock(GeyserSession session, Vector3i blockPos) {
+        restoreCorrectBlock(session, blockPos, session.getGeyser().getWorldManager().blockAt(session, blockPos));
+    }
+
     public static BlockState getPlacementState(BoarPlayer player, Block block, Vector3i position) {
         return block.defaultBlockState();
     }

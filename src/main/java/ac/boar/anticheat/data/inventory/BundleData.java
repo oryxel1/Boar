@@ -1,6 +1,6 @@
 package ac.boar.anticheat.data.inventory;
 
-import ac.boar.anticheat.validator.ItemTransactionValidator;
+import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
 import lombok.Getter;
 import lombok.Setter;
 

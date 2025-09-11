@@ -1,4 +1,4 @@
-package ac.boar.anticheat.validator;
+package ac.boar.anticheat.validator.blockbreak;
 
 import ac.boar.anticheat.data.BreakingData;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -13,16 +13,15 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.ItemUseTrans
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.physics.Direction;
-import org.geysermc.geyser.translator.protocol.bedrock.BedrockInventoryTransactionTranslator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Geyser is switching to server auth block breaking soon so yeah, support that.
 @Deprecated
 @RequiredArgsConstructor
 public final class ClientBreakBlockValidator {
-    private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK, PlayerActionType.CONTINUE_BREAK, PlayerActionType.ABORT_BREAK);
+    private final static List<PlayerActionType> allowedActions = List.of(PlayerActionType.START_BREAK, PlayerActionType.STOP_BREAK,
+            PlayerActionType.CONTINUE_BREAK, PlayerActionType.ABORT_BREAK);
 
     private final BoarPlayer player;
 
@@ -81,8 +80,9 @@ public final class ClientBreakBlockValidator {
         final List<PlayerBlockActionData> valid = new ArrayList<>();
 
         for (final PlayerBlockActionData action : packet.getPlayerActions()) {
-            if ((action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition()) && action.getAction()
-                    != PlayerActionType.START_BREAK)
+            if ((action.getBlockPosition() == null ||
+                    !MathUtil.isValid(action.getBlockPosition()) && action.getAction() != PlayerActionType.START_BREAK)
+
                     || (action.getFace() < 0 || action.getFace() >= Direction.VALUES.length) && action.getAction()
                     != PlayerActionType.ABORT_BREAK
                     || !allowedActions.contains(action.getAction())) {
@@ -135,7 +135,7 @@ public final class ClientBreakBlockValidator {
     }
 
     private void resyncBlock(final Vector3i vector3i) {
-        BedrockInventoryTransactionTranslator.restoreCorrectBlock(player.getSession(), vector3i);
+        BlockUtil.restoreCorrectBlock(player.getSession(), vector3i);
     }
 
     private BreakingData findCacheUsingPosition(final Vector3i vector3i) {

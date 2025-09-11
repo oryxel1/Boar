@@ -1,4 +1,4 @@
-package ac.boar.anticheat.validator.click;
+package ac.boar.anticheat.validator.inventory.click;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;

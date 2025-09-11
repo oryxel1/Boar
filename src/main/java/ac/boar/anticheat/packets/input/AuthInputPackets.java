@@ -67,7 +67,12 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         // Timer check end here.
         // -------------------------------------------------------------------------
 
-        player.breakingValidator.handle(packet);
+        if (player.serverBreakBlockValidator != null) {
+            player.serverBreakBlockValidator.handle(packet);
+        }
+        if (player.clientBreakBlockValidator != null) {
+            player.clientBreakBlockValidator.handle(packet);
+        }
         player.tick();
 
         LegacyAuthInputPackets.processAuthInput(player, packet, true);

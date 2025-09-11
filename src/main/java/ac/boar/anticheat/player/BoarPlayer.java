@@ -10,6 +10,7 @@ import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
+import ac.boar.anticheat.validator.blockbreak.ServerBreakBlockValidator;
 import ac.boar.geyser.util.GeyserUtil;
 import ac.boar.mappings.BlockMappings;
 import ac.boar.protocol.mitm.CloudburstReceiveListener;
@@ -18,10 +19,10 @@ import lombok.Getter;
 import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.FluidState;
-import ac.boar.anticheat.validator.ClientBreakBlockValidator;
+import ac.boar.anticheat.validator.blockbreak.ClientBreakBlockValidator;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
-import ac.boar.anticheat.validator.ItemTransactionValidator;
+import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
 import ac.boar.protocol.mitm.CloudburstSendListener;
 import ac.boar.anticheat.player.data.PlayerData;
 import lombok.Setter;
@@ -76,7 +77,8 @@ public final class BoarPlayer extends PlayerData {
     public final CompensatedInventory compensatedInventory = new CompensatedInventory(this);
 
     // Validation
-    public final ClientBreakBlockValidator breakingValidator = new ClientBreakBlockValidator(this);
+    public ClientBreakBlockValidator clientBreakBlockValidator;
+    public ServerBreakBlockValidator serverBreakBlockValidator;
     public final ItemTransactionValidator transactionValidator = new ItemTransactionValidator(this);
 
     @Getter

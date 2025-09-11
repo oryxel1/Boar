@@ -1,10 +1,10 @@
-package ac.boar.anticheat.validator.click;
+package ac.boar.anticheat.validator.inventory.click;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.validator.ItemTransactionValidator;
+import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
