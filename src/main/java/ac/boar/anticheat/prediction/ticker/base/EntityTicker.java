@@ -75,7 +75,7 @@ public class EntityTicker {
 
         boolean found = false;
         Vec3 vec3 = new Vec3(0, 0, 0);
-        float maxFluidHeight = 0;
+        float maxFluidHeight = Float.MIN_VALUE;
         Mutable mutable = new Mutable();
 
         for (int k1 = i; k1 < j; ++k1) { for (int l1 = k; l1 < l; ++l1) { for (int i2 = i1; i2 < j1; ++i2) {
@@ -92,6 +92,10 @@ public class EntityTicker {
                 }
             }
         }}}
+
+        if (!found) {
+            maxFluidHeight = 0;
+        }
 
         if (vec3.lengthSquared() > 0.0D) {
             vec3 = vec3.normalize().multiply(speed);
