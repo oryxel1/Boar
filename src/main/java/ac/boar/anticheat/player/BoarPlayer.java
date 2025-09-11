@@ -136,6 +136,8 @@ public final class BoarPlayer extends PlayerData {
         } else {
             this.getSession().sendUpstreamPacket(latencyPacket);
         }
+
+//        System.out.println("Sent: " + System.currentTimeMillis());
     }
 
     private boolean doTimeOut() {
@@ -143,12 +145,16 @@ public final class BoarPlayer extends PlayerData {
             return false;
         }
 
-        this.latencyUtil.latencyFaultDistance = Math.max(System.currentTimeMillis() - this.latencyUtil.getPrevSentTime(), this.latencyUtil.latencyFaultDistance);
+        if (this.latencyUtil.getNextSentTime() == this.latencyUtil.getLastSentTime()) {
+//            System.out.println("The same, skip!");
+            return false;
+        }
 
+        long latencyFault = this.latencyUtil.getNextSentTime().ms() - this.latencyUtil.getLastSentTime().ms();
         long distance = System.currentTimeMillis() - this.latencyUtil.getLastRespondTime();
-        distance -= this.latencyUtil.latencyFaultDistance;
+        distance -= latencyFault;
 
-//        System.out.println("Dist=" + distance + ", sentDis=" + this.latencyUtil.latencyFaultDistance);
+//        System.out.println("Dist=" + distance + ", sentDis=" + latencyFault);
         return distance >= Boar.getConfig().maxLatencyWait();
     }
 

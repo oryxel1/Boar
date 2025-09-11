@@ -25,11 +25,13 @@ public final class LatencyUtil {
     private long lastRespondTime = System.currentTimeMillis() + Boar.getConfig().maxLatencyWait();
     @Getter
     private long prevSentTime = System.currentTimeMillis();
-    private Time prevReceivedSentTime = new Time(-1, -1, 0, 0);
-    public long latencyFaultDistance;
+    private Time prevReceivedSentTime = new Time(-1, -1), nextRecivedSentTime = new Time(-1, -1);
 
     public Time getLastSentTime() {
         return this.prevReceivedSentTime;
+    }
+    public Time getNextSentTime() {
+        return this.nextRecivedSentTime;
     }
 
     public boolean hasId(long id) {
@@ -37,9 +39,8 @@ public final class LatencyUtil {
     }
 
     public void addLatencyToQueue(long id) {
-        final long latestFault = Math.max(0, System.currentTimeMillis() - this.prevSentTime);
         this.sentQueue.add(id);
-        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime(), Math.max(this.latencyFaultDistance, latestFault), latestFault));
+        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
         onLatencySend();
 
         this.prevSentTime = System.currentTimeMillis();
@@ -91,16 +92,25 @@ public final class LatencyUtil {
             return;
         }
 
+        this.nextRecivedSentTime = this.prevReceivedSentTime;
+
+        final Long next = this.sentQueue.peek();
+        if (next != null) {
+            final Time sentTime = this.idToSentTime.get(next);
+            if (sentTime != null) {
+                this.nextRecivedSentTime = sentTime;
+            }
+        }
+
         // This prevents cheaters from answering to ONE latency every X seconds (depends on the config) to prevent timed out.
         // Instead, this will force the cheater to answer to the latest latency that have sent time distance to the current time by X seconds
-        long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms() - this.prevReceivedSentTime.minDistance();
+        long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms();
         if (distance >= Boar.getConfig().maxLatencyWait()) {
             player.kick("Timed out.");
             return;
         }
 
         this.lastRespondTime = System.currentTimeMillis();
-        this.latencyFaultDistance = this.prevReceivedSentTime.fault();
         player.receivedStackId.set(lastId);
     }
 
@@ -132,16 +142,25 @@ public final class LatencyUtil {
             this.sentQueue.poll();
         }
 
+        this.nextRecivedSentTime = this.prevReceivedSentTime;
+
+        final Long next = this.sentQueue.peek();
+        if (next != null) {
+            final Time sentTime = this.idToSentTime.get(next);
+            if (sentTime != null) {
+                this.nextRecivedSentTime = sentTime;
+            }
+        }
+
         // This prevents cheaters from answering to ONE latency every X seconds (depends on the config) to prevent timed out.
         // Instead, this will force the cheater to answer to the latest latency that have sent time distance to the current time by X seconds
-        long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms() - this.prevReceivedSentTime.minDistance();
+        long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms();
         if (distance >= Boar.getConfig().maxLatencyWait()) {
             player.kick("Timed out.");
             return true;
         }
 
         this.lastRespondTime = System.currentTimeMillis();
-        this.latencyFaultDistance = this.prevReceivedSentTime.fault();
         player.receivedStackId.set(id);
         return true;
     }
@@ -166,6 +185,6 @@ public final class LatencyUtil {
         }
     }
 
-    public record Time(long ms, long ns, long minDistance, long fault) {
+    public record Time(long ms, long ns) {
     }
 }
