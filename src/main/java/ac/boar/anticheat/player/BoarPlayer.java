@@ -152,7 +152,7 @@ public final class BoarPlayer extends PlayerData {
             return false;
         }
 
-        long latencyFault = this.latencyUtil.getNextSentTime().ms() - this.latencyUtil.getLastSentTime().ms();
+        long latencyFault = Math.max(0, this.latencyUtil.getNextSentTime().ms() - this.latencyUtil.getLastSentTime().ms());
         long distance = System.currentTimeMillis() - this.latencyUtil.getLastRespondTime();
         distance -= latencyFault;
 

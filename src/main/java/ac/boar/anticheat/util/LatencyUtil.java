@@ -39,11 +39,15 @@ public final class LatencyUtil {
     }
 
     public void addLatencyToQueue(long id) {
+        final Time time = new Time(System.currentTimeMillis(), System.nanoTime());
         this.sentQueue.add(id);
-        this.idToSentTime.put(id, new Time(System.currentTimeMillis(), System.nanoTime()));
+        this.idToSentTime.put(id, time);
         onLatencySend();
 
         this.prevSentTime = System.currentTimeMillis();
+        if (this.prevReceivedSentTime == this.nextRecivedSentTime) {
+            this.nextRecivedSentTime = time;
+        }
     }
 
     public void addTaskToQueue(long id, Runnable runnable) {
