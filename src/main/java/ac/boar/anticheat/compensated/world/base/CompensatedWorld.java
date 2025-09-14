@@ -7,6 +7,7 @@ import ac.boar.anticheat.data.block.impl.BedBlockState;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.geyser.BoarChunk;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Mutable;
 import it.unimi.dsi.fastutil.longs.*;
@@ -21,8 +22,10 @@ import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
+import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -30,7 +33,7 @@ import java.util.Map;
 @Getter
 public class CompensatedWorld {
     private final BoarPlayer player;
-    private final Long2ObjectMap<BoarChunkSection[]> chunks = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<BoarChunk> chunks = new Long2ObjectOpenHashMap<>();
 
     private BedrockDimension dimension;
 
@@ -71,9 +74,9 @@ public class CompensatedWorld {
         return cache;
     }
 
-    public void addToCache(int x, int z, BoarChunkSection[] chunks) {
+    public void addToCache(int x, int z, BoarChunkSection[] chunks, List<BlockEntityInfo> blockEntities) {
         long chunkPosition = MathUtils.chunkPositionToLong(x, z);
-        this.chunks.put(chunkPosition, chunks);
+        this.chunks.put(chunkPosition, new BoarChunk(chunks, blockEntities));
     }
 
     public void removeFromCache(int x, int z) {
@@ -89,7 +92,7 @@ public class CompensatedWorld {
     }
 
     public void updateBlock(int x, int y, int z, int layer, int block) {
-        final BoarChunkSection[] column = this.getChunk(x >> 4, z >> 4);
+        final BoarChunkSection[] column = this.getChunkSections(x >> 4, z >> 4);
         if (column == null) {
             return;
         }
@@ -135,7 +138,7 @@ public class CompensatedWorld {
     }
 
     public int getRawBlockAt(int x, int y, int z, int layer) {
-        BoarChunkSection[] column = this.getChunk(x >> 4, z >> 4);
+        BoarChunkSection[] column = this.getChunkSections(x >> 4, z >> 4);
         if (column == null) {
             return player.BEDROCK_AIR;
         }
@@ -161,9 +164,32 @@ public class CompensatedWorld {
         return player.bedrockBlockToJava.getOrDefault(this.getRawBlockAt(x, y, z, layer), 0);
     }
 
-    private BoarChunkSection[] getChunk(int chunkX, int chunkZ) {
+    public BlockEntityInfo getBlockEntity(int x, int y, int z) {
+        final BoarChunk chunk = this.getChunk(x >> 4, z >> 4);
+        if (chunk == null) {
+            return null;
+        }
+
+        for (BlockEntityInfo info : chunk.blockEntities()) {
+            if (info.getX() == x && info.getY() == y && info.getZ() == z) {
+                return info;
+            }
+        }
+
+        return null;
+    }
+
+    public BoarChunk getChunk(int chunkX, int chunkZ) {
         long chunkPosition = MathUtils.chunkPositionToLong(chunkX, chunkZ);
         return this.chunks.getOrDefault(chunkPosition, null);
+    }
+
+    private BoarChunkSection[] getChunkSections(int chunkX, int chunkZ) {
+        final BoarChunk chunk = getChunk(chunkX, chunkZ);
+        if (chunk == null) {
+            return null;
+        }
+        return chunk.sections();
     }
 
     public int getMinY() {

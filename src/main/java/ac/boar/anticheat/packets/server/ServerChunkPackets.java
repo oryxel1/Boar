@@ -5,14 +5,20 @@ import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.anticheat.util.geyser.BlockStorage;
+import ac.boar.anticheat.util.geyser.BoarChunk;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.cloudburstmc.math.GenericMath;
+import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.nbt.NBTInputStream;
+import org.cloudburstmc.nbt.NbtMap;
+import org.cloudburstmc.nbt.NbtUtils;
 import org.cloudburstmc.protocol.bedrock.data.ServerboundLoadingScreenPacketType;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.cloudburstmc.protocol.common.util.VarInts;
@@ -20,7 +26,11 @@ import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.chunk.bitarray.BitArray;
 import org.geysermc.geyser.level.chunk.bitarray.BitArrayVersion;
 import org.geysermc.geyser.level.chunk.bitarray.SingletonBitArray;
+import org.geysermc.geyser.util.MathUtils;
+import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ServerChunkPackets implements PacketListener {
@@ -61,6 +71,11 @@ public class ServerChunkPackets implements PacketListener {
 
             final BoarChunkSection[] sections = new BoarChunkSection[dimension.height() >> 4];
 
+            int yOffset = world.getMinY() >> 4, chunkSize = world.getHeightY() >> 4;
+            int dimensionOffset = dimension.minY() >> 4;
+
+            final List<BlockEntityInfo> blockEntities = new ArrayList<>();
+
             final ByteBuf buffer = packet.getData().retainedDuplicate();
             try {
                 // Read chunk sections.
@@ -92,7 +107,37 @@ public class ServerChunkPackets implements PacketListener {
                     sections[i] = new BoarChunkSection(storages, subChunkIndex);
                 }
 
-                // Just ignore the rest, I don't need those.
+                // As of 1.18.30, the amount of biomes read is dependent on how high Bedrock thinks the dimension is
+                int biomeCount = dimension.height() >> 4;
+                // I don't really care about biomes, just ignore whatever we were able to read.
+                for (int i = 0; i < biomeCount; i++) {
+                    int biomeYOffset = dimensionOffset + i;
+                    if (biomeYOffset < yOffset) {
+                        buffer.skipBytes(1);
+                        continue;
+                    }
+                    if (biomeYOffset >= (chunkSize + yOffset)) {
+                        buffer.skipBytes(1);
+                        continue;
+                    }
+
+                    readStorageAndSkip(buffer);
+                }
+
+                // Border blocks.
+                buffer.skipBytes(1);
+
+                final NBTInputStream nbtStream = NbtUtils.createNetworkReader(new ByteBufInputStream(buffer));
+                while (buffer.isReadable()) {
+                    Object tag = nbtStream.readTag();
+                    if (tag instanceof NbtMap nbtTag) {
+                        int x = nbtTag.getInt("x", 0);
+                        int y = nbtTag.getInt("y", 0);
+                        int z = nbtTag.getInt("z", 0);
+
+                        blockEntities.add(new BlockEntityInfo(x, y, z, null, nbtTag));
+                    }
+                }
             } catch (Exception ignored) {
                 // Ignore and just use whatever we were able to read, bedrock client do the same thing I think?
                 // ignored.printStackTrace();
@@ -105,7 +150,7 @@ public class ServerChunkPackets implements PacketListener {
                     return;
                 }
 
-                world.addToCache(packet.getChunkX(), packet.getChunkZ(), sections);
+                world.addToCache(packet.getChunkX(), packet.getChunkZ(), sections, blockEntities);
             });
         }
 
@@ -132,6 +177,20 @@ public class ServerChunkPackets implements PacketListener {
 
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> world.updateBlock(packet.getBlockPosition(), packet.getDataLayer(), packet.getDefinition().getRuntimeId()));
         }
+
+        if (event.getPacket() instanceof BlockEntityDataPacket packet) {
+            player.sendLatencyStack();
+            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                final BoarChunk chunk = player.compensatedWorld.getChunk(packet.getBlockPosition().getX() >> 4, packet.getBlockPosition().getZ() >> 4);
+                if (chunk == null) {
+                    return;
+                }
+
+                final Vector3i pos = packet.getBlockPosition();
+                chunk.blockEntities().removeIf(block -> block.getX() == pos.getX() && block.getY() == pos.getY() && block.getZ() == pos.getZ());
+                chunk.blockEntities().add(new BlockEntityInfo(pos.getX(), pos.getY(), pos.getZ(), null, packet.getData()));
+            });
+        }
     }
 
     @Override
@@ -144,6 +203,28 @@ public class ServerChunkPackets implements PacketListener {
                 player.inLoadingScreen = false;
                 player.sinceLoadingScreen = 0;
             }
+        }
+    }
+
+    private void readStorageAndSkip(final ByteBuf buffer) {
+        final short header = buffer.readUnsignedByte();
+        final int bitArrayVersion = header >> 1;
+        if (bitArrayVersion == 127) {
+            return;
+        }
+
+        BitArrayVersion version = BitArrayVersion.get(bitArrayVersion, true);
+
+        int words = MathUtils.ceil(4096F / Cache.values()[version.ordinal()].entriesPerWord);
+        if (version != BitArrayVersion.V0) {
+            for (int i = 0; i < words; i++) {
+                buffer.readIntLE();
+            }
+        }
+
+        final int size = version == BitArrayVersion.V0 ? 1 : VarInts.readInt(buffer);
+        for (int i = 0; i < size; i++) {
+            VarInts.readInt(buffer);
         }
     }
 
@@ -181,5 +262,27 @@ public class ServerChunkPackets implements PacketListener {
         }
 
         return new BlockStorage(bitArray, palette);
+    }
+
+    private enum Cache {
+        V16(16, 2),
+        V8(8, 4),
+        V6(6, 5), // 2 bit padding
+        V5(5, 6), // 2 bit padding
+        V4(4, 8),
+        V3(3, 10), // 2 bit padding
+        V2(2, 16),
+        V1(1, 32),
+        V0(0, 0);
+
+        final byte bits;
+        final byte entriesPerWord;
+        final int maxEntryValue;
+
+        Cache(int bits, int entriesPerWord) {
+            this.bits = (byte) bits;
+            this.entriesPerWord = (byte) entriesPerWord;
+            this.maxEntryValue = (1 << this.bits) - 1;
+        }
     }
 }

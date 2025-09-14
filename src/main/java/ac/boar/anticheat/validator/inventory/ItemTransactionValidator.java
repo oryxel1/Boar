@@ -280,7 +280,7 @@ public final class ItemTransactionValidator {
                             }
                         }
 
-                        Vector3i newBlockPos = BlockUtils.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
+                        Vector3i newBlockPos = BlockUtil.getBlockPosition(packet.getBlockPosition(), packet.getBlockFace());
                         if ((state.is(Blocks.SCAFFOLDING) ||
                                 player.compensatedWorld.getBlockState(newBlockPos, 0).getState().is(Blocks.SCAFFOLDING))
                                 && item.javaId() == Items.SCAFFOLDING.javaId()) {

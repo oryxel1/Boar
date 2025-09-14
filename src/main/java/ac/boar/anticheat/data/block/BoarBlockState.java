@@ -136,6 +136,9 @@ public class BoarBlockState {
             state = BlockUtil.findFenceBlockState(player, getState(), pos);
         } else if (state.is(Blocks.IRON_BARS) || state.toString().toLowerCase(Locale.ROOT).contains("glass_pane")) {
             state = BlockUtil.findIronBarsBlockState(player, getState(), pos);
+        } else if (state.is(Blocks.CHEST) || state.is(Blocks.TRAPPED_CHEST)) {
+            state = BlockUtil.findChestState(player, state, pos);
+//            System.out.println(state);
         }
 
         final List<Box> list = new ArrayList<>();

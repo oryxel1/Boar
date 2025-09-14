@@ -8,6 +8,7 @@ import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.definitions.BlockDefinition;
 import org.cloudburstmc.protocol.bedrock.packet.UpdateBlockPacket;
 import org.geysermc.geyser.level.block.Blocks;
+import org.geysermc.geyser.level.block.property.ChestType;
 import org.geysermc.geyser.level.block.type.Block;
 import org.geysermc.geyser.level.block.type.BlockState;
 import org.geysermc.geyser.level.block.type.SkullBlock;
@@ -15,6 +16,7 @@ import org.geysermc.geyser.level.physics.Direction;
 import org.geysermc.geyser.registry.BlockRegistries;
 import org.geysermc.geyser.session.GeyserSession;
 import org.geysermc.geyser.session.cache.SkullCache;
+import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 
 import java.util.Locale;
 
@@ -50,12 +52,46 @@ public class BlockUtil {
         session.getPlayerInventoryHolder().updateSlot(session.getPlayerInventory().getHeldItemSlot()); // TODO test
     }
 
+    public static Vector3i getBlockPosition(Vector3i blockPos, int face) {
+        return switch (face) {
+            case 0 -> blockPos.sub(0, 1, 0);
+            case 1 -> blockPos.add(0, 1, 0);
+            case 2 -> blockPos.sub(0, 0, 1);
+            case 3 -> blockPos.add(0, 0, 1);
+            case 4 -> blockPos.sub(1, 0, 0);
+            case 5 -> blockPos.add(1, 0, 0);
+            default -> blockPos;
+        };
+    }
+
     public static void restoreCorrectBlock(GeyserSession session, Vector3i blockPos) {
         restoreCorrectBlock(session, blockPos, session.getGeyser().getWorldManager().blockAt(session, blockPos));
     }
 
     public static BlockState getPlacementState(BoarPlayer player, Block block, Vector3i position) {
         return block.defaultBlockState();
+    }
+
+    public static BlockState findChestState(final BoarPlayer player, final BlockState state, final Vector3i vector3i) {
+        final BlockEntityInfo blockEntity = player.compensatedWorld.getBlockEntity(vector3i.getX(), vector3i.getY(), vector3i.getZ());
+        if (blockEntity == null || blockEntity.getNbt() == null) {
+            return state.withValue(CHEST_TYPE, ChestType.SINGLE);
+        }
+
+        int pairX = blockEntity.getNbt().getInt("pairx", 0);
+        int pairZ = blockEntity.getNbt().getInt("pairz", 0);
+        if (Math.abs(vector3i.getX() - pairX) > 1 || Math.abs(vector3i.getZ() - pairZ) > 1) {
+            return state.withValue(CHEST_TYPE, ChestType.SINGLE);
+        }
+        final Vector3i attachedPos = Vector3i.from(pairX, vector3i.getY(), pairZ);
+
+        final int id = player.compensatedWorld.getBlockAt(attachedPos.getX(), attachedPos.getY(), attachedPos.getZ(), 0);
+        if (BlockState.of(id).block().javaId() != state.block().javaId()) {
+            return state.withValue(CHEST_TYPE, ChestType.SINGLE);
+        }
+
+        int pairLead = blockEntity.getNbt().getInt("pairlead", 0);
+        return state.withValue(CHEST_TYPE, pairLead == 1 ? ChestType.RIGHT : ChestType.LEFT);
     }
 
     public static boolean determineCanBreak(final BoarPlayer player, final BlockState state) {
