@@ -25,7 +25,7 @@ A dedicated (proof of concept) anti cheat for GeyserMC project.
 - No Slow
 - And the list goes on....
 #### And other additions check aside from movements.
-- Reach (> 3 blocks, depends on the config)
+- Reach (> 3 blocks - anything greater than 3 blocks of reach, depends on the config)
 - Hitbox (any kind of hitbox expansion, including touch (cheater) player)
 - Timer (anything greater than 20 ticks)
 - PingSpoof (cannot guarantee a 100% detection, but can silently compensate for some)
