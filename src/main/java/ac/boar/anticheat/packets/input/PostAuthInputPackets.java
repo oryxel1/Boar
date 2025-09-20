@@ -20,7 +20,7 @@ public class PostAuthInputPackets implements PacketListener {
             player.hasDepthStrider = false;
             player.nearBamboo = false;
 
-            player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags()));
+            player.getTeleportUtil().getAuthInputHistory().put(packet.getTick(), new TickData(packet, player.getFlagTracker().cloneFlags(), player.dimensions));
 
             if (player.vehicleData != null && player.getSession().getPlayerEntity().getVehicle() == null) {
                 event.setCancelled(true);

@@ -74,7 +74,7 @@ public class PlayerData {
     private final FlagTracker flagTracker = new FlagTracker();
 
     public int glideBoostTicks;
-    public int ticksSinceSwimming;
+    public int ticksSinceSwimming, ticksSinceCrawling;
 
     public boolean doingInventoryAction;
     public AtomicLong desyncedFlag = new AtomicLong(-1);

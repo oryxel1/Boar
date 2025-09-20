@@ -8,7 +8,9 @@ import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.geysermc.geyser.entity.type.player.SessionPlayerEntity;
 
 import java.util.Queue;
 
@@ -94,6 +96,12 @@ public class TeleportHandler {
 
         player.getTeleportUtil().cachePosition(rewind.getTick(), rewind.getPosition().toVector3f());
 
+        // Rewind can cause some problem if the tick we use have a different bounding width/height, so this is a bit of a hack but welp.
+        final SessionPlayerEntity entity = player.getSession().getPlayerEntity();
+        entity.getDirtyMetadata().put(EntityDataTypes.WIDTH, entity.getBoundingBoxWidth());
+        entity.getDirtyMetadata().put(EntityDataTypes.HEIGHT, entity.getBoundingBoxHeight());
+        entity.updateBedrockMetadata();
+
         // Keep running prediction until we catch up with the player current tick.
         long currentTick = rewind.getTick();
         while (currentTick != player.tick) {
@@ -111,11 +119,10 @@ public class TeleportHandler {
                 LegacyAuthInputPackets.processAuthInput(player, data.packet(), false);
                 LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
-                // Reverted back to the old flags.
+                // Reverted back to the old flags and dimensions.
                 player.getFlagTracker().set(player, data.flags(), false);
-            } else {
-                // Oops, don't let cheaters spamming logs by skipping ticks. This could also happen post respawn.
-                // throw new RuntimeException("Failed find auth input history for rewind.");
+                // TODO: Is this really the case.
+                player.dimensions = data.dimensions();
             }
 
             new PredictionRunner(player).run();

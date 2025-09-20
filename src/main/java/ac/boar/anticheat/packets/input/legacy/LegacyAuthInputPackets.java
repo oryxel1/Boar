@@ -154,6 +154,12 @@ public class LegacyAuthInputPackets {
             player.ticksSinceSwimming = 0;
         }
 
+        if (player.getFlagTracker().has(EntityFlag.CRAWLING)) {
+            player.ticksSinceCrawling++;
+        } else {
+            player.ticksSinceCrawling = 0;
+        }
+
         for (final PlayerAuthInputData input : player.getInputData()) {
             switch (input) {
                 case START_GLIDING -> {
