@@ -138,7 +138,8 @@ public class BoarBlockState {
             state = BlockUtil.findIronBarsBlockState(player, getState(), pos);
         } else if (state.is(Blocks.CHEST) || state.is(Blocks.TRAPPED_CHEST)) {
             state = BlockUtil.findChestState(player, state, pos);
-//            System.out.println(state);
+        } else if (BlockMappings.getStairsBlocks().contains(state.block())) {
+            state = state.withValue(Properties.STAIRS_SHAPE, BlockUtil.getStairShape(player, state, pos));
         }
 
         final List<Box> list = new ArrayList<>();

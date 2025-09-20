@@ -16,6 +16,7 @@ public class BlockMappings {
     private static final List<Block> WALL_BLOCKS = new ArrayList<>();
     private static final List<Block> SHULKER_BLOCKS = new ArrayList<>();
     private static final List<Block> LEAVES_BLOCKS = new ArrayList<>();
+    private static final List<Block> STAIRS_BLOCKS = new ArrayList<>();
 
     public static void load() {
         for (Field field : Blocks.class.getDeclaredFields()) {
@@ -34,6 +35,8 @@ public class BlockMappings {
                         SHULKER_BLOCKS.add(block);
                     } else if (lowercaseName.endsWith("_leaves")) {
                         LEAVES_BLOCKS.add(block);
+                    } else if (lowercaseName.endsWith("_stairs")) {
+                        STAIRS_BLOCKS.add(block);
                     }
 
                     Item item = Item.byBlock(block);
@@ -62,6 +65,10 @@ public class BlockMappings {
         CLIMBABLE_BLOCKS.add(Blocks.WEEPING_VINES);
         CLIMBABLE_BLOCKS.add(Blocks.WEEPING_VINES_PLANT);
 //        System.out.println("Cache: " + Arrays.toString(LEAVES_BLOCKS.toArray()));
+    }
+
+    public static List<Block> getStairsBlocks() {
+        return Collections.unmodifiableList(STAIRS_BLOCKS);
     }
 
     public static List<Block> getLeavesBlocks() {

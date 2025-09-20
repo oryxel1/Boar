@@ -2,6 +2,7 @@ package ac.boar.anticheat.util.block;
 
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.math.DirectionUtil;
 import ac.boar.mappings.BlockMappings;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
@@ -19,6 +20,7 @@ import org.geysermc.geyser.session.cache.SkullCache;
 import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import static org.geysermc.geyser.level.block.property.Properties.*;
 
@@ -166,7 +168,7 @@ public class BlockUtil {
             return false;
         }
 
-        return blockState.getValue(HORIZONTAL_FACING).getAxis() == getClockWise(direction).getAxis();
+        return blockState.getValue(HORIZONTAL_FACING).getAxis() == DirectionUtil.getClockWise(direction).getAxis();
     }
 
     public static boolean isExceptionForConnection(BlockState blockState) {
@@ -175,13 +177,41 @@ public class BlockUtil {
                 || BlockMappings.getShulkerBlocks().contains(blockState.block());
     }
 
-    private static Direction getClockWise(Direction direction) {
-        return switch (direction.ordinal()) {
-            case 2 -> Direction.EAST;
-            case 5 -> Direction.SOUTH;
-            case 3 -> Direction.WEST;
-            case 4 -> Direction.NORTH;
-            default -> throw new IllegalStateException("Unable to get Y-rotated facing of " + direction);
-        };
+    public static String getStairShape(BoarPlayer player, BlockState state, Vector3i pos) {
+        Direction direction = state.getValue(HORIZONTAL_FACING);
+        BlockState blockState = player.compensatedWorld.getBlockState(pos.add(direction.getUnitVector()), 0).getState();
+        if (isStairs(blockState) && Objects.equals(state.getValue(HALF), blockState.getValue(HALF))) {
+            Direction direction2 = blockState.getValue(HORIZONTAL_FACING);
+            if (direction2.getAxis() != state.getValue(HORIZONTAL_FACING).getAxis() && isDifferentOrientation(player, state, pos, direction2.reversed())) {
+                if (direction2 == DirectionUtil.rotateYCounterclockwise(direction)) {
+                    return "outer_left";
+                }
+
+                return "outer_right";
+            }
+        }
+
+        BlockState blockState2 = player.compensatedWorld.getBlockState(pos.add(direction.reversed().getUnitVector()), 0).getState();
+        if (isStairs(blockState2) && Objects.equals(state.getValue(HALF), blockState2.getValue(HALF))) {
+            Direction direction3 = blockState2.getValue(HORIZONTAL_FACING);
+            if (direction3.getAxis() != state.getValue(HORIZONTAL_FACING).getAxis() && isDifferentOrientation(player, state, pos, direction3)) {
+                if (direction3 == DirectionUtil.rotateYCounterclockwise(direction)) {
+                    return "inner_left";
+                }
+
+                return "inner_right";
+            }
+        }
+
+        return "straight";
+    }
+
+    private static boolean isDifferentOrientation(BoarPlayer player, BlockState state, Vector3i pos, Direction dir) {
+        BlockState blockState = player.compensatedWorld.getBlockState(pos.add(dir.getUnitVector()), 0).getState();
+        return !isStairs(blockState) || blockState.getValue(HORIZONTAL_FACING) != state.getValue(HORIZONTAL_FACING) || !Objects.equals(blockState.getValue(HALF), state.getValue(HALF));
+    }
+
+    public static boolean isStairs(BlockState state) {
+        return BlockMappings.getStairsBlocks().contains(state.block());
     }
 }
