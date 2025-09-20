@@ -86,7 +86,7 @@ public class CompensatedWorldImpl extends CompensatedWorld {
 
         aABB = aABB.expand(1.0E-7F);
         for (EntityCache cache : this.getEntities().values()) {
-            if (cache.getMetadata().getFlags() == null || !cache.getMetadata().getFlags().contains(EntityFlag.COLLIDABLE) || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
+            if (cache == null || cache.getMetadata().getFlags() == null || !cache.getMetadata().getFlags().contains(EntityFlag.COLLIDABLE) || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
                 continue;
             }
 
