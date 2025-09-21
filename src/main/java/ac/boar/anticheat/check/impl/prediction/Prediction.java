@@ -75,7 +75,7 @@ public class Prediction extends OffsetHandlerCheck {
     }
 
     public boolean shouldDoFail() {
-        return player.tickSinceBlockResync <= 0 && !player.getTeleportUtil().isTeleporting() && player.sinceLoadingScreen > 5 || !player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z);
+        return player.tickSinceBlockResync <= 0 && !player.getTeleportUtil().isTeleporting() && player.sinceLoadingScreen > 5 && player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z);
     }
 
     public void fail(String name, String verbose) {
