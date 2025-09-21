@@ -52,7 +52,7 @@ public class PlayerInventoryPackets implements PacketListener {
                 return;
             }
 
-            if (packet.getId() != inventory.openContainer.getId()) {
+            if (packet.getId() != inventory.openContainer.getId() && packet.getId() != -1) {
                 return;
             }
 
