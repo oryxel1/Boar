@@ -46,36 +46,43 @@ public class Prediction extends OffsetHandlerCheck {
         boolean claimedHorizontal = player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION);
         boolean claimedVertical = player.getInputData().contains(PlayerAuthInputData.VERTICAL_COLLISION);
         if (claimedVertical != player.verticalCollision || claimedHorizontal != player.horizontalCollision) {
-            this.checks.get("Phase").fail("o: " + offset + ", expect: (" + player.horizontalCollision + "," + player.verticalCollision + "), actual: (" + claimedHorizontal + "," + claimedVertical + ")");
+            fail("Phase", "o: " + offset + ", expect: (" + player.horizontalCollision + "," + player.verticalCollision + "), actual: (" + claimedHorizontal + "," + claimedVertical + ")");
         }
 
         if (player.bestPossibility.getType() == VectorType.VELOCITY) {
-            this.checks.get("Velocity").fail("o: " + offset);
+            fail("Velocity", "o: " + offset);
             return;
         }
 
         if (player.unvalidatedTickEnd.distanceTo(player.velocity) < player.getMaxOffset()) {
-            this.checks.get("Collisions").fail("o: " + offset);
+            fail("Collisions", "o: " + offset);
         }
 
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
         if (!MathUtil.sameDirectionHorizontal(actual, predicted)) {
-            this.checks.get("Strafe").fail("o: " + offset + ", expected direction: " +
-                    MathUtil.signAll(predicted).horizontalToString() + ", actual direction: " + MathUtil.signAll(actual).horizontalToString());
+            fail("Strafe", "o: " + offset + ", expected direction: " + MathUtil.signAll(predicted).horizontalToString() + ", actual direction: " + MathUtil.signAll(actual).horizontalToString());
         }
 
         float squaredActual = actual.horizontalLengthSquared(), squaredPredicted = predicted.horizontalLengthSquared();
         if (actual.horizontalLengthSquared() > predicted.horizontalLengthSquared()) {
-            this.checks.get("Speed").fail("o: " + offset + ", expected: " + squaredPredicted + ", actual: " + squaredActual);
+            fail("Speed", "o: " + offset + ", expected: " + squaredPredicted + ", actual: " + squaredActual);
         }
 
         if (Math.abs(player.position.y - player.unvalidatedPosition.y) > player.getMaxOffset()) {
-            this.checks.get("Flight").fail("o: " + offset);
+            fail("Flight", "o: " + offset);
         }
     }
 
     public boolean shouldDoFail() {
-        return player.tickSinceBlockResync <= 0 && !player.getTeleportUtil().isTeleporting() && player.sinceLoadingScreen > 5;
+        return player.tickSinceBlockResync <= 0 && !player.getTeleportUtil().isTeleporting() && player.sinceLoadingScreen > 5 || !player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z);
+    }
+
+    public void fail(String name, String verbose) {
+        if (Boar.getConfig().disabledChecks().contains(name)) {
+            return;
+        }
+
+        this.checks.get(name).fail(verbose);
     }
 }

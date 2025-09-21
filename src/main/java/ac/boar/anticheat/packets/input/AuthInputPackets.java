@@ -128,11 +128,13 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             player.sendLatencyStack(immediate);
             player.getTeleportUtil().getQueuedTeleports().add(new TeleportCache.DimensionSwitch(player.sentStackId.get(), new Vec3(packet.getPosition().up(EntityDefinitions.PLAYER.offset()))));
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
+                if (player.compensatedWorld.getDimension() != dimension) {
+                    player.currentLoadingScreen = packet.getLoadingScreenId();
+                    player.inLoadingScreen = true;
+                }
+
                 player.compensatedWorld.getChunks().clear();
                 player.compensatedWorld.setDimension(dimension);
-
-                player.currentLoadingScreen = packet.getLoadingScreenId();
-                player.inLoadingScreen = true;
 
                 player.getFlagTracker().clear();
                 player.getFlagTracker().flying(false);
