@@ -5,6 +5,7 @@ import ac.boar.anticheat.data.input.TickData;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.prediction.PredictionRunner;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.teleport.data.TeleportCache;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
@@ -67,7 +68,11 @@ public class TeleportHandler {
             player.setPos(new Vec3(packet.getPosition().sub(0, player.getYOffset(), 0)));
             player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
 
-            player.velocity = Vec3.ZERO.clone();
+            if (player.unvalidatedTickEnd.lengthSquared() > 1.0E-6 && player.bestPossibility.getType() == VectorType.VELOCITY) {
+                player.velocity = player.bestPossibility.getVelocity();
+            } else {
+                player.velocity = Vec3.ZERO.clone();
+            }
             player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO); // Yep!
 
             // This value can be true but since Geyser always send false then it is always false.

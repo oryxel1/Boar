@@ -181,15 +181,17 @@ public final class BoarPlayer extends PlayerData {
             return filter.getValue().getDuration() == 0;
         });
 
-        for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
-            if (cache.getPast() != null) {
-                cache.getPast().tick();
-            }
+        try {
+            for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+                if (cache.getPast() != null) {
+                    cache.getPast().tick();
+                }
 
-            if (cache.getCurrent() != null) {
-                cache.getCurrent().tick();
+                if (cache.getCurrent() != null) {
+                    cache.getCurrent().tick();
+                }
             }
-        }
+        } catch (Exception ignored) {}
 
         this.getItemUseTracker().preTick();
     }
