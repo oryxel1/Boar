@@ -85,14 +85,18 @@ public class CompensatedWorldImpl extends CompensatedWorld {
         final List<Box> boxes = new ArrayList<>();
 
         aABB = aABB.expand(1.0E-7F);
-        for (EntityCache cache : this.getEntities().values()) {
-            if (cache == null || cache.getMetadata().getFlags() == null || !cache.getMetadata().getFlags().contains(EntityFlag.COLLIDABLE) || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
-                continue;
-            }
 
-            // System.out.println("Collide able box: " + cache.getCurrent().getBoundingBox() + ", " + cache.getCurrent().getPos());
-            boxes.add(cache.getCurrent().getBoundingBox());
-        }
+        // Sometimes this can spam error when player first join or something like that, can be safely ignore here.
+        try {
+            for (EntityCache cache : this.getEntities().values()) {
+                if (cache == null || cache.getMetadata().getFlags() == null || !cache.getMetadata().getFlags().contains(EntityFlag.COLLIDABLE) || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
+                    continue;
+                }
+
+                // System.out.println("Collide able box: " + cache.getCurrent().getBoundingBox() + ", " + cache.getCurrent().getPos());
+                boxes.add(cache.getCurrent().getBoundingBox());
+            }
+        } catch (Exception ignored) {}
 
         return boxes;
     }
