@@ -2,14 +2,13 @@ package ac.boar.anticheat.compensated.cache.entity.state;
 
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.anticheat.util.reach.PositionInterpolator;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@RequiredArgsConstructor
 @Getter
 @Setter
 public final class CachedEntityState {
@@ -17,7 +16,14 @@ public final class CachedEntityState {
     private final EntityCache entity;
     private Vec3 prevPos = Vec3.ZERO;
     private Vec3 pos = Vec3.ZERO;
-    private PositionInterpolator interpolator = new PositionInterpolator(this, 3);
+    private PositionInterpolator interpolator;
+
+    public CachedEntityState(BoarPlayer player, EntityCache entity) {
+        this.player = player;
+        this.entity = entity;
+
+        this.interpolator = new PositionInterpolator(this);
+    }
 
     public void tick() {
         if (this.isInterpolating()) {
@@ -36,7 +42,14 @@ public final class CachedEntityState {
     }
 
     public Box getBoundingBox(float f) {
-        return this.calculateBoundingBox(this.prevPos.add(this.pos.subtract(this.prevPos).multiply(f)));
+        if (Math.abs(1 - f) <= 1.0E-3) {
+            return this.calculateBoundingBox();
+        }
+
+        float x = MathUtil.lerp(f, this.prevPos.x, this.pos.x);
+        float y = MathUtil.lerp(f, this.prevPos.y, this.pos.y);
+        float z = MathUtil.lerp(f, this.prevPos.z, this.pos.z);
+        return this.calculateBoundingBox(new Vec3(x, y, z));
     }
 
     public Box calculateBoundingBox() {
@@ -49,11 +62,6 @@ public final class CachedEntityState {
 
     public void setTeleportPos(Vec3 pos) {
         this.prevPos = this.pos = pos;
-    }
-
-    public void setPos(Vec3 pos) {
-        this.prevPos = this.pos;
-        this.pos = pos;
     }
 
     @Override

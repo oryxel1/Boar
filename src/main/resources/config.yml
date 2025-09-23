@@ -14,14 +14,6 @@ player-position-acceptance-threshold: 1.0E-4
 # This is the max reach that Boar going to tolerance before flagging, it does account for lag so no worry :)
 max-tolerance-compensated-reach: 3.005
 
-# This decides whether we force Bedrock reach to be close as java as much as possible...
-# Due to how ray casting is handle on Bedrock, it might give the player a slight advantage over java player
-# This make it so that Bedrock player only get the same reach as JE players...
-# There is 3 mode, "bedrock" will check normally like, just bedrock.
-# "java-1.8" mode will check like java edition but with the 0.1 hitbox expand that 1.8 have
-# "java-1.9" mode will check like java edition but without the 0.1 hitbox expand that 1.8 have.
-force-reach-java-parity: "bedrock"
-
 # How many discrepancies between the Client and Server Player position needed to be before the anticheat send alert message
 # NOTE: This is NOT tolerance of discrepancies (that's player-position-acceptance-threshold), this will still do silent
 # correction unless you change player-position-acceptance-threshold.

@@ -7,7 +7,8 @@ import ac.boar.anticheat.check.api.impl.PacketCheck;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
-import ac.boar.anticheat.util.math.Box;
+import ac.boar.anticheat.util.Pair;
+import ac.boar.anticheat.util.math.ReachUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 
@@ -16,31 +17,37 @@ import org.cloudburstmc.protocol.bedrock.data.InputMode;
 import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
 import org.cloudburstmc.protocol.bedrock.packet.InteractPacket;
 import org.cloudburstmc.protocol.bedrock.packet.InventoryTransactionPacket;
-import org.geysermc.geyser.entity.EntityDefinitions;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Experimental
 @CheckInfo(name = "Reach")
 public final class Reach extends PacketCheck {
+    private final Map<Pair<Vec3, Vec3>, EntityCache> queuedHitAttacks = new HashMap<>();
+    private boolean lastKnowHitWasValid;
+
     public Reach(BoarPlayer player) {
         super(player);
     }
 
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
-        // I doubt that minecraft still use this packet....
+        // This should no longer be used to attack player, only transaction inventory so cancel this.
         if (event.getPacket() instanceof InteractPacket packet && packet.getAction() == InteractPacket.Action.DAMAGE) {
             event.setCancelled(true);
         }
 
-        // Not an attack packet.
+        // Nope this is NOT an attack packet, do nothing.
         if (!(event.getPacket() instanceof InventoryTransactionPacket packet) || packet.getActionType() != 1 || packet.getTransactionType() != InventoryTransactionType.ITEM_USE_ON_ENTITY) {
             return;
         }
 
         final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
-        if (entity == null || entity.isInVehicle()) { // TODO: Impl reach check inside vehicle properly!
+        // TODO: Implement reach check inside vehicle properly!
+        if (entity == null || entity.isInVehicle()) {
             return;
         }
 
@@ -48,104 +55,74 @@ public final class Reach extends PacketCheck {
             return;
         }
 
-        final ReachResult result = calculateReach(entity);
-
-        float distance = result.distance();
-        if (distance > Boar.getConfig().toleranceReach()) {
-            // Don't actually alert since this could be "java-1.8" or "java-1.9" config.... or maybe just falses
-            // as long as it's not noticeable, it's fine, we can always handle the reach silently.
-
-            if (distance != Float.MAX_VALUE) {
-                Boar.debug("Cancelled hit by player " + player.getSession().getPlayerEntity().getDisplayName() + " with distance " + distance + ", mode=" + Boar.getConfig().reachJavaParityMode(), Boar.DebugMessage.WARNING);
-            } else {
-                Boar.debug("Cancelled hit by player " + player.getSession().getPlayerEntity().getDisplayName() + " (failed to find entity in sight)" + ", mode=" + Boar.getConfig().reachJavaParityMode(), Boar.DebugMessage.WARNING);
+        if (player.inputMode == InputMode.TOUCH) {
+            // Don't let player spoof this and hit out of 110 FOV range, that is not possible.
+            if (MathUtil.wrapDegrees(Math.abs(player.yaw - player.interactRotation.getY())) > 110) {
+                this.lastKnowHitWasValid = false;
+                event.setCancelled(true);
+                return; // Invalid hit, no need to try to validate this.
             }
-
-            event.setCancelled(true);
         }
 
-        if (player.inputMode == InputMode.TOUCH) {
-            // Don't let player spoof this and hit out of 110 FOV range.
-            if (MathUtil.wrapDegrees(Math.abs(player.yaw - player.interactRotation.getY())) > 110) {
+        // So... here is the thing, we don't know the player new rotation yet, and it seems to be the case here...
+        // Because of that we have to check when player HAVE sent us an auth input packet, so we have to cache this.
+        final Pair<Vec3, Vec3> pair = new Pair<>(player.prevPosition, player.position);
+        this.queuedHitAttacks.put(pair, entity);
+
+        // We check in the auth input packet, but that is way too late to cancel the hit packet send to the server.
+        // One way around this however, is still perform the reach check here, if the hit was invalid and the hit before that
+        // is also invalid, then cancel. This way if player never flag then their hit won't cancel here, but if they HAD flag before
+        // then the hit will be canceled. Now technically this can be abused, but I don't really see it as a big of a deal since
+        // backtrack cheat (latency abuse) is already a thing.
+        if (ReachUtil.calculateReach(player, pair, entity) > Boar.getConfig().toleranceReach()) {
+            if (!this.lastKnowHitWasValid) {
                 event.setCancelled(true);
             }
+            this.lastKnowHitWasValid = false;
+        } else {
+            this.lastKnowHitWasValid = true;
         }
     }
 
-    public ReachResult calculateReach(final EntityCache entity) {
-        float distance = Float.MAX_VALUE;
-
-        // Handle this like how JE handle it, also only do it for player sinceeee https://github.com/GeyserMC/Geyser/issues/5034
-        // weird that it only happen for other entity and not player huh, in any case, this is fine.
-        if (!Boar.getConfig().reachJavaParityMode().equalsIgnoreCase("bedrock") && entity.getDefinition() == EntityDefinitions.PLAYER) {
-            final Vec3 rotationVec = getRotationVector(player, 1);
-            final Vec3 min = getEyePosition(player, 1);
-            final Vec3 max = min.add(rotationVec.multiply(6F));
-
-            final Vec3 hitResult = getEntityHitResult(entity.getCurrent().getBoundingBox(1), min, max);
-            if (hitResult != null) {
-                distance = Math.min(distance, hitResult.squaredDistanceTo(min));
-            }
-
-            if (entity.getPast() != null) {
-                final Vec3 prevHitResult = getEntityHitResult(entity.getPast().getBoundingBox(1), min, max);
-                if (prevHitResult != null) {
-                    distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
-                }
-            }
-
-            return new ReachResult(1F, distance == Float.MAX_VALUE ? distance : (float) Math.sqrt(distance));
+    public void pollQueuedHits() {
+        this.lastKnowHitWasValid = false;
+        if (this.queuedHitAttacks.isEmpty()) {
+            return;
         }
 
-        float deltaTicks;
-        for (deltaTicks = 0F; deltaTicks <= 1; deltaTicks += 0.1F) {
-            final Vec3 rotationVec = getRotationVector(player, deltaTicks);
-            final Vec3 min = getEyePosition(player, deltaTicks);
-            final Vec3 max = min.add(rotationVec.multiply(7F));
-
-            final Vec3 hitResult = getEntityHitResult(entity.getCurrent().getBoundingBox(deltaTicks), min, max);
-            if (hitResult != null) {
-                distance = Math.min(distance, hitResult.squaredDistanceTo(min));
+        float hitDistance = 0;
+        for (Map.Entry<Pair<Vec3, Vec3>, EntityCache> entry : this.queuedHitAttacks.entrySet()) {
+            final EntityCache entity = entry.getValue();
+            if (entity == null || entity.getType() != EntityType.PLAYER) {
+                // Nope, other than player no entity reach can be reliably calculate, due to geyser entity position delay (know bug).
+                // This weirdly only applied to non-player entity too (yay!) so I can at least somewhat accurately check for reach cheat in PVP
+                // (https://github.com/GeyserMC/Geyser/issues/5034) and (https://github.com/GeyserMC/Geyser/issues/2520).
+                // We don't want the player to cheat either, so we handle it silently.
+                continue;
             }
 
-            if (entity.getPast() != null) {
-                final Vec3 prevHitResult = getEntityHitResult(entity.getPast().getBoundingBox(deltaTicks), min, max);
-                if (prevHitResult != null) {
-                    distance = Math.min(distance, prevHitResult.squaredDistanceTo(min));
-                }
+            Boar.debug("Step=" + entity.getCurrent().getInterpolator().getStep(), Boar.DebugMessage.INFO);
+            Boar.debug("Prev=" + entity.getCurrent().getPrevPos() + ", current=" + entity.getCurrent().getPos() + ", lerpingTo=" + entity.getCurrent().getInterpolator().getTargetPos(), Boar.DebugMessage.INFO);
+
+            // There are some edge cases when entity position is interpolating.
+            final float newReachDistance = ReachUtil.calculateReach(player, entry.getKey(), entry.getValue());
+            if (newReachDistance == Float.MAX_VALUE && entity.getCurrent().getInterpolator().getStep() > 1) {
+                continue;
             }
 
-            if (distance <= 3.005 * 3.005) {
-                break;
-            }
+            hitDistance = Math.max(newReachDistance, hitDistance);
         }
 
-        return new ReachResult(deltaTicks, distance == Float.MAX_VALUE ? distance : (float) Math.sqrt(distance));
-    }
-
-    private Vec3 getEntityHitResult(final Box box, final Vec3 min, final Vec3 max) {
-        Box lv5 = Boar.getConfig().reachJavaParityMode().equalsIgnoreCase("java-1.9") ? box.clone() : box.expand(0.1F);
-        Optional<Vec3> vec3 = lv5.clip(min, max);
-        if (lv5.contains(min)) {
-            return min;
+        if (hitDistance > Boar.getConfig().toleranceReach()) {
+            if (hitDistance == Float.MAX_VALUE) {
+                this.fail("failed to find entity in sight.");
+            } else {
+                this.fail("entity out of range, distance=" + hitDistance);
+            }
+        } else {
+            Boar.debug("Valid hit distance=" + hitDistance, Boar.DebugMessage.INFO);
         }
 
-        return vec3.orElse(null);
+        this.queuedHitAttacks.clear();
     }
-
-    private Vec3 getRotationVector(BoarPlayer player, float f) {
-        float lerpedX = player.inputMode == InputMode.TOUCH ? player.interactRotation.getX() : MathUtil.lerp(f, player.prevPitch, player.pitch);
-        float lerpedY = player.inputMode == InputMode.TOUCH ? player.interactRotation.getY() : MathUtil.lerp(f, player.prevYaw, player.yaw);
-
-        return MathUtil.getRotationVector(lerpedX, lerpedY);
-    }
-
-    private Vec3 getEyePosition(BoarPlayer player, float f) {
-        float d = MathUtil.lerp(f, player.prevPosition.x, player.position.x);
-        float e = MathUtil.lerp(f, player.prevPosition.y, player.position.y) + player.dimensions.eyeHeight();
-        float g = MathUtil.lerp(f, player.prevPosition.z, player.position.z);
-        return new Vec3(d, e, g);
-    }
-
-    public record ReachResult(float deltaTicks, float distance) {}
 }

@@ -1,53 +1,25 @@
-// FabricMC 7c48b8c4
 package ac.boar.anticheat.util.reach;
-
-import java.util.function.Consumer;
-
 import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
 import ac.boar.anticheat.util.math.Vec3;
-import ac.boar.anticheat.util.MathUtil;
-import lombok.Setter;
-import org.geysermc.geyser.entity.type.player.PlayerEntity;
-import org.jetbrains.annotations.Nullable;
+import lombok.Getter;
+import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 
-public class PositionInterpolator {
+public class PositionInterpolator implements Cloneable {
     private final CachedEntityState entity;
-    @Setter
-    private int lerpDuration;
-    private Data data = new Data(0, Vec3.ZERO);
-    @Nullable
-    private Vec3 lastPos;
-    @Nullable
-    private Consumer<PositionInterpolator> callback;
+    private final int lerpDuration;
+
+    @Getter
+    private Vec3 targetPos;
+    @Getter
+    private int step;
 
     public PositionInterpolator(CachedEntityState entity) {
-        this(entity, entity.getPlayer().getSession().getEntityCache().getEntityByGeyserId(entity.getEntity().getRuntimeId())
-                instanceof PlayerEntity ? 3 : 6, null);
-    }
-
-    public PositionInterpolator(CachedEntityState entity, int lerpDuration) {
-        this(entity, lerpDuration, null);
-    }
-
-    public PositionInterpolator(CachedEntityState entity, int lerpDuration, @Nullable Consumer<PositionInterpolator> callback) {
-        this.lerpDuration = lerpDuration;
         this.entity = entity;
-        this.callback = callback;
-    }
-
-    @Override
-    public PositionInterpolator clone() {
-        final PositionInterpolator interpolator = new PositionInterpolator(entity);
-        interpolator.setLerpDuration(lerpDuration);
-        interpolator.lastPos = this.lastPos == null ? null : this.lastPos.clone();
-        interpolator.data = new Data(data.step, data.pos.clone());
-        interpolator.callback = callback;
-
-        return interpolator;
-    }
-
-    public Vec3 getLerpedPos() {
-        return this.data.step > 0 ? this.data.pos : this.entity.getPos();
+        if (entity.getEntity() == null) {
+            this.lerpDuration = 3;
+        } else {
+            this.lerpDuration = entity.getEntity().getType() == EntityType.PLAYER ? 3 : 6;
+        }
     }
 
     public void refreshPositionAndAngles(Vec3 pow) {
@@ -56,16 +28,13 @@ public class PositionInterpolator {
             this.clear();
             return;
         }
-        this.data.step = this.lerpDuration;
-        this.data.pos = pow;
-        this.lastPos = this.entity.getPos();
-        if (this.callback != null) {
-            this.callback.accept(this);
-        }
+
+        this.targetPos = pow;
+        this.step = lerpDuration;
     }
 
     public boolean isInterpolating() {
-        return this.data.step > 0;
+        return this.step > 0;
     }
 
     public void tick() {
@@ -73,43 +42,28 @@ public class PositionInterpolator {
             this.clear();
             return;
         }
-        float d = 1.0F / this.data.step;
-        if (this.lastPos != null) {
-            Vec3 lv = this.entity.getPos().subtract(this.lastPos);
-            if (this.entity.getPlayer().compensatedWorld.noCollision(this.entity.calculateBoundingBox().offset(this.data.pos.add(lv)))) {
-                this.data.addPos(lv);
-            }
-        }
-        float e = MathUtil.lerp(d, this.entity.getPos().getX(), this.data.pos.x);
-        float h = MathUtil.lerp(d, this.entity.getPos().getY(), this.data.pos.y);
-        float i = MathUtil.lerp(d, this.entity.getPos().getZ(), this.data.pos.z);
-        Vec3 lv2 = new Vec3(e, h, i);
-        this.entity.setPos(lv2);
-        this.data.tick();
-        this.lastPos = lv2;
-    }
 
-    public void clear() {
-        this.data.step = 0;
-        this.lastPos = null;
-    }
+        if (this.step > 0 && this.targetPos != null) {
+            float x = this.entity.getPos().getX() + (this.targetPos.getX() - this.entity.getPos().getX()) / this.step;
+            float y = this.entity.getPos().getY() + (this.targetPos.getY() - this.entity.getPos().getY()) / this.step;
+            float z = this.entity.getPos().getZ() + (this.targetPos.getZ() - this.entity.getPos().getZ()) / this.step;
+            this.entity.setPos(new Vec3(x, y, z));
 
-    static class Data {
-        protected int step;
-        Vec3 pos;
-
-        Data(int step, Vec3 pos) {
-            this.step = step;
-            this.pos = pos;
-        }
-
-        public void tick() {
             --this.step;
         }
+    }
 
-        public void addPos(Vec3 pos) {
-            this.pos = this.pos.add(pos);
-        }
+    private void clear() {
+        this.step = 0;
+        this.targetPos = null;
+    }
+
+    @Override
+    public PositionInterpolator clone() {
+        final PositionInterpolator clone = new PositionInterpolator(this.entity);
+        clone.targetPos = this.targetPos;
+        clone.step = this.step;
+        return clone;
     }
 }
 

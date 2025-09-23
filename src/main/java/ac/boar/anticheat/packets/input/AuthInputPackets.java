@@ -1,5 +1,6 @@
 package ac.boar.anticheat.packets.input;
 
+import ac.boar.anticheat.check.impl.reach.Reach;
 import ac.boar.anticheat.check.impl.timer.Timer;
 import ac.boar.anticheat.data.input.PredictionData;
 import ac.boar.anticheat.data.input.VelocityData;
@@ -73,12 +74,13 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         if (player.clientBreakBlockValidator != null) {
             player.clientBreakBlockValidator.handle(packet);
         }
-        player.tick();
 
         LegacyAuthInputPackets.processAuthInput(player, packet, true);
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
 
-        // System.out.println("Unvalidated position: " + player.unvalidatedPosition);
+        ((Reach) player.getCheckHolder().get(Reach.class)).pollQueuedHits();
+
+        player.tick();
 
         if (player.vehicleData != null) { // TODO: Vehicle prediction.
             player.position = player.unvalidatedPosition;

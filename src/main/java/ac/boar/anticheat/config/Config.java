@@ -22,9 +22,6 @@ public final class Config {
     @JsonProperty("max-tolerance-compensated-reach")
     @JsonSetter(nulls = Nulls.SKIP)
     private float toleranceReach = 3.005F;
-    @JsonProperty("force-reach-java-parity")
-    @JsonSetter(nulls = Nulls.SKIP)
-    private String reachJavaParityMode = "bedrock";
     @JsonProperty("differ-till-alert")
     @JsonSetter(nulls = Nulls.SKIP)
     private float alertThreshold = 0.0F;
@@ -56,11 +53,7 @@ public final class Config {
     }
 
     public float toleranceReach() {
-        return toleranceReach;
-    }
-
-    public String reachJavaParityMode() {
-        return reachJavaParityMode;
+        return Math.max(3.0001F, toleranceReach);
     }
 
     public float alertThreshold() {
