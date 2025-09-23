@@ -6,7 +6,7 @@ Boar is a POC project that allows you to enable [server-auth-with-rewind](https:
 * *Note: I'm getting more and more tired maintaining this project, so this project won't be frequently update. However this project is not abandoned, I will still maintain
 it, update and push fixes from time to time if needed. If there are bugs and bypasses, you can still can contact to me about it and I wil get to it when I can.*
 
-### Documented differences between Java - Bedrock [here](https://github.com/Oryxel/Boar/blob/new-engine/DIFFERENCES_WIKI.md) with detailed explainations.
+### Documented differences between Java - Bedrock [here](https://github.com/oryxel1/Boar/blob/master/DIFFERENCES_WIKI.md) with detailed explainations.
 
 ### ⚠️ WARNING: THIS ONLY FOR BEDROCK PLAYER NOT JAVA PLAYER! YOU WILL NEED TO PAIR THIS WITH ANOTHER JAVA ANTICHEAT!
 A dedicated (proof of concept) anti cheat for GeyserMC project.
