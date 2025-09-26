@@ -12,11 +12,11 @@ import ac.boar.anticheat.prediction.engine.impl.GroundAndAirPredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.fluid.LavaPredictionEngine;
 import ac.boar.anticheat.prediction.engine.impl.fluid.WaterPredictionEngine;
 import ac.boar.anticheat.prediction.ticker.impl.PlayerTicker;
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
-import org.geysermc.geyser.level.block.Fluid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +68,11 @@ public class PredictionRunner {
         } else {
             possibleVelocities.add(new Vector(VectorType.NORMAL, player.velocity.clone()));
 
+            // So here is the thing, this implementation is wrong, this could false in cases where the player
+            // velocity and tick end result in the same motion. Now this is actually quite easy to check for, but
+            // I'm too lazy to check for that now sooooo, ignore for now, if this were to be implemented, just allow
+            // velocity to be taken twice if the velocity have the same offset as tick end, not actually an advantage.
+
             // Find the nearest velocity that player already accept the first latency stack.
             VelocityData nearestVelocity = null;
             for (final VelocityData data : player.queuedVelocities.values()) {
@@ -104,9 +109,19 @@ public class PredictionRunner {
                     vec3 = vec3.multiply(player.stuckSpeedMultiplier);
                 }
 
-                vec3 = Collider.collide(player, Collider.maybeBackOffFromEdge(player, vec3));
+                Vec3 vec32 = Collider.collide(player, Collider.maybeBackOffFromEdge(player, vec3));
+                boolean horizontal = !MathUtil.equal(vec3.x, vec32.x) || !MathUtil.equal(vec3.z, vec32.z);
+                boolean vertical = vec3.y != vec32.y;
 
-                float distance = player.position.add(vec3).squaredDistanceTo(player.unvalidatedPosition);
+                float distance = player.position.add(vec32).squaredDistanceTo(player.unvalidatedPosition);
+
+                // Factor in vertical and horizontal collision, helps with cases where the travelled vel is the same.
+                if (horizontal != player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION)) {
+                    distance += 1.0E-6f;
+                }
+                if (vertical != player.getInputData().contains(PlayerAuthInputData.VERTICAL_COLLISION)) {
+                    distance += 1.0E-6f;
+                }
 
                 // Do <= to priority velocity over normal last tick in case if both have the same velocity result.
                 if (distance <= closetDistance) {

@@ -57,6 +57,7 @@ public final class Reach extends PacketCheck {
 
         if (player.inputMode == InputMode.TOUCH) {
             // Don't let player spoof this and hit out of 110 FOV range, that is not possible.
+            // However, I think this should be moved into a separate bad packet check since it's not vanilla behaviour.
             if (MathUtil.wrapDegrees(Math.abs(player.yaw - player.interactRotation.getY())) > 110) {
                 this.lastKnowHitWasValid = false;
                 event.setCancelled(true);

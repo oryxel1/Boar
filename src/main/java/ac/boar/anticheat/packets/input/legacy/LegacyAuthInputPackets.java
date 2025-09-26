@@ -160,18 +160,32 @@ public class LegacyAuthInputPackets {
             player.ticksSinceCrawling = 0;
         }
 
-        for (final PlayerAuthInputData input : player.getInputData()) {
+        final Iterator<PlayerAuthInputData> iterator = player.getInputData().iterator();
+        while (iterator.hasNext()) {
+            final PlayerAuthInputData input = iterator.next();
             switch (input) {
                 case START_GLIDING -> {
                     final ContainerCache cache = player.compensatedInventory.armorContainer;
 
-                    // Prevent player from spoofing elytra gliding.
+                    // Prevent player from spoofing elytra gliding, could false, considering that the compensated inventory is a bit half-baked but should works in most case.
                     player.getFlagTracker().set(EntityFlag.GLIDING, player.compensatedInventory.translate(cache.get(1).getData()).getId() == Items.ELYTRA.javaId());
+                    if (!player.getFlagTracker().has(EntityFlag.GLIDING)) {
+                        iterator.remove();
+                    }
                 }
                 case STOP_GLIDING -> player.getFlagTracker().set(EntityFlag.GLIDING, false);
 
                 // Don't let player do backwards sprinting!
-                case START_SPRINTING -> player.setSprinting(player.input.getZ() > 0);
+                case START_SPRINTING -> {
+                    boolean forwardMovement = player.input.getZ() > 0;
+                    player.setSprinting(forwardMovement);
+
+                    // Don't let player send an START_SPRINTING to force server to send back a sprinting attribute.
+                    // or trick Geyser in any way, since it's not really reliable...
+                    if (!forwardMovement) {
+                        iterator.remove();
+                    }
+                }
                 case STOP_SPRINTING -> player.setSprinting(false);
                 case START_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, true);
                 case STOP_SNEAKING -> player.getFlagTracker().set(EntityFlag.SNEAKING, false);
@@ -186,6 +200,8 @@ public class LegacyAuthInputPackets {
                     if (player.dirtySpinStop) {
                         player.stopRiptide();
                         player.velocity = player.velocity.multiply(-0.2F);
+                    } else {
+                        iterator.remove();
                     }
                 }
 
@@ -193,6 +209,7 @@ public class LegacyAuthInputPackets {
                     // Seems to be the case, this should only be taken seriously when it's trigger by sever metadata
                     // or actual item use from inventory transaction packet.
                     if (player.getItemUseTracker().getDirtyUsing() == ItemUseTracker.DirtyUsing.NONE) {
+                        iterator.remove();
                         return;
                     }
 
@@ -202,6 +219,7 @@ public class LegacyAuthInputPackets {
                     // The player in fact CAN use an item that is not air even if that item is eg: dirt for 1 tick.
                     // However, this likely will only happen when flag de-sync.
                     if (item.getId() == Items.AIR_ID) {
+                        iterator.remove();
                         return;
                     }
 
@@ -211,6 +229,9 @@ public class LegacyAuthInputPackets {
                     player.getItemUseTracker().setDirtyUsing(ItemUseTracker.DirtyUsing.NONE);
                 }
 
+                // Should we really validate crawling, I mean sure 1 block gap, but it's that big of advantage if they lose speed
+                // in the process? It's not *that* big of an advantage since it's not really hard to get into crawling mode anyway.
+                // But maybe we should still validate it in case some parkour server start complaining.
                 case START_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, true);
                 case STOP_CRAWLING -> player.getFlagTracker().set(EntityFlag.CRAWLING, false);
             }
@@ -218,14 +239,15 @@ public class LegacyAuthInputPackets {
 
         final ItemUseTracker.DirtyUsing dirtyUsing = player.getItemUseTracker().getDirtyUsing();
         if (dirtyUsing != ItemUseTracker.DirtyUsing.NONE) {
-            // Shit hack TODO: Properly check for when the item CAN BE USE
+            // Shit hack, I know I'm too lazy to properly check for when the item is actually usable eg: riptide trident in water.
+            // Also, there are bugs in bedrock where the player can still use even tho they're not supposed to so what we get will never
+            // be reliable (https://bugs.mojang.com/browse/MCPE/issues/MCPE-178647), call me out for being lazy but blame bugrock.
             if (dirtyUsing == ItemUseTracker.DirtyUsing.INVENTORY_TRANSACTION) {
                 player.getSession().releaseItem();
             }
 
             player.getFlagTracker().set(EntityFlag.USING_ITEM, false);
             player.getItemUseTracker().setDirtyUsing(ItemUseTracker.DirtyUsing.NONE);
-//            System.out.println("Reset dirty using!");
         }
         player.dirtySpinStop = false;
     }
