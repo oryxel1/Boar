@@ -21,12 +21,12 @@ public class MathUtil {
         return new Vec3(sign(vec3.x), sign(vec3.y), sign(vec3.z));
     }
 
-    public static float sign(final float value) {
+    public static int sign(final float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
             return 0;
         }
 
-        return value == 0 ? value : value > 0 ? 1 : -1;
+        return value == 0 ? 0 : value > 0 ? 1 : -1;
     }
 
     public static float wrapDegrees(float f) {

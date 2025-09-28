@@ -138,37 +138,4 @@ public class Collider {
 
         return maxDist;
     }
-
-    public static Vec3 moveOutOfBlocks(Box boundingBox, final List<Box> collision) {
-        float y = 0, x = 0, z = 0;
-        for (Box bb : collision) {
-            if (!bb.isOverlapped(Axis.Y, boundingBox)) {
-                continue;
-            }
-
-            y = bb.chooseMax(Axis.Y) - boundingBox.chooseMin(Axis.Y);
-        }
-
-        boundingBox = boundingBox.offset(0, y, 0);
-
-        for (Box bb : collision) {
-            if (!bb.isOverlapped(Axis.X, boundingBox)) {
-                continue;
-            }
-
-            x = bb.chooseMax(Axis.X) - boundingBox.chooseMin(Axis.X);
-        }
-
-        boundingBox = boundingBox.offset(x, 0, 0);
-
-        for (Box bb : collision) {
-            if (!bb.isOverlapped(Axis.Z, boundingBox)) {
-                continue;
-            }
-
-            z = bb.chooseMax(Axis.Z) - boundingBox.chooseMin(Axis.Z);
-        }
-
-        return new Vec3(x, y, z);
-    }
 }
