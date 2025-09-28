@@ -118,7 +118,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
             player.bestPossibility = Vector.NONE;
         } else {
-            if (!player.inLoadingScreen && player.sinceLoadingScreen >= 2 && player.sinceChunkUnloaded > 1) {
+            if (!player.inLoadingScreen && player.sinceLoadingScreen >= 2 && player.sinceChunkUnloaded > 1 || player.unvalidatedTickEnd.lengthSquared() > 0) {
                 new PredictionRunner(player).run();
             } else {
                 player.velocity = Vec3.ZERO.clone();
