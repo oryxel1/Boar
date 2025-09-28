@@ -198,7 +198,7 @@ public class ServerChunkPackets implements PacketListener {
         final BoarPlayer player = event.getPlayer();
 
         if (event.getPacket() instanceof ServerboundLoadingScreenPacket packet && packet.getType() == ServerboundLoadingScreenPacketType.END_LOADING_SCREEN) {
-            if (Objects.equals(player.currentLoadingScreen, packet.getLoadingScreenId())) {
+            if (Objects.equals(player.currentLoadingScreen, packet.getLoadingScreenId()) && player.inLoadingScreen) {
                 player.currentLoadingScreen = null;
                 player.inLoadingScreen = false;
                 player.sinceLoadingScreen = 0;

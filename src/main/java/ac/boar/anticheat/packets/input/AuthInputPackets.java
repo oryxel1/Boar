@@ -39,7 +39,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         // -------------------------------------------------------------------------
         // Timer check start here.
         final long claimedTick = packet.getTick();
-        if (claimedTick < 0 || claimedTick < player.tick) { // Impossible, no way this can happen.
+        if (claimedTick < 0 || claimedTick <= player.tick) { // Impossible, no way this can happen.
             player.kick("Impossible tick id=" + claimedTick);
             return;
         }
@@ -91,6 +91,12 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             return;
         }
 
+        if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
+            player.sinceChunkUnloaded++;
+        } else {
+            player.sinceChunkUnloaded = 0;
+        }
+
         if (player.isMovementExempted()) {
             player.setPos(player.unvalidatedPosition);
 
@@ -112,7 +118,11 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
             player.bestPossibility = Vector.NONE;
         } else {
-            new PredictionRunner(player).run();
+            if (!player.inLoadingScreen && player.sinceLoadingScreen >= 2 && player.sinceChunkUnloaded > 1) {
+                new PredictionRunner(player).run();
+            } else {
+                player.velocity = Vec3.ZERO.clone();
+            }
         }
 
         this.processQueuedTeleports(player, packet);
@@ -145,7 +155,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         if (event.getPacket() instanceof MovePlayerPacket packet) {
             if (packet.getMode() == MovePlayerPacket.Mode.HEAD_ROTATION) {
-                // TODO: Actually... does this affect player motion?
                 return;
             }
 

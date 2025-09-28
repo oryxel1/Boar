@@ -57,6 +57,7 @@ public class PlayerData {
     public Integer currentLoadingScreen = null;
     public boolean inLoadingScreen;
     public int sinceLoadingScreen;
+    public int sinceChunkUnloaded;
 
     public GameType gameType = GameType.DEFAULT;
     public InputMode inputMode = InputMode.UNDEFINED;
