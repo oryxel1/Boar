@@ -2,9 +2,7 @@ package ac.boar.protocol.mitm;
 
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.util.DimensionUtil;
-import ac.boar.anticheat.validator.blockbreak.ClientBreakBlockValidator;
 import ac.boar.anticheat.validator.blockbreak.ServerBreakBlockValidator;
-import ac.boar.geyser.GeyserBoar;
 import ac.boar.protocol.PacketEvents;
 import ac.boar.protocol.event.CloudburstPacketEvent;
 import ac.boar.protocol.listener.PacketListener;
@@ -33,7 +31,6 @@ public final class CloudburstSendListener extends UpstreamSession {
         oldSession.disconnect(reason);
     }
 
-    public static boolean BREAK_WARN = false;
     @Override
     public void sendPacket(@NonNull BedrockPacket packet) {
         if (packet instanceof UpdateClientInputLocksPacket) {
@@ -61,16 +58,7 @@ public final class CloudburstSendListener extends UpstreamSession {
             // We need this to do rewind teleport.
             start.setAuthoritativeMovementMode(AuthoritativeMovementMode.SERVER_WITH_REWIND);
             start.setRewindHistorySize(Boar.getConfig().rewindHistory());
-
-            if (start.isServerAuthoritativeBlockBreaking()) {
-                player.serverBreakBlockValidator = new ServerBreakBlockValidator(player);
-            } else {
-                if (!BREAK_WARN) {
-                    GeyserBoar.getLogger().severe("You're using an outdated version of Geyser with deprecated block breaking mode, please update.");
-                    BREAK_WARN = true;
-                }
-                player.clientBreakBlockValidator = new ClientBreakBlockValidator(player);
-            }
+            player.serverBreakBlockValidator = new ServerBreakBlockValidator(player);
 
             player.sendLatencyStack();
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> player.gameType = start.getPlayerGameType());

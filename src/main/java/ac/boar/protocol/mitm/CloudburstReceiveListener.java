@@ -32,7 +32,7 @@ public final class CloudburstReceiveListener implements BedrockPacketHandler {
     }
 
     @Override
-    public void onDisconnect(String reason) {
+    public void onDisconnect(CharSequence reason) {
         this.oldHandler.onDisconnect(reason);
     }
 }

@@ -48,25 +48,11 @@ public class WaterPredictionEngine extends PredictionEngine {
 
         boolean sprinting = player.getFlagTracker().has(EntityFlag.SPRINTING);
 
-        // Look at https://bugs.mojang.com/browse/MCPE/issues/MCPE-201832, even though player is swimming, they can't move fast
-        // which means that the 0.9 tick end doesn't depend on swimming status but also sprinting status, or else they won't move fast.
-        boolean fastTickEnd = player.getFlagTracker().has(EntityFlag.SWIMMING) && sprinting || player.getInputData().contains(PlayerAuthInputData.STOP_SWIMMING);
-
-        // On versions below 1.21.80 player can move fast in water by sprinting without swimming but on 1.21.80 this is fixed.
-        // HOWEVER, this bugs one again reintroduce itself on 1.21.81+ for certain reason.
-        if (sprinting && !fastTickEnd) {
-            // If it's below 1.21.80 or 1.21.90+ then we are sure!
-            if (!GameProtocol.is1_21_80orHigher(player.getSession()) || GameProtocol.is1_21_90orHigher(player.getSession())) {
-                fastTickEnd = true;
-            } else {
-                Vec3 slow = player.velocity.multiply(0.8F + ((0.54600006f - 0.8F) * this.tickEndSpeed), 0.8F, 0.8F + ((0.54600006f - 0.8F) * this.tickEndSpeed));
-
-                // We have to guess based off player claimed tick end since there is no way to know if this is 1.21.80 or 1.21.81+
-                if (slow.horizontalLengthSquared() < player.unvalidatedTickEnd.horizontalLengthSquared()) {
-                    fastTickEnd = true;
-                }
-            }
-        }
+        // Yep, on bedrock the player can move fast in water just by sprinting, not swimming, and they can sprint in water yay!
+        // This was natively fixed in 1.21.80 but then the fix was removed in 1.21.81 (lol), so if you want to support
+        // any version below 1.21.90, and if the version is >= 1.21.80 and < 1.21.90 then you will have to bruteforce to
+        // see if player is actually water sprinting or not, since there is no actual way to tell.
+        boolean fastTickEnd = sprinting || player.getInputData().contains(PlayerAuthInputData.STOP_SWIMMING);
 
         float f = fastTickEnd ? 0.9F : 0.8F;
         f += (0.54600006f - f) * this.tickEndSpeed;

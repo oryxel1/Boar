@@ -64,15 +64,13 @@ public class CompensatedWorldImpl extends CompensatedWorld {
             builder.addAll(list);
         }
 
-        boolean needToDoBambooHacks = GameProtocol.is1_21_80orHigher(getPlayer().getSession());
-
         final CuboidBlockIterator iterator = CuboidBlockIterator.iterator(aABB);
         while (iterator.step()) {
             int x = iterator.getX(), y = iterator.getY(), z = iterator.getZ();
             if (this.isChunkLoaded(x, z)) {
                 BoarBlockState state = this.getBlockState(x, y, z, 0);
                 if (state.getState().is(Blocks.BAMBOO) && new Box(x, y, z, x + 1, y + 1, z + 1).intersects(aABB)) {
-                    getPlayer().nearBamboo = needToDoBambooHacks;
+                    getPlayer().nearBamboo = true;
                 }
 
                 builder.addAll(state.findCollision(this.getPlayer(), Vector3i.from(x, y, z), aABB, true));

@@ -19,7 +19,6 @@ import lombok.Getter;
 import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.FluidState;
-import ac.boar.anticheat.validator.blockbreak.ClientBreakBlockValidator;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
@@ -77,7 +76,6 @@ public final class BoarPlayer extends PlayerData {
     public final CompensatedInventory compensatedInventory = new CompensatedInventory(this);
 
     // Validation
-    public ClientBreakBlockValidator clientBreakBlockValidator;
     public ServerBreakBlockValidator serverBreakBlockValidator;
     public final ItemTransactionValidator transactionValidator = new ItemTransactionValidator(this);
 

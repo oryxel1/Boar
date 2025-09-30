@@ -71,9 +71,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         if (player.serverBreakBlockValidator != null) {
             player.serverBreakBlockValidator.handle(packet);
         }
-        if (player.clientBreakBlockValidator != null) {
-            player.clientBreakBlockValidator.handle(packet);
-        }
 
         LegacyAuthInputPackets.processAuthInput(player, packet, true);
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);

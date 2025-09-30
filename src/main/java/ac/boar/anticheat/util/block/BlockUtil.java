@@ -74,6 +74,9 @@ public class BlockUtil {
         return block.defaultBlockState();
     }
 
+    // This is no longer accurate as of 1.21.110 because Mojang decide to break chest state even more yay!
+    // There is so many FUCKING PROBLEMS WITH CHEST WTFFFFF WHY THE FUCK CHEST IS SO BROKEN AND NOW EVEN MORE BROKEN
+    // AS OF 1.21.110 MOJANG????
     public static BlockState findChestState(final BoarPlayer player, final BlockState state, final Vector3i vector3i) {
         final BlockEntityInfo blockEntity = player.compensatedWorld.getBlockEntity(vector3i.getX(), vector3i.getY(), vector3i.getZ());
         if (blockEntity == null || blockEntity.getNbt() == null) {
