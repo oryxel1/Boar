@@ -49,21 +49,14 @@ public class PlayerInventoryPackets implements PacketListener {
 
         if (event.getPacket() instanceof ContainerClosePacket packet) {
             if (inventory.openContainer == null) {
-                inventory.previousContainer = null;
                 return;
             }
 
-            if (packet.getId() != inventory.openContainer.getId()) {
-                if (packet.getId() != -1) {
-                    return;
-                }
-
-                inventory.openContainer = inventory.previousContainer;
-                inventory.previousContainer = null;
+            if (packet.getId() != inventory.openContainer.getId() && packet.getId() != -1) {
                 return;
             }
 
-            inventory.previousContainer = inventory.openContainer = null;
+            inventory.openContainer = null;
         }
 
         if (event.getPacket() instanceof MobEquipmentPacket packet) {
@@ -135,11 +128,8 @@ public class PlayerInventoryPackets implements PacketListener {
             // System.out.println(packet);
             player.sendLatencyStack(immediate);
             player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> {
-                if (inventory.openContainer != null) {
-                    inventory.previousContainer = inventory.openContainer;
-                }
-
-                inventory.openContainer = new ContainerCache(inventory, packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId());
+                final ContainerCache container = inventory.getContainer(packet.getId());
+                inventory.openContainer = Objects.requireNonNullElseGet(container, () -> new ContainerCache(inventory, packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
             });
         }
 //
