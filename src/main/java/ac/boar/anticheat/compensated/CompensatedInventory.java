@@ -47,6 +47,7 @@ public class CompensatedInventory {
     public final ContainerCache armorContainer = new ContainerCache(this, (byte) ContainerId.ARMOR, ContainerType.INVENTORY, null, -1L);
     public final ContainerCache hudContainer = new ContainerCache(this, (byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
 
+    public ContainerCache previousContainer = null;
     public ContainerCache openContainer = null;
 
     @Getter
