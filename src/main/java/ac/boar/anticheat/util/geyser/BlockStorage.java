@@ -25,15 +25,11 @@
 
 package ac.boar.anticheat.util.geyser;
 
-import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.Getter;
-import org.cloudburstmc.protocol.common.util.VarInts;
 import org.geysermc.geyser.level.chunk.bitarray.BitArray;
 import org.geysermc.geyser.level.chunk.bitarray.BitArrayVersion;
-
-import java.util.function.IntConsumer;
 
 @Getter
 public class BlockStorage {
@@ -58,10 +54,6 @@ public class BlockStorage {
         this.bitArray = bitArray;
     }
 
-    private static int getPaletteHeader(BitArrayVersion version, boolean runtime) {
-        return (version.getId() << 1) | (runtime ? 1 : 0);
-    }
-
     public int getFullBlock(int index) {
         return this.palette.getInt(this.bitArray.get(index));
     }
@@ -69,27 +61,6 @@ public class BlockStorage {
     public void setFullBlock(int index, int runtimeId) {
         int idx = this.idFor(runtimeId);
         this.bitArray.set(index, idx);
-    }
-
-    public void writeToNetwork(ByteBuf buffer) {
-        buffer.writeByte(getPaletteHeader(bitArray.getVersion(), true));
-
-        for (int word : bitArray.getWords()) {
-            buffer.writeIntLE(word);
-        }
-
-        bitArray.writeSizeToNetwork(buffer, palette.size());
-        palette.forEach((IntConsumer) id -> VarInts.writeInt(buffer, id));
-    }
-
-    public int estimateNetworkSize() {
-        int size = 1; // Palette header
-        size += this.bitArray.getWords().length * 4;
-
-        // We assume that none of the VarInts will be larger than 3 bytes
-        size += 3; // Palette size
-        size += this.palette.size() * 3;
-        return size;
     }
 
     private void onResize(BitArrayVersion version) {
@@ -117,21 +88,5 @@ public class BlockStorage {
             }
         }
         return index;
-    }
-
-    public boolean isEmpty() {
-        if (this.palette.size() == 1) {
-            return true;
-        }
-        for (int word : this.bitArray.getWords()) {
-            if (Integer.toUnsignedLong(word) != 0L) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public BlockStorage copy() {
-        return new BlockStorage(this.bitArray.copy(), new IntArrayList(this.palette));
     }
 }

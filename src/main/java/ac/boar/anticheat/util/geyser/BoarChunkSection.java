@@ -25,81 +25,31 @@
 
 package ac.boar.anticheat.util.geyser;
 
-import io.netty.buffer.ByteBuf;
+import ac.boar.anticheat.util.MathUtil;
 import org.cloudburstmc.protocol.common.util.Preconditions;
 
 // Geyser chunk section
-public class BoarChunkSection {
-
-    // As of at least 1.19.80
-    private static final int CHUNK_SECTION_VERSION = 9;
-
-    private final BlockStorage[] storage;
-    // Counts up from 00 for y >= 0 and down from FF for y < 0
-    private final int subChunkIndex;
-
-    public BoarChunkSection(int airBlockId, int subChunkIndex) {
-        this(new BlockStorage[]{new BlockStorage(airBlockId), new BlockStorage(airBlockId)}, subChunkIndex);
-    }
-
-    public BoarChunkSection(BlockStorage[] storage, int subChunkIndex) {
-        this.storage = storage;
-        this.subChunkIndex = subChunkIndex;
+public record BoarChunkSection(BlockStorage[] storage) {
+    public BoarChunkSection(int initialBlockId) {
+        this(new BlockStorage[]{new BlockStorage(initialBlockId), new BlockStorage(initialBlockId)});
     }
 
     public int getFullBlock(int x, int y, int z, int layer) {
+        if (layer < 0 || layer >= this.storage.length) {
+            return Integer.MIN_VALUE;
+        }
+
         checkBounds(x, y, z);
-        Preconditions.checkElementIndex(layer, this.storage.length);
-        return this.storage[layer].getFullBlock(blockPosition(x, y, z));
+        return this.storage[layer].getFullBlock(MathUtil.blockPosition(x, y, z));
     }
 
-    public void setFullBlock(int x, int y, int z, int layer, int fullBlock) {
+    public void setFullBlock(int x, int y, int z, int layer, int block) {
+        if (layer < 0 || layer >= this.storage.length) {
+            return;
+        }
+
         checkBounds(x, y, z);
-        Preconditions.checkElementIndex(layer, this.storage.length);
-        this.storage[layer].setFullBlock(blockPosition(x, y, z), fullBlock);
-    }
-
-    public void writeToNetwork(ByteBuf buffer) {
-        buffer.writeByte(CHUNK_SECTION_VERSION);
-        buffer.writeByte(this.storage.length);
-        // Required for chunk version 9+
-        buffer.writeByte(this.subChunkIndex);
-        for (BlockStorage blockStorage : this.storage) {
-            blockStorage.writeToNetwork(buffer);
-        }
-    }
-
-    public int estimateNetworkSize() {
-        int size = 2; // Version + storage count
-        for (BlockStorage blockStorage : this.storage) {
-            size += blockStorage.estimateNetworkSize();
-        }
-        return size;
-    }
-
-    public BlockStorage[] getBlockStorageArray() {
-        return storage;
-    }
-
-    public boolean isEmpty() {
-        for (BlockStorage blockStorage : this.storage) {
-            if (!blockStorage.isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public BoarChunkSection copy(int subChunkIndex) {
-        BlockStorage[] storage = new BlockStorage[this.storage.length];
-        for (int i = 0; i < storage.length; i++) {
-            storage[i] = this.storage[i].copy();
-        }
-        return new BoarChunkSection(storage, subChunkIndex);
-    }
-
-    public static int blockPosition(int x, int y, int z) {
-        return (x << 8) | (z << 4) | y;
+        this.storage[layer].setFullBlock(MathUtil.blockPosition(x, y, z), block);
     }
 
     private static void checkBounds(int x, int y, int z) {

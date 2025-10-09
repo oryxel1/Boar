@@ -95,4 +95,8 @@ public class MathUtil {
             return new Vec3(lv.x * i - lv.z * h, lv.y, lv.z * i + lv.x * h);
         }
     }
+
+    public static int blockPosition(int x, int y, int z) {
+        return (x << 8) | (z << 4) | y;
+    }
 }

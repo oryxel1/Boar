@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.longs.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.geysermc.geyser.entity.EntityDefinition;
 import org.geysermc.geyser.entity.type.Entity;
@@ -24,9 +25,7 @@ import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Setter
@@ -74,9 +73,39 @@ public class CompensatedWorld {
         return cache;
     }
 
-    public void addToCache(int x, int z, BoarChunkSection[] chunks, List<BlockEntityInfo> blockEntities) {
+    private int radius;
+    private int centerX, centerZ;
+
+    // (https://github.com/RaphiMC/ViaBedrock/blob/main/src/main/java/net/raphimc/viabedrock/protocol/storage/ChunkTracker.java#L263)
+    public void yeetOutOfRangeChunks() {
+        final Set<Long> chunksToRemove = new HashSet<>();
+        for (long key : this.chunks.keySet()) {
+            final int chunkX = (int) key, chunkZ = (int) (key >> 32);
+            if (this.isInLoadDistance(chunkX, chunkZ)) {
+                continue;
+            }
+
+            chunksToRemove.add(key);
+        }
+        for (long key : chunksToRemove) {
+            this.removeEntity(key);
+        }
+    }
+
+    // (https://github.com/RaphiMC/ViaBedrock/blob/main/src/main/java/net/raphimc/viabedrock/protocol/storage/ChunkTracker.java#L247)
+    public boolean isInLoadDistance(final int chunkX, final int chunkZ) {
+        if (!(Math.abs(chunkX - this.centerX) <= this.radius && Math.abs(chunkZ - this.centerZ) <= this.radius)) {
+            final int centerX = GenericMath.floor(player.position.getX()) >> 4;
+            final int centerZ = GenericMath.floor(player.position.getZ()) >> 4;
+            return Math.abs(chunkX - centerX) <= this.radius && Math.abs(chunkZ - centerZ) <= this.radius;
+        }
+
+        return true;
+    }
+
+    public void put(int x, int z, BoarChunkSection[] chunks) {
         long chunkPosition = MathUtils.chunkPositionToLong(x, z);
-        this.chunks.put(chunkPosition, new BoarChunk(chunks, blockEntities));
+        this.chunks.put(chunkPosition, new BoarChunk(chunks, new ArrayList<>()));
     }
 
     public void removeFromCache(int x, int z) {
@@ -106,7 +135,7 @@ public class CompensatedWorld {
         if (palette == null) {
             if (block != 0) {
                 // A previously empty chunk, which is no longer empty as a block has been added to it
-                column[(y - getMinY()) >> 4] = palette = new BoarChunkSection(this.player.BEDROCK_AIR, 0);
+                column[(y - getMinY()) >> 4] = palette = new BoarChunkSection(this.player.BEDROCK_AIR);
             } else {
                 // Nothing to update
                 return;
@@ -151,8 +180,10 @@ public class CompensatedWorld {
         BoarChunkSection chunk = column[(y - getMinY()) >> 4];
         if (chunk != null) {
             try {
-                return chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer);
+                int id = chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer);
+                return id == Integer.MIN_VALUE ? player.BEDROCK_AIR : id;
             } catch (Exception e) {
+                e.printStackTrace();
                 return player.BEDROCK_AIR;
             }
         }
