@@ -183,7 +183,7 @@ public class CompensatedWorld {
                 int id = chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer);
                 return id == Integer.MIN_VALUE ? player.BEDROCK_AIR : id;
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 return player.BEDROCK_AIR;
             }
         }
