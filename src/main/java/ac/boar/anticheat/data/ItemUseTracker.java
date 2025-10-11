@@ -34,10 +34,6 @@ public class ItemUseTracker {
     }
 
     public void postTick() {
-//        if (-- this.useDuration == 0) {
-//            System.out.println("Done duration!");
-//        }
-
         if (!player.getFlagTracker().has(EntityFlag.USING_ITEM)) {
             if (this.usedItem != ItemData.AIR || this.javaItemId != -1) {
                 this.release();
@@ -57,7 +53,6 @@ public class ItemUseTracker {
     }
 
     public void release() {
-//        System.out.println("Release!");
         this.usedItem = ItemData.AIR;
         this.javaItemId = -1;
         player.sinceTridentUse = 0;
@@ -66,7 +61,6 @@ public class ItemUseTracker {
 
     public void use(final ItemData usedItem, int itemId, boolean skip) {
         if (!canBeUse(usedItem, itemId) && !skip) {
-//            System.out.println("Skip!");
             return;
         }
 
@@ -74,37 +68,8 @@ public class ItemUseTracker {
         this.javaItemId = itemId;
         this.dirtyUsing = DirtyUsing.INVENTORY_TRANSACTION;
 
-//        this.useDuration = getMaxDuration(this.usedItem, this.javaItemId);
-
         player.sinceTridentUse = 0;
     }
-
-//    private int getMaxDuration(final ItemData usedItem, int itemId) {
-//        try {
-//            final NbtMap map = usedItem.getDefinition().getComponentData();
-//            if (map != null) {
-//                NbtMap components = map.getCompound("components");
-//                if (components != null) {
-//                    if (components.containsKey("minecraft:use_duration")) {
-//                        return components.getInt("minecraft:use_duration");
-//                    } else {
-//                        NbtMap itemProperties = components.getCompound("item_properties");
-//                        if (itemProperties.containsKey("use_duration")) {
-//                            return components.getInt("use_duration");
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception ignored) {}
-//
-//        if (itemId == Items.BOW.javaId() || itemId == Items.CROSSBOW.javaId() || itemId == Items.TRIDENT.javaId()) {
-//            return 72000;
-//        } else if (itemId == Items.SPYGLASS.javaId()) {
-//            return 1200;
-//        }
-//
-//        return 1;
-//    }
 
     private boolean canBeUse(final ItemData usedItem, int itemId) {
         // This way we can support custom item use duration too, also wrap this since I don't trust myself enough.
@@ -117,12 +82,10 @@ public class ItemUseTracker {
                 }
 
                 if (components.containsKey("minecraft:use_duration")) {
-//                    System.out.println(components.get("minecraft:use_duration"));
                     return true;
                 } else {
                     NbtMap itemProperties = components.getCompound("item_properties");
                     if (itemProperties.containsKey("use_duration")) {
-//                        System.out.println(components.get("use_duration"));
                         return true;
                     }
                 }
@@ -131,6 +94,6 @@ public class ItemUseTracker {
 
         return itemId == Items.BOW.javaId() || itemId == Items.CROSSBOW.javaId() ||
                 itemId == Items.TRIDENT.javaId() || itemId == Items.ENDER_EYE.javaId() ||
-                itemId == Items.SPYGLASS.javaId();
+                itemId == Items.SPYGLASS.javaId() || itemId == Items.OMINOUS_BOTTLE.javaId() || itemId == Items.POTION.javaId();
     }
 }
