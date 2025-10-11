@@ -123,7 +123,7 @@ public class PlayerData {
     public EntityDimensions dimensions = EntityDimensions.changing(0.6F, 1.8F).withEyeHeight(1.62F);
     public Box boundingBox = Box.EMPTY;
 
-    public Vec3 velocity = Vec3.ZERO;
+    public Vec3 velocity = Vec3.ZERO, lastTickFinalVelocity = Vec3.ZERO;
 
     public PredictionData predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
     public Vector bestPossibility = Vector.NONE;

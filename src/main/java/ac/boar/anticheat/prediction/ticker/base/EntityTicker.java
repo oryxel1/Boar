@@ -4,6 +4,7 @@ import ac.boar.anticheat.collision.Collider;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
@@ -149,14 +150,21 @@ public class EntityTicker {
         player.verticalCollision = vec3.y != vec32.y;
         player.onGround = player.verticalCollision && vec3.y < 0.0;
 
-        // Player is near bamboo, we don't know what the offsetting is so we let player decide this...
+        // Hacks for when the player is taking zero velocity but still on ground next tick for whatever reason.
+        // They will claim to be not colliding vertically this tick but still act like they're on ground next tick, nice.
+        if (vec3.y == 0 && player.bestPossibility.getVelocity().y == 0 && player.bestPossibility.getType() == VectorType.VELOCITY && !MathUtil.equal(player.lastTickFinalVelocity.y, 0)) {
+            player.verticalCollision = Collider.collide(player, player.lastTickFinalVelocity.clone()).y != player.lastTickFinalVelocity.y;
+            player.onGround = player.verticalCollision && player.lastTickFinalVelocity.y < 0;
+        }
+
+        // The player is near bamboo, we don't know what the offsetting is so we let player decide this...
         if (player.nearBamboo && player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION)) {
             player.horizontalCollision = true;
             bl = player.unvalidatedTickEnd.x == 0;
             bl2 = player.unvalidatedTickEnd.z == 0;
         }
 
-        // Hacks, but works.
+        // Sneaking hacks, this is not entirely correct but works, not much room to abuse.
         if (oldVec3.x != vec3.x || oldVec3.z != vec3.z) {
             player.velocity = new Vec3(player.unvalidatedTickEnd.x == 0 ? 0 : player.velocity.x, player.velocity.y, player.unvalidatedTickEnd.z == 0 ? 0 : player.velocity.z);
         }
