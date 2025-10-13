@@ -48,7 +48,7 @@ public class ItemCache {
         final ItemCache cache = new ItemCache(data);
         final ItemStack itemStack = inventory.translate(data);
 
-        if (inventory.getPlayer().getSession().getTagCache().is(ItemTag.BUNDLES, GeyserItemStack.from(itemStack))) {
+        if (GeyserItemStack.from(itemStack).is(inventory.getPlayer().getSession(), ItemTag.BUNDLES)) {
             int id = -1;
 
             try {
