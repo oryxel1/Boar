@@ -225,7 +225,7 @@ public class LegacyAuthInputPackets {
             // Shit hack, I know I'm too lazy to properly check for when the item is actually usable eg: riptide trident in water.
             // Also, there are bugs in bedrock where the player can still use even tho they're not supposed to so what we get will never
             // be reliable (https://bugs.mojang.com/browse/MCPE/issues/MCPE-178647), call me out for being lazy but blame bugrock.
-            if (dirtyUsing == ItemUseTracker.DirtyUsing.INVENTORY_TRANSACTION) {
+            if (dirtyUsing == ItemUseTracker.DirtyUsing.INVENTORY_TRANSACTION || dirtyUsing == ItemUseTracker.DirtyUsing.METADATA && !player.getFlagTracker().has(EntityFlag.USING_ITEM)) {
                 player.getSession().releaseItem();
             }
 
