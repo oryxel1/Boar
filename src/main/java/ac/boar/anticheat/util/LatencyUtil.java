@@ -118,9 +118,9 @@ public final class LatencyUtil {
         player.receivedStackId.set(lastId);
     }
 
-    public void confirmStackId(long id) {
+    public boolean confirmStackId(long id) {
         if (!hasId(id) || id <= player.receivedStackId.get()) {
-            return;
+            return false;
         }
 
         while (true) {
@@ -161,11 +161,12 @@ public final class LatencyUtil {
         long distance = System.currentTimeMillis() - this.prevReceivedSentTime.ms();
         if (distance >= Boar.getConfig().maxLatencyWait()) {
             player.kick("Timed out.");
-            return;
+            return true;
         }
 
         this.lastRespondTime = System.currentTimeMillis();
         player.receivedStackId.set(id);
+        return true;
     }
 
     private void onLatencySend() {
