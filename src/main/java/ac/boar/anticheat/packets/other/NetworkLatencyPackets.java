@@ -38,6 +38,7 @@ public class NetworkLatencyPackets implements PacketListener {
             return;
         }
 
-        event.setCancelled(event.getPlayer().getLatencyUtil().confirmStackId(Math.abs(id)));
+        event.getPlayer().getLatencyUtil().confirmStackId(Math.abs(id));
+        event.setCancelled(true);
     }
 }
