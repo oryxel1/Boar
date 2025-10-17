@@ -69,7 +69,7 @@ public final class BoarPlayer extends PlayerData {
 
     @Getter
     private final LatencyUtil latencyUtil = new LatencyUtil(this);
-    public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(-1);
+    public final AtomicLong receivedStackId = new AtomicLong(-1), sentStackId = new AtomicLong(0);
 
     // Lag compensation
     public final CompensatedWorldImpl compensatedWorld = new CompensatedWorldImpl(this);
