@@ -9,7 +9,7 @@ import org.geysermc.geyser.session.GeyserSession;
 
 public class NetworkLatencyPackets implements PacketListener {
     public final static long LATENCY_MAGNITUDE = 1000000L;
-    public final static long PS4_LATENCY_MAGNITUDE = 1000L;
+    public final static long PS5_LATENCY_MAGNITUDE = 1000L;
 
     @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
@@ -18,7 +18,9 @@ public class NetworkLatencyPackets implements PacketListener {
         }
 
         final GeyserSession session = event.getPlayer().getSession();
-        long id = packet.getTimestamp() / (session.platform() == BedrockPlatform.PS4 ? PS4_LATENCY_MAGNITUDE : LATENCY_MAGNITUDE);
+        // Bedrock player have different latency magnitude depending on the platform, however this is the only one we know about
+        // TODO: Figure out what the magnitude for PS4 is, currently we only know PS5 (BedrockPlatform.PS4 is an misleading name.)
+        long id = packet.getTimestamp() / (session.platform() == BedrockPlatform.PS4 ? PS5_LATENCY_MAGNITUDE : LATENCY_MAGNITUDE);
 
         // Positive id is for keep alive passthrough hack, and there also only 2 other negative id that we just need to check for.
         // This implementation could be a problem later on considering that Networking API will soon become a thing but oh welp.
