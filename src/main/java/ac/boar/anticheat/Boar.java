@@ -19,12 +19,13 @@ import ac.boar.anticheat.packets.other.NetworkLatencyPackets;
 
 import ac.boar.anticheat.player.manager.BoarPlayerManager;
 import ac.boar.protocol.PacketEvents;
+import lombok.Setter;
 
 @Getter
 public class Boar {
     @Getter
     private final static Boar instance = new Boar();
-    @Getter
+    @Getter @Setter
     private static Config config;
     private Boar() {}
 

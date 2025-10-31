@@ -3,6 +3,8 @@ package ac.boar.geyser;
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.acks.BoarAcknowledgement;
 import ac.boar.anticheat.alert.AlertManager;
+import ac.boar.anticheat.config.Config;
+import ac.boar.anticheat.config.ConfigLoader;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.injector.BoarInjector;
 import lombok.Getter;
@@ -72,10 +74,23 @@ public class GeyserBoar implements Extension {
         event.register("boar.exempt", TriState.FALSE);
         event.register("boar.alert", TriState.NOT_SET);
         event.register("boar.debug", TriState.NOT_SET);
+        event.register("boar.reload", TriState.NOT_SET);
     }
 
     @Subscribe
     public void onDefineCommands(GeyserDefineCommandsEvent event) {
+        event.register(Command.builder(this).source(CommandSource.class)
+                .name("reload")
+                .description("Reload the config for Boar.")
+                .permission("boar.reload")
+                .executor((source, cmd, args) -> {
+                    Boar.setConfig(ConfigLoader.load(this, GeyserBoar.class, Config.class, Config.DEFAULT_CONFIG));
+
+                    final String prefix = Boar.getInstance().getAlertManager().getPrefix(source);
+                    source.sendMessage(prefix + "§fReloaded config! New config: " + Boar.getConfig());
+                })
+                .build());
+
         event.register(Command.builder(this).source(CommandSource.class)
                 .name("alert")
                 .description("Enable alert messages.")
