@@ -36,7 +36,6 @@ public class UncertainRunner {
         // Now let's account for pushing out of block uncertainty.
         // Since block push will only affect X and Z direction so this case no need to account for push, player velocity is wrong.
         if (Math.abs(player.unvalidatedTickEnd.y - player.velocity.y) > 1.0E-4) {
-            System.out.println("Wrong y!");
             return;
         }
         // Assuming that we're missing the push out of block velocity, then subtracting velocity will do the job.
