@@ -36,6 +36,7 @@ public class UncertainRunner {
         // Now let's account for pushing out of block uncertainty.
         // Since block push will only affect X and Z direction so this case no need to account for push, player velocity is wrong.
         if (Math.abs(player.unvalidatedTickEnd.y - player.velocity.y) > 1.0E-4) {
+            System.out.println("Wrong y!");
             return;
         }
         // Assuming that we're missing the push out of block velocity, then subtracting velocity will do the job.
@@ -61,9 +62,10 @@ public class UncertainRunner {
         final Box box = new Box(targetX, player.boundingBox.minY, targetZ, targetX + 1, player.boundingBox.maxY, targetZ + 1).contract(1.0E-3F);
 
         // The direction player is trying to move to is also not empty, so this is likely wrong.
-        if (!player.compensatedWorld.noCollision(box)) {
-            return;
-        }
+        // TODO: Not reliable.... Well let's rely on vanilla to prevent phase then...
+//        if (!player.compensatedWorld.noCollision(box)) {
+//            return;
+//        }
 
         // TODO: Enforce this further.
         player.velocity = player.unvalidatedTickEnd.clone();
