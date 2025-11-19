@@ -87,7 +87,14 @@ public class CompensatedWorldImpl extends CompensatedWorld {
         // Sometimes this can spam error when player first join or something like that, can be safely ignore here.
         try {
             for (EntityCache cache : this.getEntities().values()) {
-                if (cache == null || cache.getMetadata().getFlags() == null || !cache.getMetadata().getFlags().contains(EntityFlag.COLLIDABLE) || !aABB.intersects(cache.getCurrent().getBoundingBox())) {
+                if (cache == null || cache.getMetadata().getFlags() == null) {
+                    continue;
+                }
+                Boolean collidable = cache.getMetadata().getFlags().get(EntityFlag.COLLIDABLE);
+                if (collidable == null || !collidable) {
+                    continue;
+                }
+                if (!aABB.intersects(cache.getCurrent().getBoundingBox())) {
                     continue;
                 }
 

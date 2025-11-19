@@ -19,6 +19,7 @@ import org.cloudburstmc.protocol.bedrock.packet.*;
 import org.geysermc.geyser.entity.type.player.SessionPlayerEntity;
 import org.geysermc.geyser.item.Items;
 
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -69,7 +70,7 @@ public class ServerDataPackets implements PacketListener {
             Float width = packet.getMetadata().get(EntityDataTypes.WIDTH);
             Float scale = packet.getMetadata().get(EntityDataTypes.SCALE);
 
-            final EnumSet<EntityFlag> flags = packet.getMetadata().getFlags();
+            final EnumMap<EntityFlag, Boolean> flags = packet.getMetadata().getFlags();
             if (flags == null && height == null && width == null && scale == null) {
                 return;
             }
@@ -77,7 +78,11 @@ public class ServerDataPackets implements PacketListener {
             final Set<EntityFlag> flagsCopy;
             if (flags != null) {
                 flagsCopy = EnumSet.noneOf(EntityFlag.class);
-                flagsCopy.addAll(flags);
+                flags.forEach((k, v) -> {
+                    if (v != null && v) {
+                        flagsCopy.add(k);
+                    }
+                });
             } else {
                 flagsCopy = null;
             }
