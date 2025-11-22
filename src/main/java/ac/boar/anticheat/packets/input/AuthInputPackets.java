@@ -88,12 +88,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             return;
         }
 
-        if (player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z)) {
-            player.sinceChunkUnloaded++;
-        } else {
-            player.sinceChunkUnloaded = 0;
-        }
-
         if (player.isMovementExempted()) {
             player.setPos(player.unvalidatedPosition);
 
@@ -115,11 +109,22 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
             player.bestPossibility = Vector.NONE;
         } else {
-            if (!player.inLoadingScreen && player.sinceLoadingScreen >= 2 && player.sinceChunkUnloaded > 1 || player.unvalidatedTickEnd.lengthSquared() > 0) {
+            if (!player.inLoadingScreen && player.sinceLoadingScreen >= 2 || player.unvalidatedTickEnd.lengthSquared() > 0) {
                 new PredictionRunner(player).run();
             } else {
                 player.velocity = Vec3.ZERO.clone();
             }
+        }
+
+        player.insideUnloadedChunk = !player.compensatedWorld.isChunkLoaded((int) player.position.x, (int) player.position.z);
+        // Don't try to predict player position in an unloaded chunk, it's not worth it and uh won't go well!
+        // Just keep teleporting the player back until they loaded in, that way we shouldn't false post teleport... I think!
+        // There isn't much room to abuse considering they're not loaded in any way... and the position is validated so
+        // the player can't just send a position 100000 blocks out to avoid for eg: velocity.
+
+        // TODO: Test properly uhhhh in some cases, I'm too lazy to care.
+        if (player.insideUnloadedChunk) {
+            player.getTeleportUtil().teleportTo(player.getTeleportUtil().getLastKnowValid());
         }
 
         this.processQueuedTeleports(player, packet);
