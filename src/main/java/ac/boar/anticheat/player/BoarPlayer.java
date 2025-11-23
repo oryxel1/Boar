@@ -108,6 +108,10 @@ public final class BoarPlayer extends PlayerData {
         }
     }
 
+    public boolean isClosed() {
+        return this.session.isClosed() || this.session.getUpstream().isClosed();
+    }
+
     public void sendLatencyStack() {
         this.sendLatencyStack(false);
     }

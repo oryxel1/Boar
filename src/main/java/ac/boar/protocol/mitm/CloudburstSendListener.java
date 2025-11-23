@@ -33,6 +33,10 @@ public final class CloudburstSendListener extends UpstreamSession {
 
     @Override
     public void sendPacket(@NonNull BedrockPacket packet) {
+        if (player.isClosed()) {
+            return;
+        }
+
         if (packet instanceof UpdateClientInputLocksPacket) {
             // Nope, don't, pain in the ass to support this.
             return;
@@ -71,6 +75,10 @@ public final class CloudburstSendListener extends UpstreamSession {
 
     @Override
     public void sendPacketImmediately(@NonNull BedrockPacket packet) {
+        if (player.isClosed()) {
+            return;
+        }
+
         final CloudburstPacketEvent event = new CloudburstPacketEvent(this.player, packet);
         for (final PacketListener listener : PacketEvents.getApi().getListeners()) {
             listener.onPacketSend(event, true);

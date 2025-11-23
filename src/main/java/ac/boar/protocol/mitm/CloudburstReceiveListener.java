@@ -19,6 +19,10 @@ public final class CloudburstReceiveListener implements BedrockPacketHandler {
 
     @Override
     public PacketSignal handlePacket(BedrockPacket packet) {
+        if (player.isClosed()) {
+            return PacketSignal.HANDLED;
+        }
+
         final CloudburstPacketEvent event = new CloudburstPacketEvent(this.player, packet);
         for (final PacketListener listener : PacketEvents.getApi().getListeners()) {
             listener.onPacketReceived(event);

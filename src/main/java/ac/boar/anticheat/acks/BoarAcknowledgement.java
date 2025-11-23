@@ -19,6 +19,10 @@ public class BoarAcknowledgement {
             return;
         }
 
+        if (player.isClosed()) {
+            return;
+        }
+
         if (player.receivedStackId.get() == player.sentStackId.get()) {
             return;
         }
