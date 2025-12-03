@@ -1,6 +1,5 @@
 package ac.boar.anticheat.packets.server;
 
-import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;

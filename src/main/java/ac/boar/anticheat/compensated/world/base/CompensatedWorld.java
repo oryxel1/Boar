@@ -88,7 +88,7 @@ public class CompensatedWorld {
             chunksToRemove.add(key);
         }
         for (long key : chunksToRemove) {
-            this.removeEntity(key);
+            this.chunks.remove(key);
         }
     }
 
