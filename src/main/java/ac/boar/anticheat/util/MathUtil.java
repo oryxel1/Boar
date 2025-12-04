@@ -99,4 +99,10 @@ public class MathUtil {
     public static int blockPosition(int x, int y, int z) {
         return (x << 8) | (z << 4) | y;
     }
+
+    // Surprisingly, Geyser messed up here, MathUtils#chunkPositionToLong is doing ((x & 0xFFFFFFFFL) << 32L) | (z & 0xFFFFFFFFL) instead which while works
+    // doesn't match vanilla behaviour, we should be doing the reverse.
+    public static long chunkPositionToLong(int x, int z) {
+        return (x & 0xFFFFFFFFL) | ((z & 0xFFFFFFFFL) << 32L);
+    }
 }

@@ -7,6 +7,7 @@ import ac.boar.anticheat.data.block.impl.BedBlockState;
 import ac.boar.anticheat.data.block.impl.HoneyBlockState;
 import ac.boar.anticheat.data.block.impl.SlimeBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.geyser.BoarChunk;
 import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Mutable;
@@ -21,7 +22,6 @@ import org.geysermc.geyser.entity.type.Entity;
 import org.geysermc.geyser.level.BedrockDimension;
 import org.geysermc.geyser.level.block.Blocks;
 import org.geysermc.geyser.level.block.type.BlockState;
-import org.geysermc.geyser.util.MathUtils;
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType;
 import org.geysermc.mcprotocollib.protocol.data.game.level.block.BlockEntityInfo;
 
@@ -88,7 +88,7 @@ public class CompensatedWorld {
             chunksToRemove.add(key);
         }
         for (long key : chunksToRemove) {
-//            this.chunks.remove(key);
+            this.chunks.remove(key);
         }
     }
 
@@ -104,12 +104,12 @@ public class CompensatedWorld {
     }
 
     public void put(int x, int z, BoarChunkSection[] chunks) {
-        long chunkPosition = MathUtils.chunkPositionToLong(x, z);
+        long chunkPosition = MathUtil.chunkPositionToLong(x, z);
         this.chunks.put(chunkPosition, new BoarChunk(chunks, new ArrayList<>()));
     }
 
     public void removeFromCache(int x, int z) {
-        this.chunks.remove(MathUtils.chunkPositionToLong(x, z));
+        this.chunks.remove(MathUtil.chunkPositionToLong(x, z));
     }
 
     public boolean isChunkLoaded(int chunkX, int chunkZ) {
@@ -211,7 +211,7 @@ public class CompensatedWorld {
     }
 
     public BoarChunk getChunk(int chunkX, int chunkZ) {
-        long chunkPosition = MathUtils.chunkPositionToLong(chunkX, chunkZ);
+        long chunkPosition = MathUtil.chunkPositionToLong(chunkX, chunkZ);
         return this.chunks.getOrDefault(chunkPosition, null);
     }
 
