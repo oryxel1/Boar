@@ -1,3 +1,5 @@
+# BOAR IS DISCONTINUED, GO USE THEMIS OR BUY GRIM V3 INSTEAD, I WILL NO LONGER MAINTAIN THIS.
+
 # Boar
 
 Boar is a POC project that allows you to enable [server-auth-with-rewind](https://github.com/Mojang/bedrock-protocol-docs/blob/main/additional_docs/ConfiguringAntiCheat.md) for 
