@@ -80,6 +80,7 @@ public class ConfigLoader {
                                 .replace("\r", "\\r")
                                 .replace("\n", "\\n");
                         s = s.replace("prefix: \"&3Boar &7>&r \"", "prefix: \"" + prefix + "\"");
+                        s = s.replace("alerts-enabled-by-default: false", "alerts-enabled-by-default: " + config.alertsEnabledByDefault());
                     }
 
                     writer.write(s.toCharArray());

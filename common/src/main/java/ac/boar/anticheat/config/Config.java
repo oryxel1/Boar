@@ -46,6 +46,9 @@ public final class Config {
     @JsonProperty("prefix")
     @JsonSetter(nulls = Nulls.SKIP)
     private String prefix = "&3Boar &7>&r ";
+    @JsonProperty("alerts-enabled-by-default")
+    @JsonSetter(nulls = Nulls.SKIP)
+    private boolean alertsEnabledByDefault = false;
     // Cached copy of the prefix with & converted to §. Lives on the config instance,
     // so reloading the config (which creates a new instance) resets it.
     @JsonIgnore
@@ -90,6 +93,10 @@ public final class Config {
 
     public String prefix() {
         return prefix;
+    }
+
+    public boolean alertsEnabledByDefault() {
+        return alertsEnabledByDefault;
     }
 
     public String formattedPrefix() {

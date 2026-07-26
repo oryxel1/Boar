@@ -3,6 +3,9 @@
 # This prefix is used in all Boar messages.
 prefix: "&3Boar &7>&r "
 
+# If true, players who have the boar.alert permission will automatically receive alerts.
+alerts-enabled-by-default: false
+
 # How many ticks of history are contained in the client's rolling window for use when receiving corrections.
 # At 20 ticks per second a history size of 40 means that a correction could still be processed with rewind with
 # two seconds of two-way latency

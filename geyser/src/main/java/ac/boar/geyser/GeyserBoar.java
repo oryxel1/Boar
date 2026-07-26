@@ -51,6 +51,10 @@ public class GeyserBoar implements Extension {
 
         // System.out.println("Adding name " + event.connection().bedrockUsername() + " " + session);
         nameToSessions.put(event.connection().bedrockUsername(), session);
+
+        if (Boar.getConfig().alertsEnabledByDefault() && session.hasPermission("boar.alert")) {
+            Boar.getInstance().getAlertManager().addAlert(new GeyserMessageRecipient(session));
+        }
     }
 
     @Subscribe
