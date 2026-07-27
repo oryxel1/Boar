@@ -49,6 +49,9 @@ public final class Config {
     @JsonProperty("alerts-enabled-by-default")
     @JsonSetter(nulls = Nulls.SKIP)
     private boolean alertsEnabledByDefault = false;
+    @JsonProperty("messages")
+    @JsonSetter(nulls = Nulls.SKIP)
+    private Messages messages = new Messages();
     // Cached copy of the prefix with & converted to §. Lives on the config instance,
     // so reloading the config (which creates a new instance) resets it.
     @JsonIgnore
@@ -99,11 +102,51 @@ public final class Config {
         return alertsEnabledByDefault;
     }
 
+    public Messages messages() {
+        return messages;
+    }
+
     public String formattedPrefix() {
         if (formattedPrefix == null) {
             formattedPrefix = prefix.replace('&', '§');
         }
 
         return formattedPrefix;
+    }
+
+    @ToString
+    @Setter
+    public static class Messages {
+        @JsonProperty("kick-invalid-auth")
+        @JsonSetter(nulls = Nulls.SKIP)
+        private String kickInvalidAuth = "Invalid auth input packet!";
+
+        @JsonProperty("kick-impossible-tick")
+        @JsonSetter(nulls = Nulls.SKIP)
+        private String kickImpossibleTick = "Impossible tick id={tick}";
+
+        @JsonProperty("kick-timeout")
+        @JsonSetter(nulls = Nulls.SKIP)
+        private String kickTimeout = "Timed out!";
+
+        @JsonProperty("alert-format")
+        @JsonSetter(nulls = Nulls.SKIP)
+        private String alertFormat = "&3{player}&7 failed&6 {check} ({type}){experimental} &7x{level} {reason}";
+
+        public String kickInvalidAuth() {
+            return kickInvalidAuth;
+        }
+
+        public String kickImpossibleTick() {
+            return kickImpossibleTick;
+        }
+
+        public String kickTimeout() {
+            return kickTimeout;
+        }
+
+        public String alertFormat() {
+            return alertFormat;
+        }
     }
 }

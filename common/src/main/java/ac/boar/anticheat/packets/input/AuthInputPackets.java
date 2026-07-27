@@ -40,7 +40,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         final long claimedTick = packet.getTick();
 
         if (claimedTick < 0) { // Impossible, no way this can happen.
-            player.kick("Impossible tick id=" + claimedTick);
+            player.kick(Boar.getConfig().messages().kickImpossibleTick().replace("{tick}", String.valueOf(claimedTick)));
             return;
         }
 

@@ -10,15 +10,15 @@ public final class AlertViolationListener implements ViolationListener {
     public void onViolation(Violation violation) {
         final Check check = violation.check();
 
-        final StringBuilder builder = new StringBuilder("§3" + violation.player().getSession().name() + "§7 failed§6 " + check.name());
-        if (!check.type().isBlank()) {
-            builder.append(" (").append(check.type()).append(")");
-        }
-        if (check.experimental()) {
-            builder.append(" §a(Experimental)");
-        }
-        builder.append(" §7x").append(violation.vl()).append(" ").append(violation.verbose());
+        String message = Boar.getConfig().messages().alertFormat()
+                .replace("{player}", violation.player().getSession().name())
+                .replace("{check}", check.name())
+                .replace("{type}", check.type())
+                .replace("{experimental}", check.experimental() ? " §a(Experimental)" : "")
+                .replace("{level}", String.valueOf(violation.vl()))
+                .replace("{reason}", violation.verbose())
+                .replace("&", "§");
 
-        Boar.getInstance().getAlertManager().alert(builder.toString());
+        Boar.getInstance().getAlertManager().alert(message);
     }
 }
