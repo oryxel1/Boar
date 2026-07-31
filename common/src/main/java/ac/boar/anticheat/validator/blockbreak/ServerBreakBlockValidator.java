@@ -51,19 +51,16 @@ public class ServerBreakBlockValidator extends BaseCheck {
 
             // These action are shouldn't be process, and likely won't be process by Geyser anyway.
             if (!ALLOWED_ACTIONS.contains(actionType) || action.getBlockPosition() == null || !MathUtil.isValid(action.getBlockPosition())) {
-                failWithoutMitigation("invalid action=" + actionType + ", position=" + action.getBlockPosition());
                 continue;
             }
 
             if (actionType != ABORT_BREAK && (face < 0 || face >= Direction.VALUES.length)) {
-                failWithoutMitigation("invalid face=" + face + ", action=" + actionType);
                 continue;
             }
 
             final Vector3i blockPosition = action.getBlockPosition();
 
             if (blockPosition.distance(player.position.toVector3i()) > 12) {
-                failWithoutMitigation("block out of range, position=" + blockPosition);
                 BlockUtil.restoreCorrectBlock(player, blockPosition);
                 continue;
             }
@@ -75,7 +72,6 @@ public class ServerBreakBlockValidator extends BaseCheck {
 
             final BoarBlockState state = player.compensatedWorld.getBlockState(blockPosition, 0);
             if (!BlockUtil.determineCanBreak(player, state)) {
-                failWithoutMitigation("cannot break block at " + blockPosition);
                 continue;
             }
 
@@ -102,7 +98,6 @@ public class ServerBreakBlockValidator extends BaseCheck {
                 case ABORT_BREAK -> this.breakingData = null;
                 case BLOCK_PREDICT_DESTROY -> {
                     if (this.breakingData == null || !Objects.equals(blockPosition, this.breakingData.getPosition())) {
-                        failWithoutMitigation("unexpected predicted destroy at " + blockPosition);
                         continue;
                     }
 
@@ -129,12 +124,6 @@ public class ServerBreakBlockValidator extends BaseCheck {
 
         if (packet.getPlayerActions().isEmpty()) {
             packet.getInputData().remove(PlayerAuthInputData.PERFORM_BLOCK_ACTIONS);
-        }
-    }
-
-    private void failWithoutMitigation(String verbose) {
-        if (player.disableMitigations()) {
-            fail(verbose);
         }
     }
 }
