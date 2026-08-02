@@ -190,6 +190,15 @@ public class UncertainRunner {
             extra = offset;
         }
 
+        boolean airFallSpeedNotExceeded = actual.horizontalLengthSquared() <= predicted.horizontalLengthSquared() + 1.0E-4F;
+        boolean airFallSameDir = (MathUtil.sign(actual.x) == MathUtil.sign(predicted.x) || actual.x == 0)
+                && (MathUtil.sign(actual.z) == MathUtil.sign(predicted.z) || actual.z == 0);
+        if (!player.onGround && !player.touchingWater && !player.isInLava() && !player.onClimbable() && player.vehicleData == null
+                && (player.velocity.y < 0 || actual.y < 0)
+                && airFallSpeedNotExceeded && airFallSameDir && offset <= 0.15F) {
+            extra = Math.max(extra, offset);
+        }
+
         return extra;
     }
 }

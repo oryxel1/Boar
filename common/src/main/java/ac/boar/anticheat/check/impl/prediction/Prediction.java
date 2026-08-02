@@ -55,8 +55,10 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
         }
 
         if (player.bestPossibility.getType() == VectorType.VELOCITY) {
-            fail("Velocity", "o: " + offset);
-            return;
+            if (player.unvalidatedTickEnd.distanceTo(player.velocity) > player.getMaxOffset()) {
+                fail("Velocity", "o: " + offset);
+                return;
+            }
         }
 
         if (player.unvalidatedTickEnd.distanceTo(player.velocity) < player.getMaxOffset()) {
