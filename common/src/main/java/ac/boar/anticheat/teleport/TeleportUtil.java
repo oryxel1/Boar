@@ -11,6 +11,7 @@ import ac.boar.anticheat.teleport.data.TeleportData;
 import ac.boar.anticheat.util.math.Vec3;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.cloudburstmc.math.vector.Vector2f;
 import org.cloudburstmc.protocol.bedrock.data.PredictionType;
 import org.cloudburstmc.protocol.bedrock.packet.CorrectPlayerMovePredictionPacket;
@@ -27,6 +28,7 @@ public class TeleportUtil {
     private final BoarPlayer player;
 
     @Getter
+    @Setter
     private Vec3 lastKnowValid = Vec3.ZERO;
 
     @Getter
@@ -57,10 +59,6 @@ public class TeleportUtil {
 
     public boolean isTeleporting() {
         return !this.queuedTeleports.isEmpty();
-    }
-
-    public void updateLastKnownValid(final Vec3 position) {
-        this.lastKnowValid = position.clone();
     }
 
     public boolean isHardTeleporting() {

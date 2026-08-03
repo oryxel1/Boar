@@ -11,7 +11,6 @@ import ac.boar.anticheat.teleport.data.RewindData;
 import ac.boar.anticheat.teleport.data.TeleportData;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.mappings.entity.Entity;
-import org.cloudburstmc.math.vector.Vector3f;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -19,9 +18,6 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 import java.util.Queue;
 
 public class TeleportHandler {
-    // Matches Geyser's per-axis tolerance for confirming a Bedrock teleport.
-    private static final float TELEPORT_CONFIRM_TOLERANCE = 0.1F;
-
     protected void processQueuedTeleports(final BoarPlayer player, final PlayerAuthInputPacket packet) {
         final Queue<TeleportData> queuedTeleports = player.getTeleportUtil().getQueuedTeleports();
 
@@ -59,33 +55,26 @@ public class TeleportHandler {
 //    }
 
     private void processTeleport(final BoarPlayer player, final TeleportData data, final PlayerAuthInputPacket packet) {
-        final Vec3 expected = data.getPosition();
-        final Vector3f actual = packet.getPosition();
-        final float distance = actual.distance(expected.toVector3f());
-        final boolean positionConfirmed = isPositionConfirmed(expected, actual);
+        float distance = packet.getPosition().distance(data.getPosition().toVector3f());
 
-        // Server teleports are authoritative once their batch is acknowledged.
-        player.setPos(expected.down(player.getYOffset()));
+        // Do this regardless if the player accept teleport or what not, we're going to force them to accept anyway.
+        player.setPos(data.getPosition().down(player.getYOffset()));
         player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
         player.velocity = Vec3.ZERO.clone();
-        player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
+        player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO); // Yep!
         player.onGround = false;
 
-        player.getTeleportUtil().updateLastKnownValid(expected);
+        player.getTeleportUtil().setLastKnowValid(data.getPosition());
 
-        // Geyser also confirms teleports from the reported position instead of requiring HANDLE_TELEPORT.
-        if (!positionConfirmed && !player.getTeleportUtil().isTeleporting()) {
-            player.getTeleportUtil().teleport(expected);
+        // I think I'm being a bit lenient but on Bedrock the position error seems to be a bit high.
+        if (!packet.getInputData().contains(PlayerAuthInputData.HANDLE_TELEPORT) || distance > 1.0E-3F) {
+            // Player rejected teleport OR this is not the latest teleport.
+            if (!player.getTeleportUtil().isTeleporting()) {
+                player.getTeleportUtil().teleport(data.getPosition());
 
-            Boar.debug(player.getSession().name() + " has not reached teleport target, d=" + distance
-                    + ", resending teleport...", Boar.DebugMessage.INFO);
+                Boar.debug(player.getSession().name() + " rejected teleport with d=" + distance + ", resending teleport...", Boar.DebugMessage.INFO);
+            }
         }
-    }
-
-    private static boolean isPositionConfirmed(final Vec3 expected, final Vector3f actual) {
-        return Math.abs(actual.getX() - expected.getX()) < TELEPORT_CONFIRM_TOLERANCE
-                && Math.abs(actual.getY() - expected.getY()) < TELEPORT_CONFIRM_TOLERANCE
-                && Math.abs(actual.getZ() - expected.getZ()) < TELEPORT_CONFIRM_TOLERANCE;
     }
 
     // Wouldn't it be nice to provide us a way to know when player accept rewind mojang :(
