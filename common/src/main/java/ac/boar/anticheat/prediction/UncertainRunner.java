@@ -118,7 +118,7 @@ public class UncertainRunner {
 
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
-        boolean validYOffset = Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset();
+        boolean validYOffset = Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getPosAcceptanceThreshold();
         boolean actualSpeedSmallerThanPredicted = actual.horizontalLengthSquared() < predicted.horizontalLengthSquared();
         boolean sameDirection = MathUtil.sameDirection(actual, predicted);
         boolean sameDirectionOrZero = (MathUtil.sign(actual.x) == MathUtil.sign(predicted.x) || actual.x == 0)
@@ -139,7 +139,7 @@ public class UncertainRunner {
         Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
         Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
 
-        boolean validYOffset = Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getMaxOffset();
+        boolean validYOffset = Math.abs(player.position.y - player.unvalidatedPosition.y) - extra <= player.getPosAcceptanceThreshold();
         boolean sameDirection = MathUtil.sameDirection(actual, predicted);
         boolean actualSpeedSmallerThanPredicted = actual.horizontalLengthSquared() < predicted.horizontalLengthSquared();
 
@@ -185,7 +185,7 @@ public class UncertainRunner {
         boolean dripstoneHorizontalSaneDir = (MathUtil.sign(actual.x) == MathUtil.sign(predicted.x) || actual.x == 0)
                 && (MathUtil.sign(actual.z) == MathUtil.sign(predicted.z) || actual.z == 0);
         if (player.nearDripstone && player.getInputData().contains(PlayerAuthInputData.VERTICAL_COLLISION)
-                && Math.abs(player.position.y - player.unvalidatedPosition.y) <= 0.3125F + player.getMaxOffset()
+                && Math.abs(player.position.y - player.unvalidatedPosition.y) <= 0.3125F + player.getPosAcceptanceThreshold()
                 && dripstoneHorizontalNotExceeded && dripstoneHorizontalSaneDir) {
             extra = offset;
         }

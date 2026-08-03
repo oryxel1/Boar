@@ -187,7 +187,7 @@ public class PlayerData {
     public int tickSinceBlockResync;
 
     // Prediction related method
-    public final float getMaxOffset() {
+    public final float getPosAcceptanceThreshold() {
         return Boar.getConfig().acceptanceThreshold();
     }
 

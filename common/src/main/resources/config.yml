@@ -14,6 +14,16 @@ player-rewind-history-size-ticks: 20
 # any offset smaller than 5.0E-5
 player-position-acceptance-threshold: 1.0E-4
 
+# How far (in blocks per tick) the server position can move towards the client position when the two are out of sync,
+# but the difference is still too small to send a correction.
+# A small and constant difference (usually caused by collisions) can grow until Boar must send a correction, which the
+# player sees as a rubberband. This drift removes the difference slowly, so no correction is necessary.
+# The drift applies only to the X and Z axes. The Y axis stays as Boar predicts it, because a vertical drift can help
+# flight cheats.
+# To disable the drift, set this to 0.
+# NOTE: This only takes effect for differences below "differ-till-alert", because any larger difference gets a correction.
+player-position-drift-amount: 0.0
+
 # This is the max reach that Boar going to tolerance before flagging, it does account for lag so no worry :)
 max-tolerance-compensated-reach: 3.005
 

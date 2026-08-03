@@ -66,11 +66,11 @@ public class LegacyAuthInputPackets {
             final boolean canAcceptClient = !hasPendingCorrection && !inCorrectionCooldown;
 
             // Have to do this due to loss precision, especially elytra!
-            if (canAcceptClient && player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getMaxOffset()) {
+            if (canAcceptClient && player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getPosAcceptanceThreshold()) {
                 player.velocity = player.unvalidatedTickEnd.clone();
             }
 
-            if (canAcceptClient && offset < player.getMaxOffset()) {
+            if (canAcceptClient && offset < player.getPosAcceptanceThreshold()) {
                 player.setPos(player.unvalidatedPosition.clone(), false);
             }
 

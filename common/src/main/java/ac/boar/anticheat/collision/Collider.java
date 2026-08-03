@@ -108,7 +108,7 @@ public class Collider {
     private static boolean clientAcceptsAutoStep(final BoarPlayer player, final Vec3 collisionVelocity, final Vec3 stepVelocity) {
         float collisionDistance = player.position.add(collisionVelocity).distanceTo(player.unvalidatedPosition);
         float stepDistance = player.position.add(stepVelocity).distanceTo(player.unvalidatedPosition);
-        return collisionDistance > player.getMaxOffset() || stepDistance <= collisionDistance;
+        return collisionDistance > player.getPosAcceptanceThreshold() || stepDistance <= collisionDistance;
     }
 
     private static MovementResult collideWithAxes(final Box originalBox, final Vec3 movement, final List<Box> colliders,

@@ -22,6 +22,9 @@ public final class Config {
     @JsonProperty("player-position-acceptance-threshold")
     @JsonSetter(nulls = Nulls.SKIP)
     private float acceptanceThreshold = 1.0E-4F;
+    @JsonProperty("player-position-drift-amount")
+    @JsonSetter(nulls = Nulls.SKIP)
+    private float positionDriftAmount = 0.0F;
     @JsonProperty("max-tolerance-compensated-reach")
     @JsonSetter(nulls = Nulls.SKIP)
     private float toleranceReach = 2.91F;
@@ -61,6 +64,10 @@ public final class Config {
 
     public float acceptanceThreshold() {
         return acceptanceThreshold;
+    }
+
+    public float positionDriftAmount() {
+        return Math.max(0.0F, positionDriftAmount);
     }
 
     public float toleranceReach() {
