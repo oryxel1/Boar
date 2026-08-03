@@ -108,18 +108,18 @@ public class TeleportUtil {
             return;
         }
 
-        final CorrectPlayerMovePredictionPacket packet = new CorrectPlayerMovePredictionPacket();
-        packet.setPosition(player.position.add(0, player.getYOffset(), 0).toVector3f());
-        packet.setOnGround(player.onGround);
-        packet.setTick(player.tick);
-        packet.setDelta(player.velocity.toVector3f());
-        packet.setVehicleRotation(Vector2f.ZERO);
-        packet.setPredictionType(player.vehicleData != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
+        final CorrectPlayerMovePredictionPacket correction = new CorrectPlayerMovePredictionPacket();
+        correction.setPosition(player.position.add(0, player.getYOffset() + 0.001f, 0).toVector3f());
+        correction.setOnGround(player.onGround);
+        correction.setTick(player.tick);
+        correction.setDelta(player.velocity.toVector3f());
+        correction.setVehicleRotation(Vector2f.ZERO);
+        correction.setPredictionType(player.vehicleData != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
 
         this.addPendingCorrection();
         this.correctionCooldown = true;
         this.player.sendLatencyStack(new MovementCorrectionAck());
-        this.player.getConnection().sendPacketImmediately(packet);
-        Boar.debug("[movement-debug] sent correction tick=" + player.tick + " pos=" + packet.getPosition() + " delta=" + packet.getDelta() + " onGround=" + player.onGround, Boar.DebugMessage.WARNING);
+        this.player.getConnection().sendPacket(correction);
+        Boar.debug("[movement-debug] sent correction tick=" + player.tick + " pos=" + correction.getPosition() + " delta=" + correction.getDelta() + " onGround=" + player.onGround, Boar.DebugMessage.WARNING);
     }
 }
