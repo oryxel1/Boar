@@ -59,6 +59,10 @@ public class TeleportUtil {
         return !this.queuedTeleports.isEmpty();
     }
 
+    public void updateLastKnownValid(final Vec3 position) {
+        this.lastKnowValid = position.clone();
+    }
+
     public boolean isHardTeleporting() {
         return !this.queuedTeleports.stream().filter(teleport -> !(teleport instanceof RewindData)).toList().isEmpty();
     }
