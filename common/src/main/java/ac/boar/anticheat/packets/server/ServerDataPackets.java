@@ -140,7 +140,7 @@ public class ServerDataPackets implements PacketListener {
         }
     }
 
-    @Override
+    /* @Override
     public void onPacketReceived(final CloudburstPacketEvent event) {
         final BoarPlayer player = event.getPlayer();
         if (event.getPacket() instanceof MovementPredictionSyncPacket packet) {
@@ -172,7 +172,7 @@ public class ServerDataPackets implements PacketListener {
             final ContainerCache cache = player.compensatedInventory.armorContainer;
             player.getFlagTracker().set(EntityFlag.GLIDING, BoarItemStack.of(player.getSession(), cache.get(1).getData()).is(Items.ELYTRA) && packet.getFlags().contains(EntityFlag.GLIDING));
         }
-    }
+    } */
 
     public static AttributeData stripModifiers(AttributeData data) {
         if (data.getName().equals("minecraft:movement") || data.getName().equals("minecraft:underwater_movement") || data.getName().equals("minecraft:lava_movement")) {
