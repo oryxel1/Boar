@@ -81,7 +81,7 @@ public class ServerDataPackets implements PacketListener {
 
         if (event.getPacket() instanceof SetEntityDataPacket packet) {
             if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
-                final EntityCache cache = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+                final EntityCache cache = player.compensatedWorld.getTrackedEntity(packet.getRuntimeEntityId());
                 if (cache == null) {
                     return;
                 }

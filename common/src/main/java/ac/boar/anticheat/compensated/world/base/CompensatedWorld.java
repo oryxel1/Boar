@@ -45,6 +45,9 @@ public class CompensatedWorld {
     private Dimension dimension;
 
     private final Long2ObjectMap<EntityCache> entities = new Long2ObjectOpenHashMap<>();
+    // Entities the server has spawned but the client has not acknowledged yet. An AddEntityAck
+    // promotes them into the visible map, so checks and prediction stay in sync with the client.
+    private final Long2ObjectMap<EntityCache> pendingEntities = new Long2ObjectOpenHashMap<>();
     private final Map<Long, Long> uniqueIdToRuntimeId = new HashMap<>();
 
     public void removeEntity(final long uniqueId) {
@@ -54,6 +57,7 @@ public class CompensatedWorld {
         }
 
         this.entities.remove((long) key);
+        this.pendingEntities.remove((long) key);
     }
 
     public EntityCache getEntity(long id) {
@@ -63,6 +67,31 @@ public class CompensatedWorld {
     public Optional<EntityCache> fetchEntity(long id) {
         EntityCache entity = this.entities.get(id);
         return entity == null ? Optional.empty() : Optional.of(entity);
+    }
+
+    /**
+     * Get an entity the server has spawned, even when the client has not acknowledged the spawn
+     * yet. Only outbound packet handlers must use this — they mirror what the server has sent so
+     * far. Checks and prediction must use {@link #getEntity(long)} so they only see entities that
+     * exist on the client.
+     */
+    public EntityCache getTrackedEntity(long id) {
+        final EntityCache entity = this.entities.get(id);
+        return entity != null ? entity : this.pendingEntities.get(id);
+    }
+
+    public Optional<EntityCache> fetchTrackedEntity(long id) {
+        return Optional.ofNullable(this.getTrackedEntity(id));
+    }
+
+    /**
+     * Make a pending entity visible. Called when the client acknowledges the spawn packet.
+     */
+    public void promoteEntity(final long runtimeId) {
+        final EntityCache entity = this.pendingEntities.remove(runtimeId);
+        if (entity != null) {
+            this.entities.put(runtimeId, entity);
+        }
     }
 
     public EntityCache addToCache(final BoarPlayer player, final long runtimeId, final long uniqueId) {
@@ -78,7 +107,7 @@ public class CompensatedWorld {
         // Default back to default bounding box if there ain't anything.
         cache.setDimensions(EntityDimensions.fixed(definition.width(), definition.height()));
 
-        this.entities.put(runtimeId, cache);
+        this.pendingEntities.put(runtimeId, cache);
         this.uniqueIdToRuntimeId.put(uniqueId, runtimeId);
 
         return cache;

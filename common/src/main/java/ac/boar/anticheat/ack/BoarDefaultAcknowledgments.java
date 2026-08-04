@@ -1,33 +1,7 @@
 package ac.boar.anticheat.ack;
 
 import ac.boar.anticheat.Boar;
-import ac.boar.anticheat.ack.types.BlockEntityUpdateAck;
-import ac.boar.anticheat.ack.types.BlockUpdateAck;
-import ac.boar.anticheat.ack.types.ChunkLoadAck;
-import ac.boar.anticheat.ack.types.ChunkRadiusUpdateAck;
-import ac.boar.anticheat.ack.types.SubChunkLoadAck;
-import ac.boar.anticheat.ack.types.ContainerOpenAck;
-import ac.boar.anticheat.ack.types.CraftingDataAck;
-import ac.boar.anticheat.ack.types.CreativeContentAck;
-import ac.boar.anticheat.ack.types.DimensionSwitchAck;
-import ac.boar.anticheat.ack.types.EntityInterpolateAck;
-import ac.boar.anticheat.ack.types.EntityMetadataAck;
-import ac.boar.anticheat.ack.types.EntityRemoveAck;
-import ac.boar.anticheat.ack.types.GameTypeAck;
-import ac.boar.anticheat.ack.types.GlideBoostAck;
-import ac.boar.anticheat.ack.types.HotbarSlotAck;
-import ac.boar.anticheat.ack.types.InventoryContentAck;
-import ac.boar.anticheat.ack.types.InventorySlotAck;
-import ac.boar.anticheat.ack.types.MobEffectAck;
-import ac.boar.anticheat.ack.types.MovementCorrectionAck;
-import ac.boar.anticheat.ack.types.PlayerMetadataAck;
-import ac.boar.anticheat.ack.types.TeleportAcceptAck;
-import ac.boar.anticheat.ack.types.UpdateAbilitiesAck;
-import ac.boar.anticheat.ack.types.UpdateAttributesAck;
-import ac.boar.anticheat.ack.types.UpdateTradeAck;
-import ac.boar.anticheat.ack.types.VehicleClearAck;
-import ac.boar.anticheat.ack.types.VehicleSetAck;
-import ac.boar.anticheat.ack.types.VelocityAck;
+import ac.boar.anticheat.ack.types.*;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.container.impl.TradeContainerCache;
@@ -73,6 +47,7 @@ public final class BoarDefaultAcknowledgments {
 
         registry.register(DimensionSwitchAck.class, BoarDefaultAcknowledgments::handleDimensionSwitch);
 
+        registry.register(AddEntityAck.class, BoarDefaultAcknowledgments::handleEntityAdd);
         registry.register(EntityRemoveAck.class, BoarDefaultAcknowledgments::handleEntityRemove);
         registry.register(EntityInterpolateAck.class, BoarDefaultAcknowledgments::handleEntityInterpolate);
         registry.register(EntityMetadataAck.class, BoarDefaultAcknowledgments::handleEntityMetadata);
@@ -143,6 +118,10 @@ public final class BoarDefaultAcknowledgments {
         player.compensatedWorld.setDimension(ack.dimension());
         player.getFlagTracker().clear();
         player.getFlagTracker().flying(false);
+    }
+
+    private static void handleEntityAdd(BoarPlayer player, AddEntityAck ack) {
+        player.compensatedWorld.promoteEntity(ack.runtimeEntityId());
     }
 
     private static void handleEntityRemove(BoarPlayer player, EntityRemoveAck ack) {

@@ -40,7 +40,7 @@ public class VehiclePackets implements PacketListener {
 
             // We handle this separately.
             if (riderId != player.runtimeEntityId) {
-                final EntityCache riderCache = player.compensatedWorld.getEntity(riderId);
+                final EntityCache riderCache = player.compensatedWorld.getTrackedEntity(riderId);
                 if (riderCache != null) {
                     riderCache.setInVehicle(link.getType() != EntityLinkData.Type.REMOVE);
                 }
@@ -48,7 +48,7 @@ public class VehiclePackets implements PacketListener {
                 return;
             }
 
-            final EntityCache cache = player.compensatedWorld.getEntity(entityId);
+            final EntityCache cache = player.compensatedWorld.getTrackedEntity(entityId);
             if (cache == null) {
                 // Likely won't happen, but why not!
                 return;

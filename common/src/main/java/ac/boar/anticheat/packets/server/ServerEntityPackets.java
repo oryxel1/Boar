@@ -1,6 +1,6 @@
 package ac.boar.anticheat.packets.server;
 
-import ac.boar.anticheat.Boar;
+import ac.boar.anticheat.ack.types.AddEntityAck;
 import ac.boar.anticheat.ack.types.EntityInterpolateAck;
 import ac.boar.anticheat.ack.types.EntityRemoveAck;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
@@ -9,6 +9,7 @@ import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.api.CloudburstPacketEvent;
 import ac.boar.protocol.api.PacketListener;
 import org.cloudburstmc.math.vector.Vector3f;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataMap;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
 import java.util.Set;
@@ -20,31 +21,11 @@ public class ServerEntityPackets implements PacketListener {
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
             player.sendLatencyStack(new EntityRemoveAck(packet.getUniqueEntityId()));
         } else if (event.getPacket() instanceof AddEntityPacket packet) {
-            final EntityCache entity = player.compensatedWorld.addToCache(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId());
-            if (entity == null) {
-                return;
-            }
-
-            final Vec3 position = new Vec3(packet.getPosition());
-            entity.setServerPosition(position);
-            entity.init();
-            entity.interpolate(position, false);
-
-            entity.setMetadata(packet.getMetadata());
+            this.handleEntityAdd(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId(), packet.getPosition(), packet.getMetadata());
         } else if (event.getPacket() instanceof AddPlayerPacket packet) {
-            final EntityCache entity = player.compensatedWorld.addToCache(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId());
-            if (entity == null) {
-                return;
-            }
-
-            final Vec3 position = new Vec3(packet.getPosition());
-            entity.setServerPosition(position);
-            entity.init();
-            entity.interpolate(position, false);
-
-            entity.setMetadata(packet.getMetadata());
+            this.handleEntityAdd(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId(), packet.getPosition(), packet.getMetadata());
         } else if (event.getPacket() instanceof MoveEntityDeltaPacket packet) {
-            final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+            final EntityCache entity = player.compensatedWorld.getTrackedEntity(packet.getRuntimeEntityId());
             if (entity == null) {
                 return;
             }
@@ -64,7 +45,7 @@ public class ServerEntityPackets implements PacketListener {
             this.queuePositionUpdate(event, entity, posX, posY, posZ, true);
         } else if (event.getPacket() instanceof MoveEntityAbsolutePacket packet) {
             player.compensatedWorld
-                    .fetchEntity(packet.getRuntimeEntityId())
+                    .fetchTrackedEntity(packet.getRuntimeEntityId())
                     .ifPresent(entity -> this.queuePositionUpdate(event, entity, packet.getPosition(), true));
         } else if (event.getPacket() instanceof MovePlayerPacket packet) {
             if (packet.getRuntimeEntityId() == player.runtimeEntityId) {
@@ -72,9 +53,26 @@ public class ServerEntityPackets implements PacketListener {
             }
 
             player.compensatedWorld
-                    .fetchEntity(packet.getRuntimeEntityId())
+                    .fetchTrackedEntity(packet.getRuntimeEntityId())
                     .ifPresent(entity -> this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getMode() == MovePlayerPacket.Mode.NORMAL));
         }
+    }
+
+    private void handleEntityAdd(final BoarPlayer player, final long runtimeId, final long uniqueId, final Vector3f rawPosition, final EntityDataMap metadata) {
+        final EntityCache entity = player.compensatedWorld.addToCache(player, runtimeId, uniqueId);
+        if (entity == null) {
+            return;
+        }
+
+        final Vec3 position = new Vec3(rawPosition);
+        entity.setServerPosition(position);
+        entity.init();
+        entity.interpolate(position, false);
+        entity.setMetadata(metadata);
+
+        // The entity stays hidden from checks and prediction until the client acknowledges the
+        // spawn packet. This keeps entity adds lag compensated, the same as entity removals.
+        player.sendLatencyStack(new AddEntityAck(runtimeId));
     }
 
     private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final boolean tryLerp) {
