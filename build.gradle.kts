@@ -35,6 +35,11 @@ allprojects {
         }
     }
 
+    // Shadow adds shadowRuntimeElements to the java component. Let's not publish the fat -all jar.
+    (components["java"] as AdhocComponentWithVariants).withVariantsFromConfiguration(configurations["shadowRuntimeElements"]) {
+        skip()
+    }
+
     indra {
         github("opencollab-incubator", "Boar") {
             ci(true)
