@@ -18,12 +18,11 @@ dependencies {
 
 indra {
     val branchName = indraGit.branchName().orNull ?: System.getenv("BRANCH_NAME") ?: "local/dev"
+    val buildNumber = System.getenv("BUILD_NUMBER") ?: "local"
+    val isSnapshot = version.toString().endsWith("-SNAPSHOT")
     configurePublications {
         if (branchName !in arrayOf("master", "local/dev")) {
-            val parts = branchName.split('/')
-            val prefix = parts.getOrNull(0)?.replace(Regex("[^0-9A-Za-z-]"), "-") ?: branchName
-            val versionNum = parts.getOrNull(1)?.replace(Regex("[^0-9A-Za-z.-]"), "-") ?: version.toString()
-            version = "$prefix-$versionNum-SNAPSHOT"
+            version = isSnapshot.let { "$version-$buildNumber" }.takeIf { !isSnapshot } ?: version.toString()
         }
     }
 
