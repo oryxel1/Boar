@@ -18,11 +18,9 @@ dependencies {
 
 indra {
     val branchName = indraGit.branchName().orNull ?: System.getenv("BRANCH_NAME") ?: "local/dev"
-    val buildNumber = System.getenv("BUILD_NUMBER") ?: "local"
-    val isSnapshot = version.toString().endsWith("-SNAPSHOT")
     configurePublications {
         if (branchName !in arrayOf("master", "local/dev")) {
-            version = isSnapshot.let { "$version-$buildNumber" }.takeIf { !isSnapshot } ?: version.toString()
+            version = version.toString()
         }
     }
 
