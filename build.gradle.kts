@@ -17,6 +17,7 @@ allprojects {
         plugin("java")
         plugin("java-library")
         plugin("com.gradleup.shadow")
+        plugin("net.kyori.indra")
         plugin("net.kyori.indra.publishing")
     }
 
