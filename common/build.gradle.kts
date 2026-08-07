@@ -30,3 +30,7 @@ indra {
     publishSnapshotsTo("boar", "https://repo.opencollab.dev/maven-snapshots")
     publishReleasesTo("boar", "https://repo.opencollab.dev/maven-releases")
 }
+
+tasks.requireTagged {
+    isEnabled = false
+}

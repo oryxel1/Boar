@@ -35,7 +35,7 @@ jobs:
         if: ${{ success() && github.repository == 'opencollab-incubator/Boar' && (github.ref_name == 'master' || github.ref_name == 'publishing') }}
         run: ./gradlew publish
         env:
-          BUILD_NUMBER: ${{ steps.release-info.outputs.curentRelease }}
+          BUILD_NUMBER: ${{ github.run_number }}
           ORG_GRADLE_PROJECT_boarUsername: ${{ vars.DEPLOY_USER }}
           ORG_GRADLE_PROJECT_boarPassword: ${{ secrets.DEPLOY_PASS }}
       - name: Publish to Modrinth
