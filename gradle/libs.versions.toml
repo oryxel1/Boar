@@ -7,6 +7,7 @@ gson = "2.3.1"
 jackson = "2.15.2"
 shadow = "9.3.0"
 minotaur = "2.+"
+indra = "4.0.0"
 protocol = "3.0.0.Beta12-SNAPSHOT"
 mcprotocollib = "1.21.11-20260217.182735-13"
 annotations = "26.1.0"
@@ -26,3 +27,5 @@ annotations = { module = "org.jetbrains:annotations", version.ref = "annotations
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
+indra = { id = "net.kyori.indra", version.ref = "indra" }
+indra-publishing = { id = "net.kyori.indra.publishing", version.ref = "indra" }
