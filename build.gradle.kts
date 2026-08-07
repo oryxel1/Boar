@@ -1,3 +1,4 @@
+import net.kyori.indra.git.IndraGitExtension
 import java.net.URI
 import java.util.zip.ZipFile
 
@@ -5,6 +6,8 @@ plugins {
     id("java")
     id("java-library")
 
+    alias(libs.plugins.indra)
+    alias(libs.plugins.indra.publishing) apply false
     alias(libs.plugins.minotaur)
     alias(libs.plugins.shadow) apply false
 }
@@ -14,6 +17,7 @@ allprojects {
         plugin("java")
         plugin("java-library")
         plugin("com.gradleup.shadow")
+        plugin("net.kyori.indra.publishing")
     }
 
     group = "ac.boar"
@@ -27,6 +31,20 @@ allprojects {
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    indra {
+        github("opencollab-incubator", "Boar") {
+            ci(true)
+            issues(true)
+            scm(true)
+        }
+
+        mitLicense()
+
+        javaVersions {
+            target(21)
         }
     }
 }
