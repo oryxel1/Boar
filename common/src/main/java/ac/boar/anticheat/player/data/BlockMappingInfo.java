@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 /**
  * Holds very simple information related to block mappings. A few convenience entries exist
- * to access common block states, with the {@code toIntermediary) being used to convert a Bedrock
+ * to access common block states, with the {@code toIntermediary} being used to convert a Bedrock
  * block runtime id into the intermediary IDs used by the server.
  *
  * @param airDefinition the air definition

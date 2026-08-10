@@ -24,6 +24,7 @@ import ac.boar.mappings.item.ItemMappings;
 import ac.boar.mappings.item.Items;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
@@ -54,8 +55,12 @@ public final class ItemTransactionValidator {
                 if (packet.getActions().size() != 2) {
                     return false;
                 }
-                // https://github.com/GeyserMC/Geyser/blob/master/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/BedrockInventoryTransactionTranslator.java#L123
-                final InventoryActionData world = packet.getActions().get(0), container = packet.getActions().get(1);
+
+                // https://github.com/GeyserMC/Geyser/blob/3aeedfa6f207691d92d4f20106bc586b2ab883d4/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/BedrockInventoryTransactionTranslator.java#L134
+                boolean isPost26_30 = player.getSession().protocolVersion() >= Bedrock_v1001.CODEC.getProtocolVersion();
+
+                final InventoryActionData world = isPost26_30 ? packet.getActions().get(1) : packet.getActions().get(0);
+                final InventoryActionData container = isPost26_30 ? packet.getActions().get(0) : packet.getActions().get(1);
 
                 if (world.getSource().getType() != InventorySource.Type.WORLD_INTERACTION || world.getSource().getFlag() != InventorySource.Flag.DROP_ITEM) {
                     return false;
