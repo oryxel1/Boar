@@ -15,11 +15,11 @@ import ac.boar.protocol.BoarHandlerAdaptor;
 import io.netty.channel.Channel;
 import org.cloudburstmc.protocol.bedrock.netty.codec.packet.BedrockPacketCodec;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-public abstract class BoarPlayerManager<T> extends HashMap<T, BoarPlayer> {
+public abstract class BoarPlayerManager<T> extends ConcurrentHashMap<T, BoarPlayer> {
 
     public BoarPlayer add(T session) {
         NetworkSession networkSession = this.createNetworkSession(session);
