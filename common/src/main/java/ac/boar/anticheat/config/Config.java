@@ -46,6 +46,9 @@ public final class Config {
     @JsonProperty("max-balance-advantage")
     @JsonSetter(nulls = Nulls.SKIP)
     private long maxBalanceAdvantage = 2000L;
+    @JsonProperty("correction-flag-cooldown-ticks")
+    @JsonSetter(nulls = Nulls.SKIP)
+    private int correctionFlagCooldownTicks = 100;
     @JsonProperty("debug-mode")
     @JsonSetter(nulls = Nulls.SKIP)
     private boolean debugMode;
@@ -96,6 +99,10 @@ public final class Config {
 
     public long maxBalanceAdvantage() {
         return maxBalanceAdvantage;
+    }
+
+    public int correctionFlagCooldownTicks() {
+        return Math.max(0, correctionFlagCooldownTicks);
     }
 
     public boolean debugMode() {

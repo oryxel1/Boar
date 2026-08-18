@@ -14,6 +14,10 @@ import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 public class Prediction extends BaseCheck implements OffsetHandlerCheck {
     private final Check correction;
 
+    private long lastFlagTick = Long.MIN_VALUE;
+    private int suppressedFails;
+    private float suppressedMaxPosDiff;
+
     public Prediction(BoarPlayer player) {
         super(player);
 
@@ -55,17 +59,38 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
 
         player.getTeleportUtil().correct();
 
+        final int cooldown = Boar.getConfig().correctionFlagCooldownTicks();
+        if (this.lastFlagTick != Long.MIN_VALUE && player.tick - this.lastFlagTick < cooldown) {
+            this.suppressedFails++;
+            if (posDiff > this.suppressedMaxPosDiff) {
+                this.suppressedMaxPosDiff = posDiff;
+            }
+            Boar.debug("[movement-debug] correction flag on cooldown tick=" + player.tick
+                    + " suppressed=" + this.suppressedFails
+                    + " maxPosDiff=" + this.suppressedMaxPosDiff, Boar.DebugMessage.WARNING);
+            return;
+        }
+
+        String suppressedNote = "";
+        if (this.suppressedFails > 0) {
+            suppressedNote = " (+" + this.suppressedFails + " extra fails since last flag, maxPosDiff="
+                    + this.suppressedMaxPosDiff + ")";
+            this.suppressedFails = 0;
+            this.suppressedMaxPosDiff = 0;
+        }
+        this.lastFlagTick = player.tick;
+
         final boolean checkEnabled = !Boar.getConfig().disabledChecks().contains("Correction");
         if (player.disableMitigations() && checkEnabled) {
             // Detection-only mode: attach the trace to the violation info instead of the log,
             // so the detection pipeline gets the full re-creation data.
-            this.correction.fail("o: " + posDiff + "\n" + player.getMovementTrace().dump(failureInfo));
+            this.correction.fail("o: " + posDiff + suppressedNote + "\n" + player.getMovementTrace().dump(failureInfo + suppressedNote));
             return;
         }
 
-        player.getMovementTrace().flush(failureInfo);
+        player.getMovementTrace().flush(failureInfo + suppressedNote);
         if (checkEnabled) {
-            this.correction.fail("o: " + posDiff);
+            this.correction.fail("o: " + posDiff + suppressedNote);
         }
     }
 
