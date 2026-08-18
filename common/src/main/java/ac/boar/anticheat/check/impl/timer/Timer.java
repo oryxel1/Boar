@@ -38,7 +38,7 @@ public final class Timer extends BaseCheck implements PingBasedCheck {
     }
 
     public boolean isInvalid() {
-        if (this.lastNS == 0 || player.inLoadingScreen || player.sinceLoadingScreen < 20) {
+        if (this.lastNS == 0 || player.inLoadingScreen || player.sinceLoadingScreen < 200) {
             this.lastNS = System.nanoTime();
             this.prevTick = player.tick;
             this.balance = 0;
