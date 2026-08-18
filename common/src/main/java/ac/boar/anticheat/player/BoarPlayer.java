@@ -24,6 +24,7 @@ import ac.boar.anticheat.player.data.PlayerData;
 import ac.boar.anticheat.teleport.TeleportUtil;
 import ac.boar.anticheat.util.LatencyUtil;
 import ac.boar.anticheat.util.MathUtil;
+import ac.boar.anticheat.util.MovementTrace;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Mutable;
 import ac.boar.anticheat.util.math.Vec3;
@@ -78,6 +79,10 @@ public final class BoarPlayer extends PlayerData {
 
     @Getter
     private final LatencyUtil latencyUtil = new LatencyUtil(this);
+
+    // Records each tick of the movement prediction. Flushed to the log on a prediction failure.
+    @Getter
+    private final MovementTrace movementTrace = new MovementTrace(this);
 
     @Getter
     @Setter

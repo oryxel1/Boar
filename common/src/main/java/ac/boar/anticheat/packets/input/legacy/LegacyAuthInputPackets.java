@@ -42,11 +42,17 @@ public class LegacyAuthInputPackets {
 
         // Properly calculated offset by comparing position instead of poorly calculated velocity that get calculated using (pos - prevPos) to account for floating point errors.
         float offset = player.position.distanceTo(player.unvalidatedPosition);
+        final float rawOffset = offset;
         float extraOffset = uncertainRunner.extraOffset(offset);
         offset -= extraOffset;
-        offset -= uncertainRunner.extraOffsetNonTickEnd(offset);
+        final float extraOffsetNonTickEnd = uncertainRunner.extraOffsetNonTickEnd(offset);
+        offset -= extraOffsetNonTickEnd;
         uncertainRunner.uncertainPushTowardsTheClosetSpace();
         uncertainRunner.resolveUncertainBouncing();
+
+        player.getMovementTrace().log("offset: raw=" + rawOffset + " extra=" + extraOffset
+                + " extraNonTickEnd=" + extraOffsetNonTickEnd + " final=" + offset
+                + " predictedPos=" + player.position + " actualPos=" + player.unvalidatedPosition);
 
         for (Map.Entry<Class<?>, Check> entry : player.getCheckHolder().entrySet()) {
             Check v = entry.getValue();
@@ -67,11 +73,18 @@ public class LegacyAuthInputPackets {
 
             // Have to do this due to loss precision, especially elytra!
             if (canAcceptClient && player.velocity.distanceTo(player.unvalidatedTickEnd) - extraOffset < player.getPosAcceptanceThreshold()) {
+                player.getMovementTrace().log("post: accepted client velocity " + player.unvalidatedTickEnd);
                 player.velocity = player.unvalidatedTickEnd.clone();
             }
 
             if (canAcceptClient && offset < player.getPosAcceptanceThreshold()) {
+                player.getMovementTrace().log("post: accepted client position " + player.unvalidatedPosition);
                 player.setPos(player.unvalidatedPosition.clone(), false);
+            }
+
+            if (!canAcceptClient) {
+                player.getMovementTrace().log("post: kept prediction (pendingCorrection=" + hasPendingCorrection
+                        + " correctionCooldown=" + inCorrectionCooldown + ")");
             }
 
             if (!hasPendingCorrection && inCorrectionCooldown) {

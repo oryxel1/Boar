@@ -48,6 +48,7 @@ public class LivingTicker extends EntityTicker {
             float n = (float) GenericMath.sqrt(k * k + l * l + m * m);
 
             player.velocity = player.velocity.add(k * (f / n), l * (f / n), m * (f / n));
+            player.getMovementTrace().log("riptide: vel=" + player.velocity + " onGround=" + player.onGround);
             player.autoSpinAttackTicks = 20;
 //            if (player.onGround) {
 //                this.doSelfMove(new Vec3(0, 1.1999999284744263F, 0));
@@ -73,6 +74,7 @@ public class LivingTicker extends EntityTicker {
         // Stop invalid grounded gliding before the jump and travel calculations use it.
         final boolean stoppedGroundedGlide = player.getFlagTracker().has(EntityFlag.GLIDING) && player.onGround;
         if (stoppedGroundedGlide) {
+            player.getMovementTrace().log("glide: stopped, player is on ground");
             player.getFlagTracker().set(EntityFlag.GLIDING, false);
         }
 
@@ -80,10 +82,16 @@ public class LivingTicker extends EntityTicker {
         boolean onAscendable = player.getFlagTracker().has(EntityFlag.OVER_DESCENDABLE_BLOCK) || player.getFlagTracker().has(EntityFlag.OVER_SCAFFOLDING);
         if (inAscendable && player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition).y > 0) {
             if (player.getInputData().contains(PlayerAuthInputData.JUMPING) || player.getInputData().contains(PlayerAuthInputData.ASCEND_BLOCK)) {
+                player.getMovementTrace().log("ascendable: y velocity set to 0.15");
                 player.velocity.y = 0.15F;
             }
         } else {
+            final Vec3 beforeJump = player.velocity;
             player.velocity = player.jump(player.velocity);
+            if (beforeJump.x != player.velocity.x || beforeJump.y != player.velocity.y || beforeJump.z != player.velocity.z) {
+                player.getMovementTrace().log("jump: " + beforeJump + " -> " + player.velocity
+                        + " (onGround=" + player.onGround + " jumpPower=" + player.getJumpPower() + ")");
+            }
         }
 
         boolean descending = player.getInputData().contains(PlayerAuthInputData.SNEAKING) || player.getInputData().contains(PlayerAuthInputData.DESCEND_BLOCK);
@@ -92,16 +100,19 @@ public class LivingTicker extends EntityTicker {
         BoarBlockState state = player.compensatedWorld.getBlockState(player.getOnPos(1F), 0);
         if (descending) {
             if (state.is(Blocks.POWDER_SNOW) ||  player.getInBlockState().is(Blocks.POWDER_SNOW)) {
+                player.getMovementTrace().log("descend: powder snow, y velocity set to -0.15");
                 player.velocity.y = -0.15F;
             }
 
             if (onAscendable && Math.abs(player.unvalidatedTickEnd.y) - 0.15F < 0.01F) {
+                player.getMovementTrace().log("descend: scaffolding, y velocity set to -0.15");
                 player.velocity.y = -0.15F;
                 player.scaffoldDescend = true;
             }
         }
 
         if (player.getFlagTracker().has(EntityFlag.GLIDING) && (player.vehicleData != null || player.hasEffect(Effect.LEVITATION))) {
+            player.getMovementTrace().log("glide: stopped, player has a vehicle or levitation");
             player.getFlagTracker().set(EntityFlag.GLIDING, false);
         }
 
@@ -196,7 +207,9 @@ public class LivingTicker extends EntityTicker {
 //                return;
 //            }
 
+            player.getMovementTrace().log("engine: Gliding, velIn=" + player.velocity);
             player.velocity = new GlidingPredictionEngine(player).travel(player.velocity);
+            player.getMovementTrace().log("engine: Gliding, velAfterTravel=" + player.velocity);
             this.doSelfMove(player.velocity.clone()); // this.move(MoverType.SELF, this.getDeltaMovement());
         } else {
             travelInAir();
@@ -205,9 +218,12 @@ public class LivingTicker extends EntityTicker {
 
     private void travelInAir() {
         final PredictionEngine engine = new GroundAndAirPredictionEngine(player);
+        player.getMovementTrace().log("engine: GroundAndAir, velIn=" + player.velocity);
         player.velocity = engine.travel(player.velocity);
+        player.getMovementTrace().log("engine: GroundAndAir, velAfterTravel=" + player.velocity);
         this.doSelfMove(player.velocity.clone()); // this.move(MoverType.SELF, this.getDeltaMovement());
         engine.finalizeMovement();
+        player.getMovementTrace().log("engine: GroundAndAir, velAfterFinalize=" + player.velocity);
     }
 
     private void travelInFluid() {
@@ -218,12 +234,16 @@ public class LivingTicker extends EntityTicker {
         } else {
             engine = new LavaPredictionEngine(player);
         }
+        player.getMovementTrace().log("engine: " + engine.getClass().getSimpleName() + ", velIn=" + player.velocity);
         player.velocity = engine.travel(player.velocity);
+        player.getMovementTrace().log("engine: " + engine.getClass().getSimpleName() + ", velAfterTravel=" + player.velocity);
         this.doSelfMove(player.velocity.clone());
         engine.finalizeMovement();
+        player.getMovementTrace().log("engine: " + engine.getClass().getSimpleName() + ", velAfterFinalize=" + player.velocity);
 
         Vec3 vec33 = player.velocity;
         if (player.horizontalCollision && player.doesNotCollide(vec33.x, vec33.y + 0.6f - player.position.y + d, vec33.z)) {
+            player.getMovementTrace().log("fluid: edge hop, y velocity set to 0.3");
             player.velocity.y = 0.3F;
         }
     }

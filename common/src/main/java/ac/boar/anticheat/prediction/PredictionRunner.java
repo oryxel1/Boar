@@ -22,6 +22,10 @@ public class PredictionRunner {
         new PlayerTicker(player).tick();
         player.predictionResult = new PredictionData(player.beforeCollision.clone(), player.afterCollision.clone(), player.velocity.clone());
         player.lastTickFinalVelocity = player.velocity.clone();
+
+        player.getMovementTrace().log("prediction done: predictedPos=" + player.position
+                + " finalVel=" + player.velocity + " beforeCollision=" + player.beforeCollision
+                + " afterCollision=" + player.afterCollision);
     }
 
     private boolean findBestTickStartVelocity() {
@@ -34,6 +38,8 @@ public class PredictionRunner {
 
         // We can store the ACTUAL prediction now.
         player.velocity = player.bestPossibility.getVelocity().clone();
+        player.getMovementTrace().log("start velocity: type=" + player.bestPossibility.getType()
+                + " vel=" + player.velocity);
         return true;
     }
 }

@@ -36,6 +36,8 @@ public class WaterPredictionEngine extends PredictionEngine {
         this.tickEndSpeed = h;
 
         player.hasDepthStrider = this.tickEndSpeed > 0 && (!player.getFlagTracker().has(EntityFlag.SWIMMING) || depthStrider >= 4);
+        player.getMovementTrace().log("water: depthStrider=" + depthStrider + " strideFactor=" + h
+                + " speed=" + (h > 0 ? 0.02F + ((player.getSpeed() - 0.02F) * h) : 0.02F));
         return this.moveRelative(vec3, h > 0 ? 0.02F + ((player.getSpeed() - 0.02F) * h) : 0.02F);
     }
 

@@ -58,6 +58,8 @@ public class UncertainRunner {
         }
 
 //        System.out.println("Min: " + y + ", tickend=" + player.unvalidatedTickEnd.y);
+        player.getMovementTrace().log("uncertainty: bounce, accepted client y=" + player.unvalidatedTickEnd.y
+                + " (minPossible=" + y + ")");
         player.velocity.y = player.unvalidatedTickEnd.y;
     }
 
@@ -110,6 +112,8 @@ public class UncertainRunner {
 //        }
 
         // TODO: Enforce this further.
+        player.getMovementTrace().log("uncertainty: push out of block, accepted client vel=" + player.unvalidatedTickEnd
+                + " (push=" + pushTowardsClosetSpaceVel + ")");
         player.velocity = player.unvalidatedTickEnd.clone();
     }
 

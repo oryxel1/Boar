@@ -71,6 +71,9 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         player.insideUnloadedChunk = !player.compensatedWorld.isChunkLoadedAt(
                 player.unvalidatedPosition.x, player.unvalidatedPosition.z);
 
+        // Start a fresh movement trace for this tick, with a snapshot of the start state.
+        player.getMovementTrace().begin();
+
         final Reach reach = (Reach) player.getCheckHolder().get(Reach.class);
         if (reach != null) { // null when the Reach check is disabled via disabled-checks - don't NPE.
             reach.validatePending();
@@ -79,26 +82,35 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         player.tick();
 
         if (player.vehicleData != null) { // TODO: Vehicle prediction.
+            player.getMovementTrace().log("path: vehicle, accepted client position");
             player.position = player.unvalidatedPosition;
             player.compensatedWorld.cleanChunksAtPlayerPosition();
             return;
         }
 
         if (player.getEntity().bedPosition() != null) {
+            player.getMovementTrace().log("path: in bed, skipped");
             return;
         }
 
         if (player.getTeleportUtil().isTeleporting()) {
+            player.getMovementTrace().log("path: teleporting, processing queued teleports");
             this.processQueuedTeleports(player, packet);
         } else if (player.insideUnloadedChunk) {
+            player.getMovementTrace().log("path: unloaded chunk, velocity zeroed");
             player.velocity = Vec3.ZERO.clone();
         } else {
             if (player.isMovementExempted()
                     || player.inLoadingScreen
                     || player.sinceLoadingScreen < 2
                     || player.tickSinceBlockResync > 0) {
+                player.getMovementTrace().log("path: exempted (movementExempt=" + player.isMovementExempted()
+                        + " inLoadingScreen=" + player.inLoadingScreen
+                        + " sinceLoadingScreen=" + player.sinceLoadingScreen
+                        + " blockResync=" + player.tickSinceBlockResync + ")");
                 processExempted(player);
             } else {
+                player.getMovementTrace().log("path: prediction");
                 new PredictionRunner(player).run();
             }
         }

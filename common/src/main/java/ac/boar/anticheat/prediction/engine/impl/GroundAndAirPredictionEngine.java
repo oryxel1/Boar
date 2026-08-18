@@ -49,9 +49,13 @@ public class GroundAndAirPredictionEngine extends PredictionEngine {
     }
 
     private Vec3 halfRelativeMovementCalculate(Vec3 vec3, float f) {
-        vec3 = this.moveRelative(vec3, player.getFrictionInfluencedSpeed(f));
+        final float speed = player.getFrictionInfluencedSpeed(f);
+        player.getMovementTrace().log("air/ground: slipperiness=" + f + " speed=" + speed);
+
+        vec3 = this.moveRelative(vec3, speed);
         final boolean collidedOrJumping = player.horizontalCollision || player.getInputData().contains(PlayerAuthInputData.JUMPING);
         if (collidedOrJumping && (player.onClimbable() || player.getInBlockState().is(Blocks.POWDER_SNOW) && PowderSnowBlock.canEntityWalkOnPowderSnow(player))) {
+            player.getMovementTrace().log("air/ground: climbable/powder snow ascent");
             vec3.y = player.bestPossibility.getType() == VectorType.VELOCITY ? vec3.y : 0.2F;
         }
 

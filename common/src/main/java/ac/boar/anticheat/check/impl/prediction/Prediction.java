@@ -6,29 +6,18 @@ import ac.boar.anticheat.check.api.Check;
 import ac.boar.api.anticheat.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
-import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @CheckInfo(name = "Prediction")
 public class Prediction extends BaseCheck implements OffsetHandlerCheck {
-    private final Map<String, Check> checks = new HashMap<>();
+    private final Check correction;
 
     public Prediction(BoarPlayer player) {
         super(player);
 
-        this.checks.put("Phase", new BaseCheck(player, "Phase", "", false));
-        this.checks.put("Velocity", new BaseCheck(player, "Velocity", "", false));
-
-        this.checks.put("Strafe", new BaseCheck(player, "Strafe", "", false));
-        this.checks.put("Speed", new BaseCheck(player, "Speed", "", false));
-        this.checks.put("Flight", new BaseCheck(player, "Flight", "", false));
-
-        this.checks.put("Collisions", new BaseCheck(player, "Collisions", "", false));
+        this.correction = new BaseCheck(player, "MovementCorrection", "", false);
     }
 
     @Override
@@ -42,51 +31,41 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
         }
 
         Boar.debug("[movement-debug] prediction posDiff tick=" + player.tick + " posDiff=" + posDiff + " acceptance/max=" + player.getPosAcceptanceThreshold() + " alert=" + Boar.getConfig().alertThreshold() + " type=" + player.bestPossibility.getType() + " predictedPos=" + player.position + " actualPos=" + player.unvalidatedPosition + " predictedDelta=" + player.velocity + " actualDelta=" + player.unvalidatedTickEnd, Boar.DebugMessage.WARNING);
-        boolean isPosDiffExcessive = posDiff >= Boar.getConfig().alertThreshold();
-        if (!player.disableMitigations()) {
-            if (!isPosDiffExcessive) {
+        if (posDiff < Boar.getConfig().alertThreshold()) {
+            // The difference is above the acceptance threshold but below the alert threshold.
+            if (!player.disableMitigations()) {
                 this.driftTowardsClient();
-            } else {
-                Boar.debug("[movement-debug] correction reason=prediction-soft tick=" + player.tick + " posDiff=" + posDiff, Boar.DebugMessage.WARNING);
-                player.getTeleportUtil().correct();
             }
-            return;
-        } else if (!isPosDiffExcessive) {
-            // Mitigations are disabled and pos difference is above acceptance threshold but isn't above flagging threshold
             return;
         }
 
         Boar.debug("[movement-debug] correction reason=prediction-fail tick=" + player.tick + " posDiff=" + posDiff, Boar.DebugMessage.WARNING);
+
+        // Dump the retained movement trace so the failure can be re-created and inspected.
+        final boolean claimedHorizontal = player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION);
+        final boolean claimedVertical = player.getInputData().contains(PlayerAuthInputData.VERTICAL_COLLISION);
+        final String failureInfo = "prediction failure tick=" + player.tick
+                + " posDiff=" + posDiff + " alertThreshold=" + Boar.getConfig().alertThreshold()
+                + " acceptance=" + player.getPosAcceptanceThreshold()
+                + " type=" + player.bestPossibility.getType()
+                + " predictedPos=" + player.position + " actualPos=" + player.unvalidatedPosition
+                + " predictedDelta=" + player.velocity + " actualDelta=" + player.unvalidatedTickEnd
+                + " serverCollision=(h=" + player.horizontalCollision + ",v=" + player.verticalCollision + ")"
+                + " claimedCollision=(h=" + claimedHorizontal + ",v=" + claimedVertical + ")";
+
         player.getTeleportUtil().correct();
 
-        boolean claimedHorizontal = player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION);
-        boolean claimedVertical = player.getInputData().contains(PlayerAuthInputData.VERTICAL_COLLISION);
-        if (claimedVertical != player.verticalCollision || claimedHorizontal != player.horizontalCollision) {
-            fail("Phase", "o: " + posDiff + ", expect: (" + player.horizontalCollision + "," + player.verticalCollision + "), actual: (" + claimedHorizontal + "," + claimedVertical + ")");
-        }
-
-        if (player.bestPossibility.getType() == VectorType.VELOCITY) {
-            fail("Velocity", "o: " + posDiff);
+        final boolean checkEnabled = !Boar.getConfig().disabledChecks().contains("Correction");
+        if (player.disableMitigations() && checkEnabled) {
+            // Detection-only mode: attach the trace to the violation info instead of the log,
+            // so the detection pipeline gets the full re-creation data.
+            this.correction.fail("o: " + posDiff + "\n" + player.getMovementTrace().dump(failureInfo));
             return;
         }
 
-        if (player.unvalidatedTickEnd.distanceTo(player.velocity) < player.getPosAcceptanceThreshold()) {
-            fail("Collisions", "o: " + posDiff);
-        }
-
-        Vec3 actual = player.unvalidatedPosition.subtract(player.prevUnvalidatedPosition);
-        Vec3 predicted = player.position.subtract(player.prevUnvalidatedPosition);
-        if (!MathUtil.sameDirectionHorizontal(actual, predicted)) {
-            fail("Strafe", "o: " + posDiff + ", expected direction: " + MathUtil.signAll(predicted).horizontalToString() + ", actual direction: " + MathUtil.signAll(actual).horizontalToString());
-        }
-
-        float squaredActual = actual.horizontalLengthSquared(), squaredPredicted = predicted.horizontalLengthSquared();
-        if (actual.horizontalLengthSquared() > predicted.horizontalLengthSquared()) {
-            fail("Speed", "o: " + posDiff + ", expected: " + squaredPredicted + ", actual: " + squaredActual);
-        }
-
-        if (Math.abs(player.position.y - player.unvalidatedPosition.y) > player.getPosAcceptanceThreshold()) {
-            fail("Flight", "o: " + posDiff);
+        player.getMovementTrace().flush(failureInfo);
+        if (checkEnabled) {
+            this.correction.fail("o: " + posDiff);
         }
     }
 
@@ -131,13 +110,5 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
                 && player.sinceLoadingScreen > 5
                 && player.compensatedWorld.isChunkLoadedAt(player.position.x, player.position.z)
                 && player.compensatedWorld.isChunkLoadedAt(player.unvalidatedPosition.x, player.unvalidatedPosition.z);
-    }
-
-    public void fail(String name, String verbose) {
-        if (Boar.getConfig().disabledChecks().contains(name)) {
-            return;
-        }
-
-        this.checks.get(name).fail(verbose);
     }
 }

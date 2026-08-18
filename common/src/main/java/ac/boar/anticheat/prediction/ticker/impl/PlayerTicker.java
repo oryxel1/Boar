@@ -34,6 +34,8 @@ public class PlayerTicker extends LivingTicker {
             }
 
             player.input = player.input.multiply(MathUtil.clamp(sneakingMultiplier, 0, 1));
+            player.getMovementTrace().log("input: sneak slowdown x" + MathUtil.clamp(sneakingMultiplier, 0, 1)
+                    + ", input=" + player.input);
         } else {
             player.ticksSinceCanSlowdown = 0;
         }
@@ -57,6 +59,7 @@ public class PlayerTicker extends LivingTicker {
 
         if (applySlowdown) {
             player.input = player.input.multiply(0.122499995F);
+            player.getMovementTrace().log("input: item use slowdown, input=" + player.input);
         }
     }
 
@@ -64,6 +67,7 @@ public class PlayerTicker extends LivingTicker {
     public void aiStep() {
         if (player.touchingWater && player.getInputData().contains(PlayerAuthInputData.SNEAKING) /*&& this.isAffectedByFluids()*/) {
             player.velocity.y -= 0.04F;
+            player.getMovementTrace().log("water: sneak sink, y velocity -0.04");
         }
 
         super.aiStep();
@@ -77,17 +81,20 @@ public class PlayerTicker extends LivingTicker {
             // Seems to be the case, on JE they check for fluid state 0.9 blocks up to prevent player from resurfacing when swimming
             // But on BE they seem to be setting the y motion to 0 instead (you can press space to swim up on JE but not on BE when near water surface)
             if (player.compensatedWorld.getFluidState(player.position.up(0.4F).toVector3i()).fluid() == Fluid.EMPTY && d > 0 && d < 0.55) {
+                player.getMovementTrace().log("swim: at surface, y velocity set to 0 (pitchVecY=" + d + ")");
                 player.velocity.y = 0;
             } else {
                 float e = d < -0.2 ? 0.085F : 0.06F;
                 final FluidState state = player.compensatedWorld.getFluidState(player.position.toVector3i());
                 if ((d <= 0.0 || state.fluid() != Fluid.EMPTY) && !player.getInputData().contains(PlayerAuthInputData.JUMPING)) {
                     player.velocity = player.velocity.add(0, (d - player.velocity.y) * e, 0);
+                    player.getMovementTrace().log("swim: pitch adjust (pitchVecY=" + d + " e=" + e + "), vel=" + player.velocity);
                 }
             }
 
             // No fucking idea why, but if it's the case then it's the case, hacks but works.
             if (player.unvalidatedTickEnd.y == 0 && player.ticksSinceSwimming > 0 && player.ticksSinceSwimming < 10 && player.getInputData().contains(PlayerAuthInputData.JUMPING)) {
+                player.getMovementTrace().log("swim: jump hack, y velocity set to 0");
                 player.velocity.y = 0;
             }
         }

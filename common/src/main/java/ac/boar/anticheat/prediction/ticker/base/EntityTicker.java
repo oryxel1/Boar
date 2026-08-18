@@ -134,11 +134,14 @@ public class EntityTicker {
 
     public final void doSelfMove(Vec3 vec3) {
         if (player.abilities.contains(Ability.NO_CLIP)) {
+            player.getMovementTrace().log("move: noclip, no collision applied");
             player.setPos(player.position.add(vec3));
             return;
         }
 
         if (player.stuckSpeedMultiplier.lengthSquared() > 1.0E-7) {
+            player.getMovementTrace().log("move: stuck multiplier " + player.stuckSpeedMultiplier
+                    + " applied, velocity zeroed");
             vec3 = vec3.multiply(player.stuckSpeedMultiplier);
             player.stuckSpeedMultiplier = Vec3.ZERO;
             player.velocity = Vec3.ZERO.clone();
@@ -160,6 +163,9 @@ public class EntityTicker {
         player.penetratedLastFrame = hasPenetration;
         player.setPos(player.position.add(vec32));
 
+        player.getMovementTrace().log("move: input=" + oldVec3 + " afterEdgeBackoff=" + vec3
+                + " afterCollide=" + vec32 + " penetration=" + penetration + " newPos=" + player.position);
+
         boolean collidedX = Math.abs(vec3.x - vec32.x) >= COLLISION_EPSILON;
         boolean collidedZ = Math.abs(vec3.z - vec32.z) >= COLLISION_EPSILON;
         player.horizontalCollision = collidedX || collidedZ;
@@ -173,10 +179,13 @@ public class EntityTicker {
             Vec3 lastTickCollision = Collider.collide(player, player.lastTickFinalVelocity.clone());
             player.verticalCollision = Math.abs(lastTickCollision.y - player.lastTickFinalVelocity.y) >= COLLISION_EPSILON;
             player.onGround = player.verticalCollision && player.lastTickFinalVelocity.y < 0;
+            player.getMovementTrace().log("move: zero-velocity ground hack, vColl=" + player.verticalCollision
+                    + " onGround=" + player.onGround);
         }
 
         // The player is near bamboo, we don't know what the offsetting is so we let player decide this...
         if (player.nearBamboo && player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION)) {
+            player.getMovementTrace().log("move: bamboo hack, trusting client horizontal collision");
             player.horizontalCollision = true;
             collidedX = player.unvalidatedTickEnd.x == 0;
             collidedZ = player.unvalidatedTickEnd.z == 0;
@@ -185,6 +194,7 @@ public class EntityTicker {
         // Sneaking hacks, this is not entirely correct but works, not much room to abuse.
         if (oldVec3.x != vec3.x || oldVec3.z != vec3.z) {
             player.velocity = new Vec3(player.unvalidatedTickEnd.x == 0 ? 0 : player.velocity.x, player.velocity.y, player.unvalidatedTickEnd.z == 0 ? 0 : player.velocity.z);
+            player.getMovementTrace().log("move: edge backoff velocity hack, vel=" + player.velocity);
         }
 
         // TODO: What the actual value actually? Player still able to bounce on slime despite being .375 block higher.
@@ -207,6 +217,10 @@ public class EntityTicker {
 
         player.beforeCollision = vec3.clone();
         player.afterCollision = vec32.clone();
+
+        player.getMovementTrace().log("move done: hColl=" + player.horizontalCollision + " (x=" + collidedX
+                + " z=" + collidedZ + ") vColl=" + player.verticalCollision + " onGround=" + player.onGround
+                + " bounce=" + player.bounce + " vel=" + player.velocity);
     }
 
     private static boolean exceedsReconstructionNoise(float penetration, float coordinate) {
