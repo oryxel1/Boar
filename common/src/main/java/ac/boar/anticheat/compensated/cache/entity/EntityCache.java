@@ -27,6 +27,7 @@ public final class EntityCache {
     private EntityDimensions dimensions;
     private Vec3 serverPosition = Vec3.ZERO;
     private boolean inVehicle;
+    private float pitch, yaw, headYaw;
 
     private EntityDataMap metadata = new EntityDataMap();
 
@@ -66,6 +67,12 @@ public final class EntityCache {
 
     public void init() {
         this.current = new CachedEntityState(this.player, this);
+    }
+
+    public void applyRotation(Float pitch, Float yaw, Float headYaw) {
+        if (pitch != null) this.pitch = pitch;
+        if (yaw != null) this.yaw = yaw;
+        if (headYaw != null) this.headYaw = headYaw;
     }
 
     public void interpolate(Vec3 pos, boolean lerp) {

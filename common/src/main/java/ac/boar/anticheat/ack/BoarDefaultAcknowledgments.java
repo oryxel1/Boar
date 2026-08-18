@@ -135,6 +135,7 @@ public final class BoarDefaultAcknowledgments {
         final EntityCache entity = player.compensatedWorld.getEntity(ack.runtimeEntityId());
         if (entity != null) {
             entity.interpolate(ack.posX(), ack.posY(), ack.posZ(), ack.lerp());
+            entity.applyRotation(ack.pitch(), ack.yaw(), ack.headYaw());
         }
     }
 

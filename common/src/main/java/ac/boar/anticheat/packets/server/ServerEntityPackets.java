@@ -21,9 +21,11 @@ public class ServerEntityPackets implements PacketListener {
         if (event.getPacket() instanceof RemoveEntityPacket packet) {
             player.sendLatencyStack(new EntityRemoveAck(packet.getUniqueEntityId()));
         } else if (event.getPacket() instanceof AddEntityPacket packet) {
-            this.handleEntityAdd(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId(), packet.getPosition(), packet.getMetadata());
+            this.handleEntityAdd(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId(), packet.getPosition(), packet.getMetadata(),
+                    packet.getRotation().getX(), packet.getRotation().getY(), packet.getHeadRotation());
         } else if (event.getPacket() instanceof AddPlayerPacket packet) {
-            this.handleEntityAdd(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId(), packet.getPosition(), packet.getMetadata());
+            this.handleEntityAdd(player, packet.getRuntimeEntityId(), packet.getUniqueEntityId(), packet.getPosition(), packet.getMetadata(),
+                    packet.getRotation().getX(), packet.getRotation().getY(), packet.getRotation().getZ());
         } else if (event.getPacket() instanceof MoveEntityDeltaPacket packet) {
             final EntityCache entity = player.compensatedWorld.getTrackedEntity(packet.getRuntimeEntityId());
             if (entity == null) {
@@ -32,6 +34,7 @@ public class ServerEntityPackets implements PacketListener {
 
             final Set<MoveEntityDeltaPacket.Flag> flags = packet.getFlags();
             Float posX = null, posY = null, posZ = null;
+            Float pitch = null, yaw = null, headYaw = null;
             if (flags.contains(MoveEntityDeltaPacket.Flag.HAS_X)) {
                 posX = packet.getX();
             }
@@ -41,12 +44,21 @@ public class ServerEntityPackets implements PacketListener {
             if (flags.contains(MoveEntityDeltaPacket.Flag.HAS_Z)) {
                 posZ = packet.getZ();
             }
+            if (flags.contains(MoveEntityDeltaPacket.Flag.HAS_PITCH)) {
+                pitch = packet.getPitch();
+            }
+            if (flags.contains(MoveEntityDeltaPacket.Flag.HAS_YAW)) {
+                yaw = packet.getYaw();
+            }
+            if (flags.contains(MoveEntityDeltaPacket.Flag.HAS_HEAD_YAW)) {
+                headYaw = packet.getHeadYaw();
+            }
 
-            this.queuePositionUpdate(event, entity, posX, posY, posZ, true);
+            this.queuePositionUpdate(event, entity, posX, posY, posZ, pitch, yaw, headYaw, true);
         } else if (event.getPacket() instanceof MoveEntityAbsolutePacket packet) {
             player.compensatedWorld
                     .fetchTrackedEntity(packet.getRuntimeEntityId())
-                    .ifPresent(entity -> this.queuePositionUpdate(event, entity, packet.getPosition(), true));
+                    .ifPresent(entity -> this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getRotation(), true));
         } else if (event.getPacket() instanceof MovePlayerPacket packet) {
             if (packet.getRuntimeEntityId() == player.runtimeEntityId) {
                 return;
@@ -54,11 +66,12 @@ public class ServerEntityPackets implements PacketListener {
 
             player.compensatedWorld
                     .fetchTrackedEntity(packet.getRuntimeEntityId())
-                    .ifPresent(entity -> this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getMode() == MovePlayerPacket.Mode.NORMAL));
+                    .ifPresent(entity -> this.queuePositionUpdate(event, entity, packet.getPosition(), packet.getRotation(), packet.getMode() == MovePlayerPacket.Mode.NORMAL));
         }
     }
 
-    private void handleEntityAdd(final BoarPlayer player, final long runtimeId, final long uniqueId, final Vector3f rawPosition, final EntityDataMap metadata) {
+    private void handleEntityAdd(final BoarPlayer player, final long runtimeId, final long uniqueId, final Vector3f rawPosition, final EntityDataMap metadata,
+                                 final float pitch, final float yaw, final float headYaw) {
         final EntityCache entity = player.compensatedWorld.addToCache(player, runtimeId, uniqueId);
         if (entity == null) {
             return;
@@ -68,6 +81,7 @@ public class ServerEntityPackets implements PacketListener {
         entity.setServerPosition(position);
         entity.init();
         entity.interpolate(position, false);
+        entity.applyRotation(pitch, yaw, headYaw);
         entity.setMetadata(metadata);
 
         // The entity stays hidden from checks and prediction until the client acknowledges the
@@ -75,8 +89,9 @@ public class ServerEntityPackets implements PacketListener {
         player.sendLatencyStack(new AddEntityAck(runtimeId));
     }
 
-    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final boolean tryLerp) {
-        queuePositionUpdate(event, entity, raw.getX(), raw.getY(), raw.getZ(), tryLerp);
+    private void queuePositionUpdate(final CloudburstPacketEvent event, final EntityCache entity, final Vector3f raw, final Vector3f rotation, final boolean tryLerp) {
+        queuePositionUpdate(event, entity, raw.getX(), raw.getY(), raw.getZ(),
+                rotation.getX(), rotation.getY(), rotation.getZ(), tryLerp);
     }
 
     private void queuePositionUpdate(
@@ -85,6 +100,9 @@ public class ServerEntityPackets implements PacketListener {
             final Float posX,
             Float posY,
             final Float posZ,
+            final Float pitch,
+            final Float yaw,
+            final Float headYaw,
             final boolean tryLerp
     ) {
         final BoarPlayer player = event.getPlayer();
@@ -104,7 +122,8 @@ public class ServerEntityPackets implements PacketListener {
         } */
 
         entity.setServerPosition(newPos);
-        player.queueAcknowledgment(new EntityInterpolateAck(runtimeId, posX, posY, posZ, tryLerp && distance < 4096));
+        player.queueAcknowledgment(new EntityInterpolateAck(runtimeId, posX, posY, posZ,
+                pitch, yaw, headYaw, tryLerp && distance < 4096));
     }
 
 }
