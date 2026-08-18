@@ -22,6 +22,7 @@ import ac.boar.mappings.block.Properties;
 import ac.boar.mappings.item.Item;
 import ac.boar.mappings.item.ItemMappings;
 import ac.boar.mappings.item.Items;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.protocol.bedrock.codec.v1001.Bedrock_v1001;
@@ -48,12 +49,23 @@ import java.util.List;
 public final class ItemTransactionValidator {
     private final BoarPlayer player;
 
+    // Holds the reason of the last failed validation. Used for debug output when mitigations are off.
+    @Getter
+    private String failReason;
+
+    private boolean fail(final String reason) {
+        this.failReason = reason;
+        return false;
+    }
+
     public boolean handle(final InventoryTransactionPacket packet) {
+        this.failReason = null;
+
         final CompensatedInventory inventory = player.compensatedInventory;
         switch (packet.getTransactionType()) {
             case NORMAL -> {
                 if (packet.getActions().size() != 2) {
-                    return false;
+                    return fail("NORMAL: expected 2 actions, got " + packet.getActions().size());
                 }
 
                 // https://github.com/GeyserMC/Geyser/blob/3aeedfa6f207691d92d4f20106bc586b2ab883d4/core/src/main/java/org/geysermc/geyser/translator/protocol/bedrock/BedrockInventoryTransactionTranslator.java#L134
@@ -63,12 +75,12 @@ public final class ItemTransactionValidator {
                 final InventoryActionData container = isPost26_30 ? packet.getActions().get(0) : packet.getActions().get(1);
 
                 if (world.getSource().getType() != InventorySource.Type.WORLD_INTERACTION || world.getSource().getFlag() != InventorySource.Flag.DROP_ITEM) {
-                    return false;
+                    return fail("NORMAL: bad world action, sourceType=" + world.getSource().getType() + ", flag=" + world.getSource().getFlag());
                 }
 
                 final int slot = container.getSlot();
                 if (slot < 0 || slot > 8) {
-                    return false;
+                    return fail("NORMAL: container slot out of bounds: " + slot);
                 }
 
                 final ItemData slotData = inventory.inventoryContainer.getItemFromSlot(slot).getData();
@@ -77,7 +89,8 @@ public final class ItemTransactionValidator {
 
                 // Invalid drop, item or whatever
                 if (dropCounts < 1 || dropCounts > slotData.getCount() || !validate(slotData, claimedData)) {
-                    return false;
+                    return fail("NORMAL: invalid drop, slot=" + slot + ", dropCount=" + dropCounts
+                            + ", predicted=" + describe(slotData) + ", claimed=" + describe(claimedData));
                 }
 
                 // Since Geyser proceed to drop everything anyway, as long as you send anything larger than 1.
@@ -118,7 +131,7 @@ public final class ItemTransactionValidator {
                 final Vector3i position = packet.getBlockPosition();
                 final int slot = packet.getHotbarSlot();
                 if (slot < 0 || slot > 8) {
-                    return false;
+                    return fail("ITEM_USE: hotbar slot out of bounds: " + slot);
                 }
 
                 final ItemData SD1 = inventory.inventoryContainer.getHeldItemData();
@@ -128,7 +141,7 @@ public final class ItemTransactionValidator {
                 if (!noActions) {
                     for (final InventoryActionData action : packet.getActions()) {
                         if (action.getSlot() < 0 || action.getSlot() > 8) {
-                            return false;
+                            return fail("ITEM_USE: action slot out of bounds: " + action.getSlot());
                         }
 
                         final ItemData SD2 = inventory.inventoryContainer.getItemFromSlot(action.getSlot()).getData();
@@ -136,19 +149,22 @@ public final class ItemTransactionValidator {
                             if (isEmpty(SD2)) {
                                 continue;
                             }
-                            return false;
+                            return fail("ITEM_USE: action item mismatch, slot=" + action.getSlot()
+                                    + ", predicted=" + describe(SD2) + ", claimed=" + describe(action.getFromItem()));
                         }
                     }
                 }
 
                 final boolean emptyHandInteraction = isEmpty(SD1) && isEmpty(packet.getItemInHand());
                 if (noActions && !emptyHandInteraction && !isEmpty(SD1) && !validate(SD1, packet.getItemInHand())) {
-                    return false;
+                    return fail("ITEM_USE: held item mismatch, heldSlot=" + inventory.heldItemSlot
+                            + ", predicted=" + describe(SD1) + ", claimed=" + describe(packet.getItemInHand()));
                 }
 
                 float distance = player.position.toVector3f().distanceSquared(position.getX(), position.getY(), position.getZ());
                 if (!MathUtil.isValid(position) || distance > 12 * 12 && position.getX() + position.getY() + position.getZ() != 0) {
-                    return false;
+                    return fail("ITEM_USE: invalid block position " + position + ", distanceSq=" + distance
+                            + ", playerPos=" + player.position);
                 }
 
                 // The rest is going to validate by Geyser.
@@ -166,7 +182,7 @@ public final class ItemTransactionValidator {
                         }
 
                         if (packet.getBlockPosition() == null) {
-                            return false;
+                            return fail("ITEM_USE(place): null block position");
                         }
 
                         if (player.mappingInfo.isItemFrame(packet.getBlockDefinition())) {
@@ -175,7 +191,7 @@ public final class ItemTransactionValidator {
 
                         int blockFace = packet.getBlockFace();
                         if (blockFace < 0 || blockFace > 5) {
-                            return false; // Invalid.
+                            return fail("ITEM_USE(place): invalid block face " + blockFace);
                         }
 
                         ItemCache heldItem = inventory.inventoryContainer.getHeldItemCache();
@@ -303,7 +319,8 @@ public final class ItemTransactionValidator {
 
                             // GeyserBoar.getLogger().severe("AIR PLACEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
                             player.tickSinceBlockResync = 5;
-                            return false;
+                            return fail("ITEM_USE(place): interact against air block at " + position
+                                    + ", face=" + blockFace + ", heldItem=" + describe(SD1) + ", resynced");
                         }
 
                         if (item.is(Items.WATER_BUCKET)) {
@@ -417,6 +434,8 @@ public final class ItemTransactionValidator {
     }
 
     public boolean handle(final ItemStackRequestPacket packet) {
+        this.failReason = null;
+
         final CompensatedInventory inventory = player.compensatedInventory;
         if (inventory.openContainer == null) {
             return true;
@@ -439,15 +458,39 @@ public final class ItemTransactionValidator {
                 continue;
             }
 
-            if (!processor.processAll(request)) {
-                return false;
-            }
+            // Failures do not drop the request. We process everything like before,
+            // collect every fail reason, and report them all after the loop.
+            processor.processAll(request);
 
             if (mitigate) {
                 packet.getRequests().add(request);
             }
         }
+
+        final List<String> reasons = processor.getFailReasons();
+        if (!reasons.isEmpty()) {
+            return fail("requests=" + clone.size() + ", failed actions=" + reasons.size()
+                    + " [" + String.join(" | ", reasons) + "]");
+        }
+
         return true;
+    }
+
+    // Turn an item into a short readable string for debug messages.
+    public static String describe(final ItemData item) {
+        if (item == null) {
+            return "null";
+        }
+
+        return describe(item.getDefinition()) + " x" + item.getCount() + (item.getDamage() != 0 ? " dmg=" + item.getDamage() : "");
+    }
+
+    public static String describe(final ItemDefinition definition) {
+        if (definition == null) {
+            return "?";
+        }
+
+        return definition.getIdentifier() + "/" + definition.getRuntimeId();
     }
 
     public static boolean validate(final ItemData predicted, final ItemData claimed) {

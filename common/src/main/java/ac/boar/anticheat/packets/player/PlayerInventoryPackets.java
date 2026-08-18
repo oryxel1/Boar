@@ -12,6 +12,7 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.check.impl.inventory.Inventory;
 import ac.boar.anticheat.data.ItemUseTracker;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
 import ac.boar.protocol.api.CloudburstPacketEvent;
 import ac.boar.protocol.api.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
@@ -28,9 +29,24 @@ public class PlayerInventoryPackets implements PacketListener {
         if (event.getPacket() instanceof InventoryTransactionPacket packet) {
             try { // In case I messed up.
                 boolean cancelled = !player.transactionValidator.handle(packet);
-                if (cancelled && player.disableMitigations()) {
-                    player.getCheckHolder().manuallyFail(Inventory.class,
-                            "invalid transaction, type=" + packet.getTransactionType() + ", action=" + packet.getActionType());
+                if (cancelled) {
+                    final String details = "invalid transaction: " + player.transactionValidator.getFailReason()
+                            + " | type=" + packet.getTransactionType()
+                            + ", action=" + packet.getActionType()
+                            + ", hotbarSlot=" + packet.getHotbarSlot()
+                            + ", heldSlot=" + inventory.heldItemSlot
+                            + ", blockPos=" + packet.getBlockPosition()
+                            + ", blockFace=" + packet.getBlockFace()
+                            + ", clickPos=" + packet.getClickPosition()
+                            + ", itemInHand=" + ItemTransactionValidator.describe(packet.getItemInHand())
+                            + ", actions=" + packet.getActions().size()
+                            + ", gameType=" + player.gameType;
+
+                    if (player.disableMitigations()) {
+                        player.getCheckHolder().manuallyFail(Inventory.class, details);
+                    } else {
+                        Boar.debug(player.getSession().name() + ": " + details, Boar.DebugMessage.WARNING);
+                    }
                 }
 //                if (cancelled) {
 //                    System.out.println("Cancel inventory action: " + packet);
@@ -48,8 +64,20 @@ public class PlayerInventoryPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof ItemStackRequestPacket packet) {
-            if (!player.transactionValidator.handle(packet) && player.disableMitigations()) {
-                player.getCheckHolder().manuallyFail(Inventory.class, "invalid item stack request");
+            // TODO: Reverse engineer the 1.26.30 client and compare against other server software(s) to make sure inventory handling is matching.
+            // Also should look into why certain actions are failing to be validated.
+            if (!player.transactionValidator.handle(packet)) {
+                final String details = "invalid item stack request: " + player.transactionValidator.getFailReason()
+                        + " | requests=" + packet.getRequests().size()
+                        + ", openContainer=" + (inventory.openContainer == null ? "none"
+                                : inventory.openContainer.getType() + ":" + inventory.openContainer.getId())
+                        + ", gameType=" + player.gameType;
+
+                if (player.disableMitigations()) {
+                    player.getCheckHolder().manuallyFail(Inventory.class, details);
+                } else {
+                    Boar.debug(player.getSession().name() + ": " + details, Boar.DebugMessage.WARNING);
+                }
             }
         }
 

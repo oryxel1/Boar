@@ -5,6 +5,7 @@ import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cloudburstmc.protocol.bedrock.data.GameType;
 import org.cloudburstmc.protocol.bedrock.data.definitions.ItemDefinition;
@@ -30,23 +31,44 @@ public class ItemRequestProcessor {
 
     private final List<ItemCache> queuedItems = new ArrayList<>();
 
+    // Collects the reason of every failed action across the whole packet.
+    // Used for debug output when mitigations are off. Failures do not stop
+    // processing, so the compensated inventory keeps tracking like before.
+    @Getter
+    private final List<String> failReasons = new ArrayList<>();
+
+    private boolean fail(final String reason) {
+        this.failReasons.add(reason);
+        return false;
+    }
+
     public boolean processAll(final ItemStackRequest request) {
-        for (final ItemStackRequestAction action : request.getActions()) {
+        final int before = this.failReasons.size();
+
+        for (int i = 0; i < request.getActions().length; i++) {
+            final ItemStackRequestAction action = request.getActions()[i];
+            final int actionStart = this.failReasons.size();
             // System.out.println(action);
             try {
                 if (!this.handle(action)) {
-                    // We ignore this... for now!
+                    // We ignore this... for now! The failReasons list still records why it failed.
                 }
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
                 // Honestly, this inventory handling system is actually just half-baked system and I never actually
                 // got the motivation to finish it, if you want to, feel free to PR. But for now
                 // I'm just going to leave it as it is, it's good enough *for now*.
+                this.failReasons.add(action.getType() + ": threw " + exception.getClass().getSimpleName() + ": " + exception.getMessage());
+            }
+
+            // Tag reasons from this action with the request id and action index for the log.
+            for (int j = actionStart; j < this.failReasons.size(); j++) {
+                this.failReasons.set(j, "request " + request.getRequestId() + " action " + i + ": " + this.failReasons.get(j));
             }
         }
 
         this.queuedItems.clear();
 
-        return true;
+        return this.failReasons.size() == before;
     }
 
     public boolean handle(final ItemStackRequestAction action) {
@@ -58,13 +80,13 @@ public class ItemRequestProcessor {
         switch (type) {
             case CRAFT_CREATIVE -> {
                 if (player.gameType != GameType.CREATIVE) {
-                    return false;
+                    return fail("CRAFT_CREATIVE: not in creative, gameType=" + player.gameType);
                 }
 
                 final CraftCreativeAction creativeAction = (CraftCreativeAction) action;
                 final ItemData item = inventory.getCreativeData().get(creativeAction.getCreativeItemNetworkId());
                 if (item == null) {
-                    return false;
+                    return fail("CRAFT_CREATIVE: unknown creative item network id " + creativeAction.getCreativeItemNetworkId());
                 }
 
                 // Creative item yay! Also, we have to grab the item definition we stored instead of
@@ -101,7 +123,9 @@ public class ItemRequestProcessor {
 
                                 if (!valid) {
                                     // System.out.println("INVALID CRAFTING - SHAPELESS - INGREDIENTS!");
-                                    return false;
+                                    return fail("CRAFT_RECIPE(shapeless): missing ingredient "
+                                            + ItemTransactionValidator.describe(defaultDescriptor.getItemId())
+                                            + ", recipeNetId=" + craftAction.getRecipeNetworkId());
                                 }
                             }
                         }
@@ -124,7 +148,10 @@ public class ItemRequestProcessor {
 
                             if (!ItemTransactionValidator.validate(predicted, claimed)) {
                                 // System.out.println("INVALID CRAFTING - SHAPED - INGREDIENTS!");
-                                return false;
+                                return fail("CRAFT_RECIPE(shaped): ingredient mismatch at index " + i
+                                        + ", predicted=" + ItemTransactionValidator.describe(predicted)
+                                        + ", claimed=" + ItemTransactionValidator.describe(claimed)
+                                        + ", recipeNetId=" + craftAction.getRecipeNetworkId());
                             }
                         }
 
@@ -142,7 +169,7 @@ public class ItemRequestProcessor {
 
             case CRAFT_RESULTS_DEPRECATED -> {
                 if (this.queuedItems.isEmpty()) {
-                    return false;
+                    return fail("CRAFT_RESULTS: no queued craft results");
                 }
 
                 final CraftResultsDeprecatedAction craftResult = (CraftResultsDeprecatedAction) action;
@@ -161,7 +188,8 @@ public class ItemRequestProcessor {
                     }
 
                     if (!valid) {
-                        return false;
+                        return fail("CRAFT_RESULTS: unexpected result item " + ItemTransactionValidator.describe(item)
+                                + ", queuedResults=" + this.queuedItems.size());
                     }
                 }
 
@@ -173,7 +201,14 @@ public class ItemRequestProcessor {
 
                 final BundleClickProcessor.BundleResponse response = BundleClickProcessor.processBundleClick(inventory, transferAction);
                 if (response.bundle()) {
-                    return response.valid();
+                    if (!response.valid()) {
+                        return fail(type + ": invalid bundle click, source=" + transferAction.getSource().getContainer()
+                                + ":" + transferAction.getSource().getSlot()
+                                + ", dest=" + transferAction.getDestination().getContainer()
+                                + ":" + transferAction.getDestination().getSlot()
+                                + ", count=" + transferAction.getCount());
+                    }
+                    return true;
                 }
 
                 final ItemStackRequestSlotData source = transferAction.getSource();
@@ -190,16 +225,23 @@ public class ItemRequestProcessor {
 
                 if (sourceSlot < 0 || destinationSlot < 0 || (sourceSlot >= sourceContainer.getContainerSize() && !create) ||
                         destinationSlot >= destinationContainer.getContainerSize()) {
-                    return false;
+                    return fail(type + ": slot out of bounds, source=" + source.getContainer() + ":" + sourceSlot
+                            + "/" + sourceContainer.getContainerSize()
+                            + ", dest=" + destination.getContainer() + ":" + destinationSlot
+                            + "/" + destinationContainer.getContainerSize() + ", create=" + create);
                 }
 
                 int sourceSlotWithoutOffset = sourceSlot - sourceContainer.getOffset();
                 int destinationSlotWithoutOffset = destinationSlot - destinationContainer.getOffset();
                 if (sourceSlotWithoutOffset < 0 || !create && sourceSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return false;
+                    return fail(type + ": source slot with offset out of bounds, slot=" + sourceSlot
+                            + ", offset=" + sourceContainer.getOffset()
+                            + ", contents=" + sourceContainer.getContents().length + ", create=" + create);
                 }
                 if (destinationSlotWithoutOffset < 0 || !create && destinationSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return false;
+                    return fail(type + ": destination slot with offset out of bounds, slot=" + destinationSlot
+                            + ", offset=" + destinationContainer.getOffset()
+                            + ", contents=" + sourceContainer.getContents().length + ", create=" + create);
                 }
 
                 final ItemCache sourceData = create ? this.queuedItems.get(0) : sourceContainer.get(sourceSlot);
@@ -208,22 +250,20 @@ public class ItemRequestProcessor {
                 // Player try to move this item to an already occupied destination, and is sending TAKE/PLACE instead of SWAP.
                 // This is not the same item too, so not possible...
                 if (!destinationData.getData().isNull() && !ItemTransactionValidator.validate(sourceData.getData(), destinationData.getData())) {
-                    // for debugging in case I fucked up.
-                    // System.out.println("INVALID DESTINATION!");
-                    // System.out.println(sourceData);
-                    // System.out.println(destinationSlot);
-                    return false;
+                    return fail(type + ": destination holds a different item, sourceSlot=" + sourceSlot
+                            + ", destSlot=" + destinationSlot
+                            + ", source=" + ItemTransactionValidator.describe(sourceData.getData())
+                            + ", dest=" + ItemTransactionValidator.describe(destinationData.getData()));
                 }
 
                 int count = transferAction.getCount();
                 // Source data is air, or count is invalid.
                 // Exempt this if player is grabbing from creative menu....
                 if (!(create && player.gameType == GameType.CREATIVE) && (sourceData.getData().isNull() || count <= 0 || count > sourceData.count())) {
-//                    System.out.println("INVALID COUNT!"); // for debugging in case I fucked up.
-//                    System.out.println("First condition: " + sourceData.getData().isNull());
-//                    System.out.println("Count: " + count);
-//                    System.out.println("Source Data: " + sourceData);
-                    return false;
+                    return fail(type + ": invalid count, requested=" + count
+                            + ", available=" + sourceData.count()
+                            + ", source=" + ItemTransactionValidator.describe(sourceData.getData())
+                            + ", sourceSlot=" + sourceSlot + ", create=" + create);
                 }
 
                 count = Math.max(0, count);
@@ -256,16 +296,23 @@ public class ItemRequestProcessor {
                 final int destinationSlot = destination.getSlot();
 
                 if (sourceSlot < 0 || destinationSlot < 0 || sourceSlot >= sourceContainer.getContainerSize() || destinationSlot >= destinationContainer.getContainerSize()) {
-                    return false;
+                    return fail("SWAP: slot out of bounds, source=" + source.getContainer() + ":" + sourceSlot
+                            + "/" + sourceContainer.getContainerSize()
+                            + ", dest=" + destination.getContainer() + ":" + destinationSlot
+                            + "/" + destinationContainer.getContainerSize());
                 }
 
                 int sourceSlotWithoutOffset = sourceSlot - sourceContainer.getOffset();
                 int destinationSlotWithoutOffset = destinationSlot - destinationContainer.getOffset();
                 if (sourceSlotWithoutOffset < 0 || sourceSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return false;
+                    return fail("SWAP: source slot with offset out of bounds, slot=" + sourceSlot
+                            + ", offset=" + sourceContainer.getOffset()
+                            + ", contents=" + sourceContainer.getContents().length);
                 }
                 if (destinationSlotWithoutOffset < 0 || destinationSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return false;
+                    return fail("SWAP: destination slot with offset out of bounds, slot=" + destinationSlot
+                            + ", offset=" + destinationContainer.getOffset()
+                            + ", contents=" + sourceContainer.getContents().length);
                 }
 
                 final ItemCache sourceData = sourceContainer.get(sourceSlot);
@@ -273,8 +320,9 @@ public class ItemRequestProcessor {
 
                 // Source/Destination slot is empty! Player is supposed to send TAKE/PLACE instead of SWAP!
                 if (sourceData.getData().isNull() || destinationData.getData().isNull()) {
-                    // System.out.println("INVALID SWAP!"); // for debugging in case I fucked up.
-                    return false;
+                    return fail("SWAP: empty slot in swap, source=" + ItemTransactionValidator.describe(sourceData.getData())
+                            + " at " + sourceSlot + ", dest=" + ItemTransactionValidator.describe(destinationData.getData())
+                            + " at " + destinationSlot);
                 }
 
                 // Now simply swap :D
@@ -286,7 +334,7 @@ public class ItemRequestProcessor {
                 final DropAction dropAction = (DropAction) action;
                 final int slot = dropAction.getSource().getSlot();
                 if (slot < 0 || slot >= cache.getContainerSize()) {
-                    return false;
+                    return fail("DROP: slot out of bounds, slot=" + slot + "/" + cache.getContainerSize());
                 }
 
                 final ItemStackRequestSlotData source = dropAction.getSource();
@@ -295,7 +343,9 @@ public class ItemRequestProcessor {
                 if (source.getContainer() == ContainerSlotType.CURSOR) {
                     final ItemCache cursor = inventory.hudContainer.get(0);
                     if (!cursor.getData().isValid() || slot != 0) { // Slot 0 is cursor slot.
-                        return false;
+                        return fail("DROP: invalid cursor drop, slot=" + slot
+                                + ", cursor=" + ItemTransactionValidator.describe(cursor.getData())
+                                + ", count=" + dropAction.getCount());
                     }
 
                     this.remove(inventory.hudContainer, 0, cursor, dropAction.getCount());
@@ -312,13 +362,15 @@ public class ItemRequestProcessor {
 
                 final int slot = source.getSlot();
                 if (slot < 0 || slot > sourceContainer.getContainerSize()) {
-                    return false;
+                    return fail("DESTROY: slot out of bounds, slot=" + slot + "/" + sourceContainer.getContainerSize());
                 }
 
                 final ItemCache itemData = sourceContainer.get(slot);
 
                 if (destroyAction.getCount() > itemData.count()) {
-                    return false;
+                    return fail("DESTROY: count too high, requested=" + destroyAction.getCount()
+                            + ", available=" + itemData.count()
+                            + ", item=" + ItemTransactionValidator.describe(itemData.getData()) + ", slot=" + slot);
                 }
 
                 this.remove(sourceContainer, slot, itemData, destroyAction.getCount());
@@ -331,13 +383,15 @@ public class ItemRequestProcessor {
 
                 final int slot = source.getSlot();
                 if (slot < 0 || slot > sourceContainer.getContainerSize()) {
-                    return false;
+                    return fail("CONSUME: slot out of bounds, slot=" + slot + "/" + sourceContainer.getContainerSize());
                 }
 
                 final ItemCache itemData = sourceContainer.get(slot);
 
                 if (consumeAction.getCount() > itemData.count()) {
-                    return false;
+                    return fail("CONSUME: count too high, requested=" + consumeAction.getCount()
+                            + ", available=" + itemData.count()
+                            + ", item=" + ItemTransactionValidator.describe(itemData.getData()) + ", slot=" + slot);
                 }
 
                 this.remove(sourceContainer, slot, itemData, consumeAction.getCount());
