@@ -25,7 +25,7 @@ import java.util.Map;
  * the start state, and each step of the simulation.
  */
 public final class MovementTrace {
-    private static final int HISTORY_TICKS = 10;
+    private static final int HISTORY_TICKS = 3;
 
     private final BoarPlayer player;
     private final ArrayDeque<List<String>> history = new ArrayDeque<>(HISTORY_TICKS);
