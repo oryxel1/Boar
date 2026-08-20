@@ -73,7 +73,7 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
 
         String suppressedNote = "";
         if (this.suppressedFails > 0) {
-            suppressedNote = " (+" + this.suppressedFails + " extra fails since last flag, maxPosDiff="
+            suppressedNote = " +" + this.suppressedFails + " extra fails since last flag, maxPosDiff="
                     + this.suppressedMaxPosDiff + ")";
             this.suppressedFails = 0;
             this.suppressedMaxPosDiff = 0;
@@ -81,16 +81,21 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
         this.lastFlagTick = player.tick;
 
         final boolean checkEnabled = !Boar.getConfig().disabledChecks().contains("Correction");
+        final String verbose = "o: " + posDiff + suppressedNote;
         if (player.disableMitigations() && checkEnabled) {
-            // Detection-only mode: attach the trace to the violation info instead of the log,
-            // so the detection pipeline gets the full re-creation data.
-            this.correction.fail("o: " + posDiff + suppressedNote + "\n" + player.getMovementTrace().dump(failureInfo + suppressedNote));
+            if (Boar.getConfig().debugMode()) {
+                this.correction.fail(verbose + "\n" + player.getMovementTrace().dump(failureInfo + suppressedNote));
+            } else {
+                this.correction.fail(verbose);
+            }
             return;
         }
 
-        player.getMovementTrace().flush(failureInfo + suppressedNote);
+        if (Boar.getConfig().debugMode()) {
+            player.getMovementTrace().flush(failureInfo + suppressedNote);
+        }
         if (checkEnabled) {
-            this.correction.fail("o: " + posDiff + suppressedNote);
+            this.correction.fail(verbose);
         }
     }
 
