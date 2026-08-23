@@ -357,7 +357,9 @@ public final class BoarDefaultAcknowledgments {
 
     private static void handleMobEffect(BoarPlayer player, MobEffectAck ack) {
         if (ack.event() == MobEffectPacket.Event.ADD || ack.event() == MobEffectPacket.Event.MODIFY) {
-            player.getActiveEffects().put(ack.effect(), new StatusEffect(ack.effect(), ack.amplifier(), ack.duration() + 1));
+            final int raw = ack.duration();
+            final int duration = raw < 0 || raw == Integer.MAX_VALUE ? Integer.MAX_VALUE : raw + 1;
+            player.getActiveEffects().put(ack.effect(), new StatusEffect(ack.effect(), ack.amplifier(), duration));
         } else if (ack.event() == MobEffectPacket.Event.REMOVE) {
             player.getActiveEffects().remove(ack.effect());
         }
