@@ -18,6 +18,14 @@ import ac.boar.protocol.api.PacketListener;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerId;
 import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerType;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequest;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemStackRequestSlotData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ConsumeAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.DestroyAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.DropAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.ItemStackRequestAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.SwapAction;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.TransferItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.packet.*;
 
 public class PlayerInventoryPackets implements PacketListener {
@@ -64,6 +72,15 @@ public class PlayerInventoryPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof ItemStackRequestPacket packet) {
+            final boolean skipped = inventory.openContainer == null;
+            for (final ItemStackRequest request : packet.getRequests()) {
+                Boar.debug(player.getSession().name() + ": item stack " + describeRequest(request)
+                        + " | openContainer=" + (inventory.openContainer == null ? "none"
+                                : inventory.openContainer.getType() + ":" + inventory.openContainer.getId())
+                        + ", validated=" + !skipped
+                        + ", gameType=" + player.gameType, Boar.DebugMessage.INFO);
+            }
+
             // TODO: Reverse engineer the 1.26.30 client and compare against other server software(s) to make sure inventory handling is matching.
             // Also should look into why certain actions are failing to be validated.
             if (!player.transactionValidator.handle(packet)) {
@@ -176,5 +193,56 @@ public class PlayerInventoryPackets implements PacketListener {
                 player.sendLatencyStack(new HotbarSlotAck(slot));
             }
         }
+    }
+
+    private static String describeRequest(final ItemStackRequest request) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("req#").append(request.getRequestId()).append(" [");
+
+        final ItemStackRequestAction[] actions = request.getActions();
+        for (int i = 0; i < actions.length; i++) {
+            if (i > 0) {
+                builder.append(", ");
+            }
+
+            final ItemStackRequestAction action = actions[i];
+            builder.append(action.getType());
+            switch (action) {
+                case TransferItemStackRequestAction transfer -> builder.append(' ')
+                        .append(describeSlot(transfer.getSource()))
+                        .append(" -> ")
+                        .append(describeSlot(transfer.getDestination()))
+                        .append(" x")
+                        .append(transfer.getCount());
+                case SwapAction swap -> builder.append(' ')
+                        .append(describeSlot(swap.getSource()))
+                        .append(" <-> ")
+                        .append(describeSlot(swap.getDestination()));
+                case DropAction drop -> builder.append(' ')
+                        .append(describeSlot(drop.getSource()))
+                        .append(" x")
+                        .append(drop.getCount())
+                        .append(drop.isRandomly() ? " randomly" : "");
+                case DestroyAction destroy -> builder.append(' ')
+                        .append(describeSlot(destroy.getSource()))
+                        .append(" x")
+                        .append(destroy.getCount());
+                case ConsumeAction consume -> builder.append(' ')
+                        .append(describeSlot(consume.getSource()))
+                        .append(" x").append(consume.getCount());
+                default -> {
+                }
+            }
+        }
+        return builder.append(']').toString();
+    }
+
+    private static String describeSlot(final ItemStackRequestSlotData data) {
+        if (data == null) {
+            return "null";
+        }
+        return data.getContainer() + "/" +
+                (data.getContainerName() == null ? "?" : data.getContainerName().getContainer())
+                + ":" + data.getSlot() + "(net=" + data.getStackNetworkId() + ")";
     }
 }

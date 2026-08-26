@@ -37,9 +37,21 @@ public class ItemRequestProcessor {
     @Getter
     private final List<String> failReasons = new ArrayList<>();
 
+    @Getter
+    private final List<String> skippedReasons = new ArrayList<>();
+
     private boolean fail(final String reason) {
         this.failReasons.add(reason);
         return false;
+    }
+
+    private boolean skip(final String reason) {
+        this.skippedReasons.add(reason);
+        return true;
+    }
+
+    private static boolean slotOutOfBounds(final ContainerCache cache, final int slot) {
+        return cache == null || !cache.holdsSlot(slot);
     }
 
     public boolean processAll(final ItemStackRequest request) {
@@ -73,10 +85,7 @@ public class ItemRequestProcessor {
 
     public boolean handle(final ItemStackRequestAction action) {
         final CompensatedInventory inventory = player.compensatedInventory;
-
         final ItemStackRequestActionType type = action.getType();
-        final ContainerCache cache = inventory.openContainer;
-
         switch (type) {
             case CRAFT_CREATIVE -> {
                 if (player.gameType != GameType.CREATIVE) {
@@ -96,19 +105,60 @@ public class ItemRequestProcessor {
 
             case CRAFT_RECIPE -> {
                 final CraftRecipeAction craftAction = (CraftRecipeAction) action;
-                if (cache.getType() == ContainerType.WORKBENCH) {
+                final ContainerCache grid = this.findContainer(ContainerSlotType.CRAFTING_INPUT);
+                final boolean workbench = grid != null && grid.getType() == ContainerType.WORKBENCH;
+                {
                     final RecipeData rawRecipe = inventory.getCraftingData().get(craftAction.getRecipeNetworkId());
                     if (rawRecipe == null) {
                         // System.out.println("No recipe found!");
                         break;
                     }
 
-                    final List<ItemData> ingredients = List.of(
-                            cache.get(32).getData(), cache.get(33).getData(), cache.get(34).getData(), cache.get(35).getData(),
-                            cache.get(36).getData(), cache.get(37).getData(), cache.get(38).getData(),
-                            cache.get(39).getData(), cache.get(40).getData());
+                    if (grid == null || grid.getContents() == null) {
+                        break;
+                    }
+
+                    final List<ItemData> ingredients = new ArrayList<>();
+                    for (int i = 0; i < grid.getContents().length; i++) {
+                        ingredients.add(grid.get(grid.getOffset() + i).getData());
+                    }
 
                     List<ItemData> results = null;
+                    if (!workbench) {
+                        final List<ItemDescriptorWithCount> needed = rawRecipe instanceof ShapelessRecipeData shapeless2
+                                ? shapeless2.getIngredients()
+                                : rawRecipe instanceof ShapedRecipeData shaped2 ? shaped2.getIngredients() : null;
+                        if (needed == null) {
+                            break;
+                        }
+
+                        for (final ItemDescriptorWithCount descriptor : needed) {
+                            if (!(descriptor.getDescriptor() instanceof DefaultDescriptor defaultDescriptor)) {
+                                continue;
+                            }
+
+                            boolean found = false;
+                            for (final ItemData item : ingredients) {
+                                if (ItemTransactionValidator.validate(item.getDefinition(), defaultDescriptor.getItemId())) {
+                                    found = true;
+                                }
+                            }
+
+                            if (!found) {
+                                return fail("CRAFT_RECIPE(grid): missing ingredient "
+                                        + ItemTransactionValidator.describe(defaultDescriptor.getItemId())
+                                        + ", recipeNetId=" + craftAction.getRecipeNetworkId());
+                            }
+                        }
+
+                        results = rawRecipe instanceof ShapelessRecipeData shapeless3
+                                ? shapeless3.getResults()
+                                : ((ShapedRecipeData) rawRecipe).getResults();
+                        for (final ItemData data : results) {
+                            this.queuedItems.add(ItemCache.build(inventory, data));
+                        }
+                        break;
+                    }
 
                     // Simple silly crafting validation.
                     if (rawRecipe instanceof ShapelessRecipeData shapeless) {
@@ -223,25 +273,16 @@ public class ItemRequestProcessor {
                 // From creative menu, crafting or other actions.
                 final boolean create = !this.queuedItems.isEmpty() && sourceSlot == 50 && source.getContainer() == ContainerSlotType.CREATED_OUTPUT;
 
-                if (sourceSlot < 0 || destinationSlot < 0 || (sourceSlot >= sourceContainer.getContainerSize() && !create) ||
-                        destinationSlot >= destinationContainer.getContainerSize()) {
-                    return fail(type + ": slot out of bounds, source=" + source.getContainer() + ":" + sourceSlot
-                            + "/" + sourceContainer.getContainerSize()
-                            + ", dest=" + destination.getContainer() + ":" + destinationSlot
-                            + "/" + destinationContainer.getContainerSize() + ", create=" + create);
+                if (sourceSlot < 0 || destinationSlot < 0) {
+                    return fail(type + ": negative slot, source=" + source.getContainer() + ":" + sourceSlot
+                            + ", dest=" + destination.getContainer() + ":" + destinationSlot);
                 }
 
-                int sourceSlotWithoutOffset = sourceSlot - sourceContainer.getOffset();
-                int destinationSlotWithoutOffset = destinationSlot - destinationContainer.getOffset();
-                if (sourceSlotWithoutOffset < 0 || !create && sourceSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return fail(type + ": source slot with offset out of bounds, slot=" + sourceSlot
-                            + ", offset=" + sourceContainer.getOffset()
-                            + ", contents=" + sourceContainer.getContents().length + ", create=" + create);
+                if (!create && slotOutOfBounds(sourceContainer, sourceSlot)) {
+                    return skip(type + ": source " + source.getContainer() + ":" + sourceSlot + " may not be properly modelled");
                 }
-                if (destinationSlotWithoutOffset < 0 || !create && destinationSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return fail(type + ": destination slot with offset out of bounds, slot=" + destinationSlot
-                            + ", offset=" + destinationContainer.getOffset()
-                            + ", contents=" + sourceContainer.getContents().length + ", create=" + create);
+                if (slotOutOfBounds(destinationContainer, destinationSlot)) {
+                    return skip(type + ": destination " + destination.getContainer() + ":" + destinationSlot + " may not be properly modelled");
                 }
 
                 final ItemCache sourceData = create ? this.queuedItems.get(0) : sourceContainer.get(sourceSlot);
@@ -295,24 +336,15 @@ public class ItemRequestProcessor {
                 final int sourceSlot = source.getSlot();
                 final int destinationSlot = destination.getSlot();
 
-                if (sourceSlot < 0 || destinationSlot < 0 || sourceSlot >= sourceContainer.getContainerSize() || destinationSlot >= destinationContainer.getContainerSize()) {
-                    return fail("SWAP: slot out of bounds, source=" + source.getContainer() + ":" + sourceSlot
-                            + "/" + sourceContainer.getContainerSize()
-                            + ", dest=" + destination.getContainer() + ":" + destinationSlot
-                            + "/" + destinationContainer.getContainerSize());
+                if (sourceSlot < 0 || destinationSlot < 0) {
+                    return fail("SWAP: negative slot, source=" + source.getContainer() + ":" + sourceSlot + ", dest=" + destination.getContainer() + ":" + destinationSlot);
                 }
 
-                int sourceSlotWithoutOffset = sourceSlot - sourceContainer.getOffset();
-                int destinationSlotWithoutOffset = destinationSlot - destinationContainer.getOffset();
-                if (sourceSlotWithoutOffset < 0 || sourceSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return fail("SWAP: source slot with offset out of bounds, slot=" + sourceSlot
-                            + ", offset=" + sourceContainer.getOffset()
-                            + ", contents=" + sourceContainer.getContents().length);
+                if (slotOutOfBounds(sourceContainer, sourceSlot)) {
+                    return skip("SWAP: source " + source.getContainer() + ":" + sourceSlot + " may not be modelled properly");
                 }
-                if (destinationSlotWithoutOffset < 0 || destinationSlotWithoutOffset >= sourceContainer.getContents().length) {
-                    return fail("SWAP: destination slot with offset out of bounds, slot=" + destinationSlot
-                            + ", offset=" + destinationContainer.getOffset()
-                            + ", contents=" + sourceContainer.getContents().length);
+                if (slotOutOfBounds(destinationContainer, destinationSlot)) {
+                    return skip("SWAP: destination " + destination.getContainer() + ":" + destinationSlot + " may not be modelled properly");
                 }
 
                 final ItemCache sourceData = sourceContainer.get(sourceSlot);
@@ -332,12 +364,8 @@ public class ItemRequestProcessor {
 
             case DROP -> {
                 final DropAction dropAction = (DropAction) action;
-                final int slot = dropAction.getSource().getSlot();
-                if (slot < 0 || slot >= cache.getContainerSize()) {
-                    return fail("DROP: slot out of bounds, slot=" + slot + "/" + cache.getContainerSize());
-                }
-
                 final ItemStackRequestSlotData source = dropAction.getSource();
+                final int slot = source.getSlot();
 
                 // Player is clicking outside the window to drop.
                 if (source.getContainer() == ContainerSlotType.CURSOR) {
@@ -350,8 +378,13 @@ public class ItemRequestProcessor {
 
                     this.remove(inventory.hudContainer, 0, cursor, dropAction.getCount());
                 } else { // Dropping by pressing Q?
-                    final ItemCache data = cache.get(slot);
-                    this.remove(cache, slot, data, dropAction.getCount());
+                    final ContainerCache sourceContainer = this.findContainer(source.getContainer());
+                    if (slotOutOfBounds(sourceContainer, slot)) {
+                        return skip("DROP: source " + source.getContainer() + ":" + slot + " may not be modelled properly");
+                    }
+
+                    final ItemCache data = sourceContainer.get(slot);
+                    this.remove(sourceContainer, slot, data, dropAction.getCount());
                 }
             }
 
@@ -361,8 +394,8 @@ public class ItemRequestProcessor {
                 final ContainerCache sourceContainer = this.findContainer(source.getContainer());
 
                 final int slot = source.getSlot();
-                if (slot < 0 || slot > sourceContainer.getContainerSize()) {
-                    return fail("DESTROY: slot out of bounds, slot=" + slot + "/" + sourceContainer.getContainerSize());
+                if (slotOutOfBounds(sourceContainer, slot)) {
+                    return skip("DESTROY: source " + source.getContainer() + ":" + slot + " may not be modelled properly");
                 }
 
                 final ItemCache itemData = sourceContainer.get(slot);
@@ -382,8 +415,8 @@ public class ItemRequestProcessor {
                 final ContainerCache sourceContainer = this.findContainer(source.getContainer());
 
                 final int slot = source.getSlot();
-                if (slot < 0 || slot > sourceContainer.getContainerSize()) {
-                    return fail("CONSUME: slot out of bounds, slot=" + slot + "/" + sourceContainer.getContainerSize());
+                if (slotOutOfBounds(sourceContainer, slot)) {
+                    return skip("CONSUME: source " + source.getContainer() + ":" + slot + " may not be modelled properly");
                 }
 
                 final ItemCache itemData = sourceContainer.get(slot);
@@ -430,6 +463,10 @@ public class ItemRequestProcessor {
             case ARMOR -> cache = inventory.armorContainer;
             case OFFHAND -> cache = inventory.offhandContainer;
             case INVENTORY, HOTBAR, HOTBAR_AND_INVENTORY -> cache = inventory.inventoryContainer;
+            case CRAFTING_INPUT -> {
+                final ContainerCache open = inventory.openContainer;
+                cache = open != null && open.getType() == ContainerType.WORKBENCH ? open : inventory.craftingGridContainer;
+            }
             default -> cache = inventory.openContainer;
         }
 

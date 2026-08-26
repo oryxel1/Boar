@@ -1,5 +1,6 @@
 package ac.boar.anticheat.validator.inventory;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.InteractionResult;
 import ac.boar.anticheat.data.ItemUseTracker;
@@ -465,6 +466,11 @@ public final class ItemTransactionValidator {
             if (mitigate) {
                 packet.getRequests().add(request);
             }
+        }
+
+        final List<String> skipped = processor.getSkippedReasons();
+        if (!skipped.isEmpty()) {
+            Boar.debug(player.getSession().name() + ": item stack actions not checked, "  + skipped.size() + " [" + String.join(" | ", skipped) + "]", Boar.DebugMessage.INFO);
         }
 
         final List<String> reasons = processor.getFailReasons();

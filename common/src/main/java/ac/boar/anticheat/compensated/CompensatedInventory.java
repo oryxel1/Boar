@@ -2,6 +2,7 @@ package ac.boar.anticheat.compensated;
 
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.compensated.cache.container.impl.ArmorContainerCache;
+import ac.boar.anticheat.compensated.cache.container.impl.CraftingGridContainerCache;
 import ac.boar.anticheat.compensated.cache.container.impl.PlayerContainerCache;
 import ac.boar.anticheat.data.enchantment.Enchantment;
 import ac.boar.anticheat.data.inventory.ItemCache;
@@ -44,6 +45,7 @@ public class CompensatedInventory {
     public final ContainerCache offhandContainer = new ContainerCache(this, (byte) ContainerId.OFFHAND, ContainerType.INVENTORY, null, -1L);
     public final ContainerCache armorContainer = new ArmorContainerCache(this);
     public final ContainerCache hudContainer = new ContainerCache(this, (byte) ContainerId.UI, ContainerType.INVENTORY, null, -1L);
+    public final ContainerCache craftingGridContainer = new CraftingGridContainerCache(this);
 
     public ContainerCache openContainer = null;
 

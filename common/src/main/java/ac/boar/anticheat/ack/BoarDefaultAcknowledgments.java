@@ -333,7 +333,11 @@ public final class BoarDefaultAcknowledgments {
         if (container == null) {
             return;
         }
-        for (int i = 0; i < ack.contents().size(); i++) {
+
+        // Make sure we have enough slots for what the server is sending
+        container.ensureSlots(ack.contents().size());
+        final int limit = Math.min(ack.contents().size(), container.getContents().length);
+        for (int i = 0; i < limit; i++) {
             container.set(i, ack.contents().get(i), false);
         }
     }
