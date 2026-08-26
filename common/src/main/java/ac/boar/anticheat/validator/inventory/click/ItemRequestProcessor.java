@@ -1,8 +1,10 @@
 package ac.boar.anticheat.validator.inventory.click;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.cache.container.ContainerCache;
 import ac.boar.anticheat.data.inventory.ItemCache;
+import ac.boar.anticheat.data.inventory.SlotSnapshot;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;
 import lombok.Getter;
@@ -23,7 +25,9 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.ItemSt
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.*;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class ItemRequestProcessor {
@@ -39,6 +43,18 @@ public class ItemRequestProcessor {
 
     @Getter
     private final List<String> skippedReasons = new ArrayList<>();
+
+    private final Map<SnapshotKey, SlotSnapshot> snapshots = new LinkedHashMap<>();
+
+    private record SnapshotKey(ContainerCache container, int slot) {
+    }
+
+    private void snapshot(final ContainerCache cache, final int slot) {
+        if (cache == null || !cache.holdsSlot(slot)) {
+            return;
+        }
+        this.snapshots.computeIfAbsent(new SnapshotKey(cache, slot),  key -> new SlotSnapshot(cache, slot, cache.get(slot).clone()));
+    }
 
     private boolean fail(final String reason) {
         this.failReasons.add(reason);
@@ -56,6 +72,20 @@ public class ItemRequestProcessor {
 
     public boolean processAll(final ItemStackRequest request) {
         final int before = this.failReasons.size();
+        this.snapshots.clear();
+
+        if (player.gameType != GameType.CREATIVE) {
+            boolean hasCraft = false;
+            boolean hasConsume = false;
+            for (final ItemStackRequestAction action : request.getActions()) {
+                hasCraft |= action.getType() == ItemStackRequestActionType.CRAFT_RECIPE;
+                hasConsume |= action.getType() == ItemStackRequestActionType.CONSUME;
+            }
+
+            if (hasCraft && !hasConsume) {
+                this.failReasons.add("request " + request.getRequestId() + ": CRAFT_RECIPE without CONSUME actions");
+            }
+        }
 
         for (int i = 0; i < request.getActions().length; i++) {
             final ItemStackRequestAction action = request.getActions()[i];
@@ -79,6 +109,18 @@ public class ItemRequestProcessor {
         }
 
         this.queuedItems.clear();
+
+        if (!this.snapshots.isEmpty()) {
+            final Map<Integer, List<SlotSnapshot>> pending = player.compensatedInventory.pendingRequests;
+            pending.put(request.getRequestId(), new ArrayList<>(this.snapshots.values()));
+
+            // Prevent abuse against clients not sending back acknowledgments
+            while (pending.size() > 64) {
+                final Integer evicted = pending.keySet().iterator().next();
+                pending.remove(evicted);
+                Boar.debug(player.getSession().name() + ": dropped pending item stack request " + evicted, Boar.DebugMessage.WARNING);
+            }
+        }
 
         return this.failReasons.size() == before;
     }
@@ -314,6 +356,7 @@ public class ItemRequestProcessor {
                     this.remove(sourceContainer, sourceSlot, sourceData, count);
                 }
 
+                this.snapshot(destinationContainer, destinationSlot);
                 if (destinationData.getData().isNull()) {
                     final ItemCache cache1 = sourceData.clone();
                     cache1.count(count);
@@ -358,6 +401,8 @@ public class ItemRequestProcessor {
                 }
 
                 // Now simply swap :D
+                this.snapshot(sourceContainer, sourceSlot);
+                this.snapshot(destinationContainer, destinationSlot);
                 sourceContainer.set(sourceSlot, destinationData);
                 destinationContainer.set(destinationSlot, sourceData);
             }
@@ -439,6 +484,8 @@ public class ItemRequestProcessor {
     }
 
     private void remove(final ContainerCache cache, final int slot, final ItemCache data, final int counts) {
+        this.snapshot(cache, slot);
+
         if (counts >= data.count()) {
             cache.set(slot, ItemData.AIR);
         } else {

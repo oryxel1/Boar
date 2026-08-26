@@ -31,6 +31,13 @@ public class ItemCache {
         return this.data.getCount();
     }
 
+    public void netId(int netId) {
+        final ItemData.Builder builder = this.data.toBuilder();
+        builder.usingNetId(true);
+        builder.netId(netId);
+        this.data = builder.build();
+    }
+
     public boolean isEmpty() {
         return this.data.getCount() <= 0 || this.data.getDefinition().getRuntimeId() == 0 || this.data.getDefinition().getRuntimeId() == -1;
     }

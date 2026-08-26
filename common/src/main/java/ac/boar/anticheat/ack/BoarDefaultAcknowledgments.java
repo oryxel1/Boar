@@ -9,10 +9,12 @@ import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.effect.Effect;
 import ac.boar.anticheat.data.inventory.ItemCache;
+import ac.boar.anticheat.data.inventory.SlotSnapshot;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
 import ac.boar.anticheat.data.vanilla.StatusEffect;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.player.data.VehicleData;
+import ac.boar.anticheat.validator.inventory.click.ItemRequestProcessor;
 import ac.boar.anticheat.prediction.engine.data.Vector;
 import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.geyser.BlockEntityInfo;
@@ -22,15 +24,22 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ContainerSlotType;
 import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.ItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.MultiRecipeData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.RecipeData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.ShapedRecipeData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.ShapelessRecipeData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.SmithingTransformRecipeData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.SmithingTrimRecipeData;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponse;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseContainer;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseSlot;
+import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseStatus;
 import org.cloudburstmc.protocol.bedrock.packet.MobEffectPacket;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class BoarDefaultAcknowledgments {
@@ -66,6 +75,7 @@ public final class BoarDefaultAcknowledgments {
         registry.register(UpdateTradeAck.class, BoarDefaultAcknowledgments::handleUpdateTrade);
         registry.register(InventorySlotAck.class, BoarDefaultAcknowledgments::handleInventorySlot);
         registry.register(InventoryContentAck.class, BoarDefaultAcknowledgments::handleInventoryContent);
+        registry.register(ItemStackResponseAck.class, BoarDefaultAcknowledgments::handleItemStackResponse);
         registry.register(HotbarSlotAck.class, BoarDefaultAcknowledgments::handleHotbarSlot);
 
         registry.register(MobEffectAck.class, BoarDefaultAcknowledgments::handleMobEffect);
@@ -339,6 +349,77 @@ public final class BoarDefaultAcknowledgments {
         final int limit = Math.min(ack.contents().size(), container.getContents().length);
         for (int i = 0; i < limit; i++) {
             container.set(i, ack.contents().get(i), false);
+        }
+    }
+
+    private static void handleItemStackResponse(BoarPlayer player, ItemStackResponseAck ack) {
+        final CompensatedInventory inv = player.compensatedInventory;
+        for (final ItemStackResponse response : ack.responses()) {
+            final List<SlotSnapshot> snapshots = inv.pendingRequests.remove(response.getRequestId());
+            if (response.getResult() == ItemStackResponseStatus.OK) {
+                inv.rejectionStreak = 0;
+                applyResponseSlots(inv, response);
+                continue;
+            }
+            if (snapshots == null) {
+                continue;
+            }
+
+            for (int i = snapshots.size() - 1; i >= 0; i--) {
+                final SlotSnapshot snapshot = snapshots.get(i);
+                if (snapshot.container().holdsSlot(snapshot.slot())) {
+                    snapshot.container().set(snapshot.slot(), snapshot.oldItem());
+                }
+            }
+
+            // Pending requests that touched these slots saved items this rollback just removed and restoring those later would
+            // create items out of thin air
+            for (final List<SlotSnapshot> later : inv.pendingRequests.values()) {
+                later.removeIf(other -> {
+                    for (final SlotSnapshot own : snapshots) {
+                        if (own.container() == other.container() && own.slot() == other.slot()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+            }
+
+            inv.rejectionStreak++;
+            final Boar.DebugMessage level = inv.rejectionStreak >= 5 ? Boar.DebugMessage.WARNING : Boar.DebugMessage.INFO;
+            Boar.debug(player.getSession().name() + ": server rejected item stack request " + response.getRequestId()
+                    + " (" + response.getResult() + "), rolled back " + snapshots.size() + " slot(s)"
+                    + ", streak=" + inv.rejectionStreak, level);
+        }
+    }
+
+    private static void applyResponseSlots(CompensatedInventory inv, ItemStackResponse response) {
+        for (final ItemStackResponseContainer containerInfo : response.getContainers()) {
+            final ContainerSlotType type = containerInfo.getContainerName() != null ?
+                    containerInfo.getContainerName().getContainer() :
+                    containerInfo.getContainer();
+            final ContainerCache cache = ItemRequestProcessor.findContainer(inv, type);
+            if (cache == null) {
+                continue;
+            }
+            for (final ItemStackResponseSlot slotInfo : containerInfo.getItems()) {
+                final int slot = slotInfo.getSlot();
+                if (!cache.holdsSlot(slot)) {
+                    continue;
+                }
+                if (slotInfo.getCount() <= 0) {
+                    cache.set(slot, ItemData.AIR);
+                    continue;
+                }
+
+                final ItemCache current = cache.get(slot);
+                if (current.isEmpty()) {
+                    // The server has an item here but we predicted air?
+                    continue;
+                }
+                current.count(slotInfo.getCount());
+                current.netId(slotInfo.getStackNetworkId());
+            }
         }
     }
 

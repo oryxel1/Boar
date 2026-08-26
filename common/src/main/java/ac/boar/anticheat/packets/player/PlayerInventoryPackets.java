@@ -7,6 +7,7 @@ import ac.boar.anticheat.ack.types.CreativeContentAck;
 import ac.boar.anticheat.ack.types.HotbarSlotAck;
 import ac.boar.anticheat.ack.types.InventoryContentAck;
 import ac.boar.anticheat.ack.types.InventorySlotAck;
+import ac.boar.anticheat.ack.types.ItemStackResponseAck;
 import ac.boar.anticheat.ack.types.UpdateTradeAck;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.check.impl.inventory.Inventory;
@@ -27,6 +28,8 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.SwapAction;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.request.action.TransferItemStackRequestAction;
 import org.cloudburstmc.protocol.bedrock.packet.*;
+
+import java.util.ArrayList;
 
 public class PlayerInventoryPackets implements PacketListener {
     @Override
@@ -181,6 +184,10 @@ public class PlayerInventoryPackets implements PacketListener {
 
         if (event.getPacket() instanceof InventoryContentPacket packet) {
             player.sendLatencyStack(new InventoryContentAck(packet.getContainerId(), packet.getContents(), packet.getStorageItem()));
+        }
+
+        if (event.getPacket() instanceof ItemStackResponsePacket packet) {
+            player.sendLatencyStack(new ItemStackResponseAck(new ArrayList<>(packet.getEntries())));
         }
 
         if (event.getPacket() instanceof PlayerHotbarPacket packet) {

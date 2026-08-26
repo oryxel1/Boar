@@ -6,6 +6,7 @@ import ac.boar.anticheat.compensated.cache.container.impl.CraftingGridContainerC
 import ac.boar.anticheat.compensated.cache.container.impl.PlayerContainerCache;
 import ac.boar.anticheat.data.enchantment.Enchantment;
 import ac.boar.anticheat.data.inventory.ItemCache;
+import ac.boar.anticheat.data.inventory.SlotSnapshot;
 import ac.boar.anticheat.player.BoarPlayer;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
@@ -21,6 +22,7 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.PotionMixData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.RecipeData;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +53,10 @@ public class CompensatedInventory {
 
     @Getter
     private final Map<Integer, ItemCache> bundleCache = new HashMap<>();
+
+    public final Map<Integer, List<SlotSnapshot>> pendingRequests = new LinkedHashMap<>();
+
+    public int rejectionStreak;
 
     public ContainerCache getContainer(byte id) {
         if (id == inventoryContainer.getId()) {
