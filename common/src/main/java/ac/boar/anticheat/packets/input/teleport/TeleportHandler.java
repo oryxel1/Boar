@@ -61,6 +61,7 @@ public class TeleportHandler {
         player.setPos(data.getPosition().down(player.getYOffset()));
         player.unvalidatedPosition = player.prevUnvalidatedPosition = player.position.clone();
         player.velocity = Vec3.ZERO.clone();
+        player.certainVelocity = null;
         player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO); // Yep!
         player.onGround = false;
 
