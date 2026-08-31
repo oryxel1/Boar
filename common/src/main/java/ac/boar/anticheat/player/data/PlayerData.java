@@ -62,6 +62,7 @@ public class PlayerData {
     public boolean inLoadingScreen;
     public int sinceLoadingScreen;
 
+    public int pendingDimensionSwitches;
     public boolean insideUnloadedChunk;
 
     public GameType gameType = GameType.DEFAULT;

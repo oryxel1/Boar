@@ -138,6 +138,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             int dimensionId = packet.getDimension();
             final Dimension dimension = DimensionUtil.dimensionFromId(dimensionId);
 
+            player.pendingDimensionSwitches++;
             player.queueAcknowledgment(new DimensionSwitchAck(dimension, packet.getLoadingScreenId()));
         }
 

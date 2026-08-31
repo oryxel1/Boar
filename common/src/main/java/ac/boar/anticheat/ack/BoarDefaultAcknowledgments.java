@@ -120,6 +120,7 @@ public final class BoarDefaultAcknowledgments {
     }
 
     private static void handleDimensionSwitch(BoarPlayer player, DimensionSwitchAck ack) {
+        player.pendingDimensionSwitches = Math.max(0, player.pendingDimensionSwitches - 1);
         if (player.compensatedWorld.getDimension() != ack.dimension()) {
             player.currentLoadingScreen = ack.loadingScreenId();
             player.inLoadingScreen = true;

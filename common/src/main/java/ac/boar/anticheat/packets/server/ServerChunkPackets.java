@@ -91,7 +91,12 @@ public class ServerChunkPackets implements PacketListener {
                 buf.release();
             }
 
-            player.queueAcknowledgment(new ChunkLoadAck(packet.getChunkX(), packet.getChunkZ(), dimension, sections));
+            final ChunkLoadAck ack = new ChunkLoadAck(packet.getChunkX(), packet.getChunkZ(), dimension, sections);
+            if (player.pendingDimensionSwitches > 0) {
+                player.queueAcknowledgment(ack);
+            } else {
+                player.dispatchAcknowledgment(ack);
+            }
         } else if (event.getPacket() instanceof SubChunkPacket packet) {
             if (packet.isCacheEnabled()) {
                 return;
@@ -132,7 +137,12 @@ public class ServerChunkPackets implements PacketListener {
                     });
                 }
 
-                player.queueAcknowledgment(new SubChunkLoadAck(chunkX, chunkZ, sectionY, dimension, section));
+                final SubChunkLoadAck ack = new SubChunkLoadAck(chunkX, chunkZ, sectionY, dimension, section);
+                if (player.pendingDimensionSwitches > 0) {
+                    player.queueAcknowledgment(ack);
+                } else {
+                    player.dispatchAcknowledgment(ack);
+                }
             }
         } else if (event.getPacket() instanceof UpdateBlockPacket packet) {
             // Ugly hack.

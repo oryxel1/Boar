@@ -179,6 +179,10 @@ public final class BoarPlayer extends PlayerData {
         this.ackTransport.attach(ack);
     }
 
+    public void dispatchAcknowledgment(Acknowledgment ack) {
+        Boar.getInstance().getAcknowledgmentRegistry().dispatch(this, ack);
+    }
+
     /**
      * Replay a Bedrock packet inbound as if the client had just sent it. Used to forward
      * an attack (or any other inbound packet) that was previously cancelled by a check.
