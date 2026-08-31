@@ -59,9 +59,6 @@ public class PlayerInventoryPackets implements PacketListener {
                         Boar.debug(player.getSession().name() + ": " + details, Boar.DebugMessage.WARNING);
                     }
                 }
-//                if (cancelled) {
-//                    System.out.println("Cancel inventory action: " + packet);
-//                }
                 event.setCancelled(cancelled && !player.disableMitigations());
             } catch (Exception exception) {
                 Boar.getInstance().getPlatform().logger().error(
@@ -157,19 +154,9 @@ public class PlayerInventoryPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof ContainerOpenPacket packet) {
-            // System.out.println(packet);
             player.queueAcknowledgment(new ContainerOpenAck(packet.getId(), packet.getType(), packet.getBlockPosition(), packet.getUniqueEntityId()));
         }
-//
-        if (event.getPacket() instanceof UpdateEquipPacket packet) {
-//            System.out.println(packet);
-//            player.sendLatencyStack();
-//            player.getLatencyUtil().addTaskToQueue(player.sentStackId.get(), () -> { try {
-//                inventory.openContainer = new ContainerCache((byte) packet.getWindowId(),
-//                        ContainerType.from(packet.getWindowType()), Vector3i.ZERO, packet.getUniqueEntityId());
-//            } catch (Exception ignored) {}});
-        }
-//
+
         if (event.getPacket() instanceof UpdateTradePacket packet) {
             if (packet.getPlayerUniqueEntityId() != player.runtimeEntityId || packet.getContainerType() != ContainerType.TRADE) {
                 return;

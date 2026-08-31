@@ -1,5 +1,6 @@
 package ac.boar.anticheat.data;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.mappings.item.Item;
 import ac.boar.mappings.item.Items;
@@ -104,7 +105,9 @@ public class ItemUseTracker {
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to read use_duration components", e);
+        }
 
         return item.is(Items.BOW) || item.is(Items.CROSSBOW) ||
                 item.is(Items.TRIDENT) || item.is(Items.ENDER_EYE) ||

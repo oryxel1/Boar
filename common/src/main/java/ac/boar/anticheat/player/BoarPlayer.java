@@ -193,8 +193,7 @@ public final class BoarPlayer extends PlayerData {
         if (this.packetInjector == null) {
             // A missing injector is a platform wiring bug — the packet a check approved for
             // replay is lost. Log it so the drop is visible, and release the caller's reference.
-            Boar.debug("[inject] dropped " + packet.getClass().getSimpleName()
-                    + " — no packet injector installed", Boar.DebugMessage.WARNING);
+            Boar.debug("injectClientPacket: dropped " + packet.getClass().getSimpleName() + " for player " + getSession().name() + ": packet injector is null", Boar.DebugMessage.WARNING);
             ReferenceCountUtil.safeRelease(packet);
             return;
         }
@@ -202,11 +201,13 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public boolean isMovementExempted() {
-        try { // Ye, well whatever.
+        try {
             if (this.session.hasPermission("boar.exempt")) {
                 return true;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(getSession().name() + ": permission check for boar.exempt threw", e);
+        }
 
         return this.abilities.contains(Ability.MAY_FLY) || this.getFlagTracker().isFlying() || this.getFlagTracker().isWasFlying();
     }
@@ -240,7 +241,9 @@ public final class BoarPlayer extends PlayerData {
                     cache.getCurrent().tick();
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(getSession().name() + ": entity tick threw", e);
+        }
 
         this.getItemUseTracker().preTick();
     }

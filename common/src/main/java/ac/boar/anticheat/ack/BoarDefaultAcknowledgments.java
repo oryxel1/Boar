@@ -20,6 +20,7 @@ import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.geyser.BlockEntityInfo;
 import ac.boar.anticheat.util.geyser.BoarChunk;
 import org.cloudburstmc.math.vector.Vector3i;
+import org.cloudburstmc.nbt.NbtMap;
 import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
@@ -228,7 +229,6 @@ public final class BoarDefaultAcknowledgments {
 
     private static void handleVelocity(BoarPlayer player, VelocityAck ack) {
         player.certainVelocity = new Vector(VectorType.VELOCITY, ack.motion());
-        Boar.debug("[velocity-ack] dispatch velocity=" + ack.motion(), Boar.DebugMessage.INFO);
     }
 
     private static void handleGlideBoost(BoarPlayer player, GlideBoostAck ack) {
@@ -289,19 +289,19 @@ public final class BoarDefaultAcknowledgments {
         final CompensatedInventory inv = player.compensatedInventory;
         try {
             inv.openContainer = new TradeContainerCache(inv, ack.offers(), ack.containerId(), ack.containerType(), Vector3i.ZERO, ack.traderUniqueEntityId());
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to build trade container cache", e);
         }
     }
 
     private static void handleInventorySlot(BoarPlayer player, InventorySlotAck ack) {
         final CompensatedInventory inv = player.compensatedInventory;
         if (ack.containerId() == 125) {
-            final ItemCache cache;
-            try {
-                cache = inv.getBundleCache().get(Objects.requireNonNull(ack.storageItem().getTag()).getInt("bundle_id"));
-            } catch (Exception ignored) {
+            final NbtMap tag = ack.storageItem() == null ? null : ack.storageItem().getTag();
+            if (tag == null || !tag.containsKey("bundle_id")) {
                 return;
             }
+            final ItemCache cache = inv.getBundleCache().get(tag.getInt("bundle_id"));
             if (cache == null) {
                 return;
             }
@@ -322,12 +322,11 @@ public final class BoarDefaultAcknowledgments {
     private static void handleInventoryContent(BoarPlayer player, InventoryContentAck ack) {
         final CompensatedInventory inv = player.compensatedInventory;
         if (ack.containerId() == 125) {
-            final ItemCache cache;
-            try {
-                cache = inv.getBundleCache().get(Objects.requireNonNull(ack.storageItem().getTag()).getInt("bundle_id"));
-            } catch (Exception ignored) {
+            final NbtMap tag = ack.storageItem() == null ? null : ack.storageItem().getTag();
+            if (tag == null || !tag.containsKey("bundle_id")) {
                 return;
             }
+            final ItemCache cache = inv.getBundleCache().get(tag.getInt("bundle_id"));
             if (cache == null) {
                 return;
             }

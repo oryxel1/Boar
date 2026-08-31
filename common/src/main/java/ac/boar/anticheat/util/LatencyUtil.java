@@ -124,6 +124,7 @@ public final class LatencyUtil {
                     try {
                         registry.dispatch(player, ack);
                     } catch (Throwable t) {
+                        Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": acknowledgment " + ack.getClass().getSimpleName() + " threw", t);
                     }
                 }
             }

@@ -90,7 +90,6 @@ public class ItemRequestProcessor {
         for (int i = 0; i < request.getActions().length; i++) {
             final ItemStackRequestAction action = request.getActions()[i];
             final int actionStart = this.failReasons.size();
-            // System.out.println(action);
             try {
                 if (!this.handle(action)) {
                     // We ignore this... for now! The failReasons list still records why it failed.
@@ -100,6 +99,7 @@ public class ItemRequestProcessor {
                 // got the motivation to finish it, if you want to, feel free to PR. But for now
                 // I'm just going to leave it as it is, it's good enough *for now*.
                 this.failReasons.add(action.getType() + ": threw " + exception.getClass().getSimpleName() + ": " + exception.getMessage());
+                Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": item stack action " + action.getType() + " threw", exception);
             }
 
             // Tag reasons from this action with the request id and action index for the log.

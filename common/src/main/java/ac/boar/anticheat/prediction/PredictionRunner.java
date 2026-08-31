@@ -31,15 +31,8 @@ public class PredictionRunner {
     private boolean findBestTickStartVelocity() {
         player.bestPossibility = Objects.requireNonNullElseGet(player.certainVelocity, () -> new Vector(VectorType.NORMAL, player.velocity.clone()));
         player.certainVelocity = null;
-
-        if (player.bestPossibility.getType() == VectorType.VELOCITY) {
-            Boar.debug("[velocity-debug] predict tick=" + player.tick + " velocity=" + player.bestPossibility.getVelocity() + " actualDelta=" + player.unvalidatedPosition.clone().subtract(player.prevUnvalidatedPosition.clone()) + " pos=" + player.position + " unvalidated=" + player.unvalidatedPosition, Boar.DebugMessage.INFO);
-        }
-
-        // We can store the ACTUAL prediction now.
         player.velocity = player.bestPossibility.getVelocity().clone();
-        player.getMovementTrace().log("start velocity: type=" + player.bestPossibility.getType()
-                + " vel=" + player.velocity);
+        player.getMovementTrace().log("start velocity: type=" + player.bestPossibility.getType() + " vel=" + player.velocity);
         return true;
     }
 }

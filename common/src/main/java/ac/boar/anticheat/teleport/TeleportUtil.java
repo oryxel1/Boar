@@ -31,7 +31,7 @@ public class TeleportUtil {
 
     public void teleport(final Vec3 vec3) {
         if (this.isTeleporting()) {
-            Boar.debug("[movement-debug] skipped teleport reason=already-teleporting queued=" + this.queuedTeleports.size(), Boar.DebugMessage.WARNING);
+            Boar.debug(player.getSession().name() + ": [movement-debug] skipped teleport reason=already-teleporting queued=" + this.queuedTeleports.size(), Boar.DebugMessage.WARNING);
             return;
         }
 
@@ -44,7 +44,7 @@ public class TeleportUtil {
         packet.setTeleportationCause(MovePlayerPacket.TeleportationCause.BEHAVIOR);
 
         this.player.getConnection().sendPacket(packet);
-        Boar.debug("[movement-debug] sent teleport pos=" + vec3 + " lastKnown=" + this.lastKnownValid, Boar.DebugMessage.WARNING);
+        Boar.debug(player.getSession().name() + ": [movement-debug] sent teleport pos=" + vec3 + " lastKnown=" + this.lastKnownValid, Boar.DebugMessage.WARNING);
     }
 
     public void queue(TeleportData data) {
@@ -94,17 +94,17 @@ public class TeleportUtil {
         }
 
         if (this.isTeleporting()) {
-            Boar.debug("[movement-debug] skipped correction reason=already-teleporting queued=" + this.queuedTeleports.size() + " tick=" + player.tick, Boar.DebugMessage.WARNING);
+            Boar.debug(player.getSession().name() + ": [movement-debug] skipped correction reason=already-teleporting queued=" + this.queuedTeleports.size() + " tick=" + player.tick, Boar.DebugMessage.WARNING);
             return;
         }
 
         if (this.hasPendingCorrection()) {
-            Boar.debug("[movement-debug] skipped correction reason=already-correcting pending=" + this.pendingCorrections + " tick=" + player.tick, Boar.DebugMessage.WARNING);
+            Boar.debug(player.getSession().name() + ": [movement-debug] skipped correction reason=already-correcting pending=" + this.pendingCorrections + " tick=" + player.tick, Boar.DebugMessage.WARNING);
             return;
         }
 
         if (player.isMovementExempted()) {
-            Boar.debug("[movement-debug] skipped correction reason=movement-exempt tick=" + player.tick, Boar.DebugMessage.WARNING);
+            Boar.debug(player.getSession().name() + ": [movement-debug] skipped correction reason=movement-exempt tick=" + player.tick, Boar.DebugMessage.WARNING);
             return;
         }
 
@@ -120,6 +120,6 @@ public class TeleportUtil {
         this.correctionCooldown = true;
         this.player.sendLatencyStack(new MovementCorrectionAck());
         this.player.getConnection().sendPacket(correction);
-        Boar.debug("[movement-debug] sent correction tick=" + player.tick + " pos=" + correction.getPosition() + " delta=" + correction.getDelta() + " onGround=" + player.onGround, Boar.DebugMessage.WARNING);
+        Boar.debug(player.getSession().name() + ": [movement-debug] sent correction tick=" + player.tick + " pos=" + correction.getPosition() + " delta=" + correction.getDelta() + " onGround=" + player.onGround, Boar.DebugMessage.WARNING);
     }
 }

@@ -1,5 +1,6 @@
 package ac.boar.anticheat.compensated.world;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
@@ -73,7 +74,7 @@ public class CompensatedWorldImpl extends CompensatedWorld {
 
         aABB = aABB.expand(1.0E-7F);
 
-        // Sometimes this can spam error when player first join or something like that, can be safely ignore here.
+        // Entity caches can be incomplete right after the player joins.
         try {
             for (EntityCache cache : this.getEntities().values()) {
                 if (cache == null || cache.getMetadata().getFlags() == null) {
@@ -87,10 +88,11 @@ public class CompensatedWorldImpl extends CompensatedWorld {
                     continue;
                 }
 
-                // System.out.println("Collide able box: " + cache.getCurrent().getBoundingBox() + ", " + cache.getCurrent().getPos());
                 boxes.add(cache.getCurrent().getBoundingBox());
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(getPlayer().getSession().name() + ": failed to collect entity collisions", e);
+        }
 
         return boxes;
     }

@@ -1,5 +1,6 @@
 package ac.boar.anticheat.compensated.world.base;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.cache.entity.EntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.block.BoarBlockState;
@@ -211,11 +212,11 @@ public class CompensatedWorld {
             sections[sectionY] = section;
             chunk = new BoarChunk(sections, new ArrayList<>());
             this.chunks.put(chunkPosition, chunk);
-            this.updateChunkExemption(chunkPosition, chunkX, chunkZ);
         } else {
             chunk.sections()[sectionY] = section;
         }
 
+        this.updateChunkExemption(chunkPosition, chunkX, chunkZ);
         this.applyPendingBlockUpdates(chunkPosition, chunk.sections(), sectionY);
     }
 
@@ -364,7 +365,7 @@ public class CompensatedWorld {
                 int id = chunk.getFullBlock(x & 0xF, y & 0xF, z & 0xF, layer);
                 return id == Integer.MIN_VALUE ? player.mappingInfo.airId() : id;
             } catch (Exception e) {
-//                e.printStackTrace();
+                Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to read block at " + x + "," + y + "," + z + " layer=" + layer, e);
                 return player.mappingInfo.airId();
             }
         }

@@ -34,7 +34,7 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
             return;
         }
 
-        Boar.debug("[movement-debug] prediction posDiff tick=" + player.tick + " posDiff=" + posDiff + " acceptance/max=" + player.getPosAcceptanceThreshold() + " alert=" + Boar.getConfig().alertThreshold() + " type=" + player.bestPossibility.getType() + " predictedPos=" + player.position + " actualPos=" + player.unvalidatedPosition + " predictedDelta=" + player.velocity + " actualDelta=" + player.unvalidatedTickEnd, Boar.DebugMessage.WARNING);
+        Boar.debug(player.getSession().name() + ": [movement-debug] prediction posDiff tick=" + player.tick + " posDiff=" + posDiff + " acceptance/max=" + player.getPosAcceptanceThreshold() + " alert=" + Boar.getConfig().alertThreshold() + " type=" + player.bestPossibility.getType() + " predictedPos=" + player.position + " actualPos=" + player.unvalidatedPosition + " predictedDelta=" + player.velocity + " actualDelta=" + player.unvalidatedTickEnd, Boar.DebugMessage.WARNING);
         if (posDiff < Boar.getConfig().alertThreshold()) {
             // The difference is above the acceptance threshold but below the alert threshold.
             if (!player.disableMitigations()) {
@@ -42,8 +42,6 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
             }
             return;
         }
-
-        Boar.debug("[movement-debug] correction reason=prediction-fail tick=" + player.tick + " posDiff=" + posDiff, Boar.DebugMessage.WARNING);
 
         // Dump the retained movement trace so the failure can be re-created and inspected.
         final boolean claimedHorizontal = player.getInputData().contains(PlayerAuthInputData.HORIZONTAL_COLLISION);
@@ -56,7 +54,6 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
                 + " predictedDelta=" + player.velocity + " actualDelta=" + player.unvalidatedTickEnd
                 + " serverCollision=(h=" + player.horizontalCollision + ",v=" + player.verticalCollision + ")"
                 + " claimedCollision=(h=" + claimedHorizontal + ",v=" + claimedVertical + ")";
-
         player.getTeleportUtil().correct();
 
         final int cooldown = Boar.getConfig().correctionFlagCooldownTicks();
@@ -65,7 +62,7 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
             if (posDiff > this.suppressedMaxPosDiff) {
                 this.suppressedMaxPosDiff = posDiff;
             }
-            Boar.debug("[movement-debug] correction flag on cooldown tick=" + player.tick
+            Boar.debug(player.getSession().name() + ": [movement-debug] correction flag on cooldown tick=" + player.tick
                     + " suppressed=" + this.suppressedFails
                     + " maxPosDiff=" + this.suppressedMaxPosDiff, Boar.DebugMessage.WARNING);
             return;
@@ -122,7 +119,7 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
                 MathUtil.clamp(diff.z, -maxDrift, maxDrift)
         ), false);
 
-        Boar.debug("[movement-debug] drifted server position tick=" + player.tick + " newPos=" + player.position + " remaining=" + player.position.subtract(player.unvalidatedPosition), Boar.DebugMessage.INFO);
+        Boar.debug(player.getSession().name() + ": [movement-debug] drifted server position tick=" + player.tick + " newPos=" + player.position + " remaining=" + player.position.subtract(player.unvalidatedPosition), Boar.DebugMessage.INFO);
     }
 
     public boolean shouldDoFail() {

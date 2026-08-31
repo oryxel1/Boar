@@ -52,7 +52,6 @@ public final class Reach extends BaseCheck implements PacketCheck {
         // TODO: vehicle reach handling. For now we don't have the data to validate, so let the
         // attack through unchanged rather than guess.
         if (entity == null || entity.isInVehicle()) {
-            Boar.debug("[reach-debug] passthrough attack runtimeId=" + packet.getRuntimeEntityId() + " reason=" + (entity == null ? "missing-entity" : "entity-in-vehicle"), Boar.DebugMessage.INFO);
             return;
         }
 
@@ -66,7 +65,6 @@ public final class Reach extends BaseCheck implements PacketCheck {
             if (player.disableMitigations()) {
                 this.fail("invalid touch rotation, yaw=" + player.yaw + ", interactYaw=" + player.interactRotation.getY());
             }
-            Boar.debug("[reach-debug] deferred reason=touch-fov runtimeId=" + packet.getRuntimeEntityId() + " yaw=" + player.yaw + " interactYaw=" + player.interactRotation.getY(), Boar.DebugMessage.WARNING);
         }
 
         event.setCancelled(true);
@@ -92,14 +90,8 @@ public final class Reach extends BaseCheck implements PacketCheck {
             }
 
             final float reach = ReachUtil.calculateReach(player, attack.attackerPositions, attack.entity, attack.entityPositionsAtAttack);
-            if (reach > Boar.getConfig().toleranceReach()) {
-                if (reach == Float.MAX_VALUE) {
-                    Boar.debug("[reach-debug] fail reason=no-hit runtimeId=" + attack.packet.getRuntimeEntityId(), Boar.DebugMessage.WARNING);
-                    //this.fail("failed to find entity in sight.");
-                } else {
-                    Boar.debug("[reach-debug] fail reason=distance distance=" + reach + " tolerance=" + Boar.getConfig().toleranceReach(), Boar.DebugMessage.WARNING);
-                    this.fail("distance=" + reach);
-                }
+            if (reach > Boar.getConfig().toleranceReach() && reach != Float.MAX_VALUE) {
+                this.fail("distance=" + reach);
                 this.resolveInvalid(attack);
             } else {
                 player.injectClientPacket(attack.packet);

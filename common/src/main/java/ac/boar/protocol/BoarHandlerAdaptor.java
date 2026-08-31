@@ -12,9 +12,6 @@ import org.cloudburstmc.protocol.bedrock.netty.BedrockPacketWrapper;
 import org.cloudburstmc.protocol.bedrock.netty.codec.packet.BedrockPacketCodec;
 import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -79,10 +76,11 @@ public class BoarHandlerAdaptor extends MessageToMessageCodec<BedrockPacketWrapp
                 try {
                     listener.onPacketSend(event);
                 } catch (Throwable t) {
-                    Boar.debug("[listener-fail] onPacketSend listener=" + listener.getClass().getSimpleName() + " packet=" + event.getPacket().getClass().getSimpleName() + " err=" + t + "\n" + stackTrace(t), Boar.DebugMessage.SERVE);
+                    Boar.getInstance().getPlatform().logger().error(this.player.getSession().name() + ": onPacketSend listener " + listener.getClass().getSimpleName() + " threw for packet " + event.getPacket().getClass().getSimpleName(), t);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(this.player.getSession().name() + ": onPacketSend listener loop threw for packet " + event.getPacket().getClass().getSimpleName(), e);
         }
 
         if (event.isCancelled()) {
@@ -100,7 +98,9 @@ public class BoarHandlerAdaptor extends MessageToMessageCodec<BedrockPacketWrapp
 
             msg.setPacketBuffer(buf.retain());
             out.add(msg.retain());
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            // The packet is dropped when encoding fails.
+            Boar.getInstance().getPlatform().logger().error(this.player.getSession().name() + ": failed to encode packet " + event.getPacket().getClass().getSimpleName(), e);
         } finally {
             buf.release();
         }
@@ -120,10 +120,11 @@ public class BoarHandlerAdaptor extends MessageToMessageCodec<BedrockPacketWrapp
                 try {
                     listener.onPacketReceived(event);
                 } catch (Throwable t) {
-                    Boar.debug("[listener-fail] onPacketReceived listener=" + listener.getClass().getSimpleName() + " packet=" + event.getPacket().getClass().getSimpleName() + " err=" + t + "\n" + stackTrace(t), Boar.DebugMessage.SERVE);
+                    Boar.getInstance().getPlatform().logger().error(this.player.getSession().name() + ": onPacketReceived listener " + listener.getClass().getSimpleName() + " threw for packet " + event.getPacket().getClass().getSimpleName(), t);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Boar.getInstance().getPlatform().logger().error(this.player.getSession().name() + ": onPacketReceived listener loop threw for packet " + event.getPacket().getClass().getSimpleName(), e);
         }
 
         if (event.isCancelled()) {
@@ -134,11 +135,5 @@ public class BoarHandlerAdaptor extends MessageToMessageCodec<BedrockPacketWrapp
         out.add(msg.retain());
 
         event.getPostTasks().forEach(Runnable::run);
-    }
-
-    private static String stackTrace(Throwable t) {
-        StringWriter sw = new StringWriter();
-        t.printStackTrace(new PrintWriter(sw));
-        return sw.toString();
     }
 }

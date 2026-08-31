@@ -85,8 +85,9 @@ public class ServerChunkPackets implements PacketListener {
                 }
 
                 // Ignore the rest, I only need the chunk data.
-            } catch (Exception ignored) {
+            } catch (Exception e) {
                 // Bedrock just ignore and use whatever they were able to read.
+                Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to decode chunk " + packet.getChunkX() + "," + packet.getChunkZ(), e);
             } finally {
                 buf.release();
             }
@@ -109,7 +110,6 @@ public class ServerChunkPackets implements PacketListener {
 
             final Dimension dimension = DimensionUtil.dimensionFromId(packet.getDimension());
             final Vector3i center = packet.getCenterPosition();
-
             for (SubChunkData entry : packet.getSubChunks()) {
                 final SubChunkRequestResult result = entry.getResult();
                 if (result != SubChunkRequestResult.SUCCESS && result != SubChunkRequestResult.SUCCESS_ALL_AIR) {
@@ -130,6 +130,7 @@ public class ServerChunkPackets implements PacketListener {
                         try {
                             return ChunkDecoder.readSubChunk(dup, airId, sectionY, dimension.minY()).section();
                         } catch (Exception ex) {
+                            Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to decode sub-chunk section " + sectionY, ex);
                             return null;
                         } finally {
                             dup.release();

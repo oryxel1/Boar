@@ -54,7 +54,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         if (timer != null && timer.isInvalid()) {
             if (!player.disableMitigations()) {
                 event.setCancelled(true);
-                Boar.debug("[movement-debug] cancelled auth-input reason=timer tick=" + player.tick + " packetTick=" + packet.getTick() + " pos=" + packet.getPosition() + " delta=" + packet.getDelta(), Boar.DebugMessage.WARNING);
+                Boar.debug(player.getSession().name() + ": [movement-debug] cancelled auth-input reason=timer tick=" + player.tick + " packetTick=" + packet.getTick() + " pos=" + packet.getPosition() + " delta=" + packet.getDelta(), Boar.DebugMessage.WARNING);
                 return;
             }
         }
