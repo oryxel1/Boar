@@ -92,6 +92,14 @@ public class ServerChunkPackets implements PacketListener {
                 buf.release();
             }
 
+            // Make sure any sections that were missing aren't marked as null as those would be considered
+            // "missing" and that primarily is the concern for the sub-chunk system
+            for (int i = 0; i < sections.length; i++) {
+                if (sections[i] == null) {
+                    sections[i] = cache.allAirSection(airId);
+                }
+            }
+
             final ChunkLoadAck ack = new ChunkLoadAck(packet.getChunkX(), packet.getChunkZ(), dimension, sections);
             if (player.pendingDimensionSwitches > 0) {
                 player.queueAcknowledgment(ack);
@@ -112,30 +120,40 @@ public class ServerChunkPackets implements PacketListener {
             final Vector3i center = packet.getCenterPosition();
             for (SubChunkData entry : packet.getSubChunks()) {
                 final SubChunkRequestResult result = entry.getResult();
-                if (result != SubChunkRequestResult.SUCCESS && result != SubChunkRequestResult.SUCCESS_ALL_AIR) {
-                    continue;
-                }
-
                 final Vector3i offset = entry.getPosition();
                 final int chunkX = center.getX() + offset.getX();
                 final int chunkZ = center.getZ() + offset.getZ();
                 final int sectionY = (center.getY() + offset.getY()) - (dimension.minY() >> 4);
 
+                if (result != SubChunkRequestResult.SUCCESS && result != SubChunkRequestResult.SUCCESS_ALL_AIR) {
+                    Boar.debug(player.getSession().name() + ": received non-successful sub-chunk request result " + result + " for chunk (" + chunkX + " " + chunkZ + ") for sub-chunk " + sectionY, Boar.DebugMessage.WARNING);
+                    continue;
+                }
+
+                final int airId = player.mappingInfo.airId();
                 BoarChunkSection section = null;
-                if (result == SubChunkRequestResult.SUCCESS && entry.getData() != null) {
-                    final ByteBuf data = entry.getData();
-                    final int airId = player.mappingInfo.airId();
-                    section = Boar.getInstance().getChunkCache().getOrDecode(data, airId, () -> {
-                        final ByteBuf dup = data.retainedDuplicate();
-                        try {
-                            return ChunkDecoder.readSubChunk(dup, airId, sectionY, dimension.minY()).section();
-                        } catch (Exception ex) {
-                            Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to decode sub-chunk section " + sectionY, ex);
-                            return null;
-                        } finally {
-                            dup.release();
-                        }
-                    });
+                if (result == SubChunkRequestResult.SUCCESS) {
+                    if (entry.getData() != null) {
+                        final ByteBuf data = entry.getData();
+                        section = Boar.getInstance().getChunkCache().getOrDecode(data, airId, () -> {
+                            final ByteBuf dup = data.retainedDuplicate();
+                            try {
+                                return ChunkDecoder.readSubChunk(dup, airId, sectionY, dimension.minY()).section();
+                            } catch (Exception ex) {
+                                Boar.getInstance().getPlatform().logger().error(player.getSession().name() + ": failed to decode sub-chunk section " + sectionY, ex);
+                                return null;
+                            } finally {
+                                dup.release();
+                            }
+                        });
+                    } else {
+                        Boar.debug(player.getSession().name() + ": received sub-chunk " + sectionY + " but no data was provided", Boar.DebugMessage.WARNING);
+                    }
+                }
+
+                // decoding error or server didn't send?? anyway we just set to air here so that it isn't considered to be "missing"
+                if (section == null) {
+                    section = Boar.getInstance().getChunkCache().allAirSection(airId);
                 }
 
                 final SubChunkLoadAck ack = new SubChunkLoadAck(chunkX, chunkZ, sectionY, dimension, section);

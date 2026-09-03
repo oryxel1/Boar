@@ -194,7 +194,7 @@ public class CompensatedWorld {
     public void put(int x, int z, BoarChunkSection[] chunks) {
         long chunkPosition = MathUtil.chunkPositionToLong(x, z);
         final BoarChunkSection[] sections = Arrays.copyOf(chunks, chunks.length);
-        this.chunks.put(chunkPosition, new BoarChunk(sections, new ArrayList<>()));
+        this.chunks.put(chunkPosition, new BoarChunk(sections, new ArrayList<>(), true));
         this.updateChunkExemption(chunkPosition, x, z);
         this.applyPendingBlockUpdates(chunkPosition, sections);
     }
@@ -210,10 +210,10 @@ public class CompensatedWorld {
         if (chunk == null) {
             final BoarChunkSection[] sections = new BoarChunkSection[sectionCount];
             sections[sectionY] = section;
-            chunk = new BoarChunk(sections, new ArrayList<>());
+            chunk = new BoarChunk(sections, new ArrayList<>(), sectionCount == 1);
             this.chunks.put(chunkPosition, chunk);
         } else {
-            chunk.sections()[sectionY] = section;
+            chunk.setSection(section, sectionY);
         }
 
         this.updateChunkExemption(chunkPosition, chunkX, chunkZ);

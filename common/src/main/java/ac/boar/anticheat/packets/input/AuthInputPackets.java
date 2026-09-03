@@ -12,9 +12,12 @@ import ac.boar.anticheat.prediction.PredictionRunner;
 import ac.boar.anticheat.teleport.data.TeleportData;
 import ac.boar.anticheat.util.Dimension;
 import ac.boar.anticheat.util.DimensionUtil;
+import ac.boar.anticheat.util.geyser.BoarChunk;
+import ac.boar.anticheat.util.geyser.BoarChunkSection;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.api.CloudburstPacketEvent;
 import ac.boar.protocol.api.PacketListener;
+import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
@@ -68,8 +71,28 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         LegacyAuthInputPackets.processAuthInput(player, packet, true);
         LegacyAuthInputPackets.updateUnvalidatedPosition(player, packet);
-        player.insideUnloadedChunk = !player.compensatedWorld.isChunkLoadedAt(
-                player.unvalidatedPosition.x, player.unvalidatedPosition.z);
+
+        final int chunkX = GenericMath.floor(player.position.x) >> 4;
+        final int chunkZ = GenericMath.floor(player.position.z) >> 4;
+        final BoarChunk chunkInside = player.compensatedWorld.getChunk(chunkX, chunkZ);
+        if (chunkInside != null) {
+            player.insideUnloadedChunk = false;
+            if (chunkInside.warnForMissingSections() && !chunkInside.hasAllSections()) {
+                StringBuilder missing = null;
+                for (int idx = 0; idx < chunkInside.sections().length; idx++) {
+                    BoarChunkSection sec = chunkInside.getSection(idx);
+                    if (sec == null) {
+                        if (missing == null) missing = new StringBuilder("["); else missing.append(", ");
+                        missing.append(idx);
+                    }
+                }
+                if (missing != null) missing.append("]"); else missing = new StringBuilder("[]");
+                Boar.debug(player.getSession().name() + ": inside loaded chunk but has missing sub-chunks: " + missing, Boar.DebugMessage.WARNING);
+            }
+        } else {
+            player.insideUnloadedChunk = true;
+        }
+
 
         // Start a fresh movement trace for this tick, with a snapshot of the start state.
         player.getMovementTrace().begin();
@@ -115,9 +138,9 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             }
         }
 
+        player.insideUnloadedChunk = !player.compensatedWorld.isChunkLoadedAt(player.position.x, player.position.z);
         player.compensatedWorld.cleanChunksAtPlayerPosition();
-        player.insideUnloadedChunk = !player.compensatedWorld.isChunkLoadedAt(
-                player.unvalidatedPosition.x, player.unvalidatedPosition.z);
+
         // Don't try to predict player position in an unloaded chunk, it's not worth it and uh won't go well!
         // Just keep teleporting the player back until they loaded in, that way we shouldn't false post teleport... I think!
         // There isn't much room to abuse considering they're not loaded in any way... and the position is validated so

@@ -8,6 +8,7 @@ import com.google.common.hash.Hashing;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
@@ -27,6 +28,15 @@ import java.util.function.Supplier;
 public final class ChunkSectionCache {
 
     private final ConcurrentMap<HashCode, BoarChunkSection> sections = new MapMaker().weakValues().makeMap();
+    private final ConcurrentMap<Integer, BoarChunkSection> allAirSections = new ConcurrentHashMap<>();
+
+    public BoarChunkSection allAirSection(final int airId) {
+        return this.allAirSections.computeIfAbsent(airId, id -> {
+            final BoarChunkSection section = new BoarChunkSection(id);
+            section.markShared();
+            return section;
+        });
+    }
 
     /**
      * Returns the shared section for the given chunk bytes. If the cache has no section for these
@@ -86,5 +96,6 @@ public final class ChunkSectionCache {
     /** Removes all entries. Call this only on shutdown. The garbage collector does the normal cleanup. */
     public void clear() {
         this.sections.clear();
+        this.allAirSections.clear();
     }
 }
