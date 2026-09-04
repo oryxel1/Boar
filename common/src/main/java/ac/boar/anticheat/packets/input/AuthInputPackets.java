@@ -77,7 +77,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         final BoarChunk chunkInside = player.compensatedWorld.getChunk(chunkX, chunkZ);
         if (chunkInside != null) {
             player.insideUnloadedChunk = false;
-            if (chunkInside.warnForMissingSections() && !chunkInside.hasAllSections()) {
+            if (!chunkInside.hasAllSections() && chunkInside.warnForMissingSections()) {
                 StringBuilder missing = null;
                 for (int idx = 0; idx < chunkInside.sections().length; idx++) {
                     BoarChunkSection sec = chunkInside.getSection(idx);

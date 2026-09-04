@@ -47,6 +47,7 @@ public class ServerChunkPackets implements PacketListener {
             }
             // Sub-chunk request mode is enabled - actual chunk data will arrive in SubChunkPackets.
             if (packet.isRequestSubChunks()) {
+                fillSectionsAboveLimit(player, packet);
                 return;
             }
 
@@ -195,6 +196,25 @@ public class ServerChunkPackets implements PacketListener {
             }
         } else if (event.getPacket() instanceof BlockEntityDataPacket packet) {
             player.sendLatencyStack(new BlockEntityUpdateAck(packet.getBlockPosition(), packet.getData()));
+        }
+    }
+
+    private static void fillSectionsAboveLimit(BoarPlayer player, LevelChunkPacket packet) {
+        final int limit = packet.getSubChunkLimit();
+        if (limit < 0 || packet.getDimension() < 0 || packet.getDimension() > 2) {
+            return;
+        }
+
+        final Dimension dimension = DimensionUtil.dimensionFromId(packet.getDimension());
+        final int sectionCount = dimension.height() >> 4;
+        final BoarChunkSection air = Boar.getInstance().getChunkCache().allAirSection(player.mappingInfo.airId());
+        for (int sectionY = limit; sectionY < sectionCount; sectionY++) {
+            final SubChunkLoadAck ack = new SubChunkLoadAck(packet.getChunkX(), packet.getChunkZ(), sectionY, dimension, air);
+            if (player.pendingDimensionSwitches > 0) {
+                player.queueAcknowledgment(ack);
+            } else {
+                player.dispatchAcknowledgment(ack);
+            }
         }
     }
 

@@ -6,12 +6,17 @@ import ac.boar.anticheat.check.api.Check;
 import ac.boar.api.anticheat.annotations.CheckInfo;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.player.BoarPlayer;
+import ac.boar.anticheat.prediction.engine.data.VectorType;
 import ac.boar.anticheat.util.MathUtil;
+import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
 import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 
 @CheckInfo(name = "Prediction")
 public class Prediction extends BaseCheck implements OffsetHandlerCheck {
+
+    private static final float DRIFT_CONTACT_EPSILON = 1.0E-4F;
+
     private final Check correction;
 
     private long lastFlagTick = Long.MIN_VALUE;
@@ -108,7 +113,7 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
      */
     private void driftTowardsClient() {
         final float maxDrift = Boar.getConfig().positionDriftAmount();
-        if (maxDrift <= 0) {
+        if (maxDrift <= 0 || !this.canDriftTowardsClient()) {
             return;
         }
 
@@ -120,6 +125,25 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
         ), false);
 
         Boar.debug(player.getSession().name() + ": [movement-debug] drifted server position tick=" + player.tick + " newPos=" + player.position + " remaining=" + player.position.subtract(player.unvalidatedPosition), Boar.DebugMessage.INFO);
+    }
+
+    private boolean canDriftTowardsClient() {
+        if (player.bestPossibility.getType() == VectorType.VELOCITY) {
+            Boar.debug(player.getSession().name() + ": [movement-debug] drift skipped reason=knockback tick=" + player.tick, Boar.DebugMessage.INFO);
+            return false;
+        }
+
+        final Box serverBox = player.boundingBox.contract(DRIFT_CONTACT_EPSILON, 0, DRIFT_CONTACT_EPSILON);
+        final Box clientBox = player.dimensions.getBoxAt(player.unvalidatedPosition).contract(DRIFT_CONTACT_EPSILON, 0, DRIFT_CONTACT_EPSILON);
+        final boolean serverFree = player.compensatedWorld.noCollision(serverBox);
+        final boolean clientFree = player.compensatedWorld.noCollision(clientBox);
+        if (serverFree != clientFree) {
+            Boar.debug(player.getSession().name() + ": [movement-debug] drift skipped reason=block-contact-mismatch tick=" + player.tick
+                    + " serverFree=" + serverFree + " clientFree=" + clientFree
+                    + " serverPos=" + player.position + " clientPos=" + player.unvalidatedPosition, Boar.DebugMessage.INFO);
+            return false;
+        }
+        return true;
     }
 
     public boolean shouldDoFail() {
