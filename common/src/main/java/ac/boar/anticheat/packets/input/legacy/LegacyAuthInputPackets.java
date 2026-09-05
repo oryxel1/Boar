@@ -91,8 +91,14 @@ public class LegacyAuthInputPackets {
 
         player.prevYaw = player.yaw;
         player.prevPitch = player.pitch;
-        player.yaw = packet.getRotation().getY();
-        player.pitch = packet.getRotation().getX();
+
+        if (player.vehicle != null) {
+            player.yaw = packet.getVehicleRotation().getY();
+            player.pitch = packet.getVehicleRotation().getX();
+        } else {
+            player.yaw = packet.getRotation().getY();
+            player.pitch = packet.getRotation().getX();
+        }
 
         player.rotation = packet.getRotation();
         player.interactRotation = packet.getInteractRotation().clone();

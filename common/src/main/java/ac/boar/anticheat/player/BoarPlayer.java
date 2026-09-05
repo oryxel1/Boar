@@ -218,6 +218,10 @@ public final class BoarPlayer extends PlayerData {
             return speed;
         }
 
+        if (vehicle != null) {
+            return this.getSpeed() * 0.1F;
+        }
+
         return this.getFlagTracker().has(EntityFlag.SPRINTING) ? 0.026F : 0.02F;
     }
 
