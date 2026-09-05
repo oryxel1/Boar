@@ -22,7 +22,7 @@ public class BadPacketA extends BaseCheck implements PacketCheck {
                 player.kick("Invalid auth input packet!");
             }
 
-            if (player.vehicle != null && !MathUtil.isValid(packet.getVehicleRotation())) {
+            if (player.vehicle != null && packet.getVehicleRotation() != null && !MathUtil.isValid(packet.getVehicleRotation())) {
                 fail("vehicleRot=" + packet.getRotation());
                 player.kick("Invalid auth input packet!");
             }
