@@ -1,8 +1,8 @@
 package ac.boar.anticheat.compensated.world;
 
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
-import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
+import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.data.Fluid;
 import ac.boar.anticheat.data.FluidState;
 import ac.boar.anticheat.data.block.BoarBlockState;
@@ -75,7 +75,7 @@ public class CompensatedWorldImpl extends CompensatedWorld {
 
         // Sometimes this can spam error when player first join or something like that, can be safely ignore here.
         try {
-            for (EntityCache cache : this.getEntities().values()) {
+            for (BaseEntityCache cache : this.getEntities().values()) {
                 if (cache == null || cache.getMetadata().getFlags() == null) {
                     continue;
                 }

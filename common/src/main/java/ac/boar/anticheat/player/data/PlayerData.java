@@ -2,6 +2,7 @@ package ac.boar.anticheat.player.data;
 
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.CompensatedInventory;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.data.vanilla.Attribute;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.Fluid;
@@ -169,7 +170,7 @@ public class PlayerData {
     public BoarBlockState inBlockState;
     public boolean scaffoldDescend;
 
-    public VehicleData vehicleData = null;
+    public BaseEntityCache vehicle = null;
 
     public Vector3i bedPosition = null;
 
@@ -221,7 +222,7 @@ public class PlayerData {
         }
 
         this.position = vec3;
-        if (this.vehicleData != null) {
+        if (this.vehicle != null) {
             return;
         }
 

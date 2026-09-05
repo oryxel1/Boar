@@ -1,6 +1,6 @@
-package ac.boar.anticheat.compensated.cache.entity;
+package ac.boar.anticheat.compensated.entity;
 
-import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
+import ac.boar.anticheat.compensated.entity.state.CachedEntityState;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.math.Vec3;
@@ -14,11 +14,14 @@ import lombok.ToString;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataMap;
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ToString
 @RequiredArgsConstructor
 @Getter
 @Setter
-public final class EntityCache {
+public class BaseEntityCache {
     private final BoarPlayer player;
     private final EntityType type;
     private final EntityDefinition definition;
@@ -29,6 +32,8 @@ public final class EntityCache {
     private boolean inVehicle;
 
     private EntityDataMap metadata = new EntityDataMap();
+
+    protected List<Long> passengers = new ArrayList<>();
 
     public void setMetadata(EntityDataMap metadata) {
         this.metadata = metadata;

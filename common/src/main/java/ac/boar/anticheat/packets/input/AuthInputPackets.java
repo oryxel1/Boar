@@ -4,6 +4,7 @@ import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.ack.types.DimensionSwitchAck;
 import ac.boar.anticheat.check.impl.reach.Reach;
 import ac.boar.anticheat.check.impl.timer.Timer;
+import ac.boar.anticheat.compensated.entity.utils.ClientVehicle;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.packets.input.teleport.TeleportHandler;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -71,10 +72,14 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         player.tick();
 
-        if (player.vehicleData != null) { // TODO: Vehicle prediction.
+        if (player.vehicle != null && (!(player.vehicle instanceof ClientVehicle vehicle) || !vehicle.shouldSimulateMovement())) {
             player.position = player.unvalidatedPosition;
             player.compensatedWorld.cleanChunksAtPlayerPosition();
             return;
+        }
+
+        if (player.vehicle != null) {
+            System.out.println("we simulate movement babyyyy");
         }
 
         if (player.getEntity().bedPosition() != null) {

@@ -1,6 +1,7 @@
-package ac.boar.anticheat.compensated.world.base;
+package ac.boar.anticheat.compensated;
 
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
+import ac.boar.anticheat.compensated.entity.impl.HorseEntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.player.BoarPlayer;
@@ -36,7 +37,7 @@ public class CompensatedWorld {
 
     private Dimension dimension;
 
-    private final Long2ObjectMap<EntityCache> entities = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<BaseEntityCache> entities = new Long2ObjectOpenHashMap<>();
     private final Map<Long, Long> uniqueIdToRuntimeId = new HashMap<>();
 
     public void removeEntity(final long uniqueId) {
@@ -45,14 +46,31 @@ public class CompensatedWorld {
             return;
         }
 
-        this.entities.remove((long) key);
+        BaseEntityCache entity = this.entities.remove((long) key);
+        if (entity == null) {
+            return;
+        }
+
+        for (Long passengerId : entity.getPassengers()) {
+            if (passengerId == player.runtimeEntityId) {
+                player.vehicle = null;
+                continue;
+            }
+
+            BaseEntityCache passenger = getEntity(passengerId);
+            if (passenger == null) {
+                continue;
+            }
+
+            passenger.setInVehicle(false);
+        }
     }
 
-    public EntityCache getEntity(long id) {
+    public BaseEntityCache getEntity(long id) {
         return this.entities.get(id);
     }
 
-    public EntityCache addToCache(final BoarPlayer player, final long runtimeId, final long uniqueId) {
+    public BaseEntityCache addToCache(final BoarPlayer player, final long runtimeId, final long uniqueId) {
         EntityDefinition definition = player.getEntityAccessor().definitionByRuntimeId(runtimeId);
         if (definition == null || runtimeId == player.runtimeEntityId) {
             return null;
@@ -60,7 +78,13 @@ public class CompensatedWorld {
 
         boolean affectedByOffset = definition.type().is(EntityTypes.PLAYER) || definition.identifier().equalsIgnoreCase("minecraft:boat") || definition.identifier().equalsIgnoreCase("minecraft:chest_boat");
 
-        final EntityCache cache = new EntityCache(player, definition.type(), definition, runtimeId);
+        final BaseEntityCache cache;
+        if (definition.type().is(EntityTypes.HORSE) || definition.type().is(EntityTypes.SKELETON_HORSE) || definition.type().is(EntityTypes.ZOMBIE_HORSE)) {
+            cache = new HorseEntityCache(player, definition.type(), definition, runtimeId);
+        } else {
+            cache = new BaseEntityCache(player, definition.type(), definition, runtimeId);
+        }
+
         cache.setAffectedByOffset(affectedByOffset);
         // Default back to default bounding box if there ain't anything.
         cache.setDimensions(EntityDimensions.fixed(definition.width(), definition.height()));

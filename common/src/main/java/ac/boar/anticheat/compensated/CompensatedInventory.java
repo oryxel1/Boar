@@ -1,8 +1,8 @@
 package ac.boar.anticheat.compensated;
 
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.compensated.cache.container.impl.ArmorContainerCache;
-import ac.boar.anticheat.compensated.cache.container.impl.PlayerContainerCache;
+import ac.boar.anticheat.compensated.container.ContainerCache;
+import ac.boar.anticheat.compensated.container.impl.ArmorContainerCache;
+import ac.boar.anticheat.compensated.container.impl.PlayerContainerCache;
 import ac.boar.anticheat.data.enchantment.Enchantment;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;

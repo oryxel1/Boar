@@ -91,7 +91,7 @@ public class TeleportUtil {
         packet.setTick(tick);
         packet.setDelta(data.tickEnd().toVector3f());
         packet.setVehicleRotation(Vector2f.ZERO);
-        packet.setPredictionType(player.vehicleData != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
+        packet.setPredictionType(player.vehicle != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
 
         this.player.getConnection().sendPacketImmediately(packet);
         Boar.debug("sent rewind tick=" + tick + " pos=" + packet.getPosition() + " delta=" + packet.getDelta() + " onGround=" + onGround, Boar.DebugMessage.WARNING);

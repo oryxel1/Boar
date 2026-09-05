@@ -6,7 +6,7 @@ import ac.boar.anticheat.ack.types.BlockUpdateAck;
 import ac.boar.anticheat.ack.types.ChunkLoadAck;
 import ac.boar.anticheat.ack.types.ChunkRadiusUpdateAck;
 import ac.boar.anticheat.ack.types.SubChunkLoadAck;
-import ac.boar.anticheat.compensated.world.base.CompensatedWorld;
+import ac.boar.anticheat.compensated.CompensatedWorld;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.Dimension;
 import ac.boar.anticheat.util.DimensionUtil;

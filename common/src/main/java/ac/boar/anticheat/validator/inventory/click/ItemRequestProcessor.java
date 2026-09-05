@@ -1,7 +1,7 @@
 package ac.boar.anticheat.validator.inventory.click;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.compensated.container.ContainerCache;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.validator.inventory.ItemTransactionValidator;

@@ -1,6 +1,6 @@
 package ac.boar.anticheat.util.reach;
 
-import ac.boar.anticheat.compensated.cache.entity.state.CachedEntityState;
+import ac.boar.anticheat.compensated.entity.state.CachedEntityState;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.mappings.entity.EntityTypes;
 import lombok.Getter;

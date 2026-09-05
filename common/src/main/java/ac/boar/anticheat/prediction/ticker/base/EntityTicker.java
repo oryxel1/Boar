@@ -40,7 +40,7 @@ public class EntityTicker {
 
     private void updateSwimming() {
         if (player.getFlagTracker().has(EntityFlag.SWIMMING)) {
-            player.getFlagTracker().set(EntityFlag.SWIMMING, player.touchingWater && player.vehicleData == null);
+            player.getFlagTracker().set(EntityFlag.SWIMMING, player.touchingWater && player.vehicle == null);
         }
     }
 

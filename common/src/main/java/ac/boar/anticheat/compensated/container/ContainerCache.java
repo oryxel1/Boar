@@ -1,4 +1,4 @@
-package ac.boar.anticheat.compensated.cache.container;
+package ac.boar.anticheat.compensated.container;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.data.inventory.ItemCache;

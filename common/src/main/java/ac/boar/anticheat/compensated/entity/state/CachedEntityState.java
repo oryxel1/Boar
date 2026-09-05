@@ -1,6 +1,6 @@
-package ac.boar.anticheat.compensated.cache.entity.state;
+package ac.boar.anticheat.compensated.entity.state;
 
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
@@ -13,12 +13,12 @@ import lombok.Setter;
 @Setter
 public final class CachedEntityState {
     private final BoarPlayer player;
-    private final EntityCache entity;
+    private final BaseEntityCache entity;
     private Vec3 prevPos = Vec3.ZERO;
     private Vec3 pos = Vec3.ZERO;
     private PositionInterpolator interpolator;
 
-    public CachedEntityState(BoarPlayer player, EntityCache entity) {
+    public CachedEntityState(BoarPlayer player, BaseEntityCache entity) {
         this.player = player;
         this.entity = entity;
 

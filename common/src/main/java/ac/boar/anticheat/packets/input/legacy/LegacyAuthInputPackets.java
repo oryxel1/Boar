@@ -3,7 +3,7 @@ package ac.boar.anticheat.packets.input.legacy;
 import ac.boar.anticheat.check.api.Check;
 import ac.boar.anticheat.check.api.impl.OffsetHandlerCheck;
 import ac.boar.anticheat.collision.Collider;
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.compensated.container.ContainerCache;
 import ac.boar.anticheat.data.ItemUseTracker;
 import ac.boar.anticheat.data.inventory.BoarItemStack;
 import ac.boar.anticheat.player.BoarPlayer;

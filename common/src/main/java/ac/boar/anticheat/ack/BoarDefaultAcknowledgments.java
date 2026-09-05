@@ -24,13 +24,12 @@ import ac.boar.anticheat.ack.types.TeleportAcceptAck;
 import ac.boar.anticheat.ack.types.UpdateAbilitiesAck;
 import ac.boar.anticheat.ack.types.UpdateAttributesAck;
 import ac.boar.anticheat.ack.types.UpdateTradeAck;
-import ac.boar.anticheat.ack.types.VehicleClearAck;
-import ac.boar.anticheat.ack.types.VehicleSetAck;
+import ac.boar.anticheat.ack.types.VehicleLinkAck;
 import ac.boar.anticheat.ack.types.VelocityAck;
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.compensated.cache.container.impl.TradeContainerCache;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.container.ContainerCache;
+import ac.boar.anticheat.compensated.container.impl.TradeContainerCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
@@ -46,6 +45,7 @@ import org.cloudburstmc.protocol.bedrock.data.Ability;
 import org.cloudburstmc.protocol.bedrock.data.AbilityLayer;
 import org.cloudburstmc.protocol.bedrock.data.AttributeData;
 import org.cloudburstmc.protocol.bedrock.data.attribute.AttributeModifierData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityLinkData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.CreativeItemData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.MultiRecipeData;
 import org.cloudburstmc.protocol.bedrock.data.inventory.crafting.recipe.RecipeData;
@@ -93,8 +93,7 @@ public final class BoarDefaultAcknowledgments {
 
         registry.register(MobEffectAck.class, BoarDefaultAcknowledgments::handleMobEffect);
 
-        registry.register(VehicleClearAck.class, BoarDefaultAcknowledgments::handleVehicleClear);
-        registry.register(VehicleSetAck.class, BoarDefaultAcknowledgments::handleVehicleSet);
+        registry.register(VehicleLinkAck.class, BoarDefaultAcknowledgments::handleVehicleLink);
 
         registry.register(TeleportAcceptAck.class, BoarDefaultAcknowledgments::handleTeleportAccept);
     }
@@ -143,21 +142,18 @@ public final class BoarDefaultAcknowledgments {
     }
 
     private static void handleEntityRemove(BoarPlayer player, EntityRemoveAck ack) {
-        if (player.vehicleData != null && player.vehicleData.vehicleRuntimeId == ack.uniqueEntityId()) {
-            player.vehicleData = null;
-        }
         player.compensatedWorld.removeEntity(ack.uniqueEntityId());
     }
 
     private static void handleEntityInterpolate(BoarPlayer player, EntityInterpolateAck ack) {
-        final EntityCache entity = player.compensatedWorld.getEntity(ack.runtimeEntityId());
+        final BaseEntityCache entity = player.compensatedWorld.getEntity(ack.runtimeEntityId());
         if (entity != null) {
             entity.interpolate(ack.position(), ack.lerp());
         }
     }
 
     private static void handleEntityMetadata(BoarPlayer player, EntityMetadataAck ack) {
-        final EntityCache cache = player.compensatedWorld.getEntity(ack.runtimeEntityId());
+        final BaseEntityCache cache = player.compensatedWorld.getEntity(ack.runtimeEntityId());
         if (cache != null) {
             cache.setMetadata(ack.metadata());
         }
@@ -208,7 +204,7 @@ public final class BoarDefaultAcknowledgments {
     }
 
     private static void handleUpdateAttributes(BoarPlayer player, UpdateAttributesAck ack) {
-        if (player.vehicleData != null) {
+        if (player.vehicle != null) {
             return;
         }
 
@@ -365,13 +361,38 @@ public final class BoarDefaultAcknowledgments {
         }
     }
 
-    private static void handleVehicleClear(BoarPlayer player, VehicleClearAck ack) {
-        player.vehicleData = null;
-    }
+    private static void handleVehicleLink(BoarPlayer player, VehicleLinkAck ack) {
+        long entityId = ack.linkData().getFrom();
+        long riderId = ack.linkData().getTo();
 
-    private static void handleVehicleSet(BoarPlayer player, VehicleSetAck ack) {
-        player.vehicleData = new VehicleData();
-        player.vehicleData.vehicleRuntimeId = ack.vehicleRuntimeId();
+        final BaseEntityCache vehicleEntity = player.compensatedWorld.getEntity(entityId);
+        if (vehicleEntity == null) {
+            return;
+        }
+
+        if (ack.linkData().getType() == EntityLinkData.Type.REMOVE) {
+            vehicleEntity.getPassengers().remove(riderId);
+        } else {
+            // It seems like RIDER/PASSENGER type isn't relevant here, it will just get added to the list.
+            vehicleEntity.getPassengers().add(riderId);
+        }
+
+        if (riderId == player.runtimeEntityId) {
+            if (ack.linkData().getType() == EntityLinkData.Type.REMOVE) {
+                player.vehicle = null;
+                return;
+            }
+
+            if (player.vehicle != vehicleEntity) {
+                player.getTeleportUtil().getQueuedTeleports().clear();
+            }
+            player.vehicle = vehicleEntity;
+        } else {
+            final BaseEntityCache riderEntity = player.compensatedWorld.getEntity(riderId);
+            if (riderEntity != null) {
+                riderEntity.setInVehicle(ack.linkData().getType() != EntityLinkData.Type.REMOVE);
+            }
+        }
     }
 
     private static void handleTeleportAccept(BoarPlayer player, TeleportAcceptAck ack) {

@@ -7,7 +7,7 @@ import ac.boar.anticheat.ack.BoarBatchedAcknowledgmentTransport;
 import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.Fluid;
 import ac.boar.anticheat.data.FluidState;
@@ -178,7 +178,7 @@ public final class BoarPlayer extends PlayerData {
         });
 
         try {
-            for (final EntityCache cache : this.compensatedWorld.getEntities().values()) {
+            for (final BaseEntityCache cache : this.compensatedWorld.getEntities().values()) {
                 if (cache.getCurrent() != null) {
                     cache.getCurrent().tick();
                 }
@@ -194,8 +194,8 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getYOffset() {
-        if (this.vehicleData != null) {
-            final EntityCache cache = this.compensatedWorld.getEntity(this.vehicleData.vehicleRuntimeId);
+        if (this.vehicle != null) {
+            final BaseEntityCache cache = this.compensatedWorld.getEntity(this.vehicle.getRuntimeId());
             if (cache != null) {
                 final String identifier = cache.getDefinition().identifier();
 

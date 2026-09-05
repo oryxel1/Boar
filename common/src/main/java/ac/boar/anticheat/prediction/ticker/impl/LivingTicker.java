@@ -2,7 +2,7 @@ package ac.boar.anticheat.prediction.ticker.impl;
 
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.data.effect.Effect;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.enchantment.Enchantment;
@@ -100,7 +100,7 @@ public class LivingTicker extends EntityTicker {
             }
         }
 
-        if (player.getFlagTracker().has(EntityFlag.GLIDING) && (player.onGround || player.vehicleData != null || player.hasEffect(Effect.LEVITATION))) {
+        if (player.getFlagTracker().has(EntityFlag.GLIDING) && (player.onGround || player.vehicle != null || player.hasEffect(Effect.LEVITATION))) {
             player.getFlagTracker().set(EntityFlag.GLIDING, false);
         }
 
@@ -143,9 +143,9 @@ public class LivingTicker extends EntityTicker {
     protected final void checkAutoSpinAttack(Box aABB, Box aABB2) {
         Box aABB3 = aABB.union(aABB2);
 
-        List<EntityCache> list = player.compensatedWorld.getEntities().values().stream().toList();
+        List<BaseEntityCache> list = player.compensatedWorld.getEntities().values().stream().toList();
         if (!list.isEmpty()) {
-            for (EntityCache entity : list) {
+            for (BaseEntityCache entity : list) {
                 if (entity.getCurrent() == null) {
                     continue;
                 }

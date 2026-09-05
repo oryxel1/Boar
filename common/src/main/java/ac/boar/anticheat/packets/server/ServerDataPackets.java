@@ -6,8 +6,8 @@ import ac.boar.anticheat.ack.types.GameTypeAck;
 import ac.boar.anticheat.ack.types.PlayerMetadataAck;
 import ac.boar.anticheat.ack.types.UpdateAbilitiesAck;
 import ac.boar.anticheat.ack.types.UpdateAttributesAck;
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.container.ContainerCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.data.inventory.BoarItemStack;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.DimensionUtil;
@@ -66,7 +66,7 @@ public class ServerDataPackets implements PacketListener {
 
         if (event.getPacket() instanceof SetEntityDataPacket packet) {
             if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
-                final EntityCache cache = player.compensatedWorld.getEntity(player.runtimeEntityId);
+                final BaseEntityCache cache = player.compensatedWorld.getEntity(player.runtimeEntityId);
                 if (cache == null) {
                     return;
                 }
@@ -77,7 +77,7 @@ public class ServerDataPackets implements PacketListener {
                 return;
             }
 
-            if (player.vehicleData != null) {
+            if (player.vehicle != null) {
                 return;
             }
 

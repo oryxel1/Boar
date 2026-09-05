@@ -1,14 +1,14 @@
 package ac.boar.anticheat.util.math;
 
 import ac.boar.anticheat.Boar;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.Pair;
 import org.cloudburstmc.protocol.bedrock.data.InputMode;
 
 public class ReachUtil {
-    public static float calculateReach(final BoarPlayer player, final Pair<Vec3, Vec3> pair, final EntityCache entity) {
+    public static float calculateReach(final BoarPlayer player, final Pair<Vec3, Vec3> pair, final BaseEntityCache entity) {
         float distance = Float.MAX_VALUE;
 
         final float MAX_RANGE = MathUtil.square(Boar.getConfig().toleranceReach());

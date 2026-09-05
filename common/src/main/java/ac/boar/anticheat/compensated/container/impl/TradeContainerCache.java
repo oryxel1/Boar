@@ -1,7 +1,7 @@
-package ac.boar.anticheat.compensated.cache.container.impl;
+package ac.boar.anticheat.compensated.container.impl;
 
 import ac.boar.anticheat.compensated.CompensatedInventory;
-import ac.boar.anticheat.compensated.cache.container.ContainerCache;
+import ac.boar.anticheat.compensated.container.ContainerCache;
 import lombok.Getter;
 import org.cloudburstmc.math.vector.Vector3i;
 import org.cloudburstmc.nbt.NbtMap;

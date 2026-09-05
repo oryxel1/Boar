@@ -3,7 +3,7 @@ package ac.boar.anticheat.check.impl.reach;
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.check.api.BaseCheck;
 import ac.boar.anticheat.check.api.impl.PacketCheck;
-import ac.boar.anticheat.compensated.cache.entity.EntityCache;
+import ac.boar.anticheat.compensated.entity.BaseEntityCache;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.Pair;
@@ -25,7 +25,7 @@ import java.util.Map;
 @Experimental
 @CheckInfo(name = "Reach")
 public final class Reach extends BaseCheck implements PacketCheck {
-    private final Map<Pair<Vec3, Vec3>, EntityCache> queuedHitAttacks = new HashMap<>();
+    private final Map<Pair<Vec3, Vec3>, BaseEntityCache> queuedHitAttacks = new HashMap<>();
     private boolean lastKnowHitWasValid;
 
     public Reach(BoarPlayer player) {
@@ -44,7 +44,7 @@ public final class Reach extends BaseCheck implements PacketCheck {
             return;
         }
 
-        final EntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
+        final BaseEntityCache entity = player.compensatedWorld.getEntity(packet.getRuntimeEntityId());
         // TODO: Implement reach check inside vehicle properly!
         if (entity == null || entity.isInVehicle()) {
             Boar.debug("[reach-debug] ignored attack runtimeId=" + packet.getRuntimeEntityId() + " reason=" + (entity == null ? "missing-entity" : "entity-in-vehicle"), Boar.DebugMessage.INFO);
@@ -97,8 +97,8 @@ public final class Reach extends BaseCheck implements PacketCheck {
         this.lastKnowHitWasValid = false;
 
         float hitDistance = 0;
-        for (Map.Entry<Pair<Vec3, Vec3>, EntityCache> entry : this.queuedHitAttacks.entrySet()) {
-            final EntityCache entity = entry.getValue();
+        for (Map.Entry<Pair<Vec3, Vec3>, BaseEntityCache> entry : this.queuedHitAttacks.entrySet()) {
+            final BaseEntityCache entity = entry.getValue();
             if (entity == null) {
                 continue;
             }
