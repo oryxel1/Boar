@@ -202,6 +202,10 @@ public class PlayerData {
         return this.tick != 1 && this.fluidHeight.getOrDefault(Fluid.LAVA, 0F) != 0.0;
     }
 
+    public float getStepHeight() {
+        return vehicle != null ? 1 : STEP_HEIGHT;
+    }
+
     public final float getEffectiveGravity(final Vec3 vec3) {
         return vec3.y < 0.0 && this.hasEffect(Effect.SLOW_FALLING) ? Math.min(GRAVITY, 0.01F) : GRAVITY;
     }

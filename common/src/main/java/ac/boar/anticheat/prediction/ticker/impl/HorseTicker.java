@@ -10,6 +10,10 @@ public class HorseTicker extends LivingTicker {
     }
 
     @Override
+    public void applyInput() {
+    }
+
+    @Override
     protected void tickRidden() {
         HorseEntityCache entity = (HorseEntityCache) player.vehicle;
 

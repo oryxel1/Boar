@@ -81,9 +81,9 @@ public class Collider {
         boolean verticalCollision = movement.y != lv2.y;
         boolean onGround = verticalCollision && movement.y < 0.0;
         if ((onGround || player.onGround) && (collisionX || collisionZ)) {
-            Vec3 vec32 = collideBoundingBox(player, new Vec3(movement.x, PlayerData.STEP_HEIGHT, movement.z), box, collisions);
-            Vec3 vec33 = collideBoundingBox(player, new Vec3(0, PlayerData.STEP_HEIGHT, 0), box.stretch(movement.x, 0, movement.z), collisions);
-            if (vec33.y < PlayerData.STEP_HEIGHT) {
+            Vec3 vec32 = collideBoundingBox(player, new Vec3(movement.x, player.getStepHeight(), movement.z), box, collisions);
+            Vec3 vec33 = collideBoundingBox(player, new Vec3(0, player.getStepHeight(), 0), box.stretch(movement.x, 0, movement.z), collisions);
+            if (vec33.y < player.getStepHeight()) {
                 Vec3 vec34 = collideBoundingBox(player, new Vec3(movement.x, 0, movement.z), box.offset(vec33), collisions).add(vec33);
                 if (vec34.horizontalLengthSquared() > vec32.horizontalLengthSquared()) {
                     vec32 = vec34;
