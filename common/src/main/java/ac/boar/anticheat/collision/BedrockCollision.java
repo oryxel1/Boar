@@ -103,6 +103,10 @@ public class BedrockCollision {
             return SOLID_SHAPE;
         }
 
+        if (state.is(Blocks.SEA_LANTERN)) {
+            return SOLID_SHAPE;
+        }
+
         if (state.is(Blocks.BELL) && state.get(Properties.BELL_ATTACHMENT).equals("floor")) {
             List<Box> collisions = new ArrayList<>();
             for (Box collisionBox : state.getCollisionBoxes()) {

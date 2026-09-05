@@ -45,6 +45,7 @@ public final class Blocks {
     public static final Reference<Block> RESPAWN_ANCHOR = create("respawn_anchor");
     public static final Reference<Block> SCAFFOLDING = create("scaffolding");
     public static final Reference<Block> SEA_PICKLE = create("sea_pickle");
+    public static final Reference<Block> SEA_LANTERN = create("sea_lantern");
     public static final Reference<Block> SLIME_BLOCK = create("slime_block");
     public static final Reference<Block> SOUL_SAND = create("soul_sand");
     public static final Reference<Block> SWEET_BERRY_BUSH = create("sweet_berry_bush");
