@@ -19,7 +19,7 @@ public class HorseTicker extends LivingTicker {
 
         if (player.onGround) {
             if (entity.playerJumpPendingScale > 0.0F) {
-                player.velocity.y = player.getJumpPower(entity.playerJumpPendingScale);
+                player.velocity.y = player.getJumpPower() * entity.playerJumpPendingScale;
                 if (player.input.z > 0.0) {
                     float sin = TrigMath.sin(player.yaw * 0.017453292F);
                     float cos = TrigMath.cos(player.yaw * 0.017453292F);

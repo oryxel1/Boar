@@ -238,15 +238,11 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getJumpPower() {
-        return getJumpPower(1f);
-    }
-
-    public float getJumpPower(float multiplier) {
         if (vehicle instanceof HorseEntityCache horse) {
-            return horse.jumpStrength.getValue() * multiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
+            return horse.jumpStrength.getValue() * this.getBlockJumpFactor() + this.getJumpBoostPower();
         }
 
-        return PlayerData.JUMP_HEIGHT * multiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
+        return PlayerData.JUMP_HEIGHT * this.getBlockJumpFactor() + this.getJumpBoostPower();
     }
 
     public float getJumpBoostPower() {

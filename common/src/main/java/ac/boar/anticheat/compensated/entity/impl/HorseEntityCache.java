@@ -13,7 +13,6 @@ import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
 
 public class HorseEntityCache extends BaseEntityCache implements ClientVehicle {
     public float playerJumpPendingScale;
-    public boolean allowStandSliding;
     public AttributeInstance moveSpeed = new AttributeInstance(0.7f);
     public AttributeInstance jumpStrength = new AttributeInstance(0.42f);
     public Vec3 velocity = Vec3.ZERO;
@@ -29,35 +28,38 @@ public class HorseEntityCache extends BaseEntityCache implements ClientVehicle {
         final BoarPlayer player = getPlayer();
 
         boolean holdingJump = packet.getInputData().contains(PlayerAuthInputData.JUMPING);
+        if (player.jumpingTicks < 0) {
+            ++player.jumpingTicks;
+            if (player.jumpingTicks == 0) {
+                player.jumpRidingScale = 0.0F;
+            }
+        }
+
         if (player.wasJumping && !holdingJump) {
+            player.jumpingTicks = -10;
             playerJumpPendingScale = player.jumpRidingScale * 100f >= 90 ? 1.0F : 0.4F + 0.4F * (player.jumpRidingScale * 100f) / 90.0F;
-            allowStandSliding = true;
         } else if (!player.wasJumping && holdingJump) {
             player.jumpingTicks = 0;
-            player.jumpRidingScale = 0;
-        } else if (holdingJump) {
+            player.jumpRidingScale = 0.0F;
+        } else if (player.wasJumping) {
+            ++player.jumpingTicks;
             if (player.jumpingTicks < 10) {
-                player.jumpRidingScale = player.jumpingTicks * 0.1f;
+                player.jumpRidingScale = player.jumpingTicks * 0.1F;
             } else {
-                player.jumpRidingScale = 0.8f + 2.0f / (player.jumpingTicks - 9) * 0.1f;
+                player.jumpRidingScale = 0.8F + 2.0F / (player.jumpingTicks - 9) * 0.1F;
             }
-            player.jumpingTicks++;
         }
     }
 
     @Override
     public Vec3 getRiddenInput(Vec3 input) {
-        if (getPlayer().onGround && this.playerJumpPendingScale == 0.0F && getMetadata().getFlag(EntityFlag.STANDING) && !this.allowStandSliding) {
-            return Vec3.ZERO;
-        } else {
-            float sideways = input.x * 0.5F;
-            float forward = input.z;
-            if (forward <= 0.0F) {
-                forward *= 0.25F;
-            }
-
-            return new Vec3(sideways, 0, forward);
+        float sideways = input.x * 0.5F;
+        float forward = input.z;
+        if (forward <= 0.0F) {
+            forward *= 0.25F;
         }
+
+        return new Vec3(sideways, 0, forward);
     }
 
     @Override
