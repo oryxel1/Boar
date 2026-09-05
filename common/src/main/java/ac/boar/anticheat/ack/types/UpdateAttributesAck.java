@@ -5,5 +5,5 @@ import org.cloudburstmc.protocol.bedrock.data.AttributeData;
 
 import java.util.List;
 
-public record UpdateAttributesAck(List<AttributeData> attributes) implements Acknowledgment {
+public record UpdateAttributesAck(long runtimeId, List<AttributeData> attributes) implements Acknowledgment {
 }

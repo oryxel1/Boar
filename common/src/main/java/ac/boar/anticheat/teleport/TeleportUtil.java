@@ -87,6 +87,10 @@ public class TeleportUtil {
         final long tick = rewind.tick();
         final CorrectPlayerMovePredictionPacket packet = new CorrectPlayerMovePredictionPacket();
         packet.setPosition(rewind.position().add(data.after()).toVector3f());
+        if (player.vehicle != null) {
+            packet.setPosition(packet.getPosition().down(player.getYOffset()));
+        }
+
         packet.setOnGround(onGround);
         packet.setTick(tick);
         packet.setDelta(data.tickEnd().toVector3f());

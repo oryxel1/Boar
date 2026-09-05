@@ -30,6 +30,7 @@ import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.container.ContainerCache;
 import ac.boar.anticheat.compensated.container.impl.TradeContainerCache;
 import ac.boar.anticheat.compensated.entity.BaseEntityCache;
+import ac.boar.anticheat.compensated.entity.impl.HorseEntityCache;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.inventory.ItemCache;
 import ac.boar.anticheat.data.vanilla.AttributeInstance;
@@ -204,7 +205,37 @@ public final class BoarDefaultAcknowledgments {
     }
 
     private static void handleUpdateAttributes(BoarPlayer player, UpdateAttributesAck ack) {
-        if (player.vehicle != null) {
+        if (ack.runtimeId() == player.runtimeEntityId && player.vehicle != null) {
+            return;
+        }
+
+        boolean isPlayer = ack.runtimeId() == player.runtimeEntityId;
+        if (!isPlayer) {
+            final BaseEntityCache entity = player.compensatedWorld.getEntity(ack.runtimeId());
+            if (!(entity instanceof HorseEntityCache horse)) {
+                return;
+            }
+
+            for (final AttributeData data : ack.attributes()) {
+                AttributeInstance attribute = null;
+                if (data.getName().equals("minecraft:horse.jump_strength")) {
+                    attribute = horse.jumpStrength;
+                } else if (data.getName().equals("minecraft:movement")) {
+                    attribute = horse.moveSpeed;
+                }
+                if (attribute == null) {
+                    return;
+                }
+
+                attribute.clearModifiers();
+//                attribute.setBaseValue(data.getDefaultValue(), false);
+                attribute.setValue(data.getValue());
+
+                for (AttributeModifierData mod : data.getModifiers()) {
+                    attribute.addTemporaryModifier(mod);
+                }
+            }
+
             return;
         }
 
@@ -215,7 +246,7 @@ public final class BoarDefaultAcknowledgments {
             }
 
             attribute.clearModifiers();
-            attribute.setBaseValue(data.getDefaultValue());
+            attribute.setBaseValue(data.getDefaultValue(), true);
             attribute.setValue(data.getValue());
 
             for (AttributeModifierData mod : data.getModifiers()) {
@@ -225,6 +256,22 @@ public final class BoarDefaultAcknowledgments {
     }
 
     private static void handleVelocity(BoarPlayer player, VelocityAck ack) {
+        if (ack.runtimeId() != player.runtimeEntityId) {
+            BaseEntityCache entity = player.compensatedWorld.getEntity(ack.runtimeId());
+            if (entity instanceof HorseEntityCache horse) {
+                horse.velocity = ack.motion();
+//                Boar.debug("[velocity-ack] dispatch velocity=" + ack.motion() + ", for horse with runtimeId=" + entity.getRuntimeId(), Boar.DebugMessage.INFO);
+            }
+            if (player.vehicle != null && entity == player.vehicle) {
+                player.velocity = ack.motion();
+            }
+            return;
+        }
+
+        if (player.vehicle != null) {
+            return;
+        }
+
         player.certainVelocity = new Vector(VectorType.VELOCITY, ack.motion());
         Boar.debug("[velocity-ack] dispatch velocity=" + ack.motion(), Boar.DebugMessage.INFO);
     }
@@ -387,6 +434,12 @@ public final class BoarDefaultAcknowledgments {
                 player.getTeleportUtil().getQueuedTeleports().clear();
             }
             player.vehicle = vehicleEntity;
+            player.boundingBox = vehicleEntity.getCurrent().calculateBoundingBox();
+            player.position = vehicleEntity.getCurrent().getPos();
+
+            if (vehicleEntity instanceof HorseEntityCache horse) {
+                player.velocity = horse.velocity.clone();
+            }
         } else {
             final BaseEntityCache riderEntity = player.compensatedWorld.getEntity(riderId);
             if (riderEntity != null) {

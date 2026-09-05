@@ -17,14 +17,10 @@ public class PlayerVelocityPackets implements PacketListener {
 
         // Yes only this, there no packet for explosion (for bedrock), geyser translate explosion directly to SetEntityMotionPacket
         if (event.getPacket() instanceof SetEntityMotionPacket packet) {
-            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
-                return;
-            }
-
             // I think there is some rewind like behavior when there is ehm the tick is not 0, so just default back to 0 till I figure it out.
             packet.setTick(0);
 
-            player.sendLatencyStack(new VelocityAck(new Vec3(packet.getMotion())));
+            player.sendLatencyStack(new VelocityAck(packet.getRuntimeEntityId(), new Vec3(packet.getMotion())));
         }
 
         if (event.getPacket() instanceof MovementEffectPacket packet) {

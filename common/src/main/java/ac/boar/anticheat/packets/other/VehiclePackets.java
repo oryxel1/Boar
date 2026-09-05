@@ -33,7 +33,6 @@ public class VehiclePackets implements PacketListener {
                 return;
             }
 
-            System.out.println("queue~!");
             player.queueAcknowledgment(new VehicleLinkAck(link));
         }
     }

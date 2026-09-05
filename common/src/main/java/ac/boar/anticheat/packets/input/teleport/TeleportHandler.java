@@ -95,7 +95,7 @@ public class TeleportHandler {
 
         player.onGround = rewind.isOnGround();
         player.velocity = rewind.getTickEnd();
-        player.setPos(rewind.getPosition().down(player.getYOffset()));
+        player.setPos(rewind.isVehicle() ? rewind.getPosition() : rewind.getPosition().down(player.getYOffset()));
         player.prevUnvalidatedPosition = player.unvalidatedPosition = player.position.clone();
 
         player.getTeleportUtil().cacheRewindHistory(rewind.getTick(), rewind.getPosition());

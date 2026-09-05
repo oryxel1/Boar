@@ -3,6 +3,7 @@ package ac.boar.anticheat.prediction.ticker.impl;
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.entity.BaseEntityCache;
+import ac.boar.anticheat.compensated.entity.utils.ClientVehicle;
 import ac.boar.anticheat.data.effect.Effect;
 import ac.boar.anticheat.data.block.BoarBlockState;
 import ac.boar.anticheat.data.enchantment.Enchantment;
@@ -33,7 +34,7 @@ public class LivingTicker extends EntityTicker {
     public void tick() {
         super.tick();
 
-        if (player.dirtyRiptide && player.getInputData().contains(PlayerAuthInputData.START_SPIN_ATTACK)) {
+        if (player.vehicle != null && player.dirtyRiptide && player.getInputData().contains(PlayerAuthInputData.START_SPIN_ATTACK)) {
             player.getFlagTracker().set(EntityFlag.DAMAGE_NEARBY_MOBS, true);
             // System.out.println("Trying to riptide.");
 
@@ -169,16 +170,15 @@ public class LivingTicker extends EntityTicker {
     }
 
     protected void travelRidden() {
-//        Vec3 vec32 = this.getRiddenInput(player, vec3);
-//        this.tickRidden(player, vec32);
-//        if (this.canSimulateMovement()) {
-//            this.setSpeed(this.getRiddenSpeed(player));
-//            this.travel(vec32);
-//        } else {
-//            this.setDeltaMovement(Vec3.ZERO);
-//        }
+        if (player.vehicle instanceof ClientVehicle vehicle) {
+            player.input = vehicle.getRiddenInput(player.input);
+        }
+        tickRidden();
 
         this.travel();
+    }
+
+    protected void tickRidden() {
     }
 
     public void applyInput() {
@@ -186,9 +186,11 @@ public class LivingTicker extends EntityTicker {
     }
 
     protected void travel() {
+        boolean isGliding = player.vehicle != null ? player.vehicle.getMetadata().getFlag(EntityFlag.GLIDING) : player.getFlagTracker().has(EntityFlag.GLIDING);
+
         if (player.isInLava() || player.touchingWater) {
             this.travelInFluid();
-        } else if (player.getFlagTracker().has(EntityFlag.GLIDING)) {
+        } else if (isGliding) {
 //            if (this.onClimbable()) {
 //                this.travelInAir(vec3);
 //                this.stopFallFlying();

@@ -8,6 +8,8 @@ import ac.boar.anticheat.check.api.holder.CheckHolder;
 import ac.boar.anticheat.collision.util.CuboidBlockIterator;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.entity.BaseEntityCache;
+import ac.boar.anticheat.compensated.entity.impl.HorseEntityCache;
+import ac.boar.anticheat.compensated.entity.utils.ClientVehicle;
 import ac.boar.anticheat.compensated.world.CompensatedWorldImpl;
 import ac.boar.anticheat.data.Fluid;
 import ac.boar.anticheat.data.FluidState;
@@ -196,12 +198,8 @@ public final class BoarPlayer extends PlayerData {
     public float getYOffset() {
         if (this.vehicle != null) {
             final BaseEntityCache cache = this.compensatedWorld.getEntity(this.vehicle.getRuntimeId());
-            if (cache != null) {
-                final String identifier = cache.getDefinition().identifier();
-
-                if (identifier.equals("minecraft:boat") || identifier.equals("minecraft:chest_boat")) {
-                    return EntityDefinitions.BIRCH_BOAT.find().map(EntityDefinition::offset).orElse(0.0f); // It's all the same anyway, I just like birch :)
-                }
+            if (cache instanceof ClientVehicle) {
+                return cache.getDefinition().offset();
             }
 
             return 0;
@@ -213,7 +211,7 @@ public final class BoarPlayer extends PlayerData {
     public float getFrictionInfluencedSpeed(float slipperiness) {
         if (this.onGround) {
             float speed = this.getSpeed() * (0.21600002F / (slipperiness * slipperiness * slipperiness));
-            if (!CompensatedInventory.getEnchantments(this.compensatedInventory.armorContainer.get(3).getData()).containsKey(Enchantment.SOUL_SPEED) && this.soulSandBelow) {
+            if (vehicle != null && !CompensatedInventory.getEnchantments(this.compensatedInventory.armorContainer.get(3).getData()).containsKey(Enchantment.SOUL_SPEED) && this.soulSandBelow) {
                 speed *= 0.55F; // not accurate, but well I can just give extra offset if player movement is slower than the predicted one.
             }
 
@@ -236,7 +234,15 @@ public final class BoarPlayer extends PlayerData {
     }
 
     public float getJumpPower() {
-        return PlayerData.JUMP_HEIGHT * this.getBlockJumpFactor() + this.getJumpBoostPower();
+        return getJumpPower(1f);
+    }
+
+    public float getJumpPower(float multiplier) {
+        if (vehicle instanceof HorseEntityCache horse) {
+            return horse.jumpStrength.getValue() * multiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
+        }
+
+        return PlayerData.JUMP_HEIGHT * multiplier * this.getBlockJumpFactor() + this.getJumpBoostPower();
     }
 
     public float getJumpBoostPower() {

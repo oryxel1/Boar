@@ -8,11 +8,13 @@ public class RewindData extends TeleportData {
     private final long tick;
     private final Vec3 tickEnd;
     private final boolean onGround;
+    private final boolean vehicle;
 
-    public RewindData(long tick, Vec3 position, Vec3 tickEnd, boolean ground) {
+    public RewindData(long tick, Vec3 position, Vec3 tickEnd, boolean ground, boolean vehicle) {
         super(position);
         this.tick = tick;
         this.tickEnd = tickEnd;
         this.onGround = ground;
+        this.vehicle = vehicle;
     }
 }

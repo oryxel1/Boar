@@ -4,6 +4,7 @@ import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.ack.types.DimensionSwitchAck;
 import ac.boar.anticheat.check.impl.reach.Reach;
 import ac.boar.anticheat.check.impl.timer.Timer;
+import ac.boar.anticheat.compensated.entity.impl.HorseEntityCache;
 import ac.boar.anticheat.compensated.entity.utils.ClientVehicle;
 import ac.boar.anticheat.packets.input.legacy.LegacyAuthInputPackets;
 import ac.boar.anticheat.packets.input.teleport.TeleportHandler;
@@ -16,6 +17,8 @@ import ac.boar.anticheat.util.DimensionUtil;
 import ac.boar.anticheat.util.math.Vec3;
 import ac.boar.protocol.api.CloudburstPacketEvent;
 import ac.boar.protocol.api.PacketListener;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.PredictionType;
 import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.CorrectPlayerMovePredictionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
@@ -75,12 +78,14 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         if (player.vehicle != null && (!(player.vehicle instanceof ClientVehicle vehicle) || !vehicle.shouldSimulateMovement())) {
             player.position = player.unvalidatedPosition;
             player.compensatedWorld.cleanChunksAtPlayerPosition();
+            player.vehicle.getCurrent().setPos(player.position);
             return;
         }
 
-        if (player.vehicle != null) {
-            System.out.println("we simulate movement babyyyy");
+        if (player.vehicle instanceof HorseEntityCache horse && horse.shouldSimulateMovement()) {
+            horse.tickJumping(packet);
         }
+        player.wasJumping = packet.getInputData().contains(PlayerAuthInputData.JUMPING);
 
         if (player.getEntity().bedPosition() != null) {
             return;
@@ -144,7 +149,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         }
 
         if (event.getPacket() instanceof CorrectPlayerMovePredictionPacket packet) {
-            player.getTeleportUtil().queue(new RewindData(packet.getTick(), new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), packet.isOnGround()));
+            player.getTeleportUtil().queue(new RewindData(packet.getTick(), new Vec3(packet.getPosition()), new Vec3(packet.getDelta()), packet.isOnGround(), packet.getPredictionType() == PredictionType.VEHICLE));
         }
     }
 }

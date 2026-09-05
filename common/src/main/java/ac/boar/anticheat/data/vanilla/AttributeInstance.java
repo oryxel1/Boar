@@ -24,13 +24,19 @@ public class AttributeInstance {
         this.baseValue = baseValue;
     }
 
-    public void setBaseValue(float baseValue) {
+    public void clearDirty() {
+        dirty = false;
+    }
+
+    public void setBaseValue(float baseValue, boolean dirty) {
         if (this.baseValue == baseValue) {
             return;
         }
 
         this.baseValue = baseValue;
-        this.setDirty();
+        if (dirty) {
+            this.setDirty();
+        }
     }
 
     public void clearModifiers() {

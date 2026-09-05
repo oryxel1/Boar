@@ -3,6 +3,7 @@ package ac.boar.anticheat.player.data;
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.compensated.CompensatedInventory;
 import ac.boar.anticheat.compensated.entity.BaseEntityCache;
+import ac.boar.anticheat.compensated.entity.utils.ClientVehicle;
 import ac.boar.anticheat.data.vanilla.Attribute;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.data.Fluid;
@@ -170,6 +171,8 @@ public class PlayerData {
     public BoarBlockState inBlockState;
     public boolean scaffoldDescend;
 
+    public boolean wasJumping;
+    public float jumpRidingScale, jumpingTicks;
     public BaseEntityCache vehicle = null;
 
     public Vector3i bedPosition = null;
@@ -208,6 +211,10 @@ public class PlayerData {
     }
 
     public float getSpeed() {
+        if (vehicle instanceof ClientVehicle clientVehicle) {
+            return clientVehicle.getVehicleSpeed();
+        }
+
         return this.attributes.get(Attribute.MOVEMENT.getIdentifier()).getValue();
     }
 
@@ -222,13 +229,15 @@ public class PlayerData {
         }
 
         this.position = vec3;
+        this.inBlockState = null;
         if (this.vehicle != null) {
+            vehicle.getCurrent().setPrevPos(position);
+            vehicle.getCurrent().setPos(position);
+            this.boundingBox = vehicle.getCurrent().calculateBoundingBox();
             return;
         }
 
         this.setBoundingBox(vec3);
-
-        this.inBlockState = null;
     }
 
     public final void setBoundingBox(Vec3 vec3) {

@@ -131,7 +131,7 @@ public class EntityTicker {
     }
 
     public final void doSelfMove(Vec3 vec3) {
-        if (player.abilities.contains(Ability.NO_CLIP)) {
+        if (player.vehicle != null && player.abilities.contains(Ability.NO_CLIP)) {
             player.setPos(player.position.add(vec3));
             return;
         }
@@ -143,7 +143,11 @@ public class EntityTicker {
         }
 
         Vec3 oldVec3 = vec3.clone();
-        Vec3 vec32 = Collider.collide(player, vec3 = Collider.maybeBackOffFromEdge(player, vec3));
+        if (player.vehicle != null) {
+            vec3 = Collider.maybeBackOffFromEdge(player, vec3);
+        }
+
+        Vec3 vec32 = Collider.collide(player, vec3);
         player.setPos(player.position.add(vec32));
 
         boolean collidedX = !MathUtil.equal(vec3.x, vec32.x);

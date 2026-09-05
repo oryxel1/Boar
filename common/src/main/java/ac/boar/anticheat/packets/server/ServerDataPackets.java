@@ -108,16 +108,13 @@ public class ServerDataPackets implements PacketListener {
         }
 
         if (event.getPacket() instanceof UpdateAttributesPacket packet) {
-            if (packet.getRuntimeEntityId() != player.runtimeEntityId) {
-                return;
-            }
             if (!packet.getAttributes().isEmpty()) {
                 // sometimes the attribute list can be immutable
                 List<AttributeData> attributes = new ArrayList<>(packet.getAttributes());
                 attributes.replaceAll(ServerDataPackets::stripModifiers);
                 packet.setAttributes(attributes);
             }
-            player.sendLatencyStack(new UpdateAttributesAck(packet.getAttributes()));
+            player.sendLatencyStack(new UpdateAttributesAck(packet.getRuntimeEntityId(), packet.getAttributes()));
         }
     }
 
