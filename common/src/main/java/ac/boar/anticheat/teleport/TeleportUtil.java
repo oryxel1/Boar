@@ -94,7 +94,7 @@ public class TeleportUtil {
         packet.setOnGround(onGround);
         packet.setTick(tick);
         packet.setDelta(data.tickEnd().toVector3f());
-        packet.setVehicleRotation(Vector2f.ZERO);
+        packet.setVehicleRotation(player.vehicle != null ? Vector2f.from(player.pitch, player.yaw) : Vector2f.ZERO);
         packet.setPredictionType(player.vehicle != null ? PredictionType.VEHICLE : PredictionType.PLAYER);
 
         this.player.getConnection().sendPacketImmediately(packet);
