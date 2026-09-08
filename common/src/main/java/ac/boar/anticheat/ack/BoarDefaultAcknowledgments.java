@@ -455,5 +455,6 @@ public final class BoarDefaultAcknowledgments {
 
     private static void handleMovementCorrection(BoarPlayer player, MovementCorrectionAck ack) {
         player.getTeleportUtil().removePendingCorrection();
+        player.getTeleportUtil().markCorrected();
     }
 }

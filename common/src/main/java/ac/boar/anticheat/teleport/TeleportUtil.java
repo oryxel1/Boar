@@ -27,6 +27,9 @@ public class TeleportUtil {
     private boolean correctionCooldown;
 
     @Getter
+    private long lastCorrectionTick = -1;
+
+    @Getter
     private final Queue<TeleportData> queuedTeleports = new ConcurrentLinkedQueue<>();
 
     public void teleport(final Vec3 vec3) {
@@ -60,6 +63,15 @@ public class TeleportUtil {
         this.lastKnownValid = position.clone();
         this.pendingCorrections = 0;
         this.correctionCooldown = false;
+        this.lastCorrectionTick = -1;
+    }
+
+    public void markCorrected() {
+        this.lastCorrectionTick = player.tick;
+    }
+
+    public boolean correctedWithin(int ticks) {
+        return this.lastCorrectionTick >= 0 && (player.tick - this.lastCorrectionTick) <= ticks;
     }
 
     public boolean isTeleporting() {

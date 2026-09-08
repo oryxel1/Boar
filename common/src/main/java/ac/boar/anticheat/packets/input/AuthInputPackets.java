@@ -54,9 +54,13 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         player.sinceAuthInput = System.currentTimeMillis();
 
         final Timer timer = (Timer) player.getCheckHolder().get(Timer.class);
+        final Reach reach = (Reach) player.getCheckHolder().get(Reach.class);
         if (timer != null && timer.isInvalid()) {
             if (!player.disableMitigations()) {
                 event.setCancelled(true);
+                if (reach != null) {
+                    reach.invalidatePending();
+                }
                 Boar.debug(player.getSession().name() + ": [movement-debug] cancelled auth-input reason=timer tick=" + player.tick + " packetTick=" + packet.getTick() + " pos=" + packet.getPosition() + " delta=" + packet.getDelta(), Boar.DebugMessage.WARNING);
                 return;
             }
@@ -97,7 +101,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         // Start a fresh movement trace for this tick, with a snapshot of the start state.
         player.getMovementTrace().begin();
 
-        final Reach reach = (Reach) player.getCheckHolder().get(Reach.class);
         if (reach != null) { // null when the Reach check is disabled via disabled-checks - don't NPE.
             reach.validatePending();
         }

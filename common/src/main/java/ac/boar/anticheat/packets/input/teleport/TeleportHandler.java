@@ -40,6 +40,7 @@ public class TeleportHandler {
         player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);
         player.onGround = data.isOnGround();
         player.getTeleportUtil().updateLastKnownValid(data.getPosition());
+        player.getTeleportUtil().markCorrected();
     }
 
     protected void processExempted(BoarPlayer player) {

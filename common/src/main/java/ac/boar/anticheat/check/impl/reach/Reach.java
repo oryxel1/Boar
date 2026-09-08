@@ -26,6 +26,9 @@ import java.util.List;
 @Experimental
 @CheckInfo(name = "Reach")
 public final class Reach extends BaseCheck implements PacketCheck {
+
+    private static final int TELEPORT_MITIGATION_ONLY_TICKS = 20;
+
     private final List<PendingAttack> pending = new ArrayList<>();
     private float buffer = 0f;
 
@@ -78,11 +81,25 @@ public final class Reach extends BaseCheck implements PacketCheck {
         ));
     }
 
+    public void invalidatePending() {
+        if (this.pending.isEmpty()) {
+            return;
+        }
+
+        for (PendingAttack attack : this.pending) {
+            this.resolveInvalid(attack);
+        }
+        this.pending.clear();
+    }
+
     public void validatePending() {
         if (this.pending.isEmpty()) {
             return;
         }
 
+        // if the server position and client position are far enough, the reach calculation may be a bit off and cause some false flags
+        // we can still mitigate for these hits though to prevent bypasses
+        boolean mitigateOnly = this.shouldMitigateOnly();
         for (PendingAttack attack : this.pending) {
             if (attack.invalidTouchRotation) {
                 this.resolveInvalid(attack);
@@ -91,7 +108,7 @@ public final class Reach extends BaseCheck implements PacketCheck {
 
             final float reach = ReachUtil.calculateReach(player, attack.attackerPositions, attack.entity, attack.entityPositionsAtAttack);
             if (reach > Boar.getConfig().toleranceReach()) {
-                if (reach != Float.MAX_VALUE) {
+                if (!mitigateOnly && reach != Float.MAX_VALUE) {
                     this.fail("distance=" + reach);
                 }
                 this.resolveInvalid(attack);
@@ -110,6 +127,14 @@ public final class Reach extends BaseCheck implements PacketCheck {
         } else {
             ReferenceCountUtil.safeRelease(attack.packet);
         }
+    }
+
+    private boolean shouldMitigateOnly() {
+        return player.getTeleportUtil().isTeleporting() ||
+                player.getTeleportUtil().hasPendingCorrection() ||
+                player.getTeleportUtil().correctedWithin(TELEPORT_MITIGATION_ONLY_TICKS) ||
+                player.position.squaredDistanceTo(player.unvalidatedPosition) > 0.000001 ||
+                player.prevPosition.squaredDistanceTo(player.position) > 0.000001;
     }
 
     @Override
