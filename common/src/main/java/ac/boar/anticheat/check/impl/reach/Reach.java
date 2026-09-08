@@ -90,8 +90,10 @@ public final class Reach extends BaseCheck implements PacketCheck {
             }
 
             final float reach = ReachUtil.calculateReach(player, attack.attackerPositions, attack.entity, attack.entityPositionsAtAttack);
-            if (reach > Boar.getConfig().toleranceReach() && reach != Float.MAX_VALUE) {
-                this.fail("distance=" + reach);
+            if (reach > Boar.getConfig().toleranceReach()) {
+                if (reach != Float.MAX_VALUE) {
+                    this.fail("distance=" + reach);
+                }
                 this.resolveInvalid(attack);
             } else {
                 player.injectClientPacket(attack.packet);
