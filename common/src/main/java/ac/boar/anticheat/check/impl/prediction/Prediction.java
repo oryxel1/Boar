@@ -92,12 +92,8 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
             }
             return;
         }
-
         if (Boar.getConfig().debugMode()) {
             player.getMovementTrace().flush(failureInfo + suppressedNote);
-        }
-        if (checkEnabled) {
-            this.correction.fail(verbose);
         }
     }
 
