@@ -1,5 +1,6 @@
 package ac.boar.anticheat.collision;
 
+import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.player.data.PlayerData;
@@ -108,7 +109,8 @@ public class Collider {
     private static boolean clientAcceptsAutoStep(final BoarPlayer player, final Vec3 collisionVelocity, final Vec3 stepVelocity) {
         float collisionDistance = player.position.add(collisionVelocity).distanceTo(player.unvalidatedPosition);
         float stepDistance = player.position.add(stepVelocity).distanceTo(player.unvalidatedPosition);
-        return collisionDistance > player.getPosAcceptanceThreshold() || stepDistance <= collisionDistance;
+        final float correctionThreshold = Boar.getConfig().alertThreshold();
+        return (correctionThreshold > 0.0F && collisionDistance > correctionThreshold) || stepDistance <= collisionDistance;
     }
 
     private static MovementResult collideWithAxes(final Box originalBox, final Vec3 movement, final List<Box> colliders,
@@ -130,8 +132,8 @@ public class Collider {
         return new MovementResult(boundingBox, yVelocity.add(xVelocity).add(zVelocity));
     }
 
-    private static MovementResult calculateAutoStep(final Box originalBox, final Vec3 movement, final List<Box> colliders,
-                                                    final boolean oneWay) {
+    private static MovementResult calculateAutoStep(final Box originalBox, final Vec3 movement, final List<Box> colliders, final boolean oneWay) {
+        // yes, this is vanilla. refer to AutoStepSystem::doAutoStepSystemImpl
         List<Box> stepColliders = new ArrayList<>(colliders.size());
         for (Box collider : colliders) {
             if (collider.minY < originalBox.maxY) {
