@@ -139,12 +139,12 @@ public class LegacyAuthInputPackets {
         if (processInputData) {
             processInputData(player);
 
-            // Player isn't moving forward but is sprinting and their flag sync, this shouldn't happen.
-            if (player.input.z <= 0 && player.getFlagTracker().has(EntityFlag.SPRINTING) && player.desyncedFlag.get() == -1) {
+            // Player isn't moving forward but is sprinting and their flag sync, this shouldn't happen unless the player is swimming
+            // The client keeps the swim and the sprint flag while the input vector's length is at least 0.7071 long, in any direction
+            // as-per SwimTriggerSystem::doTick
+            if (player.input.z <= 0 && player.getFlagTracker().has(EntityFlag.SPRINTING) && !player.getFlagTracker().has(EntityFlag.SWIMMING) && player.desyncedFlag.get() == -1) {
                 player.getFlagTracker().set(EntityFlag.SPRINTING, false);
-
-                // Tell geyser that the player "want" to stop sprinting.
-                if (!player.disableMitigations()) {
+                if (!player.disableMitigations()) { // tell the server that the player "wants" to stop sprinting.
                     packet.getInputData().add(PlayerAuthInputData.STOP_SPRINTING);
                 }
             }
