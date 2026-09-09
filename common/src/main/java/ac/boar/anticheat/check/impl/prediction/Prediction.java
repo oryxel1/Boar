@@ -84,7 +84,7 @@ public class Prediction extends BaseCheck implements OffsetHandlerCheck {
 
         final boolean checkEnabled = !Boar.getConfig().disabledChecks().contains("Correction");
         final String verbose = "o: " + posDiff + suppressedNote;
-        if (player.disableMitigations() && checkEnabled) {
+        if (checkEnabled) {
             if (Boar.getConfig().debugMode()) {
                 this.correction.fail(verbose + "\n" + player.getMovementTrace().dump(failureInfo + suppressedNote));
             } else {
