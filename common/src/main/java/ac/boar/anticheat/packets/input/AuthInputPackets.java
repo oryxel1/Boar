@@ -81,7 +81,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         final BoarChunk chunkInside = player.compensatedWorld.getChunk(chunkX, chunkZ);
         if (chunkInside != null) {
             player.insideUnloadedChunk = false;
-            if (!chunkInside.hasAllSections() && chunkInside.warnForMissingSections()) {
+            if (Boar.DEBUG_CHUNKS && !chunkInside.hasAllSections() && chunkInside.warnForMissingSections()) {
                 StringBuilder missing = null;
                 for (int idx = 0; idx < chunkInside.sections().length; idx++) {
                     BoarChunkSection sec = chunkInside.getSection(idx);
@@ -91,7 +91,7 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
                     }
                 }
                 if (missing != null) missing.append("]"); else missing = new StringBuilder("[]");
-                Boar.debug(player.getSession().name() + ": inside loaded chunk but has missing sub-chunks: " + missing, Boar.DebugMessage.WARNING);
+                Boar.chunkDebug(player.getSession().name() + ": inside loaded chunk but has missing sub-chunks: " + missing, Boar.DebugMessage.WARNING);
             }
         } else {
             player.insideUnloadedChunk = true;

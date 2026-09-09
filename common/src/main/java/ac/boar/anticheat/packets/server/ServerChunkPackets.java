@@ -127,7 +127,7 @@ public class ServerChunkPackets implements PacketListener {
                 final int sectionY = (center.getY() + offset.getY()) - (dimension.minY() >> 4);
 
                 if (result != SubChunkRequestResult.SUCCESS && result != SubChunkRequestResult.SUCCESS_ALL_AIR) {
-                    Boar.debug(player.getSession().name() + ": received non-successful sub-chunk request result " + result + " for chunk (" + chunkX + " " + chunkZ + ") for sub-chunk " + sectionY, Boar.DebugMessage.WARNING);
+                    Boar.chunkDebug(player.getSession().name() + ": received non-successful sub-chunk request result " + result + " for chunk (" + chunkX + " " + chunkZ + ") for sub-chunk " + sectionY, Boar.DebugMessage.WARNING);
                     continue;
                 }
 
@@ -148,7 +148,7 @@ public class ServerChunkPackets implements PacketListener {
                             }
                         });
                     } else {
-                        Boar.debug(player.getSession().name() + ": received sub-chunk " + sectionY + " but no data was provided", Boar.DebugMessage.WARNING);
+                        Boar.chunkDebug(player.getSession().name() + ": received sub-chunk " + sectionY + " but no data was provided", Boar.DebugMessage.WARNING);
                     }
                 }
 

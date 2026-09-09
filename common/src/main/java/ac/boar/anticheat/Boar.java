@@ -66,6 +66,15 @@ public class Boar {
         ConfigLoader.save(this.platform, platform.getClass(), config);
     }
 
+    public static boolean DEBUG_CHUNKS = false;
+
+    public static void chunkDebug(String message, DebugMessage type) {
+        if (!DEBUG_CHUNKS) {
+            return;
+        }
+        debug(message, type);
+    }
+
     public static void debug(String message, DebugMessage type) {
         if (!config.debugMode()) {
             return;
