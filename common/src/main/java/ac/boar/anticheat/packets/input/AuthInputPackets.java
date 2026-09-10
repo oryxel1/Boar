@@ -2,6 +2,7 @@ package ac.boar.anticheat.packets.input;
 
 import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.ack.types.DimensionSwitchAck;
+import ac.boar.anticheat.ack.types.RespawnStateAck;
 import ac.boar.anticheat.check.impl.reach.Reach;
 import ac.boar.anticheat.check.impl.badpackets.BadPacketA;
 import ac.boar.anticheat.check.impl.timer.Timer;
@@ -21,6 +22,7 @@ import org.cloudburstmc.math.GenericMath;
 import org.cloudburstmc.protocol.bedrock.packet.ChangeDimensionPacket;
 import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
 import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+import org.cloudburstmc.protocol.bedrock.packet.RespawnPacket;
 
 public class AuthInputPackets extends TeleportHandler implements PacketListener {
 
@@ -122,6 +124,11 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
         if (player.getTeleportUtil().isTeleporting()) {
             player.getMovementTrace().log("path: teleporting, processing queued teleports");
             this.processQueuedTeleports(player, packet);
+        } else if (player.dead && player.certainVelocity == null) {
+            // From vanilla client - Player::isImmobile is true at 0 health unless the knocked-back-on-death flag is set, and the
+            // client reports a fixed position with a zero delta
+            player.getMovementTrace().log("path: dead, no movement expected");
+            processDead(player);
         } else if (player.insideUnloadedChunk) {
             player.getMovementTrace().log("path: unloaded chunk, velocity zeroed");
             player.velocity = Vec3.ZERO.clone();
@@ -178,6 +185,17 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
             packet.setOnGround(true);
             player.getTeleportUtil().queue(new TeleportData(new Vec3(packet.getPosition()), packet.isOnGround()));
+        }
+
+        // The vanilla server sends runtime id 0 in the player's own RespawnPacket (Player::recheckSpawnPosition) so accept 0 as well as the player's id.
+        if (event.getPacket() instanceof RespawnPacket packet &&
+                (packet.getRuntimeEntityId() == player.runtimeEntityId || packet.getRuntimeEntityId() == 0) &&
+                packet.getState() != RespawnPacket.State.CLIENT_READY) {
+            player.sendLatencyStack(new RespawnStateAck(packet.getState()));
+
+            if (packet.getState() == RespawnPacket.State.SERVER_READY) {
+                player.getTeleportUtil().queue(new TeleportData(new Vec3(packet.getPosition()), true));
+            }
         }
     }
 }

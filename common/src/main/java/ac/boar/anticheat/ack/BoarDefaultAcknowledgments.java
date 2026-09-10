@@ -39,6 +39,7 @@ import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemS
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseSlot;
 import org.cloudburstmc.protocol.bedrock.data.inventory.itemstack.response.ItemStackResponseStatus;
 import org.cloudburstmc.protocol.bedrock.packet.MobEffectPacket;
+import org.cloudburstmc.protocol.bedrock.packet.RespawnPacket;
 
 import java.util.List;
 import java.util.Objects;
@@ -85,6 +86,7 @@ public final class BoarDefaultAcknowledgments {
         registry.register(VehicleSetAck.class, BoarDefaultAcknowledgments::handleVehicleSet);
 
         registry.register(TeleportAcceptAck.class, BoarDefaultAcknowledgments::handleTeleportAccept);
+        registry.register(RespawnStateAck.class, BoarDefaultAcknowledgments::handleRespawnState);
         registry.register(MovementCorrectionAck.class, BoarDefaultAcknowledgments::handleMovementCorrection);
     }
 
@@ -451,6 +453,11 @@ public final class BoarDefaultAcknowledgments {
 
     private static void handleTeleportAccept(BoarPlayer player, TeleportAcceptAck ack) {
         ack.data().accept();
+    }
+
+    private static void handleRespawnState(BoarPlayer player, RespawnStateAck ack) {
+        // SERVER_SEARCHING is sent on death. SERVER_READY is sent once the client asked to respawn.
+        player.dead = ack.state() == RespawnPacket.State.SERVER_SEARCHING;
     }
 
     private static void handleMovementCorrection(BoarPlayer player, MovementCorrectionAck ack) {

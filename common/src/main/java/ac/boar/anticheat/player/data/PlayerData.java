@@ -65,6 +65,8 @@ public class PlayerData {
     public int pendingDimensionSwitches;
     public boolean insideUnloadedChunk;
 
+    public boolean dead;
+
     public GameType gameType = GameType.DEFAULT;
     public InputMode inputMode = InputMode.UNDEFINED;
     public InputInteractionModel interactionModel = InputInteractionModel.TOUCH;

@@ -118,6 +118,7 @@ public final class MovementTrace {
                 + " pendingCorrection=" + player.getTeleportUtil().hasPendingCorrection()
                 + " correctionCooldown=" + player.getTeleportUtil().isCorrectionCooldown()
                 + " unloadedChunk=" + player.insideUnloadedChunk + " inLoadingScreen=" + player.inLoadingScreen
+                + " dead=" + player.dead
                 + " vehicle=" + (player.vehicleData != null) + " box=[" + player.boundingBox.minX + ","
                 + player.boundingBox.minY + "," + player.boundingBox.minZ + " -> " + player.boundingBox.maxX
                 + "," + player.boundingBox.maxY + "," + player.boundingBox.maxZ + "]");
