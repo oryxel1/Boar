@@ -23,6 +23,7 @@ import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
 @RequiredArgsConstructor
 public class EntityTicker {
     private static final float COLLISION_EPSILON = 1.0E-5F;
+    private static final float FLT_EPSILON = 1.1920929E-7F;
 
     protected final BoarPlayer player;
 
@@ -191,10 +192,15 @@ public class EntityTicker {
             collidedZ = player.unvalidatedTickEnd.z == 0;
         }
 
-        // Sneaking hacks, this is not entirely correct but works, not much room to abuse.
+        // Vanilla zeroes the velocity on each axis that the sneak edge guard reduced to zero
+        // (SneakMovementSystem::tickSneakMovementSystem, 1.26.30, FLT_EPSILON test).
         if (oldVec3.x != vec3.x || oldVec3.z != vec3.z) {
-            player.velocity = new Vec3(player.unvalidatedTickEnd.x == 0 ? 0 : player.velocity.x, player.velocity.y, player.unvalidatedTickEnd.z == 0 ? 0 : player.velocity.z);
-            player.getMovementTrace().log("move: edge backoff velocity hack, vel=" + player.velocity);
+            player.velocity = new Vec3(
+                    Math.abs(vec3.x) <= FLT_EPSILON ? 0 : player.velocity.x,
+                    player.velocity.y,
+                    Math.abs(vec3.z) <= FLT_EPSILON ? 0 : player.velocity.z
+            );
+            player.getMovementTrace().log("move: edge backoff velocity, vel=" + player.velocity);
         }
 
         // TODO: What the actual value actually? Player still able to bounce on slime despite being .375 block higher.

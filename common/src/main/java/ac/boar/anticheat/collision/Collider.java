@@ -4,22 +4,17 @@ import ac.boar.anticheat.Boar;
 import ac.boar.anticheat.data.EntityDimensions;
 import ac.boar.anticheat.player.BoarPlayer;
 import ac.boar.anticheat.player.data.PlayerData;
-import ac.boar.anticheat.util.MathUtil;
 import ac.boar.anticheat.util.math.Box;
 import ac.boar.anticheat.util.math.Vec3;
-import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Collider {
     public static boolean canFallAtLeast(final BoarPlayer player, float offsetX, float offsetZ, float f) {
-        Box lv = player.boundingBox.expand(-0.025F, 0, -0.025F);
-        return player.compensatedWorld.noCollision(new Box(lv.minX + offsetX, lv.minY - f, lv.minZ + offsetZ, lv.maxX + offsetX, lv.minY, lv.maxZ + offsetZ));
-    }
-
-    private static boolean isAboveGround(final BoarPlayer player) {
-        return player.onGround || player.fallDistance < 0.6F && !canFallAtLeast(player, 0, 0, 0.6F - player.fallDistance);
+        Box probe = player.boundingBox.expand(-0.025F, 0, -0.025F).offset(offsetX, -f, offsetZ);
+        return player.compensatedWorld.noCollision(probe);
     }
 
     public static boolean canStandUp(final BoarPlayer player) {
@@ -29,49 +24,31 @@ public class Collider {
     }
 
     public static Vec3 maybeBackOffFromEdge(final BoarPlayer player, final Vec3 movement) {
-        final float f = PlayerData.STEP_HEIGHT * 1.01F;
-        if (movement.y <= 0.0 && player.getFlagTracker().has(EntityFlag.SNEAKING) && isAboveGround(player)) {
-            float d = movement.x;
-            float e = movement.z;
-            float h = MathUtil.sign(d) * 0.05F;
-            float i = MathUtil.sign(e) * 0.05F;
-
-            while (d != 0 && canFallAtLeast(player, d, 0, f)) {
-                if (Math.abs(d) <= 0.05) {
-                    d = 0;
-                    break;
-                }
-
-                d -= h;
-            }
-
-            while (e != 0.0 && canFallAtLeast(player, 0, e, f)) {
-                if (Math.abs(e) <= 0.05) {
-                    e = 0;
-                    break;
-                }
-
-                e -= i;
-            }
-
-            while (d != 0.0 && e != 0.0 && canFallAtLeast(player, d, e, f)) {
-                if (Math.abs(d) <= 0.05) {
-                    d = 0;
-                } else {
-                    d -= h;
-                }
-
-                if (Math.abs(e) <= 0.05) {
-                    e = 0;
-                } else {
-                    e -= i;
-                }
-            }
-
-            return new Vec3(d, movement.y, e);
-        } else {
+        // yes, vanilla does use SNEAK_DOWN here - refer to SneakMovementSystem::tickSneakMovementSystem and SendPlayerInputPacketSystem::fillInputPacket
+        if (!player.onGround || !player.getInputData().contains(PlayerAuthInputData.SNEAK_DOWN)) {
             return movement;
         }
+
+        final float f = PlayerData.STEP_HEIGHT * 1.01F;
+        float d = movement.x;
+        float e = movement.z;
+
+        while (d != 0.0F && canFallAtLeast(player, d, 0, f)) {
+            d = towardZero(d);
+        }
+        while (e != 0.0F && canFallAtLeast(player, 0, e, f)) {
+            e = towardZero(e);
+        }
+        while ((d != 0.0F || e != 0.0F) && canFallAtLeast(player, d, e, f)) {
+            d = towardZero(d);
+            e = towardZero(e);
+        }
+
+        return new Vec3(d, movement.y, e);
+    }
+
+    private static float towardZero(final float value) {
+        return value >= 0.0F ? Math.max(value - 0.05F, 0.0F) : Math.min(value + 0.05F, 0.0F);
     }
 
     public static Vec3 collide(final BoarPlayer player, Vec3 movement) {
