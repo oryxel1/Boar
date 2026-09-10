@@ -43,7 +43,7 @@ public class TeleportHandler {
         player.getTeleportUtil().markCorrected();
     }
 
-    protected void processDead(BoarPlayer player) {
+    protected void processImmobile(BoarPlayer player) {
         player.velocity = Vec3.ZERO.clone();
         player.certainVelocity = null;
         player.predictionResult = new PredictionData(Vec3.ZERO, Vec3.ZERO, Vec3.ZERO);

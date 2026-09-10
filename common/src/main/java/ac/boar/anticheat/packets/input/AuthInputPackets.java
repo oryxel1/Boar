@@ -128,10 +128,10 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             // From vanilla client - Player::isImmobile is true at 0 health unless the knocked-back-on-death flag is set, and the
             // client reports a fixed position with a zero delta
             player.getMovementTrace().log("path: dead, no movement expected");
-            processDead(player);
+            processImmobile(player);
         } else if (player.insideUnloadedChunk) {
-            player.getMovementTrace().log("path: unloaded chunk, velocity zeroed");
-            player.velocity = Vec3.ZERO.clone();
+            player.getMovementTrace().log("path: unloaded chunk, no movement expected");
+            processImmobile(player);
         } else {
             if (player.isMovementExempted()
                     || player.inLoadingScreen
@@ -150,15 +150,6 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
 
         player.insideUnloadedChunk = !player.compensatedWorld.isChunkLoadedAt(player.position.x, player.position.z);
         player.compensatedWorld.cleanChunksAtPlayerPosition();
-
-        // Don't try to predict player position in an unloaded chunk, it's not worth it and uh won't go well!
-        // Just keep teleporting the player back until they loaded in, that way we shouldn't false post teleport... I think!
-        // There isn't much room to abuse considering they're not loaded in any way... and the position is validated so
-        // the player can't just send a position 100000 blocks out to avoid for eg: velocity.
-        // TODO: Test properly uhhhh in some cases, I'm too lazy to care.
-        if (player.insideUnloadedChunk && !player.inLoadingScreen && !player.disableMitigations()) {
-            player.getTeleportUtil().teleport(player.getTeleportUtil().getLastKnownValid());
-        }
 
         LegacyAuthInputPackets.doPostPrediction(player, packet);
     }
@@ -184,6 +175,9 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             }
 
             packet.setOnGround(true);
+            Boar.debug(player.getSession().name() + ": [movement-debug] queued server teleport source=MovePlayerPacket mode="
+                    + packet.getMode() + " cause=" + packet.getTeleportationCause() + " pos=" + packet.getPosition()
+                    + " tick=" + player.tick + " dead=" + player.dead, Boar.DebugMessage.WARNING);
             player.getTeleportUtil().queue(new TeleportData(new Vec3(packet.getPosition()), packet.isOnGround()));
         }
 
@@ -194,6 +188,8 @@ public class AuthInputPackets extends TeleportHandler implements PacketListener 
             player.sendLatencyStack(new RespawnStateAck(packet.getState()));
 
             if (packet.getState() == RespawnPacket.State.SERVER_READY) {
+                Boar.debug(player.getSession().name() + ": [movement-debug] queued server teleport source=RespawnPacket runtimeId="
+                        + packet.getRuntimeEntityId() + " pos=" + packet.getPosition() + " tick=" + player.tick, Boar.DebugMessage.WARNING);
                 player.getTeleportUtil().queue(new TeleportData(new Vec3(packet.getPosition()), true));
             }
         }
